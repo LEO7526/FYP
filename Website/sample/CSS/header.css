@@ -1,0 +1,136 @@
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #2c3e50, #1a2530);
+    color: white;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    height: 70px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo a {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4fc3f7;
+    text-decoration: none;
+}
+
+.main-nav {
+    display: flex;
+    gap: 8px;
+    margin: 0 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-button {
+    padding: 12px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.nav-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.nav-button.insert-items {
+    background: linear-gradient(to right, #43a047, #2e7d32);
+}
+
+.nav-button.insert-materials {
+    background: linear-gradient(to right, #1976d2, #0d47a1);
+}
+
+.nav-button.order-list {
+    background: linear-gradient(to right, #ffa000, #f57f17);
+}
+
+.nav-button.report {
+    background: linear-gradient(to right, #e64a19, #bf360c);
+}
+
+.nav-button.delete {
+    background: linear-gradient(to right, #d32f2f, #b71c1c);
+}
+
+.user-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.user-actions a {
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.user-actions a:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.logout-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+    .main-nav {
+        gap: 6px;
+    }
+
+    .nav-button {
+        padding: 10px 15px;
+        font-size: 13px;
+        min-width: 100px;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+    }
+
+    .logo {
+        margin-bottom: 15px;
+    }
+
+    .main-nav {
+        margin: 15px 0;
+        gap: 8px;
+    }
+
+    .nav-button {
+        min-width: auto;
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+
+    .user-actions {
+        margin-top: 15px;
+    }
+}

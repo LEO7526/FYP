@@ -1,0 +1,221 @@
+.order-section, .materials-section {
+    margin-bottom: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+}
+
+.stock-alert {
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.stock-alert.safety {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.stock-alert.danger {
+    background-color: #ff9800;
+    color: white;
+}
+
+.stock-alert.insufficient {
+    background-color: #f44336;
+    color: white;
+}
+
+.stock-alert.gray {
+    background-color: #9E9E9E;
+    color: white;
+}
+
+.order-info {
+    margin-bottom: 20px;
+}
+
+.order-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-accept, .btn-reject, .btn-modify {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+}
+
+.btn-accept {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-reject {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-modify {
+    background-color: #2196F3;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-accept:hover {
+    background-color: #45a049;
+}
+
+.btn-reject:hover {
+    background-color: #d32f2f;
+}
+
+.btn-modify:hover {
+    background-color: #0b7dda;
+}
+
+.stock-alert-container {
+    display: flex;
+    gap: 20px;
+}
+
+.stock-alert-item {
+    flex: 1;
+}
+
+.stock-alert-item h3 {
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.original-data, .modify-form {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.original-data h2, .modify-form h2 {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.product-image {
+    max-width: 100px;
+    max-height: 100px;
+    display: block;
+    margin: 10px 0;
+}
+
+.btn-view {
+    padding: 5px 10px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-view:hover {
+    background-color: #0b7dda;
+}
+
+@media screen and (max-width: 768px) {
+    table {
+        font-size: 14px;
+    }
+
+    table th, table td {
+        padding: 8px 10px;
+    }
+
+    .stock-alert-container {
+        flex-direction: column;
+    }
+}
+
+.report-summary {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.no-data {
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #666;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.sales-amount {
+    font-weight: bold;
+    color: #2e7d32;
+}
+
+/* Status indicators */
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.status.processing {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status.completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status.wait.confirm {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status.cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.no-orders {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2em;
+    color: #666;
+}
