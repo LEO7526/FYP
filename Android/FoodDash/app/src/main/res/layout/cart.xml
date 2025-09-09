@@ -57,6 +57,7 @@
         app:layout_constraintTop_toBottomOf="@+id/backButton"
         app:layout_constraintVertical_bias="0.464"
         android:layout_marginRight="48dp" />
+
     <ListView
         android:id="@+id/userList"
         android:layout_width="364dp"
@@ -67,8 +68,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/backButton"
-        app:layout_constraintVertical_bias="0.464"
-        android:layout_marginRight="48dp" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/confirm"
