@@ -1,7 +1,5 @@
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")
-    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -35,11 +33,7 @@ android {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:34.1.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-database")
-    implementation("com.google.firebase:firebase-crashlytics")
-    implementation ("com.stripe:stripe-android:20.11.0")
+    implementation("com.stripe:stripe-android:20.11.0")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
@@ -52,12 +46,8 @@ dependencies {
     implementation(libs.play.services.maps)
 
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-
-
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-
-
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

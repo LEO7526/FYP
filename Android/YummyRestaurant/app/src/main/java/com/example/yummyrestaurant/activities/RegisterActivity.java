@@ -1,15 +1,15 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.yummyrestaurant.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.example.yummyrestaurant.database.DatabaseHelper;
+import com.example.yummyrestaurant.utils.RoleManager;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -17,10 +17,17 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText nameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
     private Button registerButton;
 
+    private DatabaseHelper dbHelper;
+    private SQLiteDatabase db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        // Initialize Database Helper
+        dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getWritableDatabase();
 
         // Initialize UI components
         nameEditText = findViewById(R.id.name);
@@ -47,66 +54,61 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // Create user using Firebase Authentication
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // Registration successful
-                        Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                        // Optional: Store additional user information
-                        saveUserData(name, email);
-                        // Navigate to the next screen
-                        startActivity(new Intent(this, LoginActivity.class));
-                        finish();
-                    } else {
-                        // Registration failed
-                        Exception e = task.getException();
-                        if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                            Toast.makeText(this, "Invalid email format", Toast.LENGTH_SHORT).show();
-                        } else if (e instanceof FirebaseAuthWeakPasswordException) {
-                            Toast.makeText(this, "Password is too weak. Please use a stronger password.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, "Registration failed. Please try again.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        // Save user data to SQLite
+        long result = dbHelper.insertUser(db, name, email, password, "customer"); // 默认角色为customer
+        if (result != -1) {
+            Toast.makeText(this, "注册成功！", Toast.LENGTH_SHORT).show();
+
+            // Assuming dbHelper.insertUser returns the user id
+            String userId = String.valueOf(result);
+            String userEmail = email;
+
+            // Set user information in RoleManager
+            RoleManager.setUserId(userId);
+            RoleManager.setUserEmail(userEmail);
+
+            // Navigate to the next screen
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        } else {
+            Toast.makeText(this, "注册失败，请重试", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Method to validate user input
     private boolean isValidInput(String name, String email, String password, String confirmPassword) {
         if (name.isEmpty()) {
-            nameEditText.setError("Name is required");
+            nameEditText.setError("姓名是必填项");
             nameEditText.requestFocus();
             return false;
         }
 
         if (email.isEmpty()) {
-            emailEditText.setError("Email is required");
+            emailEditText.setError("电子邮件是必填项");
             emailEditText.requestFocus();
             return false;
         }
 
         if (password.isEmpty()) {
-            passwordEditText.setError("Password is required");
+            passwordEditText.setError("密码是必填项");
             passwordEditText.requestFocus();
             return false;
         }
 
         if (confirmPassword.isEmpty()) {
-            confirmPasswordEditText.setError("Confirm password is required");
+            confirmPasswordEditText.setError("确认密码是必填项");
             confirmPasswordEditText.requestFocus();
             return false;
         }
 
         if (!password.equals(confirmPassword)) {
-            confirmPasswordEditText.setError("Passwords do not match");
+            confirmPasswordEditText.setError("密码不匹配");
             confirmPasswordEditText.requestFocus();
             return false;
         }
 
         if (password.length() < 6) {
-            passwordEditText.setError("Password must be at least 6 characters");
+            passwordEditText.setError("密码必须至少6个字符");
             passwordEditText.requestFocus();
             return false;
         }
@@ -114,15 +116,9 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
-    // Method to save additional user data (optional)
-    private void saveUserData(String name, String email) {
-        // You can save additional user data (e.g., name) to Firebase Realtime Database or Firestore
-        // Example:
-        // DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
-        // String userId = auth.getCurrentUser().getUid();
-        // User user = new User(name, email);
-        // usersRef.child(userId).setValue(user);
-
-        Toast.makeText(this, "Additional user data saved", Toast.LENGTH_SHORT).show();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        db.close();
     }
 }

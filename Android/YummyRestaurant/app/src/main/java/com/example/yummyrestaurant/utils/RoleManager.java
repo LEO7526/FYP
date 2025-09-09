@@ -1,42 +1,49 @@
 package com.example.yummyrestaurant.utils;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import com.example.yummyrestaurant.database.DatabaseHelper;
 
 public class RoleManager {
+    private static String userId;
+    private static String userEmail;
+    private static String userRole;
 
-    // Callback interface to handle the result asynchronously
-    public interface RoleCallback {
-        void onRoleReceived(String role);
+    // 设置用户信息
+    public static void setUserId(String userId) {
+        RoleManager.userId = userId;
     }
 
-    // Asynchronous method to fetch user role
-    public static void getUserRole(String userId, RoleCallback callback) {
-        DatabaseReference userRef = FirebaseDatabase.getInstance()
-                .getReference("users")
-                .child(userId);
+    public static void setUserEmail(String userEmail) {
+        RoleManager.userEmail = userEmail;
+    }
 
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                String role = "customer"; // default role
-                if (snapshot.exists()) {
-                    String fetchedRole = snapshot.child("role").getValue(String.class);
-                    if (fetchedRole != null) {
-                        role = fetchedRole;
-                    }
-                }
-                callback.onRoleReceived(role);
-            }
+    public static void setUserRole(String userRole) {
+        RoleManager.userRole = userRole;
+    }
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Handle error gracefully
-                callback.onRoleReceived("customer"); // fallback role
-            }
-        });
+    // 获取用户信息
+    public static String getUserId() {
+        return userId;
+    }
+
+    public static String getUserEmail() {
+        return userEmail;
+    }
+
+    public static String getUserRole() {
+        return userRole;
+    }
+
+    // 方法用于从SQLite获取用户角色
+    public static void getUserRoleFromSQLite(Context context, SQLiteDatabase db, String userId, RoleCallback callback) {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        String role = dbHelper.getUserRole(db, userId);
+        callback.onRoleReceived(role);
+    }
+
+    // 回调接口用于处理角色接收
+    public interface RoleCallback {
+        void onRoleReceived(String role);
     }
 }
