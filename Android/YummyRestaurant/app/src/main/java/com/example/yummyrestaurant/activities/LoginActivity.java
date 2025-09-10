@@ -57,14 +57,14 @@ public class LoginActivity extends AppCompatActivity {
             // Validate user credentials
             Cursor cursor = db.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_USERS + " WHERE " + DatabaseHelper.COLUMN_EMAIL + " = ? AND " + DatabaseHelper.COLUMN_PASSWORD + " = ?", new String[]{email, password});
             if (cursor.getCount() > 0) {
-                Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Login sucessful", Toast.LENGTH_SHORT).show();
                 cursor.moveToFirst();
                 int userIdIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_ID);
                 int userEmailIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_EMAIL);
                 int userRoleIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_ROLE);
 
                 if (userIdIndex == -1 || userEmailIndex == -1 || userRoleIndex == -1) {
-                    Toast.makeText(this, "数据库列不存在", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "No such database", Toast.LENGTH_SHORT).show();
                     cursor.close();
                     return;
                 }

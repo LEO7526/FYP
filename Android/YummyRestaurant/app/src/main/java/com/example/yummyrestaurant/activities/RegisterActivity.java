@@ -57,7 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
         // Save user data to SQLite
         long result = dbHelper.insertUser(db, name, email, password, "customer"); // 默认角色为customer
         if (result != -1) {
-            Toast.makeText(this, "注册成功！", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Successful register！", Toast.LENGTH_SHORT).show();
 
             // Assuming dbHelper.insertUser returns the user id
             String userId = String.valueOf(result);
@@ -71,44 +71,44 @@ public class RegisterActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         } else {
-            Toast.makeText(this, "注册失败，请重试", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Register fail, please retry", Toast.LENGTH_SHORT).show();
         }
     }
 
     // Method to validate user input
     private boolean isValidInput(String name, String email, String password, String confirmPassword) {
         if (name.isEmpty()) {
-            nameEditText.setError("姓名是必填项");
+            nameEditText.setError("Please fill in your name");
             nameEditText.requestFocus();
             return false;
         }
 
         if (email.isEmpty()) {
-            emailEditText.setError("电子邮件是必填项");
+            emailEditText.setError("Please fill in your email address");
             emailEditText.requestFocus();
             return false;
         }
 
         if (password.isEmpty()) {
-            passwordEditText.setError("密码是必填项");
+            passwordEditText.setError("Please fill in your password");
             passwordEditText.requestFocus();
             return false;
         }
 
         if (confirmPassword.isEmpty()) {
-            confirmPasswordEditText.setError("确认密码是必填项");
+            confirmPasswordEditText.setError("Please fill in your confirm password");
             confirmPasswordEditText.requestFocus();
             return false;
         }
 
         if (!password.equals(confirmPassword)) {
-            confirmPasswordEditText.setError("密码不匹配");
+            confirmPasswordEditText.setError("Wrong password");
             confirmPasswordEditText.requestFocus();
             return false;
         }
 
         if (password.length() < 6) {
-            passwordEditText.setError("密码必须至少6个字符");
+            passwordEditText.setError("Password must at least contain 6 characters");
             passwordEditText.requestFocus();
             return false;
         }

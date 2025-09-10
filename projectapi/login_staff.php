@@ -3,8 +3,8 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
 $data = json_decode(file_get_contents("php://input"), true);
-$sid   = $data['sid']   ?? '';
-$spass = $data['spassword'] ?? '';
+$sid   = $_POST['sid']   ?? '';
+$spass = $_POST['spassword'] ?? '';
 
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) die(json_encode(["error" => "DB fail"]));
