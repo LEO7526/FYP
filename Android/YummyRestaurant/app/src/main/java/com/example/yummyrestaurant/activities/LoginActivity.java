@@ -88,11 +88,11 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 finish(); // Close LoginActivity after redirect
             } else {
-                Toast.makeText(this, "电子邮件或密码错误", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Incorrect email or password.", Toast.LENGTH_SHORT).show();
             }
             cursor.close();
         } else {
-            Toast.makeText(this, "请输入电子邮件和密码", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please enter your email and password.", Toast.LENGTH_SHORT).show();
         }
     }
 
