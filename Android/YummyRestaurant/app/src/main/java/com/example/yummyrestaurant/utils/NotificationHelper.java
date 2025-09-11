@@ -27,7 +27,7 @@ public class NotificationHelper {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 // 权限未授予，请求权限
                 // 这里需要在 Activity 中处理权限请求
-                Toast.makeText(context, "需要通知权限", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Notification permission required.", Toast.LENGTH_SHORT).show();
                 return;
             }
         }

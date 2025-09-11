@@ -56,7 +56,7 @@ public class SupportActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                     messageInput.setText("");
                 } else {
-                    Toast.makeText(this, "发送消息失败，请重试", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Sending the message failed, please try again.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -68,7 +68,7 @@ public class SupportActivity extends AppCompatActivity {
 
         // Check if the column exists
         if (columnIndex == -1) {
-            Toast.makeText(this, "聊天消息列不存在", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "The chat message column does not exist.", Toast.LENGTH_SHORT).show();
             cursor.close();
             return;
         }

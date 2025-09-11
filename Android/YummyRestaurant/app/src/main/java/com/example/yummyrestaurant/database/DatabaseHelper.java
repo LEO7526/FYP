@@ -75,7 +75,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Check if the email already exists
         if (userExists(db, email)) {
-            Toast.makeText(context, "该电子邮件已注册", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Email address already existed", Toast.LENGTH_SHORT).show();
             return -1;
         }
 

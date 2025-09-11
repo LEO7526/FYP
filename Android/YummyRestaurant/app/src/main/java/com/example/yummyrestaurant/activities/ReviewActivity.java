@@ -37,7 +37,7 @@ public class ReviewActivity extends AppCompatActivity {
 
         // Set RatingBar change listener
         ratingBar.setOnRatingBarChangeListener((bar, rating, fromUser) -> {
-            ratingText.setText("您评分为: " + rating);
+            ratingText.setText("Your rating is: " + rating);
 
             // Save the rating to SQLite
             saveRatingToSQLite(rating);
@@ -53,12 +53,12 @@ public class ReviewActivity extends AppCompatActivity {
             // Insert the review into the SQLite database
             long result = dbHelper.insertReview(db, userId, userEmail, rating);
             if (result != -1) {
-                Toast.makeText(this, "评分保存成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Rating saved successfully.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "保存评分失败，请重试", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to save rating, please try again.", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, "用户未登录", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "User not logged in.", Toast.LENGTH_SHORT).show();
         }
     }
 
