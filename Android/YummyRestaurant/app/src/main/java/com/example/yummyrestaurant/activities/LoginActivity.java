@@ -1,8 +1,6 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,31 +8,39 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.yummyrestaurant.R;
-import com.example.yummyrestaurant.database.DatabaseHelper;
 import com.example.yummyrestaurant.utils.RoleManager;
-import com.example.yummyrestaurant.utils.RoleManager.RoleCallback;
+import com.example.yummyrestaurant.api.LoginApi;
+import com.example.yummyrestaurant.api.LoginResponse;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
     private Button loginButton;
-
-    private DatabaseHelper dbHelper;
-    private SQLiteDatabase db;
+    private LoginApi loginApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize Database Helper
-        dbHelper = new DatabaseHelper(this);
-        db = dbHelper.getReadableDatabase();
-
         // Initialize UI components
         emailEditText = findViewById(R.id.email);
         passwordEditText = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginBtn);
+
+        // 初始化 Retrofit
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://github.com/LEO7526/FYP/blob/main/projectapi/") // 請替換為你的 API 網址
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        loginApi = retrofit.create(LoginApi.class);
+
 
         // Set click listener for the login button
         loginButton.setOnClickListener(v -> {
@@ -54,51 +60,45 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (!email.isEmpty() && !password.isEmpty()) {
-            // Validate user credentials
-            Cursor cursor = db.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_USERS + " WHERE " + DatabaseHelper.COLUMN_EMAIL + " = ? AND " + DatabaseHelper.COLUMN_PASSWORD + " = ?", new String[]{email, password});
-            if (cursor.getCount() > 0) {
-                Toast.makeText(this, "Login sucessful", Toast.LENGTH_SHORT).show();
-                cursor.moveToFirst();
-                int userIdIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_ID);
-                int userEmailIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_EMAIL);
-                int userRoleIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_ROLE);
+            String role = "staff"; 
 
-                if (userIdIndex == -1 || userEmailIndex == -1 || userRoleIndex == -1) {
-                    Toast.makeText(this, "No such database", Toast.LENGTH_SHORT).show();
-                    cursor.close();
-                    return;
+            Call<LoginResponse> call = loginApi.loginUser(email, password, role);
+            call.enqueue(new Callback<LoginResponse>() {
+                @Override
+                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        LoginResponse loginResponse = response.body();
+                        if (loginResponse.isSuccess()) {
+                            Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+
+                            // 儲存角色資訊
+                            RoleManager.setUserEmail(email);
+                            RoleManager.setUserRole(loginResponse.getRole());
+
+                            // 根據角色導頁
+                            if ("staff".equals(loginResponse.getRole())) {
+                                startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
+                            } else {
+                                startActivity(new Intent(LoginActivity.this, ProductListActivity.class));
+                            }
+                            finish();
+                        } else {
+                            Toast.makeText(LoginActivity.this, loginResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Login failed. Please try again.", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
-                String userId = cursor.getString(userIdIndex);
-                String userEmail = cursor.getString(userEmailIndex);
-                String role = cursor.getString(userRoleIndex);
-
-                // Set user information in RoleManager
-                RoleManager.setUserId(userId);
-                RoleManager.setUserEmail(userEmail);
-                RoleManager.setUserRole(role);
-
-                cursor.close();
-
-                // Navigate to the next screen
-                if ("staff".equals(role)) {
-                    startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
-                } else {
-                    startActivity(new Intent(LoginActivity.this, ProductListActivity.class));
+                @Override
+                public void onFailure(Call<LoginResponse> call, Throwable t) {
+                    Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-                finish(); // Close LoginActivity after redirect
-            } else {
-                Toast.makeText(this, "Incorrect email or password.", Toast.LENGTH_SHORT).show();
-            }
-            cursor.close();
+            });
         } else {
             Toast.makeText(this, "Please enter your email and password.", Toast.LENGTH_SHORT).show();
         }
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        db.close();
-    }
 }
+
+

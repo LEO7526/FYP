@@ -3,7 +3,6 @@ package com.example.yummyrestaurant;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -14,25 +13,15 @@ import androidx.core.content.ContextCompat;
 import com.example.yummyrestaurant.activities.DashboardActivity;
 import com.example.yummyrestaurant.activities.LoginActivity;
 import com.example.yummyrestaurant.activities.ProductListActivity;
-import com.example.yummyrestaurant.database.DatabaseHelper;
 import com.example.yummyrestaurant.utils.RoleManager;
-import com.example.yummyrestaurant.utils.RoleManager.RoleCallback;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
-    private DatabaseHelper dbHelper;
-    private SQLiteDatabase db;
     private static final int REQUEST_CODE_POST_NOTIFICATIONS = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Initialize Database Helper
-        dbHelper = new DatabaseHelper(this);
-        db = dbHelper.getReadableDatabase();
 
         // 检查并请求 POST_NOTIFICATIONS 权限（适用于 Android 9.0 及以上版本）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -49,30 +38,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleUserLogin() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            String userId = user.getUid();
-            String userEmail = user.getEmail();
+        // 直接从 RoleManager 取得用户信息（假设已在登录时保存）
+        String userRole = RoleManager.getUserRole();
 
-            // Set user information in RoleManager
-            RoleManager.setUserId(userId);
-            RoleManager.setUserEmail(userEmail);
-
-            // Get user role from SQLite
-            RoleManager.getUserRoleFromSQLite(this, db, userId, new RoleCallback() {
-                @Override
-                public void onRoleReceived(String role) {
-                    if ("staff".equals(role)) {
-                        startActivity(new Intent(MainActivity.this, DashboardActivity.class));
-                    } else {
-                        startActivity(new Intent(MainActivity.this, ProductListActivity.class));
-                    }
-                    finish(); // Close MainActivity after redirect
-                }
-            });
+        if (userRole != null) {
+            if ("staff".equals(userRole)) {
+                startActivity(new Intent(MainActivity.this, DashboardActivity.class));
+            } else {
+                startActivity(new Intent(MainActivity.this, ProductListActivity.class));
+            }
+            finish(); // 关闭 MainActivity 以便于重定向
         } else {
+            // 尚未登录，导向登录页
             startActivity(new Intent(this, LoginActivity.class));
-            finish(); // Close MainActivity after redirect
+            finish(); // 关闭 MainActivity 以便于重定向
         }
     }
 
@@ -91,11 +70,5 @@ public class MainActivity extends AppCompatActivity {
                 handleUserLogin();
             }
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        db.close();
     }
 }

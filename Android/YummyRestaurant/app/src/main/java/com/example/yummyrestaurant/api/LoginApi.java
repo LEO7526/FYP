@@ -1,3 +1,5 @@
+package com.example.yummyrestaurant.api;
+
 import com.example.yummyrestaurant.api.LoginResponse;
 
 import retrofit2.Call;
@@ -7,6 +9,10 @@ import retrofit2.http.POST;
 
 public interface LoginApi {
     @FormUrlEncoded
-    @POST("login")
-    Call<LoginResponse> loginUser(@Field("email") String email, @Field("password") String password);
+    @POST("login_staff.php")
+    Call<LoginResponse> loginUser(
+        @Field("email") String email,
+        @Field("password") String password,
+        @Field("role") String role 
+    );
 }
