@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import com.example.yummyrestaurant.api.RetrofitClient;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
+    private Spinner roleSpinner;
     private Button loginButton;
     private LoginApi loginApi;
 
@@ -32,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.email);
         passwordEditText = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginBtn);
+        roleSpinner = findViewById(R.id.roleSpinner);
 
         Retrofit retrofit = RetrofitClient.getClient();
         loginApi = retrofit.create(LoginApi.class);
@@ -52,10 +55,9 @@ public class LoginActivity extends AppCompatActivity {
     private void loginUser() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
+        String role = roleSpinner.getSelectedItem().toString().toLowerCase(); // "staff" or "customer"
 
         if (!email.isEmpty() && !password.isEmpty()) {
-            String role = "staff";
-
             Call<LoginResponse> call = loginApi.loginUser(email, password, role);
             call.enqueue(new Callback<LoginResponse>() {
                 @Override

@@ -20,6 +20,14 @@
         android:gravity="center"
         tools:text="Login" />
 
+    <!-- Role Selector -->
+    <Spinner
+        android:id="@+id/roleSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:entries="@array/roles_array" />
+
     <EditText
         android:id="@+id/email"
         android:layout_width="match_parent"

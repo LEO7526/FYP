@@ -35,6 +35,9 @@ INSERT INTO staff (semail, spassword, sname, srole, stel) VALUES
 ('kevin.ng@example.com', 'ngfamily', 'Kevin Ng', 'IT Support', 27889977),
 ('emily.tsui@example.com', 'emily2024', 'Emily Tsui', 'Marketing Lead', 26543210);
 
+-- Change srole to 'staff' for Peter Wong
+UPDATE staff SET srole='staff' WHERE semail='peter.wong@example.com';
+
 -- Table structure for table `customer`
 DROP TABLE IF EXISTS `customer`;
 CREATE TABLE customer (
