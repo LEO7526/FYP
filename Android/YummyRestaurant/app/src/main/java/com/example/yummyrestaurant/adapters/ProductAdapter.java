@@ -17,6 +17,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.productList = productList;
     }
 
+    public void setProductList(List<Product> productList) {
+        this.productList = productList;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -27,26 +32,27 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.nameTextView.setText(product.getName());
-        holder.priceTextView.setText(String.valueOf(product.getPrice()));
-        holder.descriptionTextView.setText(product.getDescription());
+        holder.nameTextView.setText(product.getPname());
+        holder.priceTextView.setText(String.valueOf(product.getPcost()));
+        // If you have a description field, add it here
+        // holder.descriptionTextView.setText(product.getDescription());
     }
 
     @Override
     public int getItemCount() {
-        return productList.size();
+        return productList == null ? 0 : productList.size();
     }
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         TextView nameTextView;
         TextView priceTextView;
-        TextView descriptionTextView;
+        // TextView descriptionTextView;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.productName);
             priceTextView = itemView.findViewById(R.id.productPrice);
-            descriptionTextView = itemView.findViewById(R.id.productDescription);
+            // descriptionTextView = itemView.findViewById(R.id.productDescription);
         }
     }
 }

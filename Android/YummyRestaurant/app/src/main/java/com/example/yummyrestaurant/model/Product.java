@@ -1,36 +1,32 @@
 package com.example.yummyrestaurant.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Product {
-    private String name;
-    private double price;
-    private String description;
+    private int pid;
+    private String pname;
+    private double pcost;
 
-    public Product(String name, double price, String description) {
-        this.name = name;
-        this.price = price;
-        this.description = description;
+    // Getters and setters
+    public int getPid() {
+        return pid;
     }
 
-    public String getName() {
-        return name;
+    public void setPid(int pid) {
+        this.pid = pid;
     }
 
-    public double getPrice() {
-        return price;
+    public String getPname() {
+        return pname;
     }
 
-    public String getDescription() {
-        return description;
+    public void setPname(String pname) {
+        this.pname = pname;
     }
 
-    public static List<Product> getSampleProducts() {
-        List<Product> products = new ArrayList<>();
-        products.add(new Product("Pizza", 10.5, "Delicious cheese pizza"));
-        products.add(new Product("Burger", 8.0, "Juicy beef burger"));
-        products.add(new Product("Pasta", 9.5, "Spaghetti with meat sauce"));
-        return products;
+    public double getPcost() {
+        return pcost;
+    }
+
+    public void setPcost(double pcost) {
+        this.pcost = pcost;
     }
 }
