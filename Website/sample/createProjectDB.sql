@@ -50,7 +50,6 @@ CREATE TABLE customer (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Dumping data for table `customer`
-INSERT INTO `customer` VALUES 
 INSERT INTO customer (cname, cpassword, ctel, caddr, company, cemail, crole) VALUES
 ('Alex Wong', 'password', 21232123, 'G/F, ABC Building, King Yip Street, KwunTong, Kowloon, Hong Kong', 'Fat Cat Company Limited', 'alex.wong@example.com', 'customer'),
 ('Tina Chan', 'password', 31233123, '303, Mei Hing Center, Yuen Long, NT, Hong Kong', 'XDD LOL Company', 'tina.chan@example.com', 'customer'),
