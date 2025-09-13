@@ -15,8 +15,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
+import com.example.yummyrestaurant.api.RetrofitClient;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -34,13 +33,8 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginBtn);
 
-        // 初始化 Retrofit
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://github.com/LEO7526/FYP/blob/main/projectapi/") // 請替換為你的 API 網址
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = RetrofitClient.getClient();
         loginApi = retrofit.create(LoginApi.class);
-
 
         // Set click listener for the login button
         loginButton.setOnClickListener(v -> {
@@ -60,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (!email.isEmpty() && !password.isEmpty()) {
-            String role = "staff"; 
+            String role = "staff";
 
             Call<LoginResponse> call = loginApi.loginUser(email, password, role);
             call.enqueue(new Callback<LoginResponse>() {
@@ -71,11 +65,11 @@ public class LoginActivity extends AppCompatActivity {
                         if (loginResponse.isSuccess()) {
                             Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
 
-                            // 儲存角色資訊
+                            // Save user info
                             RoleManager.setUserEmail(email);
                             RoleManager.setUserRole(loginResponse.getRole());
 
-                            // 根據角色導頁
+                            // Route based on role
                             if ("staff".equals(loginResponse.getRole())) {
                                 startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
                             } else {
@@ -86,7 +80,8 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, loginResponse.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(LoginActivity.this, "Login failed. Please try again.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Login failed. Please try again.", Toast.LENGTH_SHORT)
+                                .show();
                     }
                 }
 
@@ -100,5 +95,3 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 }
-
-

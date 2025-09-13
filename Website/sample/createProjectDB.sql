@@ -2,7 +2,6 @@
 -- Host: localhost    Database: projectdb
 -- Server version	8.4.3
 
--- "NO_AUTO_VALUE_ON_ZERO" suppress generate the next sequence number for AUTO_INCREMENT column
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+08:00";
@@ -16,33 +15,48 @@ USE `ProjectDB`;
 DROP TABLE IF EXISTS `staff`;
 CREATE TABLE `staff` (
   `sid` int NOT NULL AUTO_INCREMENT,
+  `semail` varchar(255) NOT NULL,       -- Added email column
   `spassword` varchar(255) NOT NULL,
   `sname` varchar(255) NOT NULL,
   `srole` varchar(45) DEFAULT NULL,
   `stel` int DEFAULT NULL,
-  PRIMARY KEY (`sid`)
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `semail_UNIQUE` (`semail`) -- Ensure emails are unique
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Dumping data for table `staff`
-INSERT INTO `staff` VALUES (1,'password','Peter Wong','Sales Manager',25669197);
+INSERT INTO staff (semail, spassword, sname, srole, stel) VALUES
+('peter.wong@example.com', 'password123', 'Peter Wong', 'Sales Manager', 25669197),
+('tina.chan@example.com', 'letmein456', 'Tina Chan', 'Production Supervisor', 31233123),
+('alex.lam@example.com', 'qwerty789', 'Alex Lam', 'Warehouse Clerk', 29881234),
+('susan.leung@example.com', 'helloWorld1', 'Susan Leung', 'HR Officer', 28889999),
+('john.ho@example.com', 'changeme2023', 'John Ho', 'Engineer', 29998888),
+('maggie.tse@example.com', 'maggiePass!', 'Maggie Tse', 'Accountant', 23881211),
+('kevin.ng@example.com', 'ngfamily', 'Kevin Ng', 'IT Support', 27889977),
+('emily.tsui@example.com', 'emily2024', 'Emily Tsui', 'Marketing Lead', 26543210);
 
 -- Table structure for table `customer`
 DROP TABLE IF EXISTS `customer`;
-CREATE TABLE `customer` (
-  `cid` int NOT NULL AUTO_INCREMENT,
-  `cname` varchar(255) NOT NULL,
-  `cpassword` varchar(255) NOT NULL,
-  `ctel` int DEFAULT NULL,
-  `caddr` text,
-  `company` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`cid`)
+CREATE TABLE customer (
+  cid INT NOT NULL AUTO_INCREMENT,
+  cname VARCHAR(255) NOT NULL,
+  cpassword VARCHAR(255) NOT NULL,
+  ctel INT DEFAULT NULL,
+  caddr TEXT,
+  company VARCHAR(255) DEFAULT NULL,
+  cemail VARCHAR(255) NOT NULL UNIQUE,
+  crole VARCHAR(45) NOT NULL DEFAULT 'customer',
+  PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Dumping data for table `customer`
 INSERT INTO `customer` VALUES 
-(1,'Alex Wong','password',21232123,'G/F, ABC Building, King Yip Street, KwunTong, Kowloon, Hong Kong','Fat Cat Company Limited'),
-(2,'Tina Chan','password',31233123,'303, Mei Hing Center, Yuen Long, NT, Hong Kong','XDD LOL Company'),
-(3,'Bowie','password',61236123,'401, Sing Kei Building, Kowloon, Hong Kong','GPA4 Company');
+INSERT INTO customer (cname, cpassword, ctel, caddr, company, cemail, crole) VALUES
+('Alex Wong', 'password', 21232123, 'G/F, ABC Building, King Yip Street, KwunTong, Kowloon, Hong Kong', 'Fat Cat Company Limited', 'alex.wong@example.com', 'customer'),
+('Tina Chan', 'password', 31233123, '303, Mei Hing Center, Yuen Long, NT, Hong Kong', 'XDD LOL Company', 'tina.chan@example.com', 'customer'),
+('Bowie', 'password', 61236123, '401, Sing Kei Building, Kowloon, Hong Kong', 'GPA4 Company', 'bowie@example.com', 'customer'),
+('Samuel Lee', 'samuelpass', 61231212, '111, Example Road, Central, Hong Kong', 'Lee Family Co', 'samuel.lee@example.com', 'customer'),
+('Emily Tsang', 'emilypass', 61231555, '88, Happy Valley Road, Hong Kong', 'Happy Valley Enterprises', 'emily.tsang@example.com', 'customer');
 
 -- Table structure for table `product`
 DROP TABLE IF EXISTS `product`;
@@ -56,11 +70,11 @@ CREATE TABLE `product` (
 
 -- Dumping data for table `product`
 INSERT INTO `product` VALUES 
-(1,'Cyberpunk Truck C204','Explore the world of imaginative play with our vibrant and durable toy truck. Perfect for little hands, this truck will inspire endless storytelling adventures both indoors and outdoors. Made from high-quality materials, it is built to withstand hours of creative playtime.',19.90),
-(2,'XDD Wooden Plane','Take to the skies with our charming wooden plane toy. Crafted from eco-friendly and child-safe materials, this beautifully designed plane sparks the imagination and encourages interactive play. With smooth edges and a sturdy construction, it\'s a delightful addition to any young aviator\'s toy collection.',9.90),
-(3,'iRobot 3233GG','Introduce your child to the wonders of technology and robotics with our smart robot companion. Packed with interactive features and educational benefits, this futuristic toy engages curious minds and promotes STEM learning in a fun and engaging way. Watch as your child explores coding, problem-solving, and innovation with this cutting-edge robot friend.',249.90),
-(4,'Apex Ball Ball Helicopter M1297','Experience the thrill of flight with our ball helicopter toy. Easy to launch and navigate, this exciting toy provides hours of entertainment for children of all ages. With colorful LED lights and a durable design, it\'s a fantastic outdoor toy that brings joy and excitement to playtime.',30.00),
-(5,'RoboKat AI Cat Robot','Meet our AI Cat Robot – the purr-fect blend of technology and cuddly companionship. This interactive robotic feline offers lifelike movements, sounds, and responses, providing a realistic pet experience without the hassle. With customizable features and playful interactions, this charming cat robot is a delightful addition to your child\'s playroom.',499.00);
+(1,'Cyberpunk Truck C204','Explore the world of imaginative play with our vibrant and durable toy truck. Perfect for little hands, this truck will inspire endless storytelling adventures both indoors and outdoors.',3980.00),
+(2,'XDD Wooden Plane','Take to the skies with our charming wooden plane toy. Crafted from eco-friendly and child-safe materials, this beautifully designed plane sparks the imagination and encourages interactive play.',998.00),
+(3,'iRobot 3233GG','Introduce your child to the wonders of technology and robotics with our smart robot companion. Packed with interactive features and educational benefits, this futuristic toy engages and educates.',3200.00),
+(4,'Apex Ball Ball Helicopter M1297','Experience the thrill of flight with our ball helicopter toy. Easy to launch and navigate, this exciting toy provides hours of entertainment for children of all ages.',1899.00),
+(5,'RoboKat AI Cat Robot','Meet our AI Cat Robot – the purr-fect blend of technology and cuddly companionship. This interactive robotic feline offers lifelike movements, sounds, and responses, providing endless fun!',4990.00);
 
 -- Table structure for table `material`
 DROP TABLE IF EXISTS `material`;
@@ -121,3 +135,5 @@ INSERT INTO `prodmat` VALUES
 (3,4,1),(3,5,12),
 (4,4,1),(4,5,8),
 (5,2,1),(5,5,6);
+
+COMMIT;

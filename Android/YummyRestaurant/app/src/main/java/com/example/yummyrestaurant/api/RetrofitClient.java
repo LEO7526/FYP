@@ -4,7 +4,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "https://github.com/LEO7526/FYP/blob/main/projectapi/";
+    private static final String BASE_URL = "https://10.0.2.2/newFolder/projectapi/";
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient() {
