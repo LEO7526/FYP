@@ -1,0 +1,7 @@
+<resources>
+    <string name="merchant_name">Yummy Restaurant</string>
+    <string-array name="roles_array">
+        <item>Staff</item>
+        <item>Customer</item>
+    </string-array>
+</resources>

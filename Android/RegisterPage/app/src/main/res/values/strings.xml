@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">RegisterPage</string>
+
+    <!-- Register Page Strings -->
+    <string name="register_title">Create New Account</string>
+    <string name="register_hint_name">Enter your name</string>
+    <string name="register_hint_email">Enter your email</string>
+    <string name="register_hint_password">Enter your password</string>
+    <string name="register_button_text">Register</string>
+
+    <!-- Toast Messages -->
+    <string name="toast_all_fields_required">All fields are required</string>
+    <string name="toast_error_occurred">An error occurred: </string>
+
+</resources>
