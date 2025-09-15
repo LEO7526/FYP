@@ -1,0 +1,59 @@
+
+.order-section table th:nth-child(6),
+.order-section table td:nth-child(6) {
+    width: 220px;
+    min-width: 220px;
+}
+
+.order-section table td:nth-child(6) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.order-section .btn-view,
+.order-section .btn-accept,
+.order-section .btn-reject,
+.order-section .btn-modify {
+    padding: 6px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+@media screen and (max-width: 1024px) {
+    .order-section table th:nth-child(6),
+    .order-section table td:nth-child(6) {
+        width: 180px;
+        min-width: 180px;
+    }
+
+    .order-section .btn-view,
+    .order-section .btn-accept,
+    .order-section .btn-reject,
+    .order-section .btn-modify {
+        padding: 5px 6px;
+        font-size: 11px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .order-section table th:nth-child(6),
+    .order-section table td:nth-child(6) {
+        width: auto;
+        min-width: 120px;
+    }
+
+    .order-section table td:nth-child(6) {
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .order-section .btn-view,
+    .order-section .btn-accept,
+    .order-section .btn-reject,
+    .order-section .btn-modify {
+        width: 100%;
+        text-align: center;
+    }
+}
