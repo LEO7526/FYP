@@ -46,4 +46,13 @@ public class RoleManager {
     public static void setUserTel(String userTel) {
         RoleManager.userTel = userTel;
     }
+
+    public static void clearUserData() {
+        userId = null;
+        userEmail = null;
+        userRole = null;
+        userName = null;
+        userTel = null;
+    }
+
 }

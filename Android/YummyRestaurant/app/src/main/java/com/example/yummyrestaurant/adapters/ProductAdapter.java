@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.yummyrestaurant.R;
-import com.example.yummyrestaurant.model.Product;
+import com.example.yummyrestaurant.models.Product;
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {

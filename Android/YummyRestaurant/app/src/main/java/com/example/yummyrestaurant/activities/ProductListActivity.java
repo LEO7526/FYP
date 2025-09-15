@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.yummyrestaurant.R;
-import com.example.yummyrestaurant.model.Product;
+import com.example.yummyrestaurant.models.Product;
 import com.example.yummyrestaurant.adapters.ProductAdapter;
 import com.example.yummyrestaurant.api.ApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;

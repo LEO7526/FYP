@@ -132,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
         } else {
             Log.d("LoginActivity", "Routing to ProductListActivity...");
-            startActivity(new Intent(LoginActivity.this, ProductListActivity.class));
+            startActivity(new Intent(LoginActivity.this, CustomerHomeActivity.class));
         }
         finish();
     }

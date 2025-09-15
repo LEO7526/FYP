@@ -1,4 +1,4 @@
-package com.example.yummyrestaurant.model;
+package com.example.yummyrestaurant.models;
 
 public class Review {
     private String userId;
