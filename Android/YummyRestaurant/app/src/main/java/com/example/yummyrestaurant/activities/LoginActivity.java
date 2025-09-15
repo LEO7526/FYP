@@ -5,13 +5,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.api.LoginCustomerApi;
+import com.example.yummyrestaurant.api.LoginStaffApi;
 import com.example.yummyrestaurant.utils.RoleManager;
-import com.example.yummyrestaurant.api.LoginApi;
 import com.example.yummyrestaurant.api.LoginResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,9 +22,8 @@ import com.example.yummyrestaurant.api.RetrofitClient;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
-    private Spinner roleSpinner;
     private Button loginButton;
-    private LoginApi loginApi;
+    private LoginStaffApi loginStaffApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +34,9 @@ public class LoginActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.email);
         passwordEditText = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginBtn);
-        roleSpinner = findViewById(R.id.roleSpinner);
 
         Retrofit retrofit = RetrofitClient.getClient();
-        loginApi = retrofit.create(LoginApi.class);
+        loginStaffApi = retrofit.create(LoginStaffApi.class);
 
         // Set click listener for the login button
         loginButton.setOnClickListener(v -> {
@@ -56,55 +54,86 @@ public class LoginActivity extends AppCompatActivity {
     private void loginUser() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
-        String role = roleSpinner.getSelectedItem().toString().toLowerCase(); // "staff" or "customer"
 
         if (!email.isEmpty() && !password.isEmpty()) {
-            Call<LoginResponse> call = loginApi.loginUser(email, password, role);
-            call.enqueue(new Callback<LoginResponse>() {
+            Log.d("LoginActivity", "Attempting login with email: " + email);
+
+            Retrofit retrofit = RetrofitClient.getClient();
+            LoginStaffApi loginStaffApi = retrofit.create(LoginStaffApi.class);
+            LoginCustomerApi loginCustomerApi = retrofit.create(LoginCustomerApi.class);
+
+            Call<LoginResponse> staffCall = loginStaffApi.loginUser(email, password);
+            Log.d("LoginActivity", "Calling staff login API...");
+            staffCall.enqueue(new Callback<LoginResponse>() {
                 @Override
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        LoginResponse loginResponse = response.body();
-                        if (loginResponse.isSuccess()) {
-                            Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-
-                            // Save user info
-                            RoleManager.setUserEmail(email);
-                            RoleManager.setUserRole(loginResponse.getRole());
-                            RoleManager.setUserName(loginResponse.getUserName());
-                            RoleManager.setUserId(loginResponse.getUserId());
-
-                            // Log user info for debugging
-                            Log.d("LoginActivity", "User logged in: " +
-                                    "ID=" + RoleManager.getUserId() +
-                                    ", Name=" + RoleManager.getUserName() +
-                                    ", Email=" + RoleManager.getUserEmail() +
-                                    ", Role=" + RoleManager.getUserRole());
-
-
-                            // Route based on role
-                            if ("staff".equals(loginResponse.getRole())) {
-                                startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
-                            } else {
-                                startActivity(new Intent(LoginActivity.this, ProductListActivity.class));
-                            }
-                            finish();
-                        } else {
-                            Toast.makeText(LoginActivity.this, loginResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
+                    Log.d("LoginActivity", "Staff login API response received.");
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Log.d("LoginActivity", "Staff login successful.");
+                        handleLoginSuccess(response.body(), email);
                     } else {
-                        Toast.makeText(LoginActivity.this, "Login failed. Please try again.", Toast.LENGTH_SHORT)
-                                .show();
+                        Log.d("LoginActivity", "Staff login failed or user not found. Trying customer login...");
+
+                        Call<LoginResponse> customerCall = loginCustomerApi.loginUser(email, password);
+                        customerCall.enqueue(new Callback<LoginResponse>() {
+                            @Override
+                            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                                Log.d("LoginActivity", "Customer login API response received.");
+                                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                                    Log.d("LoginActivity", "Customer login successful.");
+                                    handleLoginSuccess(response.body(), email);
+                                } else {
+                                    Log.d("LoginActivity", "Customer login failed.");
+                                    Toast.makeText(LoginActivity.this, "Login failed. Please check your credentials.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                                Log.e("LoginActivity", "Customer login API call failed: " + t.getMessage());
+                                Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
 
                 @Override
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
+                    Log.e("LoginActivity", "Staff login API call failed: " + t.getMessage());
                     Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
+            Log.w("LoginActivity", "Login attempt with empty email or password.");
             Toast.makeText(this, "Please enter your email and password.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void handleLoginSuccess(LoginResponse loginResponse, String email) {
+        Log.i("LoginActivity", "Login successful for role: " + loginResponse.getRole());
+        Log.i("LoginActivity", "User Info → ID: " + loginResponse.getUserId() +
+                ", Name: " + loginResponse.getUserName() +
+                ", Email: " + email +
+                ", Role: " + loginResponse.getRole() +
+                ", Telephone: " + loginResponse.getUserTel()
+
+        );
+
+        Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+
+        RoleManager.setUserEmail(email);
+        RoleManager.setUserRole(loginResponse.getRole());
+        RoleManager.setUserName(loginResponse.getUserName());
+        RoleManager.setUserId(loginResponse.getUserId());
+        RoleManager.setUserTel(loginResponse.getUserTel());
+
+        if ("staff".equals(loginResponse.getRole())) {
+            Log.d("LoginActivity", "Routing to DashboardActivity...");
+            startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
+        } else {
+            Log.d("LoginActivity", "Routing to ProductListActivity...");
+            startActivity(new Intent(LoginActivity.this, ProductListActivity.class));
+        }
+        finish();
     }
 }

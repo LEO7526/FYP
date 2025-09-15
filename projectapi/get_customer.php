@@ -4,11 +4,30 @@ header("Content-Type: application/json");
 
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) {
-    die(json_encode(["error" => $conn->connect_error]));
+    die(json_encode(["success" => false, "message" => $conn->connect_error]));
 }
 
-$result = $conn->query("SELECT cid, cname, ctel, caddr, company FROM customer");
-$out = $result->fetch_all(MYSQLI_ASSOC);
-echo json_encode($out, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+// Get POST data
+$email = $_POST['email'] ?? '';
+$password = $_POST['password'] ?? '';
+
+// Validate credentials
+$query = "SELECT cid, cname, ctel, caddr, company FROM customer WHERE cemail = '$email' AND cpassword = '$password'";
+$result = $conn->query($query);
+
+if ($result && $result->num_rows > 0) {
+    $data = $result->fetch_assoc();
+    echo json_encode([
+        "success" => true,
+        "role" => "customer",
+        "userId" => $data["cid"],
+        "userName" => $data["cname"],
+		"userTel" => $data["ctel"],
+        "message" => "Login successful"
+    ]);
+} else {
+    echo json_encode(["success" => false, "message" => "Invalid credentials"]);
+}
+
 $conn->close();
 ?>

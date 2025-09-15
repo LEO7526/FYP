@@ -6,8 +6,8 @@ public class LoginResponse {
     private String role;
     private String userName;
     private String userId;
+    private String userTel;
 
-    // Getters and setters
     public boolean isSuccess() {
         return success;
     }
@@ -46,5 +46,13 @@ public class LoginResponse {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserTel() {
+        return userTel;
+    }
+
+    public void setUserTel(String userTel) {
+        this.userTel = userTel;
     }
 }
