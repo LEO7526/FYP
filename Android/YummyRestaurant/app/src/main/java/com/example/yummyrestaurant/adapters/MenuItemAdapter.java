@@ -1,6 +1,7 @@
 package com.example.yummyrestaurant.adapters;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +10,12 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.target.Target;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.MenuItem;
 import java.util.ArrayList;
@@ -83,8 +88,30 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         holder.categoryTextView.setText(item.getCategory());
 
         Glide.with(context)
-                .load("http://10.0.2.2/NewFolder/Database/projectapi/" + item.getImage_url())
+                .load(item.getImage_url())
                 .placeholder(R.drawable.placeholder)
+                .error(R.drawable.error_image)
+                .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                                Target<Drawable> target,
+                                                boolean isFirstResource) {
+                        Log.e("GlideError", "Failed to load image for: " + item.getName() +
+                                " | URL: " + item.getImage_url() +
+                                " | Error: " + (e != null ? e.getMessage() : "Unknown error"));
+                        return false; // Let Glide handle the error image
+                    }
+
+                    @Override
+                    public boolean onResourceReady(android.graphics.drawable.Drawable resource,
+                                                   Object model,
+                                                   Target<android.graphics.drawable.Drawable> target,
+                                                   DataSource dataSource,
+                                                   boolean isFirstResource) {
+                        Log.d("GlideSuccess", "Image loaded for: " + item.getName());
+                        return false; // Let Glide handle displaying the image
+                    }
+                })
                 .into(holder.imageView);
     }
 

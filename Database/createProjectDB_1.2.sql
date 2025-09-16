@@ -121,8 +121,8 @@ INSERT INTO menu_category (category_name) VALUES
 
 -- Insert menu items
 INSERT INTO menu_item (category_id, item_price, image_url, spice_level, tags, is_available) VALUES
-(1, 28.00, 'images/cucumber_flowers.jpg', 'Mild', 'vegetarian,refreshing', TRUE),
-(4, 95.00, 'images/chongqing_beef.jpg', 'Numbing', 'beef,spicy', TRUE);
+(1, 28.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Website/Staff/SampleImages/dish/PickledCucumberFlowers.jpg', 'Mild', 'vegetarian,refreshing', TRUE),
+(4, 95.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Website/Staff/SampleImages/dish/Chongqing-styleAngusBeef.jpg', 'Numbing', 'beef,spicy', TRUE);
 
 -- Pickled Cucumber Flowers
 INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
