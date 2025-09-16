@@ -32,7 +32,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
         // Set button actions
         browseProductsBtn.setOnClickListener(v -> {
-            startActivity(new Intent(CustomerHomeActivity.this, ProductListActivity.class));
+            startActivity(new Intent(CustomerHomeActivity.this,MenuActivity.class));
         });
 
         orderHistoryBtn.setOnClickListener(v -> {
