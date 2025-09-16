@@ -71,34 +71,39 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
 
-    // Handle menu item clicks
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_track_orders) {
-            startActivity(new Intent(this, OrderTrackingActivity.class));
+        if (id == R.id.nav_settings) {
+            Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
 
-        } else if (id == R.id.nav_scan_qr) {
-            startActivity(new Intent(this, QRScannerActivity.class));
-            return true;
-
-        } else if (id == R.id.nav_notifications) {
-            List<String> notifications = getUnreadNotifications();
-            String message = notifications.isEmpty()
-                    ? "No new notifications"
-                    : "You have " + notifications.size() + " unread notifications";
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-            return true;
-
-        } else if (id == R.id.nav_check_in_out) {
-            startActivity(new Intent(this, CheckInAndOutActivity.class));
+        } else if (id == R.id.nav_logout) {
+            showLogoutConfirmation();
             return true;
 
         } else {
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void showLogoutConfirmation() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Confirm Logout")
+                .setMessage("Are you sure you want to log out?")
+                .setPositiveButton("Logout", (dialog, which) -> {
+                    Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
+                    RoleManager.clearUserData(); // Clear session
+                    Intent intent = new Intent(DashboardActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
 
