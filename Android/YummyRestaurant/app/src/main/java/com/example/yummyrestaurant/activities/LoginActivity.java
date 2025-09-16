@@ -1,13 +1,17 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.LoginCustomerApi;
 import com.example.yummyrestaurant.api.LoginStaffApi;
@@ -28,6 +32,11 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
+        boolean darkMode = prefs.getBoolean("enable_dark_mode", false);
+        AppCompatDelegate.setDefaultNightMode(darkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+
         setContentView(R.layout.activity_login);
 
         // Initialize UI components
@@ -54,6 +63,11 @@ public class LoginActivity extends AppCompatActivity {
     private void loginUser() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Please enter a valid email address.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (!email.isEmpty() && !password.isEmpty()) {
             Log.d("LoginActivity", "Attempting login with email: " + email);

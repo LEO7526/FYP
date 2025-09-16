@@ -77,7 +77,6 @@ public class DashboardActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.nav_settings) {
-            Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
 
