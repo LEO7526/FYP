@@ -1,17 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
+
+    <!-- Language Selector -->
     <Spinner
         android:id="@+id/languageSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
         android:entries="@array/language_options"
-        android:layout_marginBottom="16dp" />
+        android:prompt="@string/select_language"
+        android:textColor="#000000"
+        android:background="@android:color/white" />
 
+    <!-- Category Filter -->
+    <Spinner
+        android:id="@+id/categorySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
+        android:prompt="@string/select_category"
+        android:textColor="#000000"
+        android:background="@android:color/white" />
+
+    <!-- Spice Level Filter -->
+    <Spinner
+        android:id="@+id/spiceSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
+        android:prompt="@string/select_spice_level"
+        android:textColor="#000000"
+        android:background="@android:color/white" />
+
+    <!-- Tag Filter -->
+    <Spinner
+        android:id="@+id/tagSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="16dp"
+        android:prompt="@string/select_tag"
+        android:textColor="#000000"
+        android:background="@android:color/white" />
+
+    <!-- Loading Spinner -->
     <ProgressBar
         android:id="@+id/loadingSpinner"
         android:layout_width="wrap_content"
@@ -19,9 +68,12 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
+    <!-- RecyclerView for Menu Items -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:scrollbars="vertical" />
+
 </LinearLayout>

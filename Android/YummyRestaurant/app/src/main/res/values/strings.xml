@@ -15,4 +15,12 @@
         <item>Traditional Chinese</item>
     </string-array>
 
+    <string name="select_language">Select Language</string>
+    <string name="select_category">Select Category</string>
+    <string name="select_spice_level">Select Spice Level</string>
+    <string name="select_tag">Select Tag</string>
+
+    <string name="menu_item_image_desc">Image of the menu item</string>
+
+
 </resources>

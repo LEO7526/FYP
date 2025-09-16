@@ -1,10 +1,13 @@
 package com.example.yummyrestaurant.activities;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.widget.ProgressBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,31 +17,70 @@ import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.adapters.MenuItemAdapter;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.MenuResponse;
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
-import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import android.widget.ProgressBar;
 
 public class MenuActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     MenuItemAdapter adapter;
-    List<MenuItem> menuItemList = new ArrayList<>();
-    String currentLanguage = "en"; // Change this dynamically based on user preference
+    String currentLanguage = "en"; // Default language
+
+    Spinner categorySpinner;
+    Spinner spiceSpinner;
+    Spinner tagSpinner;
+    Spinner languageSpinner;
 
     ProgressBar loadingSpinner;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
+
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        categorySpinner = findViewById(R.id.categorySpinner);
+        spiceSpinner = findViewById(R.id.spiceSpinner);
+        tagSpinner = findViewById(R.id.tagSpinner);
+
+        String[] categories = {"All", "Appetizers", "Main Courses"};
+        String[] spiceLevels = {"All", "Mild", "Numbing"};
+        String[] tags = {"All", "vegetarian", "refreshing", "beef", "spicy"};
+
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+        ArrayAdapter<String> spiceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spiceLevels);
+        ArrayAdapter<String> tagAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tags);
+
+        categorySpinner.setAdapter(categoryAdapter);
+        spiceSpinner.setAdapter(spiceAdapter);
+        tagSpinner.setAdapter(tagAdapter);
+
+        AdapterView.OnItemSelectedListener filterListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                applyFilters(categorySpinner, spiceSpinner, tagSpinner);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        };
+
+        categorySpinner.setOnItemSelectedListener(filterListener);
+        spiceSpinner.setOnItemSelectedListener(filterListener);
+        tagSpinner.setOnItemSelectedListener(filterListener);
+
         loadingSpinner = findViewById(R.id.loadingSpinner);
-        adapter = new MenuItemAdapter(menuItemList, currentLanguage);
+
+        adapter = new MenuItemAdapter(this, new ArrayList<>());
         recyclerView.setAdapter(adapter);
+
+
+        Log.d("TestLog", "MenuActivity started");
 
         loadMenuItemsFromServer();
 
@@ -51,7 +93,8 @@ public class MenuActivity extends AppCompatActivity {
                     case 1: currentLanguage = "zh-CN"; break;
                     case 2: currentLanguage = "zh-TW"; break;
                 }
-                loadMenuItemsFromServer(); // Reload with selected language
+                Log.d("MenuActivity", "Language selected: " + currentLanguage);
+                loadMenuItemsFromServer();
             }
 
             @Override
@@ -60,8 +103,9 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void loadMenuItemsFromServer() {
-        loadingSpinner.setVisibility(View.VISIBLE);      // Show spinner
-        recyclerView.setVisibility(View.GONE);           // Hide list
+        Log.d("MenuActivity", "Loading menu items for language: " + currentLanguage);
+        loadingSpinner.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
 
         MenuApi menuApi = RetrofitClient.getClient().create(MenuApi.class);
         Call<MenuResponse> call = menuApi.getMenuItems(currentLanguage);
@@ -69,25 +113,49 @@ public class MenuActivity extends AppCompatActivity {
         call.enqueue(new Callback<MenuResponse>() {
             @Override
             public void onResponse(Call<MenuResponse> call, Response<MenuResponse> response) {
-                loadingSpinner.setVisibility(View.GONE);  // Hide spinner
-                recyclerView.setVisibility(View.VISIBLE); // Show list
+                loadingSpinner.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null && response.body().success) {
-                    menuItemList.clear();
-                    menuItemList.addAll(response.body().data);
-                    adapter.notifyDataSetChanged();
+                    // 🔍 Log full deserialized response
+                    Log.d("RawResponse", new Gson().toJson(response.body()));
+
+                    adapter.setMenuItems(response.body().data);
+                    applyFilters(categorySpinner, spiceSpinner, tagSpinner);
+
+
+                    // 🔍 Log each item individually
+                    for (MenuItem item : response.body().data) {
+                        Log.d("MenuItem", "ID: " + item.getId() +
+                                ", Name: " + item.getName() +
+                                ", Description: " + item.getDescription() +
+                                ", Price: " + item.getPrice());
+                    }
+
+                    //log the first one
+                    MenuItem first = response.body().data.get(0);
+                    Log.d("Debug123", "Raw name: " + first.getName() + ", Raw description: " + first.getDescription());
+
                 } else {
+                    Log.e("MenuActivity", "Response failed or empty");
                     Toast.makeText(MenuActivity.this, "Failed to load menu items", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<MenuResponse> call, Throwable t) {
-                loadingSpinner.setVisibility(View.GONE);  // Hide spinner
-                recyclerView.setVisibility(View.VISIBLE); // Show list
-
+                loadingSpinner.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                Log.e("MenuActivity", "API call failed: " + t.getMessage());
                 Toast.makeText(MenuActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void applyFilters(Spinner categorySpinner, Spinner spiceSpinner, Spinner tagSpinner) {
+        String selectedCategory = categorySpinner.getSelectedItem().toString();
+        String selectedSpice = spiceSpinner.getSelectedItem().toString();
+        String selectedTag = tagSpinner.getSelectedItem().toString();
+        adapter.filter(selectedCategory, selectedSpice, selectedTag);
     }
 }
