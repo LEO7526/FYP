@@ -6,59 +6,63 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-
-    <!-- Language Selector -->
-    <Spinner
-        android:id="@+id/languageSpinner"
+    <!-- Horizontal Scrollable Spinner Row -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginBottom="8dp"
-        android:entries="@array/language_options"
-        android:prompt="@string/select_language"
-        android:textColor="#000000"
-        android:background="@android:color/white" />
+        android:scrollbars="none">
 
-    <!-- Category Filter -->
-    <Spinner
-        android:id="@+id/categorySpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginBottom="8dp"
-        android:prompt="@string/select_category"
-        android:textColor="#000000"
-        android:background="@android:color/white" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-    <!-- Spice Level Filter -->
-    <Spinner
-        android:id="@+id/spiceSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginBottom="8dp"
-        android:prompt="@string/select_spice_level"
-        android:textColor="#000000"
-        android:background="@android:color/white" />
+            <!-- Language Selector -->
+            <Spinner
+                android:id="@+id/languageSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:layout_marginEnd="8dp"
+                android:entries="@array/language_options"
+                android:prompt="@string/select_language"
+                android:textColor="#000000"
+                android:background="@android:color/white" />
 
-    <!-- Tag Filter -->
-    <Spinner
-        android:id="@+id/tagSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginBottom="16dp"
-        android:prompt="@string/select_tag"
-        android:textColor="#000000"
-        android:background="@android:color/white" />
+            <!-- Category Filter -->
+            <Spinner
+                android:id="@+id/categorySpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:layout_marginEnd="8dp"
+                android:prompt="@string/select_category"
+                android:textColor="#000000"
+                android:background="@android:color/white" />
+
+            <!-- Spice Level Filter -->
+            <Spinner
+                android:id="@+id/spiceSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:layout_marginEnd="8dp"
+                android:prompt="@string/select_spice_level"
+                android:textColor="#000000"
+                android:background="@android:color/white" />
+
+            <!-- Tag Filter -->
+            <Spinner
+                android:id="@+id/tagSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:layout_marginEnd="8dp"
+                android:prompt="@string/select_tag"
+                android:textColor="#000000"
+                android:background="@android:color/white" />
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <!-- Loading Spinner -->
     <ProgressBar

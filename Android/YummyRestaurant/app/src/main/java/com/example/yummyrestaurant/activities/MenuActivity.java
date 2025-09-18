@@ -128,13 +128,14 @@ public class MenuActivity extends AppCompatActivity {
                     for (MenuItem item : response.body().data) {
                         Log.d("MenuItem", "ID: " + item.getId() +
                                 ", Name: " + item.getName() +
+                                ", Image URL: " + item.getImage_url() +
                                 ", Description: " + item.getDescription() +
                                 ", Price: " + item.getPrice());
                     }
 
                     //log the first one
                     MenuItem first = response.body().data.get(0);
-                    Log.d("Debug123", "Raw name: " + first.getName() + ", Raw description: " + first.getDescription());
+                    Log.d("Debug123", "Raw name: " + first.getImage_url());
 
                 } else {
                     Log.e("MenuActivity", "Response failed or empty");
