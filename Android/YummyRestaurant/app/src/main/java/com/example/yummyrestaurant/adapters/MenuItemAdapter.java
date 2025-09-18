@@ -74,7 +74,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_menu, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.menu_item_card, parent, false);
         return new ViewHolder(view);
     }
 
@@ -82,20 +82,21 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MenuItem item = filteredList.get(position);
 
-        holder.nameTextView.setText(item.getName());
-        holder.descriptionTextView.setText(item.getDescription());
-        holder.priceTextView.setText(String.format("¥ %.2f", item.getPrice()));
-        holder.categoryTextView.setText(item.getCategory());
+        // Set text values
+        holder.dishName.setText(item.getName());
+        holder.dishDescription.setText(item.getDescription());
+        holder.dishPrice.setText(String.format("¥ %.2f", item.getPrice()));
+        holder.spiceLevel.setText("Spice: " + item.getSpice_level());
 
+        // Load image with Glide
         Glide.with(context)
                 .load(item.getImage_url())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error_image)
-                .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                .listener(new com.bumptech.glide.request.RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model,
-                                                Target<Drawable> target,
-                                                boolean isFirstResource) {
+                                                Target<Drawable> target, boolean isFirstResource) {
                         Log.e("GlideError", "Failed to load image for: " + item.getName() +
                                 " | URL: " + item.getImage_url() +
                                 " | Error: " + (e != null ? e.getMessage() : "Unknown error"));
@@ -103,16 +104,14 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                     }
 
                     @Override
-                    public boolean onResourceReady(android.graphics.drawable.Drawable resource,
-                                                   Object model,
-                                                   Target<android.graphics.drawable.Drawable> target,
-                                                   DataSource dataSource,
+                    public boolean onResourceReady(Drawable resource, Object model,
+                                                   Target<Drawable> target, DataSource dataSource,
                                                    boolean isFirstResource) {
                         Log.d("GlideSuccess", "Image loaded for: " + item.getName());
                         return false; // Let Glide handle displaying the image
                     }
                 })
-                .into(holder.imageView);
+                .into(holder.dishImage);
     }
 
     @Override
@@ -121,17 +120,16 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView, descriptionTextView;
-        TextView categoryTextView;
-        ImageView imageView;
+        ImageView dishImage;
+        TextView dishName, dishDescription, dishPrice, spiceLevel;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            nameTextView = itemView.findViewById(R.id.menuItemName);
-            priceTextView = itemView.findViewById(R.id.menuItemPrice);
-            descriptionTextView = itemView.findViewById(R.id.menuItemDescription);
-            categoryTextView = itemView.findViewById(R.id.menuItemCategory);
-            imageView = itemView.findViewById(R.id.menuItemImage);
+            dishImage = itemView.findViewById(R.id.dishImage);
+            dishName = itemView.findViewById(R.id.dishName);
+            dishDescription = itemView.findViewById(R.id.dishDescription);
+            dishPrice = itemView.findViewById(R.id.dishPrice);
+            spiceLevel = itemView.findViewById(R.id.spiceLevel);
         }
     }
 }
