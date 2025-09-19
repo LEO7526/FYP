@@ -1,8 +1,11 @@
 package com.example.yummyrestaurant.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class MenuItem {
+public class MenuItem implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @SerializedName("id")
     private int id;
 
@@ -26,7 +29,6 @@ public class MenuItem {
 
     @SerializedName("category")
     private String category;
-
 
     public int getId() {
         return id;

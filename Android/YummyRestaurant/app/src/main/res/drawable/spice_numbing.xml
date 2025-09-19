@@ -1,0 +1,12 @@
+<!-- res/drawable/spice_numbing.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="30dp"
+    android:height="30dp"
+    android:viewportWidth="30"
+    android:viewportHeight="30">
+
+    <!-- Zigzag bolt to suggest numbing -->
+    <path
+        android:fillColor="#9C27B0"
+        android:pathData="M10,2 L14,10 L11,10 L14,18 L10,10 L13,10 Z" />
+</vector>

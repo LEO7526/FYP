@@ -1,10 +1,14 @@
 package com.example.yummyrestaurant.activities;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ProgressBar;
@@ -33,9 +37,10 @@ public class MenuActivity extends AppCompatActivity {
     Spinner categorySpinner;
     Spinner spiceSpinner;
     Spinner tagSpinner;
-    Spinner languageSpinner;
 
     ProgressBar loadingSpinner;
+
+    EditText searchBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,21 @@ public class MenuActivity extends AppCompatActivity {
         categorySpinner = findViewById(R.id.categorySpinner);
         spiceSpinner = findViewById(R.id.spiceSpinner);
         tagSpinner = findViewById(R.id.tagSpinner);
+
+        searchBar = findViewById(R.id.searchBar);
+
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.search(s.toString()); // Call your adapter's search method
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         String[] categories = {"All", "Appetizers", "Main Courses"};
         String[] spiceLevels = {"All", "Mild", "Numbing"};
@@ -84,22 +104,6 @@ public class MenuActivity extends AppCompatActivity {
 
         loadMenuItemsFromServer();
 
-        Spinner languageSpinner = findViewById(R.id.languageSpinner);
-        languageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0: currentLanguage = "en"; break;
-                    case 1: currentLanguage = "zh-CN"; break;
-                    case 2: currentLanguage = "zh-TW"; break;
-                }
-                Log.d("MenuActivity", "Language selected: " + currentLanguage);
-                loadMenuItemsFromServer();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
     }
 
     private void loadMenuItemsFromServer() {

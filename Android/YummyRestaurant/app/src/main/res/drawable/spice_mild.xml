@@ -1,0 +1,7 @@
+<!-- res/drawable/spice_mild_animated.xml -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/chili_base">
+    <target
+        android:name="chili"
+        android:animation="@animator/pulse" />
+</animated-vector>

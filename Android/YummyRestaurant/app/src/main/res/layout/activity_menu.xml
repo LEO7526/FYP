@@ -51,17 +51,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <!-- Language Selector -->
-                <Spinner
-                    android:id="@+id/languageSpinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:layout_marginEnd="12dp"
-                    android:entries="@array/language_options"
-                    android:prompt="@string/select_language"
-                    android:background="@android:color/white" />
-
                 <!-- Category Filter -->
                 <Spinner
                     android:id="@+id/categorySpinner"

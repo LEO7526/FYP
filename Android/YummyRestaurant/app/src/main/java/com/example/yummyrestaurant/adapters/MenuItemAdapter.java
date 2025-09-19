@@ -1,12 +1,14 @@
 package com.example.yummyrestaurant.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -17,6 +19,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.target.Target;
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.activities.DishDetailActivity;
 import com.example.yummyrestaurant.models.MenuItem;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +29,8 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     private Context context;
     private List<MenuItem> fullList;
     private List<MenuItem> filteredList;
+
+
 
     public MenuItemAdapter(Context context, List<MenuItem> menuItems) {
         this.context = context;
@@ -71,6 +76,26 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         notifyDataSetChanged();
     }
 
+    public void search(String query) {
+        filteredList.clear();
+
+        if (query == null || query.trim().isEmpty()) {
+            filteredList.addAll(fullList);
+        } else {
+            String lowerQuery = query.toLowerCase();
+            for (MenuItem item : fullList) {
+                String name = item.getName() != null ? item.getName().toLowerCase() : "";
+                String description = item.getDescription() != null ? item.getDescription().toLowerCase() : "";
+
+                if (name.contains(lowerQuery) || description.contains(lowerQuery)) {
+                    filteredList.add(item);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -86,9 +111,52 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         holder.dishName.setText(item.getName());
         holder.dishDescription.setText(item.getDescription());
         holder.dishPrice.setText(String.format("¥ %.2f", item.getPrice()));
-        holder.spiceLevel.setText("Spice: " + item.getSpice_level());
 
-        // Load image with Glide
+        // Set spice level bar
+        holder.spiceIconContainer.removeAllViews(); // Clear previous views
+
+        String spice = item.getSpice_level() != null ? item.getSpice_level().toLowerCase() : "";
+        int spiceCount;
+
+        switch (spice) {
+            case "mild":
+                spiceCount = 1;
+                break;
+            case "medium":
+                spiceCount = 2;
+                break;
+            case "hot":
+                spiceCount = 3;
+                break;
+            case "numbing":
+                spiceCount = 4;
+                break;
+            default:
+                spiceCount = 0;
+                break;
+        }
+
+        // Define colors for each spice level
+        List<String> spiceColors = Arrays.asList("#FFECB3", "#FFC107", "#FF9800", "#F44336");
+
+        for (int i = 0; i < spiceCount; i++) {
+            View barSegment = new View(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(16, ViewGroup.LayoutParams.MATCH_PARENT);
+            if (i > 0) params.setMarginStart(4);
+            barSegment.setLayoutParams(params);
+            barSegment.setBackgroundColor(android.graphics.Color.parseColor(spiceColors.get(i)));
+            holder.spiceIconContainer.addView(barSegment);
+        }
+
+        if (spiceCount == 0) {
+            View defaultSegment = new View(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(16, ViewGroup.LayoutParams.MATCH_PARENT);
+            defaultSegment.setLayoutParams(params);
+            defaultSegment.setBackgroundColor(android.graphics.Color.parseColor("#BDBDBD")); // light gray for unknown
+            holder.spiceIconContainer.addView(defaultSegment);
+        }
+
+        // Load dish image with Glide
         Glide.with(context)
                 .load(item.getImage_url())
                 .placeholder(R.drawable.placeholder)
@@ -100,7 +168,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                         Log.e("GlideError", "Failed to load image for: " + item.getName() +
                                 " | URL: " + item.getImage_url() +
                                 " | Error: " + (e != null ? e.getMessage() : "Unknown error"));
-                        return false; // Let Glide handle the error image
+                        return false;
                     }
 
                     @Override
@@ -108,12 +176,19 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                                                    Target<Drawable> target, DataSource dataSource,
                                                    boolean isFirstResource) {
                         Log.d("GlideSuccess", "Image loaded for: " + item.getName());
-                        return false; // Let Glide handle displaying the image
+                        return false;
                     }
                 })
                 .into(holder.dishImage);
-    }
 
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DishDetailActivity.class);
+            intent.putExtra("menuItem", item); // MenuItem must be Serializable or Parcelable
+            context.startActivity(intent);
+        });
+
+    }
     @Override
     public int getItemCount() {
         return filteredList.size();
@@ -121,6 +196,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView dishImage;
+        LinearLayout spiceIconContainer;
         TextView dishName, dishDescription, dishPrice, spiceLevel;
 
         public ViewHolder(@NonNull View itemView) {
@@ -129,7 +205,9 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
             dishName = itemView.findViewById(R.id.dishName);
             dishDescription = itemView.findViewById(R.id.dishDescription);
             dishPrice = itemView.findViewById(R.id.dishPrice);
-            spiceLevel = itemView.findViewById(R.id.spiceLevel);
+            spiceIconContainer = itemView.findViewById(R.id.spiceIconContainer);
         }
     }
+
+
 }
