@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Theme colors -->
+    <color name="colorPrimary">#FF6F00</color>         <!-- Matches primary_color -->
+    <color name="colorPrimaryDark">#E65100</color>     <!-- A darker shade for status bar -->
+    <color name="colorAccent">#FFC107</color>          <!-- Matches accent_color -->
+
+    <!-- Existing custom colors -->
     <color name="primary_color">#FF6F00</color>
     <color name="accent_color">#FFC107</color>
     <color name="white">#FFFFFF</color>
@@ -8,6 +14,4 @@
     <color name="light_gray">#EEEEEE</color> <!-- Optional: for category buttons -->
     <color name="red">#FF3B30</color> <!-- A vibrant red, great for action buttons -->
     <color name="primaryColor">#FF5722</color> <!-- Deep orange -->
-
-
 </resources>

@@ -63,7 +63,7 @@
         <activity
             android:name=".activities.DashboardActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar" />
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".activities.WishlistActivity"
             android:exported="false" />

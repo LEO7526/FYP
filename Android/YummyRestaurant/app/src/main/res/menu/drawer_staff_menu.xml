@@ -1,0 +1,46 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/nav_profile"
+        android:title="Profile"
+        android:icon="@drawable/ic_profile" />
+
+    <item
+        android:id="@+id/nav_settings"
+        android:title="Settings"
+        android:icon="@drawable/ic_settings"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Logout"
+        android:icon="@drawable/ic_logout"
+        app:showAsAction="never" />
+
+    <!-- Added items from buttons -->
+    <item
+        android:id="@+id/nav_track_orders"
+        android:title="Track Orders"
+        android:icon="@drawable/ic_track_orders"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/nav_scan_qr"
+        android:title="Scan QR"
+        android:icon="@drawable/ic_qr"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/nav_view_notifications"
+        android:title="View Notifications"
+        android:icon="@drawable/ic_notifications"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/nav_check_in_out"
+        android:title="Check In/Out"
+        android:icon="@drawable/ic_check_in_out"
+        app:showAsAction="never" />
+
+</menu>
