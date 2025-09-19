@@ -2,9 +2,11 @@ package com.example.yummyrestaurant.activities;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.CartManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +44,7 @@ public class DishDetailActivity extends AppCompatActivity {
         TextView price = findViewById(R.id.dishPriceDetail);
         ImageView image = findViewById(R.id.dishImageDetail);
         LinearLayout spiceBar = findViewById(R.id.spiceBarDetail);
+        Button addToCartBtn = findViewById(R.id.addToCartBtn);
 
         if (item != null) {
             name.setText(item.getName() != null ? item.getName() : "Unknown Dish");
@@ -88,10 +92,17 @@ public class DishDetailActivity extends AppCompatActivity {
                 defaultSegment.setBackgroundColor(Color.parseColor("#BDBDBD"));
                 spiceBar.addView(defaultSegment);
             }
+
+            // Add to Cart button logic
+            addToCartBtn.setOnClickListener(v -> {
+                CartManager.addItem(item);
+                Toast.makeText(this, item.getName() + " added to cart", Toast.LENGTH_SHORT).show();
+            });
+
         } else {
             name.setText("Dish not found");
             description.setText("Unable to load dish details.");
-            price.setText("¥ --");
+            price.setText("$ --");
             image.setImageResource(R.drawable.error_image);
         }
     }

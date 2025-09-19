@@ -29,4 +29,14 @@
     <string name="dish_price_placeholder">$00.00</string>
 
 
+    <!-- New content descriptions -->
+    <string name="desc_search_icon">Search icon</string>
+    <string name="desc_profile_icon">User profile icon</string>
+
+    <!-- Category labels -->
+    <string name="category_all">All</string>
+    <string name="category_combos">Combos</string>
+    <string name="category_sliders">Sliders</string>
+
+    <string name="add_button">Add new item</string>
 </resources>

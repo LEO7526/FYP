@@ -5,4 +5,9 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="gray">#CCCCCC</color>
+    <color name="light_gray">#EEEEEE</color> <!-- Optional: for category buttons -->
+    <color name="red">#FF3B30</color> <!-- A vibrant red, great for action buttons -->
+    <color name="primaryColor">#FF5722</color> <!-- Deep orange -->
+
+
 </resources>

@@ -110,7 +110,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         // Set text values
         holder.dishName.setText(item.getName());
         holder.dishDescription.setText(item.getDescription());
-        holder.dishPrice.setText(String.format("¥ %.2f", item.getPrice()));
+        holder.dishPrice.setText(String.format("$ %.2f", item.getPrice()));
 
         // Set spice level bar
         holder.spiceIconContainer.removeAllViews(); // Clear previous views
