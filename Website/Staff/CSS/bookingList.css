@@ -1,0 +1,563 @@
+/* bookingList.css */
+
+/* Page header and add button container */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Center the page title */
+.page-header h1 {
+    margin: 0 auto;
+    text-align: center;
+    flex: 1;
+}
+
+/* Add booking button positioned to the right */
+.btn-add-booking {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    margin-left: auto;
+}
+
+.btn-add-booking:hover {
+    background-color: #45a049;
+}
+
+/* Table container for centering */
+.table-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 1400px;
+}
+
+/* Filter buttons container - centered */
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Filter buttons with different light backgrounds */
+.filter-btn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    color: #333;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* All button - light blue */
+.filter-btn:nth-child(1) {
+    background-color: #e3f2fd;
+}
+
+.filter-btn:nth-child(1):hover {
+    background-color: #bbdefb;
+}
+
+/* Pending button - light yellow */
+.filter-btn:nth-child(2) {
+    background-color: #fff9c4;
+}
+
+.filter-btn:nth-child(2):hover {
+    background-color: #fff59d;
+}
+
+/* Confirmed button - light green */
+.filter-btn:nth-child(3) {
+    background-color: #e8f5e9;
+}
+
+.filter-btn:nth-child(3):hover {
+    background-color: #c8e6c9;
+}
+
+/* History button - light purple */
+.filter-btn:nth-child(4) {
+    background-color: #f3e5f5;
+}
+
+.filter-btn:nth-child(4):hover {
+    background-color: #e1bee7;
+}
+
+/* Cancelled button - light red */
+.filter-btn:nth-child(5) {
+    background-color: #ffebee;
+}
+
+.filter-btn:nth-child(5):hover {
+    background-color: #ffcdd2;
+}
+
+.filter-btn.active {
+    border-color: #4285f4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.3);
+}
+
+/* Table styles optimization */
+#bookingTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+    table-layout: fixed; /* Fixed layout to maintain proportions */
+}
+
+#bookingTable th,
+#bookingTable td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#bookingTable th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Column width definitions - reduced widths as requested */
+.booking-id-col {
+    width: 100px;
+    min-width: 100px;
+}
+
+.customer-col {
+    width: 220px; /* Reduced by 60px from original 280px */
+    min-width: 220px;
+}
+
+.table-col {
+    width: 60px; /* Reduced by 20px from original 80px */
+    min-width: 60px;
+}
+
+.time-col {
+    width: 180px;
+    min-width: 180px;
+}
+
+.guests-col {
+    width: 70px; /* Reduced by 40px from original 100px */
+    min-width: 70px;
+}
+
+.purpose-col {
+    width: 160px; /* Reduced by 60px from original 220px */
+    min-width: 160px;
+}
+
+.status-col {
+    width: 12%;
+    width: 100px;
+    min-width: 100px;
+}
+
+.actions-col {
+    width: 90px;
+    min-width: 90px;
+}
+
+/* Status cell - centered both horizontally and vertically */
+.status-cell {
+    text-align: center;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Status styles - unified size for all statuses */
+.status {
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 13px;
+    text-transform: capitalize;
+    display: inline-block;
+    width: 80%;
+    max-width: 100px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1.2;
+    min-height: 28px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, +30%);
+}
+
+.status.cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status.confirmed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status.completed {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+/* Customer info */
+.customer-info {
+    line-height: 1.4;
+}
+
+.customer-info strong {
+    color: #555;
+    display: inline-block;
+    width: 45px;
+}
+
+/* Time info */
+.time-info {
+    line-height: 1.4;
+}
+
+.time-info strong {
+    color: #555;
+    display: inline-block;
+    width: 45px;
+}
+
+/* Prevent date wrapping */
+.date-line {
+    white-space: nowrap;
+    margin-bottom: 2px;
+}
+
+/* Booking ID */
+.booking-id {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+/* Member badge */
+.member-badge {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+/* Action buttons - unified size */
+.actions-cell {
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+}
+
+/* Vertical action buttons for Pending status */
+.action-buttons-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.btn-action {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+    width: 65px;
+    height: 24px;
+    line-height: 16px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    vertical-align: middle;
+}
+
+.btn-action:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-accept {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-accept:hover {
+    background-color: #45a049;
+}
+
+.btn-reject {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-reject:hover {
+    background-color: #d32f2f;
+}
+
+.btn-cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #d32f2f;
+}
+
+.btn-locked {
+    background-color: #9E9E9E;
+    color: white;
+}
+
+/* Remark styling */
+.remark-row {
+    background-color: #fffdd0;
+}
+
+.remark-row td {
+    padding: 8px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.remark-content {
+    background-color: #fffdd0;
+    color: #000000;
+    padding: 6px 12px;
+    border-left: 4px solid #ffd54f;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-left: 0;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.modal-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-confirm {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: #666;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    background: #d32f2f;
+}
+
+.btn-cancel:hover {
+    background: #555;
+}
+
+/* Responsive design */
+@media screen and (max-width: 1200px) {
+    .customer-col {
+        width: 200px;
+        min-width: 200px;
+    }
+
+    .purpose-col {
+        width: 140px;
+        min-width: 140px;
+    }
+
+    .time-col {
+        width: 160px;
+        min-width: 160px;
+    }
+    .status-col {
+        width: 14%;
+        min-width: 85px;
+    }
+
+    .status {
+        width: 88%;
+        font-size: 11px;
+        padding: 5px 6px;
+        min-height: 26px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .filter-buttons {
+        justify-content: center;
+    }
+
+    #bookingTable {
+        font-size: 13px;
+    }
+
+    #bookingTable th,
+    #bookingTable td {
+        padding: 6px 8px;
+    }
+
+
+    .btn-action {
+        width: 60px;
+        height: 22px;
+        font-size: 11px;
+        line-height: 14px;
+    }
+
+    .status-col {
+        width: 16%;
+        min-width: 75px;
+    }
+
+    .status {
+        width: 85%;
+        font-size: 10px;
+        padding: 4px 5px;
+        min-height: 24px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+    #bookingTable td {
+        height: auto;
+        min-height: 40px;
+    }
+
+    .status {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        margin: 2px auto;
+    }
+}
+@media screen and (max-width: 480px) {
+    .status-col {
+        width: 18%;
+        min-width: 65px;
+    }
+
+    .status {
+        width: 82%;
+        font-size: 9px;
+        padding: 3px 4px;
+        min-height: 22px;
+    }
+}
+#bookingTable td {
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+    height: 50px;
+}
+
+#bookingTable td.customer-info,
+#bookingTable td.time-info {
+    text-align: left;
+}
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 4px;
+    z-index: 9999;
+    display: none;
+    font-weight: bold;
+}

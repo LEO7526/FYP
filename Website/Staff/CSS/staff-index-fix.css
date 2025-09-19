@@ -1,59 +1,320 @@
+/* ===== 针对 staffIndex.php 中的 Pending Reservations 表格样式 ===== */
 
-.order-section table th:nth-child(6),
-.order-section table td:nth-child(6) {
+/* 表格列宽与 bookingList.css 保持一致 */
+#pendingBookingTable th:nth-child(1),
+#pendingBookingTable td:nth-child(1) {
+    width: 100px;
+    min-width: 100px;
+}
+
+#pendingBookingTable th:nth-child(2),
+#pendingBookingTable td:nth-child(2) {
     width: 220px;
     min-width: 220px;
 }
 
-.order-section table td:nth-child(6) {
+#pendingBookingTable th:nth-child(3),
+#pendingBookingTable td:nth-child(3) {
+    width: 60px;
+    min-width: 60px;
+}
+
+#pendingBookingTable th:nth-child(4),
+#pendingBookingTable td:nth-child(4) {
+    width: 180px;
+    min-width: 180px;
+}
+
+#pendingBookingTable th:nth-child(5),
+#pendingBookingTable td:nth-child(5) {
+    width: 70px;
+    min-width: 70px;
+}
+
+#pendingBookingTable th:nth-child(6),
+#pendingBookingTable td:nth-child(6) {
+    width: 160px;
+    min-width: 160px;
+}
+
+#pendingBookingTable th:nth-child(7),
+#pendingBookingTable td:nth-child(7) {
+    width: 100px;
+    min-width: 100px;
+}
+
+#pendingBookingTable th:nth-child(8),
+#pendingBookingTable td:nth-child(8) {
+    width: 90px;
+    min-width: 90px;
+}
+
+/* 按钮垂直排列 - 与 bookingList.css 一致 */
+#pendingBookingTable .action-buttons-vertical {
     display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
-.order-section .btn-view,
-.order-section .btn-accept,
-.order-section .btn-reject,
-.order-section .btn-modify {
-    padding: 6px 8px;
+/* 按钮样式统一 */
+#pendingBookingTable .btn-action {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
     font-size: 12px;
-    white-space: nowrap;
-    flex-shrink: 0;
+    width: 65px;
+    height: 24px;
+    line-height: 16px;
+    box-sizing: border-box;
+    text-align: center;
 }
 
-@media screen and (max-width: 1024px) {
-    .order-section table th:nth-child(6),
-    .order-section table td:nth-child(6) {
-        width: 180px;
-        min-width: 180px;
-    }
-
-    .order-section .btn-view,
-    .order-section .btn-accept,
-    .order-section .btn-reject,
-    .order-section .btn-modify {
-        padding: 5px 6px;
-        font-size: 11px;
-    }
+/* 状态居中 */
+#pendingBookingTable .status-cell {
+    text-align: center;
+    vertical-align: middle;
 }
 
+/* 响应式处理：与 bookingList.css 保持一致 */
 @media screen and (max-width: 768px) {
-    .order-section table th:nth-child(6),
-    .order-section table td:nth-child(6) {
-        width: auto;
-        min-width: 120px;
+    #pendingBookingTable {
+        font-size: 13px;
     }
 
-    .order-section table td:nth-child(6) {
+    #pendingBookingTable th,
+    #pendingBookingTable td {
+        padding: 6px 8px;
+    }
+
+    #pendingBookingTable .btn-action {
+        width: 60px;
+        height: 22px;
+        font-size: 11px;
+        line-height: 14px;
+    }
+
+    #pendingBookingTable .status-cell {
+        min-width: 75px;
+    }
+
+    /* 按钮垂直排列保留 */
+    #pendingBookingTable .action-buttons-vertical {
         flex-direction: column;
         gap: 3px;
     }
 
-    .order-section .btn-view,
-    .order-section .btn-accept,
-    .order-section .btn-reject,
-    .order-section .btn-modify {
-        width: 100%;
-        text-align: center;
+    /* 允许横向滚动 */
+    .order-section .table-container {
+        overflow-x: auto;
     }
 }
+/* 状态标签颜色 */
+#pendingBookingTable .status {
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 13px;
+    text-transform: capitalize;
+    display: inline-block;
+    width: 80%;
+    max-width: 100px;
+    text-align: center;
+    line-height: 1.2;
+    min-height: 28px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#pendingBookingTable .status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+#pendingBookingTable .status.confirmed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+#pendingBookingTable .status.cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+#pendingBookingTable .status.completed {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+/* 按钮颜色 */
+#pendingBookingTable .btn-accept {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#pendingBookingTable .btn-accept:hover {
+    background-color: #45a049;
+}
+
+#pendingBookingTable .btn-reject {
+    background-color: #f44336;
+    color: white;
+}
+
+#pendingBookingTable .btn-reject:hover {
+    background-color: #d32f2f;
+}
+
+#pendingBookingTable .btn-cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+#pendingBookingTable .btn-cancel:hover {
+    background-color: #d32f2f;
+}
+
+#pendingBookingTable .btn-locked {
+    background-color: #9E9E9E;
+    color: white;
+    cursor: not-allowed;
+}
+
+/* 备注行背景色 */
+#pendingBookingTable .remark-row {
+    background-color: #fffdd0;
+}
+
+#pendingBookingTable .remark-content {
+    background-color: #fffdd0;
+    color: #000000;
+    padding: 6px 12px;
+    border-left: 4px solid #ffd54f;
+    border-radius: 4px;
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* 会员标签颜色 */
+#pendingBookingTable .member-badge {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+/* 悬停行背景色 */
+#pendingBookingTable tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* 表头背景色 */
+#pendingBookingTable th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+}
+/* 表头背景 */
+#pendingBookingTable thead th {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* 默认行背景 */
+#pendingBookingTable tbody tr {
+    background-color: #e2e8f1;
+}
+
+/* 悬停行 */
+#pendingBookingTable tbody tr:hover {
+    background-color: #cce5ff;
+}
+
+/* 偶数行淡灰（斑马纹） */
+#pendingBookingTable tbody tr:nth-child(even):not(.remark-row) {
+    background-color: #e2e8f1;
+}
+
+/* 备注行淡黄 */
+#pendingBookingTable tr.remark-row {
+    background-color: #fffdd0 !important;
+}
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 4px;
+    z-index: 9999;
+    display: none;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.modal-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-confirm {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: #666;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+

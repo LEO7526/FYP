@@ -1,6 +1,10 @@
 <?php
 require_once '../auth_check.php';
 check_staff_auth(); // Check staff authentication status
+
+$page = isset($_GET['page']) ? $_GET['page'] : 'staffIndex.php';
+$action = isset($_GET['action']) ? $_GET['action'] : '';
+$bid = isset($_GET['bid']) ? $_GET['bid'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,15 +19,15 @@ check_staff_auth(); // Check staff authentication status
 <body>
 <header>
     <div class="logo">
-        <a href="staffIndex.php">Smile & Sunshine Toy</a>
+        <a href="staffIndex.php">Yummy Restaurant</a>
     </div>
 
     <nav class="main-nav">
-        <a href="InsertItems.php" class="nav-button insert-items">Insert Items</a>
-        <a href="InsertMaterials.php" class="nav-button insert-materials">Insert Materials</a>
-        <a href="bookingList.php" class="nav-button order-list">Order List</a>
-        <a href="Report.php" class="nav-button report">Report</a>
-        <a href="Delete.php" class="nav-button delete">Delete</a>
+        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
+        <a href="Inventory.php" class="nav-button insert-materials">Inventory</a>
+        <a href="ReservationList.php" class="nav-button order-list">Reservations</a>
+        <a href="SalesReport.php" class="nav-button report">Sales Reports</a>
+        <a href="PurchaseReturn.php" class="nav-button delete">Purchase & Return</a>
     </nav>
 
     <div class="user-actions">
@@ -34,7 +38,7 @@ check_staff_auth(); // Check staff authentication status
 <div class="container">
     <div class="complete-text">Complete</div>
     <div class="thank-you-text">Data already updated</div>
-    <div class="link-text">Click <a href="staffIndex.php" class="back-link-text">here</a> to go back to home page</div>
+    <div class="link-text">Click <a href="<?= htmlspecialchars($page) ?>" class="back-link-text">here</a> to go back to <?php echo $page === 'bookingList.php' ? 'Booking List' : 'home page' ?></div>
 </div>
 </body>
 </html>

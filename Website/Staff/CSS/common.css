@@ -94,3 +94,26 @@ select:required:valid {
     color: #2a83f4;
     text-decoration: none;
 }
+/* Container for proper centering and background */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 70px); /* Adjust for header height */
+}
+
+/* Back link styling */
+.back-link {
+    margin: 15px 0;
+}
+
+.back-link-text {
+    font-size: 15px;
+    color: #2a83f4;
+    text-decoration: none;
+}
+
+.back-link-text:hover {
+    text-decoration: underline;
+}

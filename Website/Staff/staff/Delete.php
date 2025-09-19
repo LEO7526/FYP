@@ -35,7 +35,7 @@ $products = mysqli_fetch_all($result, MYSQLI_ASSOC);
         </div>
 
         <nav class="main-nav">
-            <a href="InsertItems.php" class="nav-button insert-items">Insert Items</a>
+            <a href="InsertDish.php" class="nav-button insert-items">Insert Items</a>
             <a href="InsertMaterials.php" class="nav-button insert-materials">Insert Materials</a>
             <a href="bookingList.php" class="nav-button order-list">Order List</a>
             <a href="Report.php" class="nav-button report">Report</a>

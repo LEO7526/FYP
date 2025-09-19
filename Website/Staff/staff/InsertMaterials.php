@@ -90,15 +90,15 @@ check_staff_auth();// Verify staff authentication status
 <body>
 <header>
     <div class="logo">
-        <a href="staffIndex.php">Smile & Sunshine Toy</a>
+        <a href="staffIndex.php">Yummy Restaurant</a>
     </div>
 
     <nav class="main-nav">
-        <a href="InsertItems.php" class="nav-button insert-items">Insert Items</a>
-        <a href="InsertMaterials.php" class="nav-button insert-materials">Insert Materials</a>
-        <a href="bookingList.php" class="nav-button order-list">Order List</a>
-        <a href="Report.php" class="nav-button report">Report</a>
-        <a href="Delete.php" class="nav-button delete">Delete</a>
+        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
+        <a href="Inventory.php" class="nav-button insert-materials">Inventory</a>
+        <a href="ReservationList.php" class="nav-button order-list">Reservations</a>
+        <a href="SalesReport.php" class="nav-button report">Sales Reports</a>
+        <a href="PurchaseReturn.php" class="nav-button delete">Purchase & Return</a>
     </nav>
 
     <div class="user-actions">
