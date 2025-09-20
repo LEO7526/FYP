@@ -219,3 +219,338 @@ table th {
     font-size: 1.2em;
     color: #666;
 }
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+.status.cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.status.confirmed {
+    background-color: #d4edda;
+    color: #155724;
+}
+.status.completed {
+    background-color: #cce5ff;
+    color: #004085;
+}
+.remark-row {
+    background-color: #f9f9f9;
+}
+.remark-row td {
+    padding: 10px 15px;
+    font-style: italic;
+    border-bottom: 1px solid #ddd;
+}
+.member-badge {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 5px;
+}
+body {
+    background-color: #f0f8ff;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+h1 {
+    color: #1a5f7a;
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #1a5f7a;
+    padding-bottom: 15px;
+}
+
+/* 表格样式 */
+#bookingTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #e6f2ff;
+    border: 2px solid #1a5f7a;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#bookingTable th {
+    background-color: #1a5f7a;
+    color: white;
+    padding: 15px 10px;
+    text-align: center;
+    border: 1px solid #0d3b4d;
+    font-weight: bold;
+}
+
+#bookingTable td {
+    padding: 12px 10px;
+    border: 1px solid #8ec5fc;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#bookingTable tr:nth-child(even) {
+    background-color: #d4e6ff;
+}
+
+#bookingTable tr:hover {
+    background-color: #c2dfff;
+}
+
+.customer-info, .time-info {
+    text-align: left;
+    padding: 8px;
+    line-height: 1.5;
+}
+
+.customer-info strong, .time-info strong {
+    display: block;
+    color: #1a5f7a;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.remark-row {
+    background-color: #e0f0ff !important;
+}
+
+.remark-row td {
+    padding: 15px;
+    font-style: italic;
+    color: #2c5f7a;
+    border: 1px solid #8ec5fc;
+}
+
+.remark-content {
+    background-color: #e0f0ff;
+    padding: 10px 15px;
+    border-left: 4px solid #1a5f7a;
+    border-radius: 4px;
+}
+
+.member-badge {
+    display: inline-block;
+    background-color: #1a5f7a;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.btn-view {
+    padding: 8px 15px;
+    background-color: #1a5f7a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.btn-view:hover {
+    background-color: #0d3b4d;
+}
+
+@media screen and (max-width: 1200px) {
+    #bookingTable {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+body.booking-page {
+    background-color: #f0f8ff;
+    font-family: Arial, sans-serif;
+}
+
+.booking-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+.booking-container h1 {
+    color: #1a5f7a;
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #1a5f7a;
+    padding-bottom: 15px;
+}
+
+#bookingTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #e6f2ff;
+    border: 2px solid #1a5f7a;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#bookingTable th {
+    background-color: #1a5f7a;
+    color: white;
+    padding: 15px 10px;
+    text-align: center;
+    border: 1px solid #0d3b4d;
+    font-weight: bold;
+}
+
+#bookingTable td {
+    padding: 12px 10px;
+    border: 1px solid #8ec5fc;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#bookingTable tr:nth-child(even) {
+    background-color: #d4e6ff;
+}
+
+#bookingTable tr:hover {
+    background-color: #c2dfff;
+}
+
+.booking-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: capitalize;
+    display: inline-block;
+    min-width: 90px;
+}
+
+.booking-status.cancelled {
+    background-color: #ffcccc;
+    color: #cc0000;
+    border: 1px solid #cc0000;
+}
+
+.booking-status.pending {
+    background-color: #fff2cc;
+    color: #b38f00;
+    border: 1px solid #b38f00;
+}
+
+.booking-status.confirmed {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #155724;
+}
+
+.booking-status.completed {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #004085;
+}
+
+.customer-info, .time-info {
+    text-align: left;
+    padding: 8px;
+    line-height: 1.5;
+}
+
+.customer-info strong, .time-info strong {
+    display: block;
+    color: #1a5f7a;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.remark-row {
+    background-color: #e0f0ff !important;
+}
+
+.remark-row td {
+    padding: 15px;
+    font-style: italic;
+    color: #2c5f7a;
+    border: 1px solid #8ec5fc;
+}
+
+.remark-content {
+    background-color: #e0f0ff;
+    padding: 10px 15px;
+    border-left: 4px solid #1a5f7a;
+    border-radius: 4px;
+}
+
+.member-badge {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.btn-booking-view {
+    padding: 8px 15px;
+    background-color: #1a5f7a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.btn-booking-view:hover {
+    background-color: #0d3b4d;
+}
+
+@media screen and (max-width: 1200px) {
+    #bookingTable {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+.time-info {
+    min-width: 140px;
+}
+
+.booking-id-cell {
+    position: relative;
+    padding-bottom: 25px !important;
+}
+
+.booking-id-content {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.member-tag {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4CAF50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    white-space: nowrap;
+}
