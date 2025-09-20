@@ -1,93 +1,162 @@
 package com.example.yummyrestaurant.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.api.PaymentApiService;
 import com.example.yummyrestaurant.api.PaymentIntentResponse;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.paymentsheet.PaymentSheet;
 import com.stripe.android.paymentsheet.PaymentSheetResult;
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PaymentActivity extends AppCompatActivity implements PaymentSheetResultCallback {
+import com.example.yummyrestaurant.utils.CartManager;
+
+public class PaymentActivity extends AppCompatActivity {
 
     private PaymentSheet paymentSheet;
-    private String paymentIntentClientSecret;
-
+    private String clientSecret;
+    private ProgressBar loadingSpinner;
+    private ImageView successIcon;
     private Button payButton;
+    private TextView amountText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        // Initialize Stripe with your publishable key
-        PaymentConfiguration.init(
-                getApplicationContext(),
-                "pk_test_51S56QLC1wirzkW6GoFfOawzrgqNOL5i1DxFatxz2Mr5OAMISZ84QFFkn16763PXc3uDPjpqsQxJLpzfV2q74ke6U00P2dWN9PO" // Replace with your actual Stripe publishable key
-        );
+        PaymentConfiguration.init(getApplicationContext(), "pk_test_51S56QLC1wirzkW6GoFfOawzrgqNOL5i1DxFatxz2Mr5OAMISZ84QFFkn16763PXc3uDPjpqsQxJLpzfV2q74ke6U00P2dWN9PO");
 
-        payButton = findViewById(R.id.payBtn);
-        payButton.setEnabled(false); // Disable until client secret is fetched
+        paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);
 
-        // Initialize PaymentSheet
-        paymentSheet = new PaymentSheet(this, this);
+        loadingSpinner = findViewById(R.id.loadingSpinner);
+        successIcon = findViewById(R.id.successIcon);
+        payButton = findViewById(R.id.payButton);
+        amountText = findViewById(R.id.amountText);
 
-        // Fetch PaymentIntent client secret from backend
+        amountText.setText("Total: HK$5.00");
+
+        payButton.setOnClickListener(v -> {
+            payButton.setEnabled(false);
+            loadingSpinner.setVisibility(View.VISIBLE);
+            fetchClientSecret();
+        });
+    }
+
+    private void fetchClientSecret() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("amount", 500); // HK$5.00
+
         PaymentApiService service = RetrofitClient.getClient().create(PaymentApiService.class);
-        Call<PaymentIntentResponse> call = service.createPaymentIntent();
+        Call<PaymentIntentResponse> call = service.createPaymentIntent(data);
+
         call.enqueue(new Callback<PaymentIntentResponse>() {
             @Override
             public void onResponse(Call<PaymentIntentResponse> call, Response<PaymentIntentResponse> response) {
+                loadingSpinner.setVisibility(View.GONE);
+                payButton.setEnabled(true);
+
                 if (response.isSuccessful() && response.body() != null) {
-                    paymentIntentClientSecret = response.body().getClientSecret();
-                    payButton.setEnabled(true);
+                    clientSecret = response.body().getClientSecret();
+                    presentPaymentSheet();
                 } else {
-                    Toast.makeText(PaymentActivity.this, "Failed to fetch payment intent", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PaymentActivity.this, "Failed to get client secret", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<PaymentIntentResponse> call, Throwable t) {
-                Toast.makeText(PaymentActivity.this, "Request failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Handle payment button click
-        payButton.setOnClickListener(v -> {
-            if (paymentIntentClientSecret != null && !paymentIntentClientSecret.isEmpty()) {
-                paymentSheet.presentWithPaymentIntent(
-                        paymentIntentClientSecret,
-                        new PaymentSheet.Configuration.Builder(getString(R.string.merchant_name))
-                                .build()
-                );
-            } else {
-                Toast.makeText(PaymentActivity.this, "Payment intent client secret is not available", Toast.LENGTH_SHORT).show();
+                loadingSpinner.setVisibility(View.GONE);
+                payButton.setEnabled(true);
+                Toast.makeText(PaymentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    @Override
-    public void onPaymentSheetResult(@NonNull PaymentSheetResult paymentSheetResult) {
-        if (paymentSheetResult instanceof PaymentSheetResult.Completed) {
-            Toast.makeText(this, "Payment succeeded!", Toast.LENGTH_SHORT).show();
-            // Handle post-payment success logic here
-        } else if (paymentSheetResult instanceof PaymentSheetResult.Canceled) {
+    private void presentPaymentSheet() {
+        paymentSheet.presentWithPaymentIntent(
+                clientSecret,
+                new PaymentSheet.Configuration.Builder("Yummy Restaurant").build()
+        );
+    }
+
+    private void onPaymentSheetResult(PaymentSheetResult result) {
+        if (result instanceof PaymentSheetResult.Completed) {
+            Log.i("PaymentActivity", "Payment completed successfully.");
+
+            // Show success animation
+            successIcon.setAlpha(0f);
+            successIcon.setVisibility(View.VISIBLE);
+            successIcon.animate().alpha(1f).setDuration(500).start();
+            Log.d("PaymentActivity", "Success animation triggered.");
+
+            // Clear cart
+            CartManager.clearCart();
+            Log.d("PaymentActivity", "Cart cleared after successful payment.");
+
+            // Delay and navigate to confirmation screen
+            new Handler().postDelayed(() -> {
+                Log.i("PaymentActivity", "Navigating to OrderConfirmationActivity.");
+                Intent intent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
+                startActivity(intent);
+                finish();
+            }, 1500);
+        } else if (result instanceof PaymentSheetResult.Canceled) {
+            Log.w("PaymentActivity", "Payment was canceled by the user.");
             Toast.makeText(this, "Payment canceled", Toast.LENGTH_SHORT).show();
-        } else if (paymentSheetResult instanceof PaymentSheetResult.Failed) {
-            String error = ((PaymentSheetResult.Failed) paymentSheetResult).getError().getMessage();
-            Toast.makeText(this, "Payment failed: " + error, Toast.LENGTH_SHORT).show();
+        } else if (result instanceof PaymentSheetResult.Failed) {
+            Throwable error = ((PaymentSheetResult.Failed) result).getError();
+            Log.e("PaymentActivity", "Payment failed: " + error.getLocalizedMessage(), error);
+            Toast.makeText(this, "Payment failed", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void saveOrderToBackend(String userId, int amount, String paymentIntentId) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("userId", userId);
+        data.put("amount", amount);
+        data.put("paymentIntentId", paymentIntentId);
+
+        OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
+        Call<ResponseBody> call = service.saveOrder(data);
+
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(PaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(PaymentActivity.this, "Failed to save order", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(PaymentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
 }

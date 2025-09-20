@@ -3,6 +3,8 @@ package com.example.yummyrestaurant.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +50,19 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // ✅ Access header view and update user info
+        View headerView = navigationView.getHeaderView(0);
+        TextView navHeaderName = headerView.findViewById(R.id.navHeaderName);
+        TextView navHeaderEmail = headerView.findViewById(R.id.navHeaderEmail);
+
+        // ✅ Get user data from RoleManager (or your user session manager)
+        String name = RoleManager.getUserName(); // e.g., "Ching"
+        String email = RoleManager.getUserEmail(); // e.g., "ching@example.com"
+
+        // ✅ Set dynamic values
+        navHeaderName.setText("Welcome, " + name);
+        navHeaderEmail.setText(email);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar,
                 R.string.navigation_drawer_open,
@@ -55,6 +70,13 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+
+
+        ImageView cartIcon = findViewById(R.id.cartIcon);
+        cartIcon.setOnClickListener(v -> {
+            Intent intent = new Intent(DashboardActivity.this, CartActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override
@@ -65,7 +87,11 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             startActivity(new Intent(this, OrderTrackingActivity.class));
         } else if (id == R.id.nav_scan_qr) {
             startActivity(new Intent(this, QRScannerActivity.class));
-        } else if (id == R.id.nav_view_notifications) {
+
+        } else if (id == R.id.nav_browse_menu) {
+            startActivity(new Intent(this, MenuActivity.class));
+
+        }else if (id == R.id.nav_view_notifications) {
             List<String> notifications = getUnreadNotifications();
             String message = notifications.isEmpty()
                     ? "No new notifications"

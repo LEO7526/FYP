@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+//    for payment
     implementation("com.stripe:stripe-android:20.11.0")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -48,6 +49,8 @@ dependencies {
     implementation("androidx.activity:activity:1.7.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
+
+//for map
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     implementation("org.osmdroid:osmdroid-mapsforge:6.1.16")
     implementation(libs.play.services.location)
@@ -67,6 +70,7 @@ dependencies {
     implementation("androidx.annotation:annotation:1.7.0")
 
     implementation("androidx.cardview:cardview:1.0.0")
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

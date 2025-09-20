@@ -30,6 +30,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".activities.OrderConfirmationActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.CartActivity"
             android:exported="false" />
         <activity

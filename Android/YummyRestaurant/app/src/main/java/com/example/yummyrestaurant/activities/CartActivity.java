@@ -1,5 +1,6 @@
 package com.example.yummyrestaurant.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -11,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.CartItemAdapter;
-import com.example.yummyrestaurant.adapters.MenuItemAdapter;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
 
@@ -25,6 +25,8 @@ public class CartActivity extends AppCompatActivity {
     private CartItemAdapter adapter;
     private TextView totalCostText;
     private Button checkoutBtn;
+    private Map<MenuItem, Integer> cartItems;
+    private double total;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,16 +39,24 @@ public class CartActivity extends AppCompatActivity {
 
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        Map<MenuItem, Integer> cartItems = CartManager.getCartItems();
+        cartItems = CartManager.getCartItems();
         adapter = new CartItemAdapter(this, cartItems);
         cartRecyclerView.setAdapter(adapter);
 
-        double total = CartManager.getTotalCost();
+        total = CartManager.getTotalCost();
         totalCostText.setText(String.format(Locale.getDefault(), "Total: $ %.2f", total));
 
         checkoutBtn.setOnClickListener(v -> {
+            if (cartItems == null || cartItems.isEmpty()) {
+                Toast.makeText(this, "Your cart is empty!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Toast.makeText(this, "Proceeding to payment...", Toast.LENGTH_SHORT).show();
-            // TODO: Launch payment flow
+
+            Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
+            intent.putExtra("totalAmount", total);
+            startActivity(intent);
         });
     }
 }
