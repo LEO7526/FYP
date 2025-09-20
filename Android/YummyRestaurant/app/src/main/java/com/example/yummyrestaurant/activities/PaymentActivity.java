@@ -18,11 +18,19 @@ import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.api.PaymentApiService;
 import com.example.yummyrestaurant.api.PaymentIntentResponse;
 import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.RoleManager;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.paymentsheet.PaymentSheet;
 import com.stripe.android.paymentsheet.PaymentSheetResult;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -55,7 +63,8 @@ public class PaymentActivity extends AppCompatActivity {
         payButton = findViewById(R.id.payButton);
         amountText = findViewById(R.id.amountText);
 
-        amountText.setText("Total: HK$5.00");
+        int totalAmount = CartManager.getTotalAmountInCents(); // in cents
+        amountText.setText("Total: HK$" + (totalAmount / 100.0));
 
         payButton.setOnClickListener(v -> {
             payButton.setEnabled(false);
@@ -66,7 +75,8 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void fetchClientSecret() {
         Map<String, Object> data = new HashMap<>();
-        data.put("amount", 500); // HK$5.00
+        int totalAmount = CartManager.getTotalAmountInCents();
+        data.put("amount", totalAmount);
 
         PaymentApiService service = RetrofitClient.getClient().create(PaymentApiService.class);
         Call<PaymentIntentResponse> call = service.createPaymentIntent(data);
@@ -111,6 +121,14 @@ public class PaymentActivity extends AppCompatActivity {
             successIcon.animate().alpha(1f).setDuration(500).start();
             Log.d("PaymentActivity", "Success animation triggered.");
 
+
+
+            // Save order to backend
+            String userId = RoleManager.getUserId();
+            int amount = CartManager.getTotalAmountInCents(); // Use the new method
+            String paymentIntentId = clientSecret; // Or extract actual ID if needed
+            saveOrderToBackend(userId, amount, paymentIntentId);
+
             // Clear cart
             CartManager.clearCart();
             Log.d("PaymentActivity", "Cart cleared after successful payment.");
@@ -133,29 +151,61 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void saveOrderToBackend(String userId, int amount, String paymentIntentId) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("userId", userId);
-        data.put("amount", amount);
-        data.put("paymentIntentId", paymentIntentId);
+        Map<String, Object> orderData = new HashMap<>();
+        orderData.put("cid", RoleManager.getUserId());
+        orderData.put("ocost", CartManager.getTotalCost());
+
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        orderData.put("odeliverdate", timestamp);
+        orderData.put("ostatus", 1);
+
+        List<Map<String, Object>> items = new ArrayList<>();
+        for (Map.Entry<MenuItem, Integer> entry : CartManager.getCartItems().entrySet()) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("pid", entry.getKey().getId());
+            item.put("oqty", entry.getValue());
+            item.put("item_cost", entry.getKey().getPrice());
+            items.add(item);
+
+            // Log each item detail
+            Log.d("PaymentActivity", "Item added: pid=" + item.get("pid") +
+                    ", qty=" + item.get("oqty") +
+                    ", cost=" + item.get("item_cost"));
+        }
+
+        orderData.put("items", items);
+
+        // Log the full payload
+        Log.d("PaymentActivity", "Order payload: " + new com.google.gson.Gson().toJson(orderData));
 
         OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
-        Call<ResponseBody> call = service.saveOrder(data);
+        Call<ResponseBody> call = service.saveOrder(orderData);
 
         call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(PaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
+                    try {
+                        String responseText = response.body().string(); // Read the actual response
+                        Log.i("PaymentActivity", "Order saved successfully. Response: " + responseText);
+                        Toast.makeText(PaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
+                    } catch (IOException e) {
+                        Log.e("PaymentActivity", "Failed to read response body", e);
+                    }
                 } else {
+                    Log.w("PaymentActivity", "Order save failed. Response code: " + response.code());
                     Toast.makeText(PaymentActivity.this, "Failed to save order", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("PaymentActivity", "Order save error: " + t.getMessage(), t);
                 Toast.makeText(PaymentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
+        Log.d("PaymentActivity", "Initiated backend save: userId=" + userId + ", amount=" + amount + ", paymentIntentId=" + paymentIntentId);
     }
 
 

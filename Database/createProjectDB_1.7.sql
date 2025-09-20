@@ -210,28 +210,34 @@ INSERT INTO `material` VALUES
 (4,'ABS LL Chem 5026',2000,200,'KG',400),
 (5,'4 x 1 Flat Head Stainless Steel Screws',50000,2400,'PC',20000);
 
--- Table structure for table `orders`
-DROP TABLE IF EXISTS `orders`;
-CREATE TABLE `orders` (
-  `oid` int NOT NULL AUTO_INCREMENT,
-  `odate` datetime NOT NULL,
-  `pid` int NOT NULL,
-  `oqty` int NOT NULL,
-  `ocost` decimal(20,2) NOT NULL,
-  `cid` int NOT NULL,
-  `odeliverdate` datetime DEFAULT NULL,
-  `ostatus` int NOT NULL,
-  PRIMARY KEY (`oid`),
-  CONSTRAINT `fk_orders_cid` FOREIGN KEY (`cid`) REFERENCES `customer` (`cid`),
-  CONSTRAINT `fk_orders_pid` FOREIGN KEY (`pid`) REFERENCES `product` (`pid`)
+
+
+-- Drop old table if needed
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+
+-- Create orders table (order header)
+CREATE TABLE orders (
+  oid INT NOT NULL AUTO_INCREMENT,
+  odate DATETIME NOT NULL,
+  ocost DECIMAL(20,2) NOT NULL,
+  cid INT NOT NULL,
+  odeliverdate DATETIME DEFAULT NULL,
+  ostatus INT NOT NULL,
+  PRIMARY KEY (oid),
+  CONSTRAINT fk_orders_cid FOREIGN KEY (cid) REFERENCES customer(cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+
+
 -- Dumping data for table `orders`
-INSERT INTO `orders` VALUES 
-(1,'2025-04-12 17:50:00',1,200,3980.00,1,NULL,1),
-(2,'2025-04-13 12:01:00',5,200,99800.00,2,'2025-06-22 12:30:00',3);
+INSERT INTO `orders` (oid, odate, ocost, cid, odeliverdate, ostatus) VALUES
+(1, '2025-04-12 17:50:00', 3980.00, 1, NULL, 1),
+(2, '2025-04-13 12:01:00', 99800.00, 2, '2025-06-22 12:30:00', 3);
 
 
+-- Create order_items table (order details)
 CREATE TABLE order_items (
   item_id INT NOT NULL AUTO_INCREMENT,
   oid INT NOT NULL,
@@ -241,7 +247,13 @@ CREATE TABLE order_items (
   PRIMARY KEY (item_id),
   CONSTRAINT fk_order_items_oid FOREIGN KEY (oid) REFERENCES orders(oid),
   CONSTRAINT fk_order_items_pid FOREIGN KEY (pid) REFERENCES product(pid)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Dumping data for table `order_items`
+INSERT INTO `order_items` (item_id, oid, pid, oqty, item_cost) VALUES
+(1, 1, 1, 200, 3980.00),
+(2, 2, 5, 200, 99800.00);
 
 
 -- Table structure for table `prodmat`

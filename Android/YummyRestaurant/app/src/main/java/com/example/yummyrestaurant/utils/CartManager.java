@@ -26,7 +26,23 @@ public class CartManager {
         return total;
     }
 
+    public static int getTotalAmountInCents() {
+        return (int) Math.round(getTotalCost() * 100);
+    }
+
     public static void clearCart() {
         cartItems.clear();
+    }
+
+    public static void removeItem(MenuItem item) {
+        cartItems.remove(item);
+    }
+
+    public static void updateQuantity(MenuItem item, int quantity) {
+        if (quantity <= 0) {
+            cartItems.remove(item);
+        } else {
+            cartItems.put(item, quantity);
+        }
     }
 }
