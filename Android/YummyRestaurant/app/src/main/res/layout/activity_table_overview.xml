@@ -15,11 +15,14 @@
         android:textStyle="bold"
         android:layout_marginBottom="8dp" />
 
-    <ListView
-        android:id="@+id/tableListView"
+    <GridView
+        android:id="@+id/tableGridView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:dividerHeight="1dp" />
-
+        android:numColumns="3"
+        android:verticalSpacing="12dp"
+        android:horizontalSpacing="12dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center" />
 </LinearLayout>

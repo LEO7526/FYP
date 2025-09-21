@@ -16,10 +16,22 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/items"
+        android:id="@+id/customer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Items" />
+        android:text="Customer" />
+
+    <TextView
+        android:id="@+id/table"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Table" />
+
+    <TextView
+        android:id="@+id/staff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Staff" />
 
     <TextView
         android:id="@+id/date"
@@ -32,4 +44,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Total" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status" />
 </LinearLayout>

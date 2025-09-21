@@ -1,5 +1,6 @@
 package com.example.yummyrestaurant.api;
 
+import com.example.yummyrestaurant.models.Order;
 import com.example.yummyrestaurant.models.OrderItem;
 
 import java.util.List;
@@ -21,4 +22,9 @@ public interface OrderApiService {
     @GET("get_orderItems.php")
     Call<List<OrderItem>> getOrderItems(@Query("order_id") int orderId);
 
+    @GET("get_orders.php")
+    Call<List<Order>> getAllOrders();
+
+    @GET("get_orders.php")
+    Call<List<Order>> getOrdersByCustomer(@Query("cid") int cid);
 }

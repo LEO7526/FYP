@@ -3,15 +3,13 @@ package com.example.yummyrestaurant.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.GridView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.adapters.TableGridAdapter;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.api.TableApiService;
 import com.example.yummyrestaurant.models.TableOrder;
@@ -24,8 +22,6 @@ import retrofit2.Response;
 
 public class TableOverviewActivity extends AppCompatActivity {
 
-    private ListView tableListView;
-    private ArrayAdapter<String> adapter;
     private List<TableOrder> tableOrders;
 
     @Override
@@ -33,9 +29,7 @@ public class TableOverviewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table_overview);
 
-        tableListView = findViewById(R.id.tableListView);
-
-        fetchTableOrders();
+        fetchTableOrders(); // Adapter setup happens after data is loaded
     }
 
     private void fetchTableOrders() {
@@ -47,7 +41,34 @@ public class TableOverviewActivity extends AppCompatActivity {
             public void onResponse(Call<List<TableOrder>> call, Response<List<TableOrder>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     tableOrders = response.body();
-                    displayTables();
+
+                    GridView tableGridView = findViewById(R.id.tableGridView);
+                    TableGridAdapter adapter = new TableGridAdapter(TableOverviewActivity.this, tableOrders);
+                    tableGridView.setAdapter(adapter);
+
+                    tableGridView.setOnItemClickListener((parent, view, position, id) -> {
+                        TableOrder selectedOrder = tableOrders.get(position);
+                        String status = selectedOrder.getStatus();
+
+                        switch (status) {
+                            case "available":
+                                Toast.makeText(TableOverviewActivity.this, "Table is available. No action needed.", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "reserved":
+                                Toast.makeText(TableOverviewActivity.this, "Table is reserved. Waiting for guests.", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "seated":
+                                Toast.makeText(TableOverviewActivity.this, "Guests are seated. Ready to take order.", Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                Intent intent = new Intent(TableOverviewActivity.this, TableOrderDetailActivity.class);
+                                intent.putExtra("table_order_id", selectedOrder.getToid());
+                                intent.putExtra("order_id", selectedOrder.getOid());
+                                startActivity(intent);
+                                break;
+                        }
+                    });
+
                 } else {
                     Toast.makeText(TableOverviewActivity.this, "Failed to load tables", Toast.LENGTH_SHORT).show();
                 }
@@ -58,25 +79,6 @@ public class TableOverviewActivity extends AppCompatActivity {
                 Log.e("TableOverview", "Error fetching tables", t);
                 Toast.makeText(TableOverviewActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        });
-    }
-
-    private void displayTables() {
-        String[] tableLabels = new String[tableOrders.size()];
-        for (int i = 0; i < tableOrders.size(); i++) {
-            TableOrder order = tableOrders.get(i);
-            tableLabels[i] = "Table " + order.getTableNumber() + " — " + order.getStatus();
-        }
-
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, tableLabels);
-        tableListView.setAdapter(adapter);
-
-        tableListView.setOnItemClickListener((AdapterView<?> parent, android.view.View view, int position, long id) -> {
-            TableOrder selectedOrder = tableOrders.get(position);
-            Intent intent = new Intent(TableOverviewActivity.this, TableOrderDetailActivity.class);
-            intent.putExtra("table_order_id", selectedOrder.getToid());
-            intent.putExtra("order_id", selectedOrder.getOid());
-            startActivity(intent);
         });
     }
 }
