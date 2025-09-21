@@ -22,6 +22,13 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/nav_browse_table"
+        android:title="Browse Table"
+        android:icon="@drawable/ic_browse_table"
+        app:showAsAction="never" />
+
+
+    <item
         android:id="@+id/nav_scan_qr"
         android:title="Scan QR"
         android:icon="@drawable/ic_qr"

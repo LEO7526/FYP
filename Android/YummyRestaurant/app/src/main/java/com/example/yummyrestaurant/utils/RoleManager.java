@@ -6,6 +6,7 @@ public class RoleManager {
     private static String userRole;
     private static String userName;
     private static String userTel;
+    private static Integer assignedTableNumber; // For staff use
 
     public static String getUserId() {
         return userId;
@@ -53,6 +54,23 @@ public class RoleManager {
         userRole = null;
         userName = null;
         userTel = null;
+        assignedTableNumber = null;
     }
 
+    // Staff-specific logic
+    public static boolean isStaff() {
+        return "staff".equalsIgnoreCase(userRole);
+    }
+
+    public static void setAssignedTable(int tableNumber) {
+        RoleManager.assignedTableNumber = tableNumber;
+    }
+
+    public static Integer getAssignedTable() {
+        return assignedTableNumber;
+    }
+
+    public static boolean hasAssignedTable() {
+        return assignedTableNumber != null;
+    }
 }

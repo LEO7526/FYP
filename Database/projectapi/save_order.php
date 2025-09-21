@@ -21,7 +21,7 @@ $ostatus = $input['ostatus'] ?? 0;
 $items = $input['items'] ?? [];
 $odate = date('Y-m-d H:i:s'); // Current timestamp
 
-if (!$ocost || !$cid || empty($items)) {
+if (!$ocost || $cid === null || empty($items)) {
     error_log("Missing required fields: ocost=$ocost, cid=$cid, items=" . json_encode($items));
     echo json_encode(["error" => "Missing required fields"]);
     exit;
@@ -83,6 +83,42 @@ foreach ($items as $item) {
     $itemStmt->close();
 }
 
+// Staff-specific logic
+$sid = $input['sid'] ?? null;
+$table_number = $input['table_number'] ?? null;
+$table_order_id = null;
+
+if ($sid && $table_number) {
+    $tableStmt = $conn->prepare("
+        INSERT INTO table_orders (table_number, oid, staff_id, status)
+        VALUES (?, ?, ?, 'ordering')
+    ");
+    if (!$tableStmt) {
+        error_log("Prepare failed for table_orders: " . $conn->error);
+        echo json_encode(["error" => "Failed to prepare table order insert"]);
+        $conn->close();
+        exit;
+    }
+
+    $tableStmt->bind_param("iii", $table_number, $order_id, $sid);
+
+    if (!$tableStmt->execute()) {
+        error_log("Execute failed for table_orders: " . $tableStmt->error);
+        echo json_encode(["error" => "Failed to save table order"]);
+        $tableStmt->close();
+        $conn->close();
+        exit;
+    }
+
+    $table_order_id = $tableStmt->insert_id;
+    error_log("Table order saved with ID: $table_order_id");
+    $tableStmt->close();
+}
+
 // Final response
-echo json_encode(["success" => true, "order_id" => $order_id]);
+$response = ["success" => true, "order_id" => $order_id];
+if ($table_order_id !== null) {
+    $response["table_order_id"] = $table_order_id;
+}
+echo json_encode($response);
 $conn->close();

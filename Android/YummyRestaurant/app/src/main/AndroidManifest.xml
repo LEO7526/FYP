@@ -30,6 +30,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".activities.TableOrderDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.TableOverviewActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.OrderConfirmationActivity"
             android:exported="false" />
         <activity

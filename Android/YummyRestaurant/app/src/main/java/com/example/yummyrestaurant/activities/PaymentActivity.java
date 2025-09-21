@@ -152,7 +152,16 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void saveOrderToBackend(String userId, int amount, String paymentIntentId) {
         Map<String, Object> orderData = new HashMap<>();
-        orderData.put("cid", RoleManager.getUserId());
+
+        boolean isStaff = RoleManager.isStaff(); // You need to implement this method
+        if (isStaff) {
+            orderData.put("cid", 0); // Walk-in customer
+            orderData.put("sid", RoleManager.getUserId()); // Staff ID
+            orderData.put("table_number", RoleManager.getAssignedTable()); // You need to implement this
+        } else {
+            orderData.put("cid", userId); // Regular customer
+        }
+
         orderData.put("ocost", CartManager.getTotalCost());
 
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -166,16 +175,10 @@ public class PaymentActivity extends AppCompatActivity {
             item.put("oqty", entry.getValue());
             item.put("item_cost", entry.getKey().getPrice());
             items.add(item);
-
-            // Log each item detail
-            Log.d("PaymentActivity", "Item added: pid=" + item.get("pid") +
-                    ", qty=" + item.get("oqty") +
-                    ", cost=" + item.get("item_cost"));
         }
 
         orderData.put("items", items);
 
-        // Log the full payload
         Log.d("PaymentActivity", "Order payload: " + new com.google.gson.Gson().toJson(orderData));
 
         OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
@@ -186,7 +189,7 @@ public class PaymentActivity extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
-                        String responseText = response.body().string(); // Read the actual response
+                        String responseText = response.body().string();
                         Log.i("PaymentActivity", "Order saved successfully. Response: " + responseText);
                         Toast.makeText(PaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {

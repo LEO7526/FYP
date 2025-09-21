@@ -88,7 +88,10 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         } else if (id == R.id.nav_scan_qr) {
             startActivity(new Intent(this, QRScannerActivity.class));
 
-        } else if (id == R.id.nav_browse_menu) {
+        }  else if (id == R.id.nav_browse_table) {
+            startActivity(new Intent(this, TableOverviewActivity.class));
+
+        }else if (id == R.id.nav_browse_menu) {
             startActivity(new Intent(this, MenuActivity.class));
 
         }else if (id == R.id.nav_view_notifications) {

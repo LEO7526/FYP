@@ -6,6 +6,9 @@ import java.io.Serializable;
 public class MenuItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @SerializedName("price")
+    private double price;
+
     @SerializedName("id")
     private int id;
 
@@ -14,9 +17,6 @@ public class MenuItem implements Serializable {
 
     @SerializedName("description")
     private String description;
-
-    @SerializedName("price")
-    private double price;
 
     @SerializedName("image_url")
     private String image_url;
