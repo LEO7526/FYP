@@ -34,6 +34,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -83,12 +84,17 @@ public class CustomerHomeActivity extends AppCompatActivity {
         adapter = new MenuItemAdapter(this, new ArrayList<>());
         menuRecyclerView.setAdapter(adapter);
 
-        // Search functionality
+        // Search functionality for dish name only
         searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.search(s.toString());
+                adapter.searchByDishName(s.toString().trim());
             }
+
+            @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
             public void afterTextChanged(Editable s) {}
         });
 
@@ -106,7 +112,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_profile) {
-                Toast.makeText(this, "Profile clicked", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, ProfileActivity.class));
                 return true;
             } else if (id == R.id.nav_order_history) {
                 startActivity(new Intent(this, OrderHistoryActivity.class));
@@ -132,6 +138,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
             return false;
         });
     }
+
 
     private void setupSpinners() {
         String[] categories = {"All", "Appetizers", "Main Courses"};

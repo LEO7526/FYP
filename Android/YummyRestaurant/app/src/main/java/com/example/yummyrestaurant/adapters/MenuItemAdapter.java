@@ -85,9 +85,8 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
             String lowerQuery = query.toLowerCase();
             for (MenuItem item : fullList) {
                 String name = item.getName() != null ? item.getName().toLowerCase() : "";
-                String description = item.getDescription() != null ? item.getDescription().toLowerCase() : "";
 
-                if (name.contains(lowerQuery) || description.contains(lowerQuery)) {
+                if (name.contains(lowerQuery)) {
                     filteredList.add(item);
                 }
             }
@@ -95,6 +94,26 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
         notifyDataSetChanged();
     }
+
+    public void searchByDishName(String query) {
+        filteredList.clear();
+
+        if (query == null || query.trim().isEmpty()) {
+            filteredList.addAll(fullList);
+        } else {
+            String lowerQuery = query.toLowerCase();
+            for (MenuItem item : fullList) {
+                if (item.getName() != null && item.getName().toLowerCase().contains(lowerQuery)) {
+                    filteredList.add(item);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+
+
 
     @NonNull
     @Override
