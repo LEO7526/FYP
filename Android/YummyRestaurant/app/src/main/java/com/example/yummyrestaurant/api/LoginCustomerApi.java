@@ -12,4 +12,13 @@ public interface LoginCustomerApi {
             @Field("email") String email,
             @Field("password") String password
     );
+
+    @FormUrlEncoded
+    @POST("updateProfileImage.php") // Replace with your actual endpoint
+    Call<Void> updateProfileImage(
+            @Field("email") String email,
+            @Field("imageUrl") String imageUrl
+    );
+
+
 }
