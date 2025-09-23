@@ -8,6 +8,8 @@ public class RoleManager {
     private static String userTel;
     private static Integer assignedTableNumber; // For staff use
 
+    private static String userImageUrl;
+
     public static String getUserId() {
         return userId;
     }
@@ -72,5 +74,13 @@ public class RoleManager {
 
     public static boolean hasAssignedTable() {
         return assignedTableNumber != null;
+    }
+
+    public static String getUserImageUrl() {
+        return userImageUrl;
+    }
+
+    public static void setUserImageUrl(String userImageUrl) {
+        RoleManager.userImageUrl = userImageUrl;
     }
 }
