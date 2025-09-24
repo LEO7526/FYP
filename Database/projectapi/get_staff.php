@@ -11,7 +11,7 @@ if ($conn->connect_error) {
 $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 
-$stmt = $conn->prepare("SELECT sid, sname, srole, stel FROM staff WHERE semail = ? AND spassword = ?");
+$stmt = $conn->prepare("SELECT sid, sname, srole, stel,simageurl FROM staff WHERE semail = ? AND spassword = ?");
 $stmt->bind_param("ss", $email, $password);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -24,6 +24,7 @@ if ($data) {
         "userId" => $data["sid"],
         "userName" => $data["sname"],
 		"userTel" => $data["stel"],
+		"userImageUrl" => $data["simageurl"],
         "message" => "Login successful"
     ]);
 } else {

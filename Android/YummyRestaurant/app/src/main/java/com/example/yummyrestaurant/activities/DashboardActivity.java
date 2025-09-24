@@ -94,7 +94,12 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         }else if (id == R.id.nav_browse_menu) {
             startActivity(new Intent(this, MenuActivity.class));
 
-        }else if (id == R.id.nav_view_notifications) {
+        }else if (id == R.id.nav_profile) {
+            startActivity(new Intent(this, ProfileActivity.class));
+
+        }
+
+        else if (id == R.id.nav_view_notifications) {
             List<String> notifications = getUnreadNotifications();
             String message = notifications.isEmpty()
                     ? "No new notifications"

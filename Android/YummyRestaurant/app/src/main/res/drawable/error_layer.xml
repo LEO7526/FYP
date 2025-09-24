@@ -1,0 +1,11 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Gradient background -->
+    <item android:drawable="@drawable/error_background" />
+
+    <!-- Warning icon centered -->
+    <item
+        android:drawable="@drawable/outline_error_24"
+        android:gravity="center" />
+
+</layer-list>

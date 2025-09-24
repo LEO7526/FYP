@@ -77,7 +77,7 @@ public class RoleManager {
     }
 
     public static String getUserImageUrl() {
-        return userImageUrl;
+        return (userImageUrl != null && !userImageUrl.isEmpty()) ? "uploads/" + userImageUrl : null;
     }
 
     public static void setUserImageUrl(String userImageUrl) {

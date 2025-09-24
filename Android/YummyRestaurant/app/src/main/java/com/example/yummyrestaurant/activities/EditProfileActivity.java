@@ -5,11 +5,16 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -98,14 +103,23 @@ public class EditProfileActivity extends AppCompatActivity {
         emailInput.setText(currentEmail != null ? currentEmail : "");
 
         if (imagePath != null && !imagePath.isEmpty()) {
-            String fullImageUrl = "http://10.0.2.2/NewFolder/Database/projectapi/" + imagePath;
+            String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + imagePath;
             Log.d(TAG, "Loading profile image from: " + fullImageUrl);
 
             Glide.with(this)
                     .load(fullImageUrl)
                     .placeholder(R.drawable.default_avatar)
-                    .error(R.drawable.error_image)
+                    .error(R.drawable.error_layer) // Show layered error drawable
                     .into(profilePreview);
+
+            // Apply pulse animation if image fails to load
+            profilePreview.post(() -> {
+                Drawable currentDrawable = profilePreview.getDrawable();
+                if (currentDrawable != null && currentDrawable.getConstantState() == getResources().getDrawable(R.drawable.error_layer).getConstantState()) {
+                    Animation pulse = AnimationUtils.loadAnimation(this, R.anim.pulse_animation);
+                    profilePreview.startAnimation(pulse);
+                }
+            });
         }
 
         selectImageButton.setOnClickListener(v -> {
@@ -142,7 +156,13 @@ public class EditProfileActivity extends AppCompatActivity {
                     byte[] imageBytes = readBytes(inputStream);
 
                     RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), imageBytes);
-                    MultipartBody.Part body = MultipartBody.Part.createFormData("image", "profile.jpg", requestFile);
+                    String fileName = getFileNameFromUri(selectedImageUri); // ✅ actual filename
+
+                    MultipartBody.Part body = MultipartBody.Part.createFormData(
+                            "image",
+                            fileName,
+                            requestFile
+                    );
                     RequestBody emailBody = RequestBody.create(MediaType.parse("text/plain"), newEmail);
 
                     UploadApi uploadApi = RetrofitClient.getClient().create(UploadApi.class);
@@ -160,7 +180,7 @@ public class EditProfileActivity extends AppCompatActivity {
                                 if ("success".equals(uploadResponse.getStatus())) {
                                     RoleManager.setUserImageUrl(uploadResponse.getPath());
 
-                                    String fullImageUrl = "http://10.0.2.2/NewFolder/Database/projectapi/" + uploadResponse.getPath();
+                                    String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + RoleManager.getUserImageUrl();
                                     Glide.with(EditProfileActivity.this)
                                             .load(fullImageUrl)
                                             .placeholder(R.drawable.default_avatar)
@@ -170,7 +190,7 @@ public class EditProfileActivity extends AppCompatActivity {
                                     Toast.makeText(EditProfileActivity.this, "✅ Image uploaded!", Toast.LENGTH_SHORT).show();
 
                                     Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
-                                    intent.putExtra("updatedImageUrl", uploadResponse.getPath());
+                                    intent.putExtra("updatedImageUrl", RoleManager.getUserImageUrl());
                                     startActivity(intent);
                                     finish();
                                 } else {
@@ -233,5 +253,28 @@ public class EditProfileActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Permission denied. Cannot access image.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public String getFileNameFromUri(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (nameIndex >= 0) {
+                        result = cursor.getString(nameIndex);
+                    }
+                }
+            } finally {
+                if (cursor != null) cursor.close();
+            }
+        }
+
+        if (result == null) {
+            result = uri.getLastPathSegment(); // fallback
+        }
+
+        return result;
     }
 }

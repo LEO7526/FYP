@@ -8,6 +8,16 @@ public class LoginResponse {
     private String userId;
     private String userTel;
 
+    private String userImageUrl;
+
+    public String getUserImageUrl() {
+        return userImageUrl;
+    }
+
+    public void setUserImageUrl(String userImageUrl) {
+        this.userImageUrl = userImageUrl;
+    }
+
     public boolean isSuccess() {
         return success;
     }

@@ -129,6 +129,7 @@ public class LoginActivity extends AppCompatActivity {
                 ", Name: " + loginResponse.getUserName() +
                 ", Email: " + email +
                 ", Role: " + loginResponse.getRole() +
+                ", ImageUrl: " + loginResponse.getUserImageUrl() +
                 ", Telephone: " + loginResponse.getUserTel()
 
         );
@@ -140,6 +141,7 @@ public class LoginActivity extends AppCompatActivity {
         RoleManager.setUserName(loginResponse.getUserName());
         RoleManager.setUserId(loginResponse.getUserId());
         RoleManager.setUserTel(loginResponse.getUserTel());
+        RoleManager.setUserImageUrl(loginResponse.getUserImageUrl());
 
         if ("staff".equals(loginResponse.getRole())) {
             Log.d("LoginActivity", "Routing to DashboardActivity...");
