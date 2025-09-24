@@ -9,7 +9,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 
-public interface UploadApi {
+public interface CustomerUploadApi {
 
     @Multipart
     @POST("save_customerImage.php")

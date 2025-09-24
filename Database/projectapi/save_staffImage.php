@@ -1,13 +1,13 @@
 <?php
-$targetDir = "uploads/customers/";
+$targetDir = "uploads/staff/";
 if (!file_exists($targetDir)) {
     mkdir($targetDir, 0777, true);
 }
 
 $response = [];
 
-if (isset($_FILES["image"]) && isset($_POST["cemail"])) {
-    $email = $_POST["cemail"];
+if (isset($_FILES["image"]) && isset($_POST["semail"])) {
+    $email = $_POST["semail"];
     $fileName = basename($_FILES["image"]["name"]);
     $targetFile = $targetDir . $fileName;
 
@@ -23,7 +23,7 @@ if (isset($_FILES["image"]) && isset($_POST["cemail"])) {
             $response["status"] = "error";
             $response["message"] = "Database connection failed";
         } else {
-            $stmt = $conn->prepare("UPDATE customer SET cimageurl = ? WHERE cemail = ?");
+            $stmt = $conn->prepare("UPDATE staff SET simageurl = ? WHERE semail = ?");
             $stmt->bind_param("ss", $fileName, $email);
 
             if ($stmt->execute()) {

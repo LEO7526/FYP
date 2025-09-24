@@ -26,9 +26,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.api.CustomerUploadApi;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.api.LoginCustomerApi;
-import com.example.yummyrestaurant.api.UploadApi;
+import com.example.yummyrestaurant.api.StaffUploadApi;
 import com.example.yummyrestaurant.models.UploadResponse;
 import com.example.yummyrestaurant.utils.RoleManager;
 
@@ -81,7 +82,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         apiService = RetrofitClient.getClient().create(LoginCustomerApi.class);
 
-        // Request permission
+        // Request storage access permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES}, 100);
@@ -103,13 +104,15 @@ public class EditProfileActivity extends AppCompatActivity {
         emailInput.setText(currentEmail != null ? currentEmail : "");
 
         if (imagePath != null && !imagePath.isEmpty()) {
-            String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + imagePath;
+            // Ensure we're using the correctly formatted path
+            String correctImagePath = RoleManager.getUserImageUrl();
+            String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + correctImagePath;
             Log.d(TAG, "Loading profile image from: " + fullImageUrl);
 
             Glide.with(this)
                     .load(fullImageUrl)
                     .placeholder(R.drawable.default_avatar)
-                    .error(R.drawable.error_layer) // Show layered error drawable
+                    .error(R.drawable.error_layer)
                     .into(profilePreview);
 
             // Apply pulse animation if image fails to load
@@ -156,17 +159,29 @@ public class EditProfileActivity extends AppCompatActivity {
                     byte[] imageBytes = readBytes(inputStream);
 
                     RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), imageBytes);
-                    String fileName = getFileNameFromUri(selectedImageUri); // ✅ actual filename
+                    String fileName = getFileNameFromUri(selectedImageUri);
 
                     MultipartBody.Part body = MultipartBody.Part.createFormData(
                             "image",
                             fileName,
                             requestFile
                     );
-                    RequestBody emailBody = RequestBody.create(MediaType.parse("text/plain"), newEmail);
 
-                    UploadApi uploadApi = RetrofitClient.getClient().create(UploadApi.class);
-                    Call<UploadResponse> uploadCall = uploadApi.uploadImage(body, emailBody);
+                    Call<UploadResponse> uploadCall;
+
+                    if (RoleManager.getUserRole().equals("customer")) {
+                        RequestBody emailBody = RequestBody.create(MediaType.parse("text/plain"), newEmail);
+                        CustomerUploadApi uploadApi = RetrofitClient.getClient().create(CustomerUploadApi.class);
+                        uploadCall = uploadApi.uploadImage(body, emailBody); // API expects "cemail"
+                    } else if (RoleManager.getUserRole().equals("staff")) {
+                        RequestBody emailBody = RequestBody.create(MediaType.parse("text/plain"), newEmail);
+                        StaffUploadApi uploadApi = RetrofitClient.getClient().create(StaffUploadApi.class);
+                        uploadCall = uploadApi.uploadImage(body, emailBody); // API expects "semail"
+                    } else {
+                        Toast.makeText(this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Upload aborted: unknown role");
+                        return;
+                    }
 
                     Log.d(TAG, "Uploading image to server...");
                     progressDialog.show();
@@ -178,9 +193,17 @@ public class EditProfileActivity extends AppCompatActivity {
                             if (response.isSuccessful() && response.body() != null) {
                                 UploadResponse uploadResponse = response.body();
                                 if ("success".equals(uploadResponse.getStatus())) {
-                                    RoleManager.setUserImageUrl(uploadResponse.getPath());
+                                    // ✅ FIX: Extract just the filename from the full path
+                                    String fullPath = uploadResponse.getPath();
+                                    String fileName = extractFileNameFromPath(fullPath);
 
-                                    String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + RoleManager.getUserImageUrl();
+                                    // Store only the filename in RoleManager
+                                    RoleManager.setUserImageUrl(fileName);
+
+                                    // Get the correctly formatted path for immediate display
+                                    String correctImagePath = RoleManager.getUserImageUrl();
+                                    String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + correctImagePath;
+
                                     Glide.with(EditProfileActivity.this)
                                             .load(fullImageUrl)
                                             .placeholder(R.drawable.default_avatar)
@@ -190,7 +213,8 @@ public class EditProfileActivity extends AppCompatActivity {
                                     Toast.makeText(EditProfileActivity.this, "✅ Image uploaded!", Toast.LENGTH_SHORT).show();
 
                                     Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
-                                    intent.putExtra("updatedImageUrl", RoleManager.getUserImageUrl());
+                                    // Pass the correctly formatted path
+                                    intent.putExtra("updatedImageUrl", correctImagePath);
                                     startActivity(intent);
                                     finish();
                                 } else {
@@ -199,11 +223,6 @@ public class EditProfileActivity extends AppCompatActivity {
                             } else {
                                 Toast.makeText(EditProfileActivity.this, "❌ Server error: " + response.code(), Toast.LENGTH_LONG).show();
                             }
-
-                            new android.os.Handler().postDelayed(() -> {
-                                startActivity(new Intent(EditProfileActivity.this, ProfileActivity.class));
-                                finish();
-                            }, 1500);
                         }
 
                         @Override
@@ -220,6 +239,7 @@ public class EditProfileActivity extends AppCompatActivity {
                                     .show();
                         }
                     });
+
                 } catch (IOException e) {
                     Log.e(TAG, "File access error", e);
                     Toast.makeText(this, "⚠️ Unable to access image file", Toast.LENGTH_LONG).show();
@@ -276,5 +296,18 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         return result;
+    }
+
+    private String extractFileNameFromPath(String fullPath) {
+        if (fullPath == null || fullPath.isEmpty()) {
+            return "";
+        }
+
+        int lastSlashIndex = fullPath.lastIndexOf('/');
+        if (lastSlashIndex != -1 && lastSlashIndex < fullPath.length() - 1) {
+            return fullPath.substring(lastSlashIndex + 1);
+        }
+
+        return fullPath; // Return as-is if no slash found
     }
 }
