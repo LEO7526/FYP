@@ -3,11 +3,12 @@ package com.example.yummyrestaurant.models;
 import com.google.gson.annotations.SerializedName;
 
 public class OrderItem {
-    @SerializedName("pid")
-    private int pid;
 
-    @SerializedName("pname")
-    private String pname;
+    @SerializedName("item_id")
+    private int itemId;
+
+    @SerializedName("name")
+    private String name;
 
     @SerializedName("quantity")
     private int quantity;
@@ -18,28 +19,28 @@ public class OrderItem {
     @SerializedName("itemCost")
     private double itemCost;
 
-    public OrderItem(int pid, String pname, int quantity, double itemPrice, double itemCost) {
-        this.pid = pid;
-        this.pname = pname;
+    public OrderItem(int itemId, String name, int quantity, double itemPrice, double itemCost) {
+        this.itemId = itemId;
+        this.name = name;
         this.quantity = quantity;
         this.itemPrice = itemPrice;
         this.itemCost = itemCost;
     }
 
-    public int getPid() {
-        return pid;
+    public int getItemId() {
+        return itemId;
     }
 
-    public void setPid(int pid) {
-        this.pid = pid;
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
     }
 
-    public String getPname() {
-        return pname;
+    public String getName() {
+        return name;
     }
 
-    public void setPname(String pname) {
-        this.pname = pname;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getQuantity() {

@@ -159,24 +159,20 @@ DROP TABLE IF EXISTS orders;
 
 -- Create orders table (order header)
 CREATE TABLE orders (
-  oid INT NOT NULL AUTO_INCREMENT,
-  odate DATETIME NOT NULL,
-  ocost DECIMAL(20,2) NOT NULL,
-  cid INT NOT NULL,
-  odeliverdate DATETIME DEFAULT NULL,
-  ostatus INT NOT NULL,
+  oid INT NOT NULL AUTO_INCREMENT,           -- Order ID
+  odate DATETIME NOT NULL,                   -- Order date
+  cid INT NOT NULL,                          -- Customer ID
+  ostatus INT NOT NULL,                      -- Order status
   PRIMARY KEY (oid),
   CONSTRAINT fk_orders_cid FOREIGN KEY (cid) REFERENCES customer(cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
-
 -- Dumping data for table `orders`
-INSERT INTO `orders` (oid, odate, ocost, cid, odeliverdate, ostatus) VALUES
-(1, '2025-04-12 17:50:00', 3980.00, 1, NULL, 1),
-(2, '2025-04-13 12:01:00', 99800.00, 2, '2025-06-22 12:30:00', 3);
-
+INSERT INTO orders (oid, odate, cid, ostatus) VALUES
+(1, '2025-04-12 17:50:00', 1, 1),
+(2, '2025-04-13 12:01:00', 2, 3);
 
 
 
@@ -288,19 +284,18 @@ INSERT INTO `material` VALUES
 
 -- Create order_items table (order details)
 CREATE TABLE order_items (
-    oid INT NOT NULL,                         -- Order ID
-    item_id INT NOT NULL,                     -- Menu item translation ID
-    qty INT NOT NULL DEFAULT 1,               -- Quantity ordered
-    price DECIMAL(12,2) NOT NULL,             -- Price per item
+    oid INT NOT NULL,                         
+    item_id INT NOT NULL,                     
+    qty INT NOT NULL DEFAULT 1,               
     PRIMARY KEY (oid, item_id),
     FOREIGN KEY (oid) REFERENCES orders(oid),
     FOREIGN KEY (item_id) REFERENCES menu_item_translation(item_id)
 );
 
 -- Dumping data for table `order_items`
-INSERT INTO order_items (oid, item_id, qty, price) VALUES
-(1, 1, 200, 3980.00),
-(2, 2, 200, 99800.00);
+INSERT INTO order_items (oid, item_id, qty) VALUES
+(1, 1, 200),
+(2, 2, 200);
 
 
 -- Table structure for table `prodmat`

@@ -15,12 +15,13 @@ if ($conn->connect_error) {
 }
 
 $cid = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
+$language = $_GET['lang'] ?? 'en'; // default to English
 
+// Fetch order headers
 $sql = "
     SELECT 
         o.oid,
         o.odate,
-        o.ocost,
         o.ostatus,
         c.cname,
         t.table_number,
@@ -39,10 +40,50 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $orders = [];
-while ($row = $result->fetch_assoc()) {
-    $orders[] = $row;
-}
-echo json_encode($orders);
 
+while ($row = $result->fetch_assoc()) {
+    $order = $row;
+    $oid = $order['oid'];
+
+    // Fetch items for this order
+    $itemSql = "
+        SELECT 
+            oi.item_id,
+            mi.item_price,
+            mit.item_name,
+            oi.qty AS quantity
+        FROM order_items oi
+        JOIN menu_item_translation mit ON oi.item_id = mit.item_id
+        JOIN menu_item mi ON mit.item_id = mi.item_id
+        WHERE mit.language_code = ? AND oi.oid = ?
+    ";
+
+    $itemStmt = $conn->prepare($itemSql);
+    $itemStmt->bind_param("si", $language, $oid);
+    $itemStmt->execute();
+    $itemResult = $itemStmt->get_result();
+
+    $items = [];
+    while ($itemRow = $itemResult->fetch_assoc()) {
+        $itemPrice = (float)$itemRow['item_price'];
+        $quantity = (int)$itemRow['quantity'];
+        $items[] = [
+            "item_id" => (int)$itemRow['item_id'],
+            "name" => $itemRow['item_name'],
+            "quantity" => $quantity,
+            "itemPrice" => $itemPrice,
+            "itemCost" => $itemPrice * $quantity
+        ];
+    }
+
+    $order['items'] = $items;
+    $orders[] = $order;
+
+    $itemStmt->close();
+}
+
+$stmt->close();
 $conn->close();
+
+echo json_encode($orders);
 ?>

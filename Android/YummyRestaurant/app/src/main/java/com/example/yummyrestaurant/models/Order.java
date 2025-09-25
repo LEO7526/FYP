@@ -1,13 +1,28 @@
 package com.example.yummyrestaurant.models;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
 public class Order {
     private int oid;
     private String odate;
-    private String ocost;
     private int ostatus;
     private String cname;
     private String staff_name;
     private int table_number;
+
+    @SerializedName("items")
+    private List<OrderItem> items;
+
+    public List<OrderItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItem> items) {
+        this.items = items;
+    }
+
 
     public int getOid() {
         return oid;
@@ -25,13 +40,6 @@ public class Order {
         this.odate = odate;
     }
 
-    public String getOcost() {
-        return ocost;
-    }
-
-    public void setOcost(String ocost) {
-        this.ocost = ocost;
-    }
 
     public int getOstatus() {
         return ostatus;

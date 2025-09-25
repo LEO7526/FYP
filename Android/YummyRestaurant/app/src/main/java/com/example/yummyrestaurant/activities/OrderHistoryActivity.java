@@ -13,6 +13,7 @@ import com.example.yummyrestaurant.adapters.OrderAdapter;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.models.Order;
+import com.example.yummyrestaurant.utils.RoleManager;
 
 import java.util.List;
 
@@ -27,7 +28,10 @@ public class OrderHistoryActivity extends AppCompatActivity {
     private List<Order> orderList;
 
     // Example: Replace with actual customer ID from login/session
-    private int customerId = 2;
+    private int customerId = -1 ;
+    private String role;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,14 @@ public class OrderHistoryActivity extends AppCompatActivity {
 
         orderRecyclerView = findViewById(R.id.orderRecyclerView);
         orderRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        role = RoleManager.getUserRole();
+
+        if ("customer".equals(role)) {
+            customerId = Integer.valueOf(RoleManager.getUserId());
+        } else {
+            customerId = 0;
+        }
 
         fetchOrderHistory(customerId);
     }

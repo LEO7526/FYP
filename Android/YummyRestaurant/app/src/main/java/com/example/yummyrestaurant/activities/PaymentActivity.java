@@ -49,6 +49,11 @@ public class PaymentActivity extends AppCompatActivity {
     private Button payButton;
     private TextView amountText;
 
+    String dishJson;
+
+    List<Map<String, Object>> items = new ArrayList<>(); // for backend
+    List<Map<String, Object>> itemsForDisplay = new ArrayList<>(); // for confirmation screen
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +69,9 @@ public class PaymentActivity extends AppCompatActivity {
         amountText = findViewById(R.id.amountText);
 
         int totalAmount = CartManager.getTotalAmountInCents(); // in cents
+
+        Log.d("PaymentActivity", "Cart items: " + CartManager.getCartItems().size());
+
         amountText.setText("Total: HK$" + (totalAmount / 100.0));
 
         payButton.setOnClickListener(v -> {
@@ -123,23 +131,32 @@ public class PaymentActivity extends AppCompatActivity {
 
 
 
+
+
             // Save order to backend
             String userId = RoleManager.getUserId();
             int amount = CartManager.getTotalAmountInCents(); // Use the new method
             String paymentIntentId = clientSecret; // Or extract actual ID if needed
             saveOrderToBackend(userId, amount, paymentIntentId);
 
+            new Handler().postDelayed(() -> {
+                Log.i("PaymentActivity", "Navigating to OrderConfirmationActivity.");
+                Intent intent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
+
+                // Pass order details
+                intent.putExtra("customerId", RoleManager.getUserId());
+                intent.putExtra("totalAmount", amount);
+                intent.putExtra("itemCount", items.size());
+                intent.putExtra("dishJson", dishJson);
+
+                startActivity(intent);
+                finish();
+            }, 1500);
+
             // Clear cart
             CartManager.clearCart();
             Log.d("PaymentActivity", "Cart cleared after successful payment.");
 
-            // Delay and navigate to confirmation screen
-            new Handler().postDelayed(() -> {
-                Log.i("PaymentActivity", "Navigating to OrderConfirmationActivity.");
-                Intent intent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
-                startActivity(intent);
-                finish();
-            }, 1500);
         } else if (result instanceof PaymentSheetResult.Canceled) {
             Log.w("PaymentActivity", "Payment was canceled by the user.");
             Toast.makeText(this, "Payment canceled", Toast.LENGTH_SHORT).show();
@@ -153,33 +170,50 @@ public class PaymentActivity extends AppCompatActivity {
     private void saveOrderToBackend(String userId, int amount, String paymentIntentId) {
         Map<String, Object> orderData = new HashMap<>();
 
-        boolean isStaff = RoleManager.isStaff(); // You need to implement this method
+        boolean isStaff = RoleManager.isStaff();
+        int customerId;
+
         if (isStaff) {
-            orderData.put("cid", 0); // Walk-in customer
+            customerId = 0; // Walk-in customer
             orderData.put("sid", RoleManager.getUserId()); // Staff ID
-            orderData.put("table_number", RoleManager.getAssignedTable()); // You need to implement this
+            orderData.put("table_number", RoleManager.getAssignedTable()); // Table number
         } else {
-            orderData.put("cid", userId); // Regular customer
+            customerId = Integer.parseInt(userId); // Regular customer
         }
 
-        orderData.put("ocost", CartManager.getTotalCost());
+        orderData.put("cid", customerId);
+        orderData.put("ostatus", 1); // Order status
+        orderData.put("table_number","not chosen");
+        orderData.put("sid", "not applicable");
 
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-        orderData.put("odeliverdate", timestamp);
-        orderData.put("ostatus", 1);
 
-        List<Map<String, Object>> items = new ArrayList<>();
+
         for (Map.Entry<MenuItem, Integer> entry : CartManager.getCartItems().entrySet()) {
+            MenuItem menuItem = entry.getKey();
+            int quantity = entry.getValue();
+
+            // Backend payload
             Map<String, Object> item = new HashMap<>();
-            item.put("pid", entry.getKey().getId());
-            item.put("oqty", entry.getValue());
-            item.put("item_cost", entry.getKey().getPrice());
+            item.put("item_id", menuItem.getId());
+            item.put("qty", quantity);
             items.add(item);
+
+            // Display payload
+            Map<String, Object> displayItem = new HashMap<>();
+            displayItem.put("item_id", menuItem.getId());
+            displayItem.put("qty", quantity);
+            displayItem.put("dish_name", menuItem.getName());
+            displayItem.put("dish_price", menuItem.getPrice()); // 👈 Add dish price
+            itemsForDisplay.add(displayItem);
         }
 
         orderData.put("items", items);
 
+        dishJson = new com.google.gson.Gson().toJson(itemsForDisplay);
+
         Log.d("PaymentActivity", "Order payload: " + new com.google.gson.Gson().toJson(orderData));
+
+
 
         OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
         Call<ResponseBody> call = service.saveOrder(orderData);
@@ -208,7 +242,7 @@ public class PaymentActivity extends AppCompatActivity {
             }
         });
 
-        Log.d("PaymentActivity", "Initiated backend save: userId=" + userId + ", amount=" + amount + ", paymentIntentId=" + paymentIntentId);
+        Log.d("PaymentActivity", "Initiated backend save: customerId=" + customerId + ", items=" + items.size());
     }
 
 

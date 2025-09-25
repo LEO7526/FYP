@@ -14,23 +14,21 @@ $input = json_decode(file_get_contents("php://input"), true);
 error_log("Received input: " . json_encode($input));
 
 // Extract and validate fields
-$ocost = $input['ocost'] ?? null;
 $cid = $input['cid'] ?? null;
-$odeliverdate = $input['odeliverdate'] ?? null;
 $ostatus = $input['ostatus'] ?? 0;
 $items = $input['items'] ?? [];
 $odate = date('Y-m-d H:i:s'); // Current timestamp
 
-if (!$ocost || $cid === null || empty($items)) {
-    error_log("Missing required fields: ocost=$ocost, cid=$cid, items=" . json_encode($items));
+if ($cid === null || empty($items)) {
+    error_log("Missing required fields: cid=$cid, items=" . json_encode($items));
     echo json_encode(["error" => "Missing required fields"]);
     exit;
 }
 
-// Insert into orders table
+// Insert into orders table (removed ocost and odeliverdate as they don't exist in your schema)
 $stmt = $conn->prepare("
-    INSERT INTO orders (odate, ocost, cid, odeliverdate, ostatus)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO orders (odate, cid, ostatus)
+    VALUES (?, ?, ?)
 ");
 if (!$stmt) {
     error_log("Prepare failed for orders: " . $conn->error);
@@ -38,7 +36,7 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("sdssi", $odate, $ocost, $cid, $odeliverdate, $ostatus);
+$stmt->bind_param("sii", $odate, $cid, $ostatus);
 
 if (!$stmt->execute()) {
     error_log("Execute failed for orders: " . $stmt->error);
@@ -52,38 +50,37 @@ $order_id = $stmt->insert_id;
 error_log("Order header saved with ID: $order_id");
 $stmt->close();
 
-// Insert each item into order_items
+// Insert each item into order_items (adjusted for your schema)
 foreach ($items as $item) {
-    $pid = $item['pid'] ?? null;
-    $oqty = $item['oqty'] ?? null;
-    $item_cost = $item['item_cost'] ?? null;
+    $item_id = $item['item_id'] ?? null;
+    $qty = $item['qty'] ?? null;
 
-    if (!$pid || !$oqty || !$item_cost) {
+    if (!$item_id || !$qty) {
         error_log("Skipping invalid item: " . json_encode($item));
         continue;
     }
 
     $itemStmt = $conn->prepare("
-        INSERT INTO order_items (oid, pid, oqty, item_cost)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO order_items (oid, item_id, qty)
+        VALUES (?, ?, ?)
     ");
     if (!$itemStmt) {
         error_log("Prepare failed for item: " . $conn->error);
         continue;
     }
 
-    $itemStmt->bind_param("iiid", $order_id, $pid, $oqty, $item_cost);
+    $itemStmt->bind_param("iii", $order_id, $item_id, $qty);
 
     if (!$itemStmt->execute()) {
-        error_log("Execute failed for item: pid=$pid, qty=$oqty, cost=$item_cost — " . $itemStmt->error);
+        error_log("Execute failed for item: item_id=$item_id, qty=$qty — " . $itemStmt->error);
     } else {
-        error_log("Item saved: order_id=$order_id, pid=$pid, qty=$oqty, cost=$item_cost");
+        error_log("Item saved: order_id=$order_id, item_id=$item_id, qty=$qty");
     }
 
     $itemStmt->close();
 }
 
-// Staff-specific logic
+// Staff-specific logic for table orders
 $sid = $input['sid'] ?? null;
 $table_number = $input['table_number'] ?? null;
 $table_order_id = null;
@@ -122,3 +119,4 @@ if ($table_order_id !== null) {
 }
 echo json_encode($response);
 $conn->close();
+?>

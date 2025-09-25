@@ -9,27 +9,27 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Get order_id from query string
-$order_id = $_GET['order_id'] ?? null;
+// Get order_id and language from query string
+$order_id = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
 $language = $_GET['lang'] ?? 'en'; // default to English
 
-if (!$order_id) {
-    error_log("Missing order_id");
-    echo json_encode(["error" => "Missing order_id"]);
+if ($order_id === 0) {
+    error_log("Missing or invalid order_id");
+    echo json_encode(["error" => "Missing or invalid order_id"]);
     exit;
 }
 
 // Query order_items with menu_item and translation
 $sql = "
     SELECT 
-        oi.pid,
+        oi.item_id,
         mi.item_price,
         mit.item_name,
-        oi.oqty AS quantity
+        oi.qty AS quantity
     FROM order_items oi
-    JOIN menu_item mi ON oi.pid = mi.item_id
-    JOIN menu_item_translation mit ON mi.item_id = mit.item_id AND mit.language_code = ?
-    WHERE oi.oid = ?
+    JOIN menu_item_translation mit ON oi.item_id = mit.item_id
+    JOIN menu_item mi ON mit.item_id = mi.item_id
+    WHERE mit.language_code = ? AND oi.oid = ?
 ";
 
 $stmt = $conn->prepare($sql);
@@ -48,8 +48,8 @@ while ($row = $result->fetch_assoc()) {
     $itemPrice = (float)$row['item_price'];
     $quantity = (int)$row['quantity'];
     $items[] = [
-        "pid" => (int)$row['pid'],
-        "pname" => $row['item_name'],
+        "item_id" => (int)$row['item_id'],
+        "name" => $row['item_name'],
         "quantity" => $quantity,
         "itemPrice" => $itemPrice,
         "itemCost" => $itemPrice * $quantity
@@ -60,3 +60,4 @@ $stmt->close();
 $conn->close();
 
 echo json_encode($items);
+?>

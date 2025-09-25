@@ -40,7 +40,7 @@ public class OrderItemAdapter extends ArrayAdapter<OrderItem> {
         TextView quantityText = convertView.findViewById(R.id.itemQuantityText);
         TextView costText = convertView.findViewById(R.id.itemCostText);
 
-        nameText.setText(item.getPname());
+        nameText.setText(item.getName());
         priceText.setText("Unit: HK$" + String.format("%.2f", item.getItemPrice()));
         quantityText.setText("Qty: " + item.getQuantity());
         costText.setText("Subtotal: HK$" + String.format("%.2f", item.getItemCost()));
