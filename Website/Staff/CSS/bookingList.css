@@ -16,16 +16,19 @@
 }
 
 /* Add booking button positioned to the right */
-.btn-add-booking {
+#btn-add-booking,#btn_Confirm_Reservation {
     background-color: #4CAF50;
     color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
-    text-decoration: none;
     font-weight: bold;
     transition: background-color 0.3s;
     margin-left: auto;
+    cursor: pointer;
+}
+#btn-add-booking:hover {
+    background-color: #45a049;
 }
 
 .btn-add-booking:hover {
@@ -188,36 +191,13 @@
 .status-cell {
     text-align: center;
     vertical-align: middle;
-    display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
 }
 
 /* Status styles - unified size for all statuses */
-.status {
-    padding: 6px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 13px;
-    text-transform: capitalize;
-    display: inline-block;
-    width: 80%;
-    max-width: 100px;
-    text-align: center;
-    vertical-align: middle;
-    line-height: 1.2;
-    min-height: 28px;
-    box-sizing: border-box;
-    margin: 0 auto;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, +30%);
-}
+
 
 .status.cancelled {
     background-color: #f8d7da;
@@ -440,34 +420,6 @@
     background: #555;
 }
 
-/* Responsive design */
-@media screen and (max-width: 1200px) {
-    .customer-col {
-        width: 200px;
-        min-width: 200px;
-    }
-
-    .purpose-col {
-        width: 140px;
-        min-width: 140px;
-    }
-
-    .time-col {
-        width: 160px;
-        min-width: 160px;
-    }
-    .status-col {
-        width: 14%;
-        min-width: 85px;
-    }
-
-    .status {
-        width: 88%;
-        font-size: 11px;
-        padding: 5px 6px;
-        min-height: 26px;
-    }
-}
 
 @media screen and (max-width: 768px) {
     .page-header {
@@ -561,3 +513,59 @@
     display: none;
     font-weight: bold;
 }
+/* 修改 bookingList-responsive.css 中的相关部分 */
+
+@media screen and (max-width: 1064px) {
+    .table-container {
+        width: 100%;
+    }
+
+    #bookingTable {
+        min-width: 980px;
+        width: 100%;
+    }
+
+    body {
+        overflow-x: auto;
+    }
+
+    .container {
+        max-width: none;
+        overflow: visible;
+    }
+}
+.name-tel-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.name-tel-row .name-tel-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.name-tel-row label {
+    margin-bottom: 4px;
+    font-weight: bold;
+    color: #555;
+}
+
+.name-tel-row input[type="text"] {
+    border: 1px solid #f44336;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+
+}
+
+.name-tel-row input[type="text"]:focus {
+    border-color: #2a83f4;
+    outline: none;
+}
+.name-tel-row input[type="text"].filled {
+    border-color: #4CAF50;
+}
+

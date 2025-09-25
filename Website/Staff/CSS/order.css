@@ -142,19 +142,7 @@ table th {
     background-color: #0b7dda;
 }
 
-@media screen and (max-width: 768px) {
-    table {
-        font-size: 14px;
-    }
 
-    table th, table td {
-        padding: 8px 10px;
-    }
-
-    .stock-alert-container {
-        flex-direction: column;
-    }
-}
 
 .report-summary {
     margin: 20px 0;
@@ -370,12 +358,6 @@ h1 {
     background-color: #0d3b4d;
 }
 
-@media screen and (max-width: 1200px) {
-    #bookingTable {
-        display: block;
-        overflow-x: auto;
-    }
-}
 
 body.booking-page {
     background-color: #f0f8ff;
@@ -521,12 +503,7 @@ body.booking-page {
     background-color: #0d3b4d;
 }
 
-@media screen and (max-width: 1200px) {
-    #bookingTable {
-        display: block;
-        overflow-x: auto;
-    }
-}
+
 
 .time-info {
     min-width: 140px;

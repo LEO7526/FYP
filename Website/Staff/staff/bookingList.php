@@ -24,7 +24,6 @@ if ($filter === 'pending') {
 
 $whereSql = implode(" AND ", $whereConditions);
 
-// 获取所有预订数据
 $sql = "SELECT b.bid, b.bkcname, b.bktel, b.tid, b.bdate, b.btime, b.pnum, b.purpose, b.status, b.remark, 
                b.cid, c.cname as member_name
         FROM booking b
@@ -33,7 +32,6 @@ $sql = "SELECT b.bid, b.bkcname, b.bktel, b.tid, b.bdate, b.btime, b.pnum, b.pur
         ORDER BY b.bdate ASC, b.btime ASC";
 $result = mysqli_query($conn, $sql);
 
-// 存储所有预订数据到数组
 $bookings = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $bookings[] = $row;
@@ -77,7 +75,45 @@ while ($row = mysqli_fetch_assoc($result)) {
 <div class="container">
     <div class="page-header">
         <h1>Booking List</h1>
-        <a href="newBooking.php" class="btn-add-booking">+ Add</a>
+        <button id="btn-add-booking">+ Add</button>
+
+    </div>
+    <div id="bookingForm" style="display:none;">
+        <h3>Reserve a Table</h3>
+        <form method="post" action="staff_booking.php" class="reservation-form">
+            <label for="name">Name:</label><input id="reserve_cname" name="reserve_cname" type="text">
+            <label for="tel_num"> Telephone number:</label><input id="tel_num" name="tel_num" type="text">
+            <label for="date">Dining Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="time">Dining Time:</label>
+            <input type="time" id="time" name="time" required>
+            <br>
+            <label for="guests">Number of Guests:</label>
+            <select id="guests" name="guests" required>
+                <option value="">-- Select --</option>
+                <?php for ($i = 1; $i <= 8; $i++) echo "<option value=\"$i\">$i</option>"; ?>
+            </select>
+
+            <label for="tid">Select Table:</label>
+            <select id="tid" name="tid" required>
+                <option value="">-- Please choose a table --</option>
+            </select>
+            <label for="purpose">Purpose of booking</label>
+            <select id="purpose" name="purpose">
+                <option value="Null">-- Please select the purpose --</option>
+                <option value="Date Night">Date Night</option>
+                <option value="Family Dinner">Family Dinner</option>
+                <option value="Business Meeting">Business Meeting</option>
+                <option value="Lunch Meeting">Lunch Meeting</option>
+                <option value="Birthday Celebration">Birthday Celebration</option>
+
+            </select>
+            <label for="remark">Remark:</label>
+            <input id="remark" name="remark" type="text">
+
+            <button id="btn_Confirm_Reservation" type="submit">Confirm Reservation</button>
+        </form>
     </div>
 
     <!-- Filter buttons -->
@@ -176,7 +212,6 @@ while ($row = mysqli_fetch_assoc($result)) {
             $isMember = !is_null($row['cid']);
             $customerName = $isMember ? $row['member_name'] : $row['bkcname'];
 
-            // 状态映射
             $statusMap = [
                 0 => ['text' => 'Cancelled', 'class' => 'cancelled'],
                 1 => ['text' => 'Pending', 'class' => 'pending'],
@@ -271,7 +306,87 @@ while ($row = mysqli_fetch_assoc($result)) {
 </div>
 
 <script>
+    function showBookingForm() {
+        document.getElementById("bookingForm").style.display = "block";
+    }
+
     $(document).ready(function () {
+
+        $(document).on('input', '#reserve_cname, #tel_num', function () {
+            const $input = $(this);
+            if ($input.val().trim().length > 0) {
+                $input.addClass('filled');
+            } else {
+                $input.removeClass('filled');
+            }
+        });
+
+        const dateInput = document.getElementById("date");
+        const timeInput = document.getElementById("time");
+        const guestsInput = document.getElementById("guests");
+        const tableSelect = document.getElementById("tid");
+
+
+
+        function wrapNameTel() {
+            if ($('.name-tel-row').length) return;
+
+            $('#reserve_cname').prev('label').addBack().wrapAll('<div class="name-tel-group name-wrap"/>');
+            $('#tel_num').prev('label').addBack().wrapAll('<div class="name-tel-group tel-wrap"/>');
+            $('.name-wrap,.tel-wrap').wrapAll('<div class="name-tel-row"/>');
+        }
+
+        $('#btn-add-booking').off('click').on('click', function () {
+            const $form = $('#bookingForm');
+            if ($form.is(':visible')) {
+                $form.hide();
+            } else {
+                $form.show(0, wrapNameTel);
+                $form[0].reset();
+            }
+        });
+        function fetchTables() {
+            const date = dateInput.value;
+            const time = timeInput.value;
+            const guests = guestsInput.value;
+
+            if (date && time && guests) {
+                $.ajax({
+                    url: "available_tables.php",
+                    method: "POST",
+                    data: {
+                        date: date,
+                        time: time,
+                        guests: guests
+                    },
+                    success: function(data) {
+                        tableSelect.innerHTML = '<option value="">Please choose a table</option>';
+                        data.forEach(function(table) {
+                            const option = document.createElement("option");
+                            option.value = table.tid;
+                            option.textContent = `Table ${table.tid}`;
+                            tableSelect.appendChild(option);
+                        });
+                    },
+                    error: function() {
+                        console.error("Error fetching available tables");
+                        tableSelect.innerHTML = '<option value="">Error loading tables</option>';
+                    }
+                });
+            } else {
+                tableSelect.innerHTML = '<option value="">Please choose a table</option>';
+            }
+        }
+
+        if (dateInput && timeInput && guestsInput) {
+            dateInput.addEventListener("change", fetchTables);
+            timeInput.addEventListener("change", fetchTables);
+            guestsInput.addEventListener("change", fetchTables);
+
+            if (dateInput.value && timeInput.value && guestsInput.value) {
+                fetchTables();
+            }
+        }
 
         /* ===== Toast Notification Helper ===== */
         function showNotification(msg) {
@@ -294,10 +409,10 @@ while ($row = mysqli_fetch_assoc($result)) {
             let actionsHtml = '';
             if (status === 1) { // Pending
                 actionsHtml = `
-                <div class="action-buttons-vertical">
-                    <button class="btn-action btn-accept" data-bid="${bid}" data-action="accept">Accept</button>
-                    <button class="btn-action btn-reject" data-bid="${bid}" data-action="reject">Reject</button>
-                </div>`;
+            <div class="action-buttons-vertical">
+                <button class="btn-action btn-accept" data-bid="${bid}" data-action="accept">Accept</button>
+                <button class="btn-action btn-reject" data-bid="${bid}" data-action="reject">Reject</button>
+            </div>`;
             } else if (status === 2) { // Confirmed
                 actionsHtml = `<button class="btn-action btn-cancel" data-bid="${bid}" data-action="cancel">Cancel</button>`;
             } else { // Cancelled / Completed
@@ -340,7 +455,6 @@ while ($row = mysqli_fetch_assoc($result)) {
                     data: { bid: bid, action: action },
                     success: function () {
                         showNotification('✅ Booking ' + action + 'ed successfully!');
-                        // 延迟刷新让用户看到通知
                         setTimeout(() => location.reload(), 500);
                     },
                     error: function () {
@@ -375,7 +489,31 @@ while ($row = mysqli_fetch_assoc($result)) {
         $(window).on('click', function (e) {
             if (e.target.id === 'confirmModal') $('#confirmModal').hide();
         });
+        $('#bookingForm form').on('submit', function (e) {
+            e.preventDefault();
+            const $form = $(this);
+
+            $.ajax({
+                url: 'staff_booking.php',
+                method: 'post',
+                data: $form.serialize(),
+                success: function (res) {
+                    if (res.includes('successfully')) {
+                        $('#bookingForm').hide();
+                        showNotification('✅ Reservation created!');
+                        setTimeout(() => location.reload(), 600);
+                    } else {
+                        alert('❌ ' + res);
+                    }
+                    $form[0].reset();
+                },
+                error: function () {
+                    alert('❌ Network error, please retry.');
+                }
+            });
+        });
     });
+
 </script>
 </body>
 </html>
