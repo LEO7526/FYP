@@ -31,8 +31,6 @@ public class DishDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dish_detail);
 
-
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -52,6 +50,33 @@ public class DishDetailActivity extends AppCompatActivity {
             name.setText(item.getName() != null ? item.getName() : "Unknown Dish");
             description.setText(item.getDescription() != null ? item.getDescription() : "No description available.");
             price.setText(String.format(Locale.getDefault(), "¥ %.2f", item.getPrice()));
+
+            LinearLayout tagsContainer = findViewById(R.id.tagsContainer);
+
+            if (item.getTags() != null && !item.getTags().isEmpty()) {
+                tagsContainer.removeAllViews();
+
+                String[] tags = item.getTags().split(","); // assuming comma-separated
+                for (String rawTag : tags) {
+                    String tag = rawTag.trim();
+                    if (tag.isEmpty()) continue;
+
+                    TextView tagView = new TextView(this);
+                    tagView.setText("#" + tag); // add hashtag
+                    tagView.setTextSize(14);
+                    tagView.setTextColor(Color.parseColor("#333333"));
+                    tagView.setBackgroundResource(R.drawable.tag_background);
+
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    params.setMargins(8, 8, 8, 8);
+                    tagView.setLayoutParams(params);
+
+                    tagsContainer.addView(tagView);
+                }
+            }
 
             String imageUrl = item.getImage_url();
             if (imageUrl != null && !imageUrl.isEmpty()) {

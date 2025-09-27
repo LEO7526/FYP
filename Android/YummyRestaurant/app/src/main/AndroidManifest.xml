@@ -65,9 +65,6 @@
             android:name=".activities.OrderHistoryActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.MenuActivity"
-            android:exported="false" />
-        <activity
             android:name=".activities.CheckInAndOutActivity"
             android:exported="false">
             <intent-filter>

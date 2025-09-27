@@ -46,12 +46,11 @@ public class CustomerHomeActivity extends AppCompatActivity {
     private MenuItemAdapter adapter;
     private ProgressBar loadingSpinner;
     private EditText searchBar;
-    private Spinner categorySpinner, spiceSpinner, tagSpinner;
+    private Spinner categorySpinner;   // only category spinner remains
     private String currentLanguage = "en";
     private static boolean login;
 
     private List<ImageView> functionIcons = new ArrayList<>();
-
     private Map<ImageView, String> iconBaseNames = new HashMap<>();
 
     public static boolean isLogin() {
@@ -65,8 +64,6 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
         login = RoleManager.getUser() != null;
 
-
-
         initViews();
         setupRecyclerView();
         setupSearchBar();
@@ -75,8 +72,6 @@ public class CustomerHomeActivity extends AppCompatActivity {
         setupBottomFunctionBar();
 
         loadMenuItemsFromServer();
-
-
     }
 
     private void initViews() {
@@ -84,8 +79,6 @@ public class CustomerHomeActivity extends AppCompatActivity {
         loadingSpinner = findViewById(R.id.loadingSpinner);
         searchBar = findViewById(R.id.searchBar);
         categorySpinner = findViewById(R.id.categorySpinner);
-        spiceSpinner = findViewById(R.id.spiceSpinner);
-        tagSpinner = findViewById(R.id.tagSpinner);
     }
 
     private void setupRecyclerView() {
@@ -107,32 +100,18 @@ public class CustomerHomeActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        String[] categories = {"All", "Appetizers", "Main Courses","Soup","Dessert"};
+        String[] categories = {"All Dishes", "Appetizers", "Main Courses", "Soup", "Dessert"};
 
-        String[] spiceLevels = {
-                "All", "None", "Mild", "Medium", "Spicy", "Hot", "Numbing"
-        };
+        categorySpinner.setAdapter(
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories)
+        );
 
-        String[] tags = {
-                "All", "vegetarian", "refreshing", "beef", "spicy", "chicken",
-                "cold", "sour", "tofu", "numbing", "noodles", "pork",
-                "streetfood", "stirfry", "classic", "eggplant", "sweet", "glutinous", "fish"
-        };
-
-        categorySpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories));
-        spiceSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spiceLevels));
-        tagSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tags));
-
-        AdapterView.OnItemSelectedListener filterListener = new AdapterView.OnItemSelectedListener() {
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 applyFilters();
             }
             public void onNothingSelected(AdapterView<?> parent) {}
-        };
-
-        categorySpinner.setOnItemSelectedListener(filterListener);
-        spiceSpinner.setOnItemSelectedListener(filterListener);
-        tagSpinner.setOnItemSelectedListener(filterListener);
+        });
     }
 
     private void setupNavigationDrawer() {
@@ -187,10 +166,9 @@ public class CustomerHomeActivity extends AppCompatActivity {
         iconBaseNames.put(orderRecordIcon, "customer_main_page_function_item_background");
         iconBaseNames.put(profileIcon, "customer_main_page_function_item_background");
 
-        highlightIcon(orderBellIcon);
-
         orderBellIcon.setOnClickListener(v -> {
             highlightIcon(orderBellIcon);
+            Toast.makeText(this, "You're already on the Home page", Toast.LENGTH_SHORT).show();
         });
 
         couponIcon.setOnClickListener(v -> {
@@ -257,9 +235,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
     private void applyFilters() {
         String selectedCategory = categorySpinner.getSelectedItem().toString();
-        String selectedSpice = spiceSpinner.getSelectedItem().toString();
-        String selectedTag = tagSpinner.getSelectedItem().toString();
-        adapter.filter(selectedCategory, selectedSpice, selectedTag);
+        adapter.filter(selectedCategory);
     }
 
     private void highlightIcon(ImageView selectedIcon) {

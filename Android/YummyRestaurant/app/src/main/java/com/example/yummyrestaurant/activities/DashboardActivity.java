@@ -138,7 +138,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             startActivity(new Intent(this, TableOverviewActivity.class));
 
         }else if (id == R.id.nav_browse_menu) {
-            startActivity(new Intent(this, MenuActivity.class));
+            startActivity(new Intent(this, CustomerHomeActivity.class));
 
         }else if (id == R.id.nav_profile) {
             startActivity(new Intent(this, ProfileActivity.class));
