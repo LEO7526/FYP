@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
             // Close MainActivity to prevent returning to it
             finish();
         } else {
-            // If user is not logged in, navigate to LoginActivity
-            startActivity(new Intent(this, LoginActivity.class));
+            // If user is not logged in, assume it is a customer
+            startActivity(new Intent(this, CustomerHomeActivity.class));
             // Close MainActivity to prevent returning to it
             finish();
         }

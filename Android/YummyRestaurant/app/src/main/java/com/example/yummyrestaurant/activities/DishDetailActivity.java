@@ -1,5 +1,6 @@
 package com.example.yummyrestaurant.activities;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
@@ -28,8 +29,9 @@ public class DishDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_dish_detail);
+
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -95,8 +97,17 @@ public class DishDetailActivity extends AppCompatActivity {
 
             // Add to Cart button logic
             addToCartBtn.setOnClickListener(v -> {
-                CartManager.addItem(item);
-                Toast.makeText(this, item.getName() + " added to cart", Toast.LENGTH_SHORT).show();
+
+                if(CustomerHomeActivity.isLogin()){
+                    CartManager.addItem(item);
+                    Toast.makeText(this, item.getName() + " added to cart", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    startActivity(intent);
+                }
+
+
             });
 
         } else {

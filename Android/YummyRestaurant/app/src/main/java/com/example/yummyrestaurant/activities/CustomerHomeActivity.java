@@ -8,12 +8,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -42,103 +40,61 @@ import retrofit2.Response;
 
 public class CustomerHomeActivity extends AppCompatActivity {
 
-    private TextView welcomeText;
     private RecyclerView menuRecyclerView;
     private MenuItemAdapter adapter;
     private ProgressBar loadingSpinner;
     private EditText searchBar;
     private Spinner categorySpinner, spiceSpinner, tagSpinner;
-    private String currentLanguage = "en"; // Default language
+    private String currentLanguage = "en";
+    private static boolean login;
+
+    public static boolean isLogin() {
+        return login;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_home);
 
-        // Initialize views
-        welcomeText = findViewById(R.id.welcomeText);
+        login = RoleManager.getUser() != null;
+
+        initViews();
+        setupRecyclerView();
+        setupSearchBar();
+        setupSpinners();
+        setupNavigationDrawer();
+        setupBottomFunctionBar();
+
+        loadMenuItemsFromServer();
+    }
+
+    private void initViews() {
         menuRecyclerView = findViewById(R.id.menuRecyclerView);
         loadingSpinner = findViewById(R.id.loadingSpinner);
         searchBar = findViewById(R.id.searchBar);
         categorySpinner = findViewById(R.id.categorySpinner);
         spiceSpinner = findViewById(R.id.spiceSpinner);
         tagSpinner = findViewById(R.id.tagSpinner);
+    }
 
-        DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
-        NavigationView navigationView = findViewById(R.id.navigationView);
-        ImageView menuIcon = findViewById(R.id.menuIcon);
-
-        ImageView cartIcon = findViewById(R.id.cartIcon);
-
-        cartIcon.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CartActivity.class);
-            startActivity(intent);
-        });
-
-        // Set welcome message
-        String username = RoleManager.getUserName();
-        welcomeText.setText("Welcome, " + username + "!");
-
-        // Set up RecyclerView
+    private void setupRecyclerView() {
         menuRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MenuItemAdapter(this, new ArrayList<>());
         menuRecyclerView.setAdapter(adapter);
+    }
 
-        // Search functionality for dish name only
+    private void setupSearchBar() {
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 adapter.searchByDishName(s.toString().trim());
             }
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        // Spinner setup
-        setupSpinners();
-
-        // Load menu items
-        loadMenuItemsFromServer();
-
-
-        // Navigation drawer logic
-        menuIcon.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
-
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-
-            if (id == R.id.nav_profile) {
-                startActivity(new Intent(this, ProfileActivity.class));
-                return true;
-            } else if (id == R.id.nav_order_history) {
-                startActivity(new Intent(this, OrderHistoryActivity.class));
-                return true;
-            } else if (id == R.id.nav_settings) {
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-
-            }else if (id == R.id.nav_logout) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Confirm Logout")
-                        .setMessage("Are you sure you want to log out?")
-                        .setPositiveButton("Logout", (dialog, which) -> {
-                            RoleManager.clearUserData();
-                            startActivity(new Intent(this, LoginActivity.class));
-                            finish();
-                        })
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                        .show();
-                return true;
-            }
-
-            return false;
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
         });
     }
-
 
     private void setupSpinners() {
         String[] categories = {"All", "Appetizers", "Main Courses"};
@@ -161,6 +117,77 @@ public class CustomerHomeActivity extends AppCompatActivity {
         tagSpinner.setOnItemSelectedListener(filterListener);
     }
 
+    private void setupNavigationDrawer() {
+        DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
+        NavigationView navigationView = findViewById(R.id.navigationView);
+        ImageView menuIcon = findViewById(R.id.menuIcon);
+        ImageView cartIcon = findViewById(R.id.cartIcon);
+
+        menuIcon.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+        cartIcon.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_settings) {
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            } else if (id == R.id.nav_logout) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Confirm Logout")
+                        .setMessage("Are you sure you want to log out?")
+                        .setPositiveButton("Logout", (dialog, which) -> {
+                            RoleManager.clearUserData();
+                            startActivity(new Intent(this, LoginActivity.class));
+                            finish();
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .show();
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    private void setupBottomFunctionBar() {
+        ImageView orderBellIcon = findViewById(R.id.orderBellIcon);
+        ImageView couponIcon = findViewById(R.id.couponIcon);
+        ImageView membershipIcon = findViewById(R.id.membershipIcon);
+        ImageView orderRecordIcon = findViewById(R.id.orderRecordIcon);
+        ImageView profileIcon = findViewById(R.id.profileIcon);
+
+        orderBellIcon.setOnClickListener(v -> {
+            Toast.makeText(this, "You're already on the Home page", Toast.LENGTH_SHORT).show();
+        });
+
+        couponIcon.setOnClickListener(v -> {
+            Toast.makeText(this, "Coupon activity clicked", Toast.LENGTH_SHORT).show();
+        });
+
+        membershipIcon.setOnClickListener(v -> {
+            Toast.makeText(this, "Membership activity clicked", Toast.LENGTH_SHORT).show();
+        });
+
+        orderRecordIcon.setOnClickListener(v -> {
+            if (login) {
+                startActivity(new Intent(this, OrderHistoryActivity.class));
+            } else {
+                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, LoginActivity.class));
+            }
+        });
+
+        profileIcon.setOnClickListener(v -> {
+            if (login) {
+                startActivity(new Intent(this, ProfileActivity.class));
+            } else {
+                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, LoginActivity.class));
+            }
+        });
+    }
+
     private void loadMenuItemsFromServer() {
         Log.d("MenuActivity", "Loading menu items for language: " + currentLanguage);
         loadingSpinner.setVisibility(View.VISIBLE);
@@ -176,25 +203,9 @@ public class CustomerHomeActivity extends AppCompatActivity {
                 menuRecyclerView.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null && response.body().success) {
-                    Log.d("RawResponse", new Gson().toJson(response.body()));
                     adapter.setMenuItems(response.body().data);
                     applyFilters();
-
-                    for (MenuItem item : response.body().data) {
-                        Log.d("MenuItem", "ID: " + item.getId() +
-                                ", Name: " + item.getName() +
-                                ", Image URL: " + item.getImage_url() +
-                                ", Description: " + item.getDescription() +
-                                ", Price: " + item.getPrice());
-                    }
-
-                    if (!response.body().data.isEmpty()) {
-                        MenuItem first = response.body().data.get(0);
-                        Log.d("Debug123", "Raw name: " + first.getImage_url());
-                    }
-
                 } else {
-                    Log.e("MenuActivity", "Response failed or empty");
                     Toast.makeText(CustomerHomeActivity.this, "Failed to load menu items", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -203,7 +214,6 @@ public class CustomerHomeActivity extends AppCompatActivity {
             public void onFailure(Call<MenuResponse> call, Throwable t) {
                 loadingSpinner.setVisibility(View.GONE);
                 menuRecyclerView.setVisibility(View.VISIBLE);
-                Log.e("MenuActivity", "API call failed: " + t.getMessage());
                 Toast.makeText(CustomerHomeActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

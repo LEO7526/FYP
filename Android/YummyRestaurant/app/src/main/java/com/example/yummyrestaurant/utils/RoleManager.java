@@ -2,7 +2,16 @@ package com.example.yummyrestaurant.utils;
 
 import android.util.Log;
 
+import com.example.yummyrestaurant.models.User;
+
 public class RoleManager {
+
+    public static User getUser() {
+        if (userId == null || userEmail == null || userName == null || userTel == null) {
+            return null; // Not logged in or incomplete data
+        }
+        return new User(userId, userName, userEmail, userTel);
+    }
     private static final String TAG = "RoleManager";
 
     private static String userId;

@@ -1,17 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Theme colors -->
-    <color name="colorPrimary">#FF6F00</color>         <!-- Matches primary_color -->
-    <color name="colorPrimaryDark">#E65100</color>     <!-- A darker shade for status bar -->
-    <color name="colorAccent">#FFC107</color>          <!-- Matches accent_color -->
 
-    <!-- Existing custom colors -->
-    <color name="primary_color">#FF6F00</color>
-    <color name="accent_color">#FFC107</color>
+    <!-- 🌈 Theme Colors -->
+    <color name="colorPrimary">#FF6F00</color>
+    <color name="colorPrimaryDark">#E65100</color>
+    <color name="colorAccent">#FFC107</color>
+
+    <!-- 🎯 Base Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="gray">#CCCCCC</color>
-    <color name="light_gray">#EEEEEE</color> <!-- Optional: for category buttons -->
-    <color name="red">#FF3B30</color> <!-- A vibrant red, great for action buttons -->
-    <color name="primaryColor">#FF5722</color> <!-- Deep orange -->
+    <color name="gray">#9E9E9E</color>
+    <color name="light_gray">#EEEEEE</color>
+    <color name="dark_gray">#616161</color>
+
+    <!-- 🔥 Reds -->
+    <color name="red">#FF3B30</color>
+    <color name="red_light">#FFCDD2</color>
+    <color name="red_dark">#D32F2F</color>
+
+    <!-- 🍊 Oranges -->
+    <color name="orange">#FF9800</color>
+    <color name="orange_light">#FFE0B2</color>
+    <color name="orange_dark">#F57C00</color>
+    <color name="deep_orange">#FF5722</color>
+
+    <!-- 🍋 Yellows -->
+    <color name="yellow">#FFEB3B</color>
+    <color name="yellow_light">#FFF9C4</color>
+    <color name="yellow_dark">#FBC02D</color>
+
+    <!-- 🌿 Greens -->
+    <color name="green">#4CAF50</color>
+    <color name="green_light">#C8E6C9</color>
+    <color name="green_dark">#388E3C</color>
+    <color name="lime">#CDDC39</color>
+
+    <!-- 🌊 Blues -->
+    <color name="blue">#2196F3</color>
+    <color name="blue_light">#BBDEFB</color>
+    <color name="blue_dark">#1976D2</color>
+    <color name="light_blue">#03A9F4</color>
+    <color name="cyan">#00BCD4</color>
+
+    <!-- 🍇 Purples -->
+    <color name="purple">#9C27B0</color>
+    <color name="purple_light">#E1BEE7</color>
+    <color name="purple_dark">#7B1FA2</color>
+    <color name="deep_purple">#673AB7</color>
+
+    <!-- 🌸 Pinks -->
+    <color name="pink">#E91E63</color>
+    <color name="pink_light">#F8BBD0</color>
+    <color name="pink_dark">#C2185B</color>
+
+    <!-- 🧊 Neutrals -->
+    <color name="brown">#795548</color>
+    <color name="blue_gray">#607D8B</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- 🧪 Custom Aliases -->
+    <color name="primary_color">#FF6F00</color>
+    <color name="accent_color">#FFC107</color>
+    <color name="primaryColor">#FF5722</color>
+
 </resources>
