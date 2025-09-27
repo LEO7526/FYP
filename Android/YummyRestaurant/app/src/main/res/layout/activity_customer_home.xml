@@ -109,7 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/filterContainer"
-            android:layout_marginTop="-2dp"
+            android:layout_above="@id/bottomFunctionBar"
             android:padding="16dp" />
 
         <LinearLayout

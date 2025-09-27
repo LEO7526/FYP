@@ -32,7 +32,9 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -48,6 +50,10 @@ public class CustomerHomeActivity extends AppCompatActivity {
     private String currentLanguage = "en";
     private static boolean login;
 
+    private List<ImageView> functionIcons = new ArrayList<>();
+
+    private Map<ImageView, String> iconBaseNames = new HashMap<>();
+
     public static boolean isLogin() {
         return login;
     }
@@ -59,6 +65,8 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
         login = RoleManager.getUser() != null;
 
+
+
         initViews();
         setupRecyclerView();
         setupSearchBar();
@@ -67,6 +75,8 @@ public class CustomerHomeActivity extends AppCompatActivity {
         setupBottomFunctionBar();
 
         loadMenuItemsFromServer();
+
+
     }
 
     private void initViews() {
@@ -97,9 +107,17 @@ public class CustomerHomeActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        String[] categories = {"All", "Appetizers", "Main Courses"};
-        String[] spiceLevels = {"All", "Mild", "Numbing"};
-        String[] tags = {"All", "vegetarian", "refreshing", "beef", "spicy"};
+        String[] categories = {"All", "Appetizers", "Main Courses","Soup","Dessert"};
+
+        String[] spiceLevels = {
+                "All", "None", "Mild", "Medium", "Spicy", "Hot", "Numbing"
+        };
+
+        String[] tags = {
+                "All", "vegetarian", "refreshing", "beef", "spicy", "chicken",
+                "cold", "sour", "tofu", "numbing", "noodles", "pork",
+                "streetfood", "stirfry", "classic", "eggplant", "sweet", "glutinous", "fish"
+        };
 
         categorySpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories));
         spiceSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spiceLevels));
@@ -157,19 +175,36 @@ public class CustomerHomeActivity extends AppCompatActivity {
         ImageView orderRecordIcon = findViewById(R.id.orderRecordIcon);
         ImageView profileIcon = findViewById(R.id.profileIcon);
 
+        functionIcons.add(orderBellIcon);
+        functionIcons.add(couponIcon);
+        functionIcons.add(membershipIcon);
+        functionIcons.add(orderRecordIcon);
+        functionIcons.add(profileIcon);
+
+        iconBaseNames.put(orderBellIcon, "customer_main_page_function_item_background");
+        iconBaseNames.put(couponIcon, "customer_main_page_function_item_background");
+        iconBaseNames.put(membershipIcon, "customer_main_page_function_item_background_unique");
+        iconBaseNames.put(orderRecordIcon, "customer_main_page_function_item_background");
+        iconBaseNames.put(profileIcon, "customer_main_page_function_item_background");
+
+        highlightIcon(orderBellIcon);
+
         orderBellIcon.setOnClickListener(v -> {
-            Toast.makeText(this, "You're already on the Home page", Toast.LENGTH_SHORT).show();
+            highlightIcon(orderBellIcon);
         });
 
         couponIcon.setOnClickListener(v -> {
+            highlightIcon(couponIcon);
             Toast.makeText(this, "Coupon activity clicked", Toast.LENGTH_SHORT).show();
         });
 
         membershipIcon.setOnClickListener(v -> {
+            highlightIcon(membershipIcon);
             Toast.makeText(this, "Membership activity clicked", Toast.LENGTH_SHORT).show();
         });
 
         orderRecordIcon.setOnClickListener(v -> {
+            highlightIcon(orderRecordIcon);
             if (login) {
                 startActivity(new Intent(this, OrderHistoryActivity.class));
             } else {
@@ -179,6 +214,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
         });
 
         profileIcon.setOnClickListener(v -> {
+            highlightIcon(profileIcon);
             if (login) {
                 startActivity(new Intent(this, ProfileActivity.class));
             } else {
@@ -224,5 +260,20 @@ public class CustomerHomeActivity extends AppCompatActivity {
         String selectedSpice = spiceSpinner.getSelectedItem().toString();
         String selectedTag = tagSpinner.getSelectedItem().toString();
         adapter.filter(selectedCategory, selectedSpice, selectedTag);
+    }
+
+    private void highlightIcon(ImageView selectedIcon) {
+        for (ImageView icon : functionIcons) {
+            String baseName = iconBaseNames.get(icon);
+            if (baseName == null) continue;
+
+            int drawableId = (icon == selectedIcon)
+                    ? getResources().getIdentifier(baseName + "_current", "drawable", getPackageName())
+                    : getResources().getIdentifier(baseName, "drawable", getPackageName());
+
+            if (drawableId != 0) {
+                icon.setBackgroundResource(drawableId);
+            }
+        }
     }
 }
