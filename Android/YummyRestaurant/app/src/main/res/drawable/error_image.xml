@@ -20,8 +20,7 @@
     </item>
 
     <!-- Centered warning icon -->
-    <item android:gravity="center">
-        <drawable android:drawable="@drawable/outline_error_24" />
-    </item>
-
+    <item
+        android:drawable="@drawable/outline_error_24"
+        android:gravity="center" />
 </layer-list>

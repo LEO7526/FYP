@@ -305,12 +305,12 @@ INSERT INTO menu_category (category_name) VALUES
 -- Appetizers
 INSERT INTO menu_item (category_id, item_price, image_url, spice_level, tags, is_available) VALUES
 (1, 28.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Website/Staff/SampleImages/dish/PickledCucumberFlowers.jpg', 'Mild', 'vegetarian,refreshing', TRUE),
-(1, 26.00, 'https://example.com/images/spicy_wood_ear.jpg', 'Mild', 'vegetarian,refreshing', TRUE),
-(1, 32.00, 'https://example.com/images/kou_shui_chicken.jpg', 'Spicy', 'chicken,cold,spicy', TRUE);
+(1, 26.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Website/Staff/SampleImages/dish/spicy_wood_ear.jpg', 'Mild', 'vegetarian,refreshing', TRUE),
+(1, 32.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Website/Staff/SampleImages/dish/kou_shui_chicken.jpg', 'Spicy', 'chicken,cold,spicy', TRUE);
 
 -- Soup
 INSERT INTO menu_item (category_id, item_price, image_url, spice_level, tags, is_available) VALUES
-(2, 48.00, 'https://example.com/images/suan_cai_fish_soup.jpg', 'Medium', 'fish,sour,spicy', TRUE);
+(2, 48.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Website/Staff/SampleImages/dish/suan_cai_fish_soup.jpg', 'Medium', 'fish,sour,spicy', TRUE);
 
 -- Main Courses
 INSERT INTO menu_item (category_id, item_price, image_url, spice_level, tags, is_available) VALUES
