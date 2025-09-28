@@ -2,9 +2,24 @@ package com.example.yummyrestaurant.models;
 
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
+import java.util.Objects;
 
 public class MenuItem implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MenuItem menuItem = (MenuItem) o;
+        return id == menuItem.id; // or compare by name if no id
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // or Objects.hash(name)
+    }
+
 
     @SerializedName("price")
     private double price;

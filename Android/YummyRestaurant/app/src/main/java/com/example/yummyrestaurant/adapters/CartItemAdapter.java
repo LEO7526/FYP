@@ -41,8 +41,9 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
 
         holder.name.setText(item.getName());
         holder.description.setText(item.getDescription());
-        holder.price.setText(String.format(Locale.getDefault(), "$ %.2f", item.getPrice()));
         holder.quantity.setText("x" + quantity);
+        holder.price.setText(String.format(Locale.getDefault(),
+                "$ %.2f", item.getPrice() * quantity));
 
         Glide.with(context).load(item.getImage_url()).into(holder.image);
     }

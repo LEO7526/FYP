@@ -46,6 +46,26 @@ public class DishDetailActivity extends AppCompatActivity {
         LinearLayout spiceBar = findViewById(R.id.spiceBarDetail);
         Button addToCartBtn = findViewById(R.id.addToCartBtn);
 
+
+        // Quantity controls
+        Button decreaseBtn = findViewById(R.id.decreaseQtyBtn);
+        Button increaseBtn = findViewById(R.id.increaseQtyBtn);
+        TextView quantityText = findViewById(R.id.quantityText);
+
+        final int[] quantity = {1}; // start with 1
+
+        decreaseBtn.setOnClickListener(v -> {
+            if (quantity[0] > 1) { // don’t go below 1
+                quantity[0]--;
+                quantityText.setText(String.valueOf(quantity[0]));
+            }
+        });
+
+        increaseBtn.setOnClickListener(v -> {
+            quantity[0]++;
+            quantityText.setText(String.valueOf(quantity[0]));
+        });
+
         if (item != null) {
             name.setText(item.getName() != null ? item.getName() : "Unknown Dish");
             description.setText(item.getDescription() != null ? item.getDescription() : "No description available.");
@@ -122,17 +142,16 @@ public class DishDetailActivity extends AppCompatActivity {
 
             // Add to Cart button logic
             addToCartBtn.setOnClickListener(v -> {
-
-                if(CustomerHomeActivity.isLogin()){
-                    CartManager.addItem(item);
-                    Toast.makeText(this, item.getName() + " added to cart", Toast.LENGTH_SHORT).show();
-                }else{
+                if (CustomerHomeActivity.isLogin()) {
+                    for (int i = 0; i < quantity[0]; i++) {
+                        CartManager.addItem(item);
+                    }
+                    Toast.makeText(this, quantity[0] + " × " + item.getName() + " added to cart", Toast.LENGTH_SHORT).show();
+                } else {
                     Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(this, LoginActivity.class);
                     startActivity(intent);
                 }
-
-
             });
 
         } else {
@@ -141,5 +160,12 @@ public class DishDetailActivity extends AppCompatActivity {
             price.setText("$ --");
             image.setImageResource(R.drawable.error_image);
         }
+
+
+        Button customizeBtn = findViewById(R.id.customizeBtn);
+        customizeBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CustomizeDishActivity.class);
+            startActivity(intent);
+        });
     }
 }
