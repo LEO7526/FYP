@@ -12,10 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.CartItemAdapter;
-import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.utils.CartManager;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class CartActivity extends AppCompatActivity {
     private CartItemAdapter adapter;
     private TextView totalCostText;
     private Button checkoutBtn;
-    private Map<MenuItem, Integer> cartItems;
+    private Map<CartItem, Integer> cartItems;
     private double total;
 
     @Override
@@ -39,12 +38,11 @@ public class CartActivity extends AppCompatActivity {
 
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        cartItems = CartManager.getCartItems();
-        adapter = new CartItemAdapter(this, cartItems);
+        // Initialize adapter once
+        adapter = new CartItemAdapter(this, CartManager.getCartItems());
         cartRecyclerView.setAdapter(adapter);
 
-        total = CartManager.getTotalCost();
-        totalCostText.setText(String.format(Locale.getDefault(), "Total: $ %.2f", total));
+        updateCartUI();
 
         checkoutBtn.setOnClickListener(v -> {
             if (cartItems == null || cartItems.isEmpty()) {
@@ -55,8 +53,24 @@ public class CartActivity extends AppCompatActivity {
             Toast.makeText(this, "Proceeding to payment...", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
-            intent.putExtra("totalAmount", total);
+            intent.putExtra("totalAmount", CartManager.getTotalAmountInCents());
             startActivity(intent);
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateCartUI();
+    }
+
+    private void updateCartUI() {
+        cartItems = CartManager.getCartItems();
+        adapter.updateItems(cartItems);
+
+        total = CartManager.getTotalCost();
+        totalCostText.setText(String.format(Locale.getDefault(), "Total: HK$ %.2f", total));
+
+        checkoutBtn.setEnabled(!cartItems.isEmpty());
     }
 }

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -18,16 +17,17 @@ import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.api.PaymentApiService;
 import com.example.yummyrestaurant.api.PaymentIntentResponse;
 import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
+import com.google.gson.Gson;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.paymentsheet.PaymentSheet;
 import com.stripe.android.paymentsheet.PaymentSheetResult;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -38,8 +38,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import com.example.yummyrestaurant.utils.CartManager;
-
 public class PaymentActivity extends AppCompatActivity {
 
     private PaymentSheet paymentSheet;
@@ -49,17 +47,20 @@ public class PaymentActivity extends AppCompatActivity {
     private Button payButton;
     private TextView amountText;
 
-    String dishJson;
+    private String dishJson;
 
-    List<Map<String, Object>> items = new ArrayList<>(); // for backend
-    List<Map<String, Object>> itemsForDisplay = new ArrayList<>(); // for confirmation screen
+    private final List<Map<String, Object>> items = new ArrayList<>();          // backend payload
+    private final List<Map<String, Object>> itemsForDisplay = new ArrayList<>(); // confirmation screen
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        PaymentConfiguration.init(getApplicationContext(), "pk_test_51S56QLC1wirzkW6GoFfOawzrgqNOL5i1DxFatxz2Mr5OAMISZ84QFFkn16763PXc3uDPjpqsQxJLpzfV2q74ke6U00P2dWN9PO");
+        PaymentConfiguration.init(
+                getApplicationContext(),
+                "pk_test_51S56QLC1wirzkW6GoFfOawzrgqNOL5i1DxFatxz2Mr5OAMISZ84QFFkn16763PXc3uDPjpqsQxJLpzfV2q74ke6U00P2dWN9PO"
+        );
 
         paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);
 
@@ -69,14 +70,13 @@ public class PaymentActivity extends AppCompatActivity {
         amountText = findViewById(R.id.amountText);
 
         int totalAmount = CartManager.getTotalAmountInCents(); // in cents
-
         Log.d("PaymentActivity", "Cart items: " + CartManager.getCartItems().size());
 
-        amountText.setText("Total: HK$" + (totalAmount / 100.0));
+        amountText.setText(String.format(Locale.getDefault(), "Total: HK$%.2f", totalAmount / 100.0));
 
         payButton.setOnClickListener(v -> {
             payButton.setEnabled(false);
-            loadingSpinner.setVisibility(View.VISIBLE);
+            loadingSpinner.setVisibility(android.view.View.VISIBLE);
             fetchClientSecret();
         });
     }
@@ -92,7 +92,7 @@ public class PaymentActivity extends AppCompatActivity {
         call.enqueue(new Callback<PaymentIntentResponse>() {
             @Override
             public void onResponse(Call<PaymentIntentResponse> call, Response<PaymentIntentResponse> response) {
-                loadingSpinner.setVisibility(View.GONE);
+                loadingSpinner.setVisibility(android.view.View.GONE);
                 payButton.setEnabled(true);
 
                 if (response.isSuccessful() && response.body() != null) {
@@ -105,7 +105,7 @@ public class PaymentActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<PaymentIntentResponse> call, Throwable t) {
-                loadingSpinner.setVisibility(View.GONE);
+                loadingSpinner.setVisibility(android.view.View.GONE);
                 payButton.setEnabled(true);
                 Toast.makeText(PaymentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -125,18 +125,13 @@ public class PaymentActivity extends AppCompatActivity {
 
             // Show success animation
             successIcon.setAlpha(0f);
-            successIcon.setVisibility(View.VISIBLE);
+            successIcon.setVisibility(android.view.View.VISIBLE);
             successIcon.animate().alpha(1f).setDuration(500).start();
-            Log.d("PaymentActivity", "Success animation triggered.");
-
-
-
-
 
             // Save order to backend
             String userId = RoleManager.getUserId();
-            int amount = CartManager.getTotalAmountInCents(); // Use the new method
-            String paymentIntentId = clientSecret; // Or extract actual ID if needed
+            int amount = CartManager.getTotalAmountInCents();
+            String paymentIntentId = clientSecret;
             saveOrderToBackend(userId, amount, paymentIntentId);
 
             new Handler().postDelayed(() -> {
@@ -183,13 +178,13 @@ public class PaymentActivity extends AppCompatActivity {
 
         orderData.put("cid", customerId);
         orderData.put("ostatus", 1); // Order status
-        orderData.put("table_number","not chosen");
+        orderData.put("table_number", "not chosen");
         orderData.put("sid", "not applicable");
 
-
-
-        for (Map.Entry<MenuItem, Integer> entry : CartManager.getCartItems().entrySet()) {
-            MenuItem menuItem = entry.getKey();
+        // ✅ Iterate over CartItem, not MenuItem
+        for (Map.Entry<CartItem, Integer> entry : CartManager.getCartItems().entrySet()) {
+            CartItem cartItem = entry.getKey();
+            MenuItem menuItem = cartItem.getMenuItem();
             int quantity = entry.getValue();
 
             // Backend payload
@@ -203,27 +198,31 @@ public class PaymentActivity extends AppCompatActivity {
             displayItem.put("item_id", menuItem.getId());
             displayItem.put("qty", quantity);
             displayItem.put("dish_name", menuItem.getName());
-            displayItem.put("dish_price", menuItem.getPrice()); // 👈 Add dish price
+            displayItem.put("dish_price", menuItem.getPrice());
+
+            // Include customization if present
+            if (cartItem.getCustomization() != null) {
+                displayItem.put("spice_level", cartItem.getCustomization().getSpiceLevel());
+                displayItem.put("extra_notes", cartItem.getCustomization().getExtraNotes());
+            }
+
             itemsForDisplay.add(displayItem);
         }
 
         orderData.put("items", items);
 
-        dishJson = new com.google.gson.Gson().toJson(itemsForDisplay);
-
-        Log.d("PaymentActivity", "Order payload: " + new com.google.gson.Gson().toJson(orderData));
-
-
+        dishJson = new Gson().toJson(itemsForDisplay);
+        Log.d("PaymentActivity", "Order payload: " + new Gson().toJson(orderData));
 
         OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
         Call<ResponseBody> call = service.saveOrder(orderData);
 
-        call.enqueue(new Callback<>() {
+        call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
-                        String responseText = response.body().string();
+                        String responseText = response.body() != null ? response.body().string() : "";
                         Log.i("PaymentActivity", "Order saved successfully. Response: " + responseText);
                         Toast.makeText(PaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {
@@ -244,6 +243,4 @@ public class PaymentActivity extends AppCompatActivity {
 
         Log.d("PaymentActivity", "Initiated backend save: customerId=" + customerId + ", items=" + items.size());
     }
-
-
 }

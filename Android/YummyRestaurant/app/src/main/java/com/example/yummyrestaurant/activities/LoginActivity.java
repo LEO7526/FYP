@@ -9,19 +9,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.LoginCustomerApi;
 import com.example.yummyrestaurant.api.LoginStaffApi;
-import com.example.yummyrestaurant.utils.RoleManager;
 import com.example.yummyrestaurant.api.LoginResponse;
+import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.CartItem;
+import com.example.yummyrestaurant.models.Customization;
+import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.RoleManager;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import com.example.yummyrestaurant.api.RetrofitClient;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -35,7 +41,9 @@ public class LoginActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
         boolean darkMode = prefs.getBoolean("enable_dark_mode", false);
-        AppCompatDelegate.setDefaultNightMode(darkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(
+                darkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+        );
 
         setContentView(R.layout.activity_login);
 
@@ -48,15 +56,13 @@ public class LoginActivity extends AppCompatActivity {
         loginStaffApi = retrofit.create(LoginStaffApi.class);
 
         // Set click listener for the login button
-        loginButton.setOnClickListener(v -> {
-            loginUser();
-        });
+        loginButton.setOnClickListener(v -> loginUser());
 
         // Register link
         TextView registerLink = findViewById(R.id.registerLink);
-        registerLink.setOnClickListener(v -> {
-            startActivity(new Intent(this, RegisterActivity.class));
-        });
+        registerLink.setOnClickListener(v ->
+                startActivity(new Intent(this, RegisterActivity.class))
+        );
     }
 
     // Method to login the user
@@ -77,35 +83,31 @@ public class LoginActivity extends AppCompatActivity {
             LoginCustomerApi loginCustomerApi = retrofit.create(LoginCustomerApi.class);
 
             Call<LoginResponse> staffCall = loginStaffApi.loginUser(email, password);
-            Log.d("LoginActivity", "Calling staff login API...");
             staffCall.enqueue(new Callback<LoginResponse>() {
                 @Override
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                    Log.d("LoginActivity", "Staff login API response received.");
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        Log.d("LoginActivity", "Staff login successful.");
                         handleLoginSuccess(response.body(), email);
                     } else {
-                        Log.d("LoginActivity", "Staff login failed or user not found. Trying customer login...");
-
+                        // Try customer login
                         Call<LoginResponse> customerCall = loginCustomerApi.loginUser(email, password);
                         customerCall.enqueue(new Callback<LoginResponse>() {
                             @Override
                             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                                Log.d("LoginActivity", "Customer login API response received.");
                                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                                    Log.d("LoginActivity", "Customer login successful.");
                                     handleLoginSuccess(response.body(), email);
                                 } else {
-                                    Log.d("LoginActivity", "Customer login failed.");
-                                    Toast.makeText(LoginActivity.this, "Login failed. Please check your credentials.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(LoginActivity.this,
+                                            "Login failed. Please check your credentials.",
+                                            Toast.LENGTH_SHORT).show();
                                 }
                             }
 
                             @Override
                             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                                Log.e("LoginActivity", "Customer login API call failed: " + t.getMessage());
-                                Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this,
+                                        "Network error: " + t.getMessage(),
+                                        Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -113,29 +115,20 @@ public class LoginActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
-                    Log.e("LoginActivity", "Staff login API call failed: " + t.getMessage());
-                    Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this,
+                            "Network error: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Log.w("LoginActivity", "Login attempt with empty email or password.");
             Toast.makeText(this, "Please enter your email and password.", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void handleLoginSuccess(LoginResponse loginResponse, String email) {
-        Log.i("LoginActivity", "Login successful for role: " + loginResponse.getRole());
-        Log.i("LoginActivity", "User Info → ID: " + loginResponse.getUserId() +
-                ", Name: " + loginResponse.getUserName() +
-                ", Email: " + email +
-                ", Role: " + loginResponse.getRole() +
-                ", ImageUrl: " + loginResponse.getUserImageUrl() +
-                ", Telephone: " + loginResponse.getUserTel()
-
-        );
-
         Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
 
+        // Save user info
         RoleManager.setUserEmail(email);
         RoleManager.setUserRole(loginResponse.getRole());
         RoleManager.setUserName(loginResponse.getUserName());
@@ -143,13 +136,39 @@ public class LoginActivity extends AppCompatActivity {
         RoleManager.setUserTel(loginResponse.getUserTel());
         RoleManager.setUserImageUrl(loginResponse.getUserImageUrl());
 
-        if ("staff".equals(loginResponse.getRole())) {
-            Log.d("LoginActivity", "Routing to DashboardActivity...");
-            startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
-        } else {
-            Log.d("LoginActivity", "Routing to ProductListActivity...");
-            startActivity(new Intent(LoginActivity.this, CustomerHomeActivity.class));
+        // ✅ Restore pending cart item if present
+        Intent data = getIntent();
+        MenuItem pendingItem = (MenuItem) data.getSerializableExtra("pendingMenuItem");
+        int qty = data.getIntExtra("pendingQuantity", 0);
+        String spice = data.getStringExtra("pendingSpice");
+        String notes = data.getStringExtra("pendingNotes");
+
+        if (pendingItem != null && qty > 0) {
+            Customization customization = new Customization(spice, notes);
+            CartItem cartItem = new CartItem(pendingItem, customization);
+            int currentQty = CartManager.getItemQuantity(cartItem);
+            CartManager.updateQuantity(cartItem, currentQty + qty);
+
+            Toast.makeText(
+                    this,
+                    qty + " × " + pendingItem.getName() +
+                            (customization != null && customization.getSpiceLevel() != null
+                                    ? " (" + customization.getSpiceLevel() + ")"
+                                    : "") +
+                            " added to cart",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            // ✅ Clear extras so they won’t be reused
+            data.removeExtra("pendingMenuItem");
+            data.removeExtra("pendingQuantity");
+            data.removeExtra("pendingSpice");
+            data.removeExtra("pendingNotes");
         }
+
+        // ✅ Redirect to CartActivity so user sees updated cart
+        Intent intent = new Intent(LoginActivity.this, CartActivity.class);
+        startActivity(intent);
         finish();
     }
 }

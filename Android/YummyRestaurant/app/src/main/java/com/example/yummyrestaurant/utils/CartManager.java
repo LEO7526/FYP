@@ -1,20 +1,21 @@
 package com.example.yummyrestaurant.utils;
 
+import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class CartManager {
 
-    // Use LinkedHashMap to preserve insertion order
-    private static final Map<MenuItem, Integer> cartItems = new LinkedHashMap<>();
+    // Preserve insertion order so items appear in the order they were added
+    private static final Map<CartItem, Integer> cartItems = new LinkedHashMap<>();
 
     /**
-     * Add an item to the cart. If it already exists, increase its quantity.
+     * Add an item to the cart. If it already exists (same dish + same customization),
+     * increase its quantity.
      */
-    public static void addItem(MenuItem item) {
+    public static void addItem(CartItem item) {
         if (cartItems.containsKey(item)) {
             int currentQty = cartItems.get(item);
             cartItems.put(item, currentQty + 1);
@@ -26,7 +27,7 @@ public class CartManager {
     /**
      * Get all items in the cart with their quantities.
      */
-    public static Map<MenuItem, Integer> getCartItems() {
+    public static Map<CartItem, Integer> getCartItems() {
         return new LinkedHashMap<>(cartItems);
     }
 
@@ -35,8 +36,9 @@ public class CartManager {
      */
     public static double getTotalCost() {
         double total = 0;
-        for (Map.Entry<MenuItem, Integer> entry : cartItems.entrySet()) {
-            total += entry.getKey().getPrice() * entry.getValue();
+        for (Map.Entry<CartItem, Integer> entry : cartItems.entrySet()) {
+            MenuItem menuItem = entry.getKey().getMenuItem();
+            total += menuItem.getPrice() * entry.getValue();
         }
         return total;
     }
@@ -49,24 +51,10 @@ public class CartManager {
     }
 
     /**
-     * Clear the cart completely.
-     */
-    public static void clearCart() {
-        cartItems.clear();
-    }
-
-    /**
-     * Remove a specific item from the cart.
-     */
-    public static void removeItem(MenuItem item) {
-        cartItems.remove(item);
-    }
-
-    /**
      * Update the quantity of a specific item.
      * If quantity <= 0, the item is removed.
      */
-    public static void updateQuantity(MenuItem item, int quantity) {
+    public static void updateQuantity(CartItem item, int quantity) {
         if (quantity <= 0) {
             cartItems.remove(item);
         } else {
@@ -75,9 +63,23 @@ public class CartManager {
     }
 
     /**
+     * Remove a specific item from the cart.
+     */
+    public static void removeItem(CartItem item) {
+        cartItems.remove(item);
+    }
+
+    /**
+     * Clear the cart completely.
+     */
+    public static void clearCart() {
+        cartItems.clear();
+    }
+
+    /**
      * Get the quantity of a specific item in the cart.
      */
-    public static int getItemQuantity(MenuItem item) {
+    public static int getItemQuantity(CartItem item) {
         return cartItems.getOrDefault(item, 0);
     }
 
