@@ -57,6 +57,10 @@ public class CustomerHomeActivity extends AppCompatActivity {
         return login;
     }
 
+    public static void setLogin(boolean login) {
+        CustomerHomeActivity.login = login;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -166,25 +170,32 @@ public class CustomerHomeActivity extends AppCompatActivity {
         iconBaseNames.put(orderRecordIcon, "customer_main_page_function_item_background");
         iconBaseNames.put(profileIcon, "customer_main_page_function_item_background");
 
+        //default
+        highlightIcon(orderBellIcon);
+
         orderBellIcon.setOnClickListener(v -> {
             highlightIcon(orderBellIcon);
             Toast.makeText(this, "You're already on the Home page", Toast.LENGTH_SHORT).show();
         });
 
         couponIcon.setOnClickListener(v -> {
-            highlightIcon(couponIcon);
-            Toast.makeText(this, "Coupon activity clicked", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, CouponActivity.class);
+            intent.putExtra("selectedIcon", R.id.couponIcon); // tell Home which icon to highlight
+            startActivity(intent);
         });
 
         membershipIcon.setOnClickListener(v -> {
-            highlightIcon(membershipIcon);
-            Toast.makeText(this, "Membership activity clicked", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, MembershipActivity.class);
+            intent.putExtra("selectedIcon", R.id.membershipIcon); // tell Home which icon to highlight
+            startActivity(intent);
         });
 
         orderRecordIcon.setOnClickListener(v -> {
-            highlightIcon(orderRecordIcon);
+
             if (login) {
-                startActivity(new Intent(this, OrderHistoryActivity.class));
+                Intent intent = new Intent(this, OrderHistoryActivity.class);
+                intent.putExtra("selectedIcon", R.id.orderRecordIcon); // tell Home which icon to highlight
+                startActivity(intent);
             } else {
                 Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, LoginActivity.class));
@@ -192,9 +203,11 @@ public class CustomerHomeActivity extends AppCompatActivity {
         });
 
         profileIcon.setOnClickListener(v -> {
-            highlightIcon(profileIcon);
+
             if (login) {
-                startActivity(new Intent(this, ProfileActivity.class));
+                Intent intent = new Intent(this, ProfileActivity.class);
+                intent.putExtra("selectedIcon", R.id.profileIcon); // tell Home which icon to highlight
+                startActivity(intent);
             } else {
                 Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, LoginActivity.class));
@@ -251,5 +264,24 @@ public class CustomerHomeActivity extends AppCompatActivity {
                 icon.setBackgroundResource(drawableId);
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Read which icon should be highlighted (default = Home/OrderBell)
+        int selectedIconId = getIntent().getIntExtra("selectedIcon", R.id.orderBellIcon);
+
+        ImageView selectedIcon = findViewById(selectedIconId);
+        if (selectedIcon != null) {
+            highlightIcon(selectedIcon);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // update the stored Intent so onResume() sees the latest extras
     }
 }

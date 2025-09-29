@@ -18,7 +18,7 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.utils.RoleManager;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseCustomerActivity {
 
     private TextView userNameText, userEmailText;
     private ImageView profileImage;
@@ -30,6 +30,10 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        //parent's method
+        setupBottomFunctionBar(); // reuse the same bar + highlight logic
+
 
         Log.d(TAG, "onCreate: Initializing UI components");
 

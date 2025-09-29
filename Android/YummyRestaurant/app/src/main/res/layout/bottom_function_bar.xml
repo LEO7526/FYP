@@ -1,0 +1,78 @@
+<!-- bottom_function_bar.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:background="@color/white">
+
+    <!-- Browse menu icon -->
+    <ImageView
+        android:id="@+id/orderBellIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_order_bell"
+        android:contentDescription="Order Food"
+        android:layout_margin="8dp"
+        android:background="@drawable/customer_main_page_function_item_background"
+        android:padding="8dp"/>
+
+    <!-- Coupon Icon -->
+    <FrameLayout
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerInside"
+        android:layout_margin="8dp"
+        android:background="@drawable/customer_main_page_function_item_background">
+
+        <ImageView
+            android:id="@+id/couponIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerInside"
+            android:contentDescription="Coupon"
+            android:padding="8dp"
+            android:src="@drawable/ic_coupon" />
+    </FrameLayout>
+
+    <!--membership icon-->
+    <ImageView
+        android:id="@+id/membershipIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_qr"
+        android:contentDescription="Membership"
+        android:layout_margin="8dp"
+        android:background="@drawable/customer_main_page_function_item_background_unique"
+        android:padding="8dp" />
+
+
+    <!--            order record icon-->
+    <ImageView
+        android:id="@+id/orderRecordIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_order_record"
+        android:contentDescription="Order Record"
+        android:background="@drawable/customer_main_page_function_item_background"
+        android:padding="8dp" />
+
+
+
+    <!-- Profile Icon -->
+    <ImageView
+        android:id="@+id/profileIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="8dp"
+        android:contentDescription="Profile"
+        android:src="@drawable/ic_profile"
+        android:background="@drawable/customer_main_page_function_item_background"
+        android:padding="8dp"
+        android:scaleType="centerInside" />
+
+</LinearLayout>

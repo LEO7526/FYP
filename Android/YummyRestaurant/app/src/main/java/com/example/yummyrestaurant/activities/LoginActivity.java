@@ -166,8 +166,11 @@ public class LoginActivity extends AppCompatActivity {
             data.removeExtra("pendingNotes");
         }
 
-        // ✅ Redirect to CartActivity so user sees updated cart
-        Intent intent = new Intent(LoginActivity.this, CartActivity.class);
+        //set login to true
+        CustomerHomeActivity.setLogin(true);
+
+        // ✅ Redirect to home activity
+        Intent intent = new Intent(LoginActivity.this, CustomerHomeActivity.class);
         startActivity(intent);
         finish();
     }

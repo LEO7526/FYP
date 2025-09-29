@@ -21,7 +21,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class OrderHistoryActivity extends AppCompatActivity {
+public class OrderHistoryActivity extends BaseCustomerActivity {
 
     private RecyclerView orderRecyclerView;
     private OrderAdapter orderAdapter;
@@ -37,6 +37,9 @@ public class OrderHistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_history);
+
+        setupBottomFunctionBar(); // reuse the same bar + highlight logic
+
 
         orderRecyclerView = findViewById(R.id.orderRecyclerView);
         orderRecyclerView.setLayoutManager(new LinearLayoutManager(this));

@@ -50,7 +50,6 @@
                 android:layout_centerInParent="true" />
         </RelativeLayout>
 
-
         <!-- Search Bar -->
         <EditText
             android:id="@+id/searchBar"
@@ -88,8 +87,6 @@
             android:visibility="gone" />
 
         <!-- Menu List -->
-
-        <!-- Bottom Function Bar -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/menuRecyclerView"
             android:layout_width="match_parent"
@@ -98,85 +95,13 @@
             android:layout_above="@id/bottomFunctionBar"
             android:padding="16dp" />
 
-        <LinearLayout
+        <!-- Bottom Function Bar (direct include, no wrapper) -->
+        <include
             android:id="@+id/bottomFunctionBar"
+            layout="@layout/bottom_function_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="@color/white"
-            android:gravity="center|center_horizontal|center_vertical"
-            android:orientation="horizontal"
-            android:padding="12dp">
-
-
-            <!-- Browse menu icon -->
-            <ImageView
-                android:id="@+id/orderBellIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_order_bell"
-                android:contentDescription="Order Food"
-                android:layout_margin="8dp"
-                android:background="@drawable/customer_main_page_function_item_background"
-                android:padding="8dp"
-                android:scaleType="centerInside" />
-
-            <!-- Coupon Icon -->
-            <FrameLayout
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_margin="8dp"
-                android:background="@drawable/customer_main_page_function_item_background">
-
-                <ImageView
-                    android:id="@+id/couponIcon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:contentDescription="Coupon"
-                    android:padding="8dp"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_coupon" />
-            </FrameLayout>
-
-<!--membership icon-->
-            <ImageView
-                android:id="@+id/membershipIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_qr"
-                android:contentDescription="Membership"
-                android:layout_margin="8dp"
-                android:scaleType="centerInside"
-                android:background="@drawable/customer_main_page_function_item_background_unique"
-                android:padding="8dp" />
-
-
-<!--            order record icon-->
-            <ImageView
-                android:id="@+id/orderRecordIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_order_record"
-                android:contentDescription="Order Record"
-                android:layout_margin="8dp"
-                android:scaleType="centerInside"
-                android:background="@drawable/customer_main_page_function_item_background"
-                android:padding="8dp" />
-
-
-
-            <!-- Profile Icon -->
-            <ImageView
-                android:id="@+id/profileIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_margin="8dp"
-                android:contentDescription="Profile"
-                android:src="@drawable/ic_profile"
-                android:background="@drawable/customer_main_page_function_item_background"
-                android:padding="8dp"
-                android:scaleType="centerInside" />
-        </LinearLayout>
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 
@@ -188,4 +113,5 @@
         android:layout_gravity="start"
         android:background="@color/white"
         app:menu="@menu/drawer_menu" />
+
 </androidx.drawerlayout.widget.DrawerLayout>

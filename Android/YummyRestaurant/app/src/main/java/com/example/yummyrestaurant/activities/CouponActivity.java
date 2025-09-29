@@ -10,17 +10,15 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.yummyrestaurant.R;
 
-public class CouponActivity extends AppCompatActivity {
+public class CouponActivity extends BaseCustomerActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_coupon);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        //parent's method
+        setupBottomFunctionBar(); // reuse the same bar + highlight logic
+
     }
 }
