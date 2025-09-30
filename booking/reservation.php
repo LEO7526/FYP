@@ -16,15 +16,6 @@
             $("#myBookingBtn").click(function () {
                 $("#myBookingForm").show();
                 $("#bookingForm").hide();
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            $("#myBookingBtn").click(function () {
-                $("#myBookingForm").show();
-                $("#bookingForm").hide();
 
                 $.ajax({
                     url: "mybooking.php",
@@ -40,6 +31,63 @@
         });
     </script>
 
+    <script> // cancel booking
+        $(document).on("submit", ".cancel-form", function (e) {
+            e.preventDefault();
+
+            if (confirm("確定取消這筆訂位嗎？")) {
+                $.post("mybooking.php", $(this).serialize(), function (response) {
+                    $("#bookingResult").html(response);
+                });
+            }
+        });
+    </script>
+
+    <script> // edit booking
+        $(document).on("submit", ".edit-form", function (e) {
+            e.preventDefault();
+            $.post("mybooking.php", $(this).serialize(), function (response) {
+                $("#bookingResult").html(response);
+            });
+        });
+
+        $(document).on("click", "#edit-loadTablesBtn", function () {
+            const date = $("#edit-date").val();
+            const time = $("#edit-time").val();
+            const guests = $("#edit-guests").val();
+            const tableSelect = $("#edit-tid");
+
+            if (!date || !time || !guests) {
+                alert("請先選擇日期、時間和人數");
+                return;
+            }
+
+            fetch("available_tables.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `date=${date}&time=${time}&guests=${guests}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    tableSelect.html('<option value="">Please choose a table</option>');
+                    if (data.length === 0) {
+                        tableSelect.append('<option value="">No tables available</option>');
+                    } else {
+                        data.forEach(table => {
+                            const option = $("<option>").val(table.tid).text(`Table ${table.tid}`);
+                            tableSelect.append(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Failed to load tables:", error);
+                    tableSelect.html('<option value="">Error loading tables</option>');
+                });
+        });
+
+
+    </script>
+
     <script>
         function openLogin() {
             document.getElementById("loginPopup").style.display = "flex";
@@ -50,108 +98,92 @@
         }
     </script>
 
-    <script>
+    <script> //booking
         document.addEventListener("DOMContentLoaded", function () {
+            const loadBtn = document.getElementById("loadTablesBtn");
             const dateInput = document.getElementById("date");
             const timeInput = document.getElementById("time");
             const guestsInput = document.getElementById("guests");
             const tableSelect = document.getElementById("tid");
 
-            function fetchTables() {
+
+            const today = new Date();
+            dateInput.min = today.toISOString().split("T")[0];
+
+
+            loadBtn.addEventListener("click", function () {
                 const date = dateInput.value;
                 const time = timeInput.value;
                 const guests = guestsInput.value;
 
-                if (date && time && guests) {
-                    fetch("available_tables.php", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                        body: `date=${date}&time=${time}&guests=${guests}`
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            tableSelect.innerHTML = '<option value="">Please choose a table</option>';
+                if (!date || !time || !guests) {
+                    alert("請先選擇日期、時間和人數");
+                    return;
+                }
+
+                fetch("available_tables.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `date=${date}&time=${time}&guests=${guests}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        tableSelect.innerHTML = '<option value="">Please choose a table</option>';
+                        if (data.length === 0) {
+                            tableSelect.innerHTML += '<option value="">No tables available</option>';
+                        } else {
                             data.forEach(table => {
                                 const option = document.createElement("option");
                                 option.value = table.tid;
                                 option.textContent = `Table ${table.tid}`;
                                 tableSelect.appendChild(option);
                             });
-                        });
-                } else {
-                    tableSelect.innerHTML = '<option value="">Please choose a table</option>';
-                }
-            }
-
-            dateInput.addEventListener("change", fetchTables);
-            timeInput.addEventListener("change", fetchTables);
-            guestsInput.addEventListener("change", fetchTables);
-        });
-    </script>
-
-
-    <script>
-        function showBookingForm() {
-            document.getElementById("bookingForm").style.display = "block";
-        }
-
-        function checkMyBooking() {
-            window.location.href = "mybooking.php";
-        }
-    </script>
-
-    <script>
-        $(document).on("submit", ".edit-form", function (e) {
-            e.preventDefault();
-            $.post("mybooking.php", $(this).serialize(), function (response) {
-                $("#bookingResult").html(response);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Failed to load tables:", error);
+                        tableSelect.innerHTML = '<option value="">Error loading tables</option>';
+                    });
             });
         });
+    </script>
 
-        $(document).on("submit", ".cancel-form", function (e) {
-            e.preventDefault();
-            if (confirm("確定取消這筆訂位嗎？")) {
-                $.post("mybooking.php", $(this).serialize(), function (response) {
-                    $("#bookingResult").html(response);
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const timeSelect = document.getElementById("time");
+
+            function generateTimeSlots(startHour, endHour, stepMinutes, durationMinutes, finalEndTime) {
+                const slots = [];
+                let current = new Date();
+                current.setHours(startHour, 0, 0, 0);
+
+                const endLimit = new Date();
+                endLimit.setHours(finalEndTime, 0, 0, 0);
+
+                while (true) {
+                    const end = new Date(current.getTime() + durationMinutes * 60000);
+                    if (end > endLimit) break;
+
+                    const startStr = current.toTimeString().slice(0, 5);
+                    const endStr = end.toTimeString().slice(0, 5);
+                    const label = `${startStr} - ${endStr}`;
+                    const value = startStr + ":00";
+
+                    slots.push({ label, value });
+
+                    current.setMinutes(current.getMinutes() + stepMinutes);
+                }
+
+                slots.forEach(slot => {
+                    const option = document.createElement("option");
+                    option.value = slot.value;
+                    option.textContent = slot.label;
+                    timeSelect.appendChild(option);
                 });
             }
-        });
 
-        $(document).on("submit", ".update-form", function (e) {
-            e.preventDefault();
-            $.post("mybooking.php", $(this).serialize(), function (response) {
-                $("#bookingResult").html(response);
-            });
-        });
-    </script>
-
-    <script>
-
-        $(document).on("change", "#bookingResult input[name='bdate'], #bookingResult input[name='btime'], #bookingResult input[name='pnum']", function () {
-            const bdate = $("#bookingResult input[name='bdate']").val();
-            const btime = $("#bookingResult input[name='btime']").val();
-            const pnum = $("#bookingResult input[name='pnum']").val();
-            const tableSelect = $("#bookingResult select[name='tid']");
-            const currentTid = tableSelect.val();
-
-            if (bdate && btime && pnum) {
-                $.post("mybooking.php", {
-                    action: "fetch_tables",
-                    bdate: bdate,
-                    btime: btime,
-                    pnum: pnum
-                }, function (data) {
-                    tableSelect.empty().append('<option value="">請選擇座位</option>');
-                    if (data.length === 0) {
-                        tableSelect.append('<option value="">目前無可用座位</option>');
-                    } else {
-                        data.forEach(table => {
-                            const selected = table.tid == currentTid ? "selected" : "";
-                            tableSelect.append(`<option value="${table.tid}" ${selected}>Table ${table.tid}</option>`);
-                        });
-                    }
-                }, "json");
-            }
+            // 起始時間 11:00，每 30 分鐘一組，持續 90 分鐘，最後一組結束時間為 23:00
+            generateTimeSlots(11, 22, 30, 90, 23);
         });
     </script>
 
@@ -190,8 +222,13 @@
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
 
-                <button type="submit">Enter</button>
+                <button type="submit">Login</button>
             </form>
+
+            <!-- Sign Up button -->
+            <div class="register-link">
+                <p>Don't have an account? <a href="register.php">Sign Up</a></p>
+            </div>
         </div>
     </div>
 </div>
@@ -210,17 +247,14 @@
             <input type="date" id="date" name="date" required>
 
             <label for="time">Dining Time:</label>
-            <input type="time" id="time" name="time" required>
+            <select id="time" name="time" required>
+                <option value="">Select Time</option>
+            </select>
 
             <label for="guests">Number of Guests:</label>
             <select id="guests" name="guests" required>
                 <option value="">Select</option>
                 <?php for ($i = 1; $i <= 8; $i++) echo "<option value=\"$i\">$i</option>"; ?>
-            </select>
-
-            <label for="tid">Select Table:</label>
-            <select id="tid" name="tid" required>
-                <option value="">Please choose a table</option>
             </select>
             <label for="purpose">Purpose of booking</label>
             <select id="purpose" name="purpose">
@@ -229,27 +263,23 @@
                 <option value="Business Meeting">Business Meeting</option>
                 <option value="Lunch Meeting">Lunch Meeting</option>
                 <option value="Birthday Celebration">Birthday Celebration</option>
-
             </select>
             <label for="remark">Remark:</label>
             <input id="remark" name="remark" type="text">
-
+            <button type="button" id="loadTablesBtn">Load Available Tables</button>
+            <label for="tid">Select Table:</label>
+            <select id="tid" name="tid" required>
+                <option value="">Please choose a table</option>
+            </select>
             <button type="submit">Confirm Reservation</button>
         </form>
     </div>
-
 
     <div id="myBookingForm" style="display:none;">
         <h3>Check Your Booking</h3>
         <div id="bookingResult" class="booking-result"></div>
     </div>
 
-
 </div>
-
-
-
-
-    <div></div>
 </body>
 </html>

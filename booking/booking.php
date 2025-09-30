@@ -3,7 +3,10 @@ session_start();
 $pdo = new PDO("mysql:host=localhost;dbname=projectdb;charset=utf8", "root", "");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-
+if (!isset($_COOKIE['cid']) || empty($_COOKIE['cid'])) {
+    echo "<script>alert('請先登入才能進行訂位。'); window.location.href='reservation.php';</script>";
+    exit;
+}
 
 $date = $_POST['date'] ?? '';
 $time = $_POST['time'] ?? '';
@@ -23,7 +26,7 @@ if ($date && $time && $guests && $tid && $cid) {
         $bktel = $customer['ctel'];
 
         $stmt = $pdo->prepare("INSERT INTO booking (cid, bkcname, bktel, tid, bdate, btime, pnum, purpose, remark, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$cid, $bkcname, $bktel, $tid, $date, $time, $guests, $purpose, $remark, 0]);
+        $stmt->execute([$cid, $bkcname, $bktel, $tid, $date, $time, $guests, $purpose, $remark, 2]);
         $bid = $pdo->lastInsertId();
 
         echo "<script>alert('訂位成功！您的訂位編號為：$bid'); window.location.href='home.php';</script>";
