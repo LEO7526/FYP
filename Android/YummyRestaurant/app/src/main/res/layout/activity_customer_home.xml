@@ -61,22 +61,54 @@
             android:background="@drawable/search_bar_bg"
             android:padding="12dp" />
 
-        <!-- Filter Spinners -->
-        <LinearLayout
-            android:id="@+id/filterContainer"
+        <!-- Filter Buttons (scrollable row) -->
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/searchBar"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center">
+            android:fillViewport="true"
+            android:scrollbars="none">
 
-            <Spinner
-                android:id="@+id/categorySpinner"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/filterContainer"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/btnAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="All Dishes" />
+
+                <Button
+                    android:id="@+id/btnAppetizers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Appetizers" />
+
+                <Button
+                    android:id="@+id/btnMainCourses"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Main Courses" />
+
+                <Button
+                    android:id="@+id/btnSoup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Soup" />
+
+                <Button
+                    android:id="@+id/btnDessert"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dessert" />
+
+            </LinearLayout>
+        </HorizontalScrollView>
 
         <!-- Loading Spinner -->
         <ProgressBar
@@ -95,7 +127,7 @@
             android:layout_above="@id/bottomFunctionBar"
             android:padding="16dp" />
 
-        <!-- Bottom Function Bar (direct include, no wrapper) -->
+        <!-- Bottom Function Bar -->
         <include
             android:id="@+id/bottomFunctionBar"
             layout="@layout/bottom_function_bar"

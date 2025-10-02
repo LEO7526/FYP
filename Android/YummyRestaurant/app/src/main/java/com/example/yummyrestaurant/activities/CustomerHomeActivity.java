@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -46,9 +47,11 @@ public class CustomerHomeActivity extends AppCompatActivity {
     private MenuItemAdapter adapter;
     private ProgressBar loadingSpinner;
     private EditText searchBar;
-    private Spinner categorySpinner;   // only category spinner remains
     private String currentLanguage = "en";
     private static boolean login;
+    private Button btnAll, btnAppetizers, btnMainCourses, btnSoup, btnDessert;
+    private String selectedCategory = "All Dishes"; // default
+
 
     private List<ImageView> functionIcons = new ArrayList<>();
     private Map<ImageView, String> iconBaseNames = new HashMap<>();
@@ -71,7 +74,7 @@ public class CustomerHomeActivity extends AppCompatActivity {
         initViews();
         setupRecyclerView();
         setupSearchBar();
-        setupSpinners();
+        setupCategoryButtons();
         setupNavigationDrawer();
         setupBottomFunctionBar();
 
@@ -82,7 +85,11 @@ public class CustomerHomeActivity extends AppCompatActivity {
         menuRecyclerView = findViewById(R.id.menuRecyclerView);
         loadingSpinner = findViewById(R.id.loadingSpinner);
         searchBar = findViewById(R.id.searchBar);
-        categorySpinner = findViewById(R.id.categorySpinner);
+        btnAll = findViewById(R.id.btnAll);
+        btnAppetizers = findViewById(R.id.btnAppetizers);
+        btnMainCourses = findViewById(R.id.btnMainCourses);
+        btnSoup = findViewById(R.id.btnSoup);
+        btnDessert = findViewById(R.id.btnDessert);
     }
 
     private void setupRecyclerView() {
@@ -103,20 +110,30 @@ public class CustomerHomeActivity extends AppCompatActivity {
         });
     }
 
-    private void setupSpinners() {
-        String[] categories = {"All Dishes", "Appetizers", "Main Courses", "Soup", "Dessert"};
-
-        categorySpinner.setAdapter(
-                new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories)
-        );
-
-        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                applyFilters();
+    private void setupCategoryButtons() {
+        View.OnClickListener listener = v -> {
+            int id = v.getId();
+            if (id == R.id.btnAll) {
+                selectedCategory = "All Dishes";
+            } else if (id == R.id.btnAppetizers) {
+                selectedCategory = "Appetizers";
+            } else if (id == R.id.btnMainCourses) {
+                selectedCategory = "Main Courses";
+            } else if (id == R.id.btnSoup) {
+                selectedCategory = "Soup";
+            } else if (id == R.id.btnDessert) {
+                selectedCategory = "Dessert";
             }
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+            applyFilters();
+        };
+
+        btnAll.setOnClickListener(listener);
+        btnAppetizers.setOnClickListener(listener);
+        btnMainCourses.setOnClickListener(listener);
+        btnSoup.setOnClickListener(listener);
+        btnDessert.setOnClickListener(listener);
     }
+
 
     private void setupNavigationDrawer() {
         DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
@@ -247,9 +264,9 @@ public class CustomerHomeActivity extends AppCompatActivity {
     }
 
     private void applyFilters() {
-        String selectedCategory = categorySpinner.getSelectedItem().toString();
         adapter.filter(selectedCategory);
     }
+
 
     private void highlightIcon(ImageView selectedIcon) {
         for (ImageView icon : functionIcons) {
