@@ -167,10 +167,10 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         //set login to true
-        CustomerHomeActivity.setLogin(true);
+        BrowseMenuActivity.setLogin(true);
 
         // ✅ Redirect to home activity
-        Intent intent = new Intent(LoginActivity.this, CustomerHomeActivity.class);
+        Intent intent = new Intent(LoginActivity.this, BrowseMenuActivity.class);
         startActivity(intent);
         finish();
     }

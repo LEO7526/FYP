@@ -8,124 +8,15 @@
     <!-- Main Content -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white">
+        android:layout_height="match_parent">
 
-        <!-- Top Bar -->
-        <RelativeLayout
-            android:id="@+id/topBar"
+        <!-- Slideshow ImageView -->
+        <ImageView
+            android:id="@+id/myImageView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:background="@color/white">
-
-            <!-- Menu Icon (Top Left) -->
-            <ImageView
-                android:id="@+id/menuIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_menu"
-                android:contentDescription="Menu"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true" />
-
-            <!-- Cart Icon (Top Right) -->
-            <ImageView
-                android:id="@+id/cartIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_cart"
-                android:contentDescription="Cart"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true" />
-
-            <!-- App Title (Centered) -->
-            <TextView
-                android:id="@+id/appTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/merchant_name"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_centerInParent="true" />
-        </RelativeLayout>
-
-        <!-- Search Bar -->
-        <EditText
-            android:id="@+id/searchBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Search menu..."
-            android:layout_below="@id/topBar"
-            android:layout_margin="16dp"
-            android:background="@drawable/search_bar_bg"
-            android:padding="12dp" />
-
-        <!-- Filter Buttons (scrollable row) -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/searchBar"
-            android:fillViewport="true"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/filterContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
-
-                <Button
-                    android:id="@+id/btnAll"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="All Dishes" />
-
-                <Button
-                    android:id="@+id/btnAppetizers"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Appetizers" />
-
-                <Button
-                    android:id="@+id/btnMainCourses"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Main Courses" />
-
-                <Button
-                    android:id="@+id/btnSoup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Soup" />
-
-                <Button
-                    android:id="@+id/btnDessert"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dessert" />
-
-            </LinearLayout>
-        </HorizontalScrollView>
-
-        <!-- Loading Spinner -->
-        <ProgressBar
-            android:id="@+id/loadingSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone" />
-
-        <!-- Menu List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/menuRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/filterContainer"
-            android:layout_above="@id/bottomFunctionBar"
-            android:padding="16dp" />
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Slideshow" />
 
         <!-- Bottom Function Bar -->
         <include

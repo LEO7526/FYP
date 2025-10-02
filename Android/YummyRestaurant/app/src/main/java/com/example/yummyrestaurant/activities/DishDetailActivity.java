@@ -147,7 +147,7 @@ public class DishDetailActivity extends AppCompatActivity {
 
             /// Add to Cart button logic
             addToCartBtn.setOnClickListener(v -> {
-                if (CustomerHomeActivity.isLogin()) {
+                if (BrowseMenuActivity.isLogin()) {
                     // User is logged in → add directly
                     CartItem cartItem = new CartItem(item, selectedCustomization);
                     int currentQty = CartManager.getItemQuantity(cartItem);
