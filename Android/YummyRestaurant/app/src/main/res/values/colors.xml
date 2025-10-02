@@ -72,4 +72,9 @@
     <color name="spice_hot">#F44336</color>
     <color name="spice_numbing">#D32F2F</color>
 
+
+    <!-- Purple 500 (Material Design standard) -->
+    <color name="purple_500">#9C27B0</color>
+
+
 </resources>

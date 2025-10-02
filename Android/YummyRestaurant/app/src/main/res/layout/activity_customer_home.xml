@@ -10,13 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Slideshow ImageView -->
-        <ImageView
-            android:id="@+id/myImageView"
+        <!-- Slideshow Container -->
+        <include
+            layout="@layout/slideshow_container"
+            android:id="@+id/slideshowContainer"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="Slideshow" />
+            android:layout_alignParentTop="true" />
 
         <!-- Bottom Function Bar -->
         <include
