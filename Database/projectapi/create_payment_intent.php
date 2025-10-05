@@ -16,13 +16,13 @@ if ($amount < 500) {
 }
 
 try {
-    $intent = \Stripe\PaymentIntent::create([
-        'amount' => $amount,
-        'currency' => 'hkd',
-        'automatic_payment_methods' => ['enabled' => true],
-    ]);
+$intent = \Stripe\PaymentIntent::create([
+    'amount' => $amount,
+    'currency' => 'hkd',
+    'payment_method_types' => ['card'],
+]);
 
-    echo json_encode(['clientSecret' => $intent->client_secret]);
+echo json_encode(['clientSecret' => $intent->client_secret]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);

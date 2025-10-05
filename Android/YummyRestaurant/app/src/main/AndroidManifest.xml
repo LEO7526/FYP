@@ -30,6 +30,11 @@
         android:theme="@style/Theme.YummyRestaurant"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
+
         <activity
             android:name=".activities.CustomerHomeActivity"
             android:exported="false" />
@@ -103,7 +108,16 @@
             android:exported="false" />
         <activity
             android:name=".activities.PaymentActivity"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="com.example.yummyrestaurant"
+                    android:host="stripe-redirect" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activities.SupportActivity"
             android:exported="false" />

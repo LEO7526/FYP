@@ -132,6 +132,9 @@ CREATE TABLE orders (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+ALTER TABLE orders ADD COLUMN orderRef VARCHAR(255);
+
+
 
 -- Dumping data for table `orders`
 INSERT INTO orders (oid, odate, cid, ostatus) VALUES
