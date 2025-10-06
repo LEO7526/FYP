@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -23,7 +24,9 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.MenuItemAdapter;
 import com.example.yummyrestaurant.api.MenuApi;
 import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuResponse;
+import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.android.material.navigation.NavigationView;
 
@@ -47,9 +50,12 @@ public class BrowseMenuActivity extends AppCompatActivity {
     private Button btnAll, btnAppetizers, btnMainCourses, btnSoup, btnDessert;
     private String selectedCategory = "All Dishes"; // default
 
-
     private List<ImageView> functionIcons = new ArrayList<>();
     private Map<ImageView, String> iconBaseNames = new HashMap<>();
+
+    // New: cart badge views
+    private ImageView cartIcon;
+    private TextView cartBadge;
 
     public static boolean isLogin() {
         return login;
@@ -77,6 +83,9 @@ public class BrowseMenuActivity extends AppCompatActivity {
         setupNavigationDrawer();
         setupBottomFunctionBar();
 
+        // update cart badge on start
+        updateCartBadge();
+
         loadMenuItemsFromServer();
     }
 
@@ -89,6 +98,10 @@ public class BrowseMenuActivity extends AppCompatActivity {
         btnMainCourses = findViewById(R.id.btnMainCourses);
         btnSoup = findViewById(R.id.btnSoup);
         btnDessert = findViewById(R.id.btnDessert);
+
+        // cart views (ensure your layout uses the FrameLayout with cartBadge)
+        cartIcon = findViewById(R.id.cartIcon);
+        cartBadge = findViewById(R.id.cartBadge);
     }
 
     private void setupRecyclerView() {
@@ -133,15 +146,15 @@ public class BrowseMenuActivity extends AppCompatActivity {
         btnDessert.setOnClickListener(listener);
     }
 
-
     private void setupNavigationDrawer() {
         DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
         NavigationView navigationView = findViewById(R.id.navigationView);
         ImageView menuIcon = findViewById(R.id.menuIcon);
-        ImageView cartIcon = findViewById(R.id.cartIcon);
 
         menuIcon.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
-        cartIcon.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        if (cartIcon != null) {
+            cartIcon.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
+        }
 
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -265,6 +278,9 @@ public class BrowseMenuActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(BrowseMenuActivity.this, "Failed to load menu items", Toast.LENGTH_SHORT).show();
                 }
+
+                // Ensure badge is current after data load
+                updateCartBadge();
             }
 
             @Override
@@ -272,6 +288,9 @@ public class BrowseMenuActivity extends AppCompatActivity {
                 loadingSpinner.setVisibility(View.GONE);
                 menuRecyclerView.setVisibility(View.VISIBLE);
                 Toast.makeText(BrowseMenuActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+
+                // Ensure badge is current on failure too
+                updateCartBadge();
             }
         });
     }
@@ -279,7 +298,6 @@ public class BrowseMenuActivity extends AppCompatActivity {
     private void applyFilters() {
         adapter.filter(selectedCategory);
     }
-
 
     private void highlightIcon(ImageView selectedIcon) {
         for (ImageView icon : functionIcons) {
@@ -307,11 +325,39 @@ public class BrowseMenuActivity extends AppCompatActivity {
         if (selectedIcon != null) {
             highlightIcon(selectedIcon);
         }
+
+        // Refresh badge whenever activity resumes
+        updateCartBadge();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent); // update the stored Intent so onResume() sees the latest extras
+    }
+
+    // New: update cart badge from CartManager
+    private void updateCartBadge() {
+        int totalCount = 0;
+        try {
+            Map<CartItem, Integer> cart = CartManager.getCartItems();
+            if (cart != null && !cart.isEmpty()) {
+                for (Integer qty : cart.values()) {
+                    if (qty != null) totalCount += qty;
+                }
+            }
+        } catch (Exception e) {
+            totalCount = 0;
+        }
+
+        if (cartBadge == null) return;
+
+        if (totalCount > 0) {
+            String text = totalCount > 99 ? "99+" : String.valueOf(totalCount);
+            cartBadge.setText(text);
+            cartBadge.setVisibility(View.VISIBLE);
+        } else {
+            cartBadge.setVisibility(View.GONE);
+        }
     }
 }

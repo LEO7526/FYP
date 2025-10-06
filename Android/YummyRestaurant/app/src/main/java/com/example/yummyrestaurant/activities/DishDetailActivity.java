@@ -73,11 +73,11 @@ public class DishDetailActivity extends AppCompatActivity {
             price.setText(String.format(Locale.getDefault(), "¥ %.2f", item.getPrice()));
 
             LinearLayout tagsContainer = findViewById(R.id.tagsContainer);
-            if (item.getTags() != null && !item.getTags().isEmpty()) {
+            List<String> itemTags = item.getTags();
+            if (itemTags != null && !itemTags.isEmpty()) {
                 tagsContainer.removeAllViews();
-                String[] tags = item.getTags().split(",");
-                for (String rawTag : tags) {
-                    String tag = rawTag.trim();
+                for (String rawTag : itemTags) {
+                    String tag = rawTag == null ? "" : rawTag.trim();
                     if (tag.isEmpty()) continue;
 
                     TextView tagView = new TextView(this);
@@ -90,11 +90,15 @@ public class DishDetailActivity extends AppCompatActivity {
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                     );
-                    params.setMargins(8, 8, 8, 8);
+                    int marginPx = (int) (8 * getResources().getDisplayMetrics().density);
+                    params.setMargins(marginPx, marginPx, marginPx, marginPx);
                     tagView.setLayoutParams(params);
 
                     tagsContainer.addView(tagView);
                 }
+            } else {
+                // optional: hide container if no tags
+                tagsContainer.removeAllViews();
             }
 
             String imageUrl = item.getImage_url();
@@ -108,44 +112,36 @@ public class DishDetailActivity extends AppCompatActivity {
                 image.setImageResource(R.drawable.placeholder);
             }
 
-            // Spice level bar
+            // Spice level bar (spice_level is int in model)
             spiceBar.removeAllViews();
-            String spice = item.getSpice_level() != null ? item.getSpice_level().toLowerCase() : "";
-            int spiceCount;
-            switch (spice) {
-                case "mild":
-                    spiceCount = 1;
-                    break;
-                case "medium":
-                    spiceCount = 2;
-                    break;
-                case "hot":
-                    spiceCount = 3;
-                    break;
-                case "numbing":
-                    spiceCount = 4;
-                    break;
-                default:
-                    spiceCount = 0;
-                    break;
+            int spiceCount = 0;
+            try {
+                spiceCount = Math.max(0, Math.min(4, item.getSpice_level()));
+            } catch (Exception e) {
+                spiceCount = 0;
             }
+
             List<String> spiceColors = Arrays.asList("#FFECB3", "#FFC107", "#FF9800", "#F44336");
+            int segmentWidthPx = (int) (24 * getResources().getDisplayMetrics().density);
+            int segmentHeightPx = (int) (8 * getResources().getDisplayMetrics().density);
+            int gapPx = (int) (4 * getResources().getDisplayMetrics().density);
+
             for (int i = 0; i < spiceCount; i++) {
                 TextView segment = new TextView(this);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(24, 8);
-                if (i > 0) params.setMarginStart(4);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(segmentWidthPx, segmentHeightPx);
+                if (i > 0) params.setMarginStart(gapPx);
                 segment.setLayoutParams(params);
-                segment.setBackgroundColor(Color.parseColor(spiceColors.get(i)));
+                segment.setBackgroundColor(Color.parseColor(spiceColors.get(Math.min(i, spiceColors.size() - 1))));
                 spiceBar.addView(segment);
             }
             if (spiceCount == 0) {
                 TextView defaultSegment = new TextView(this);
-                defaultSegment.setLayoutParams(new LinearLayout.LayoutParams(24, 8));
+                defaultSegment.setLayoutParams(new LinearLayout.LayoutParams(segmentWidthPx, segmentHeightPx));
                 defaultSegment.setBackgroundColor(Color.parseColor("#BDBDBD"));
                 spiceBar.addView(defaultSegment);
             }
 
-            /// Add to Cart button logic
+            // Add to Cart button logic
             addToCartBtn.setOnClickListener(v -> {
                 if (BrowseMenuActivity.isLogin()) {
                     // User is logged in → add directly
@@ -155,7 +151,7 @@ public class DishDetailActivity extends AppCompatActivity {
 
                     Toast.makeText(
                             this,
-                            quantity[0] + " × " + item.getName() +
+                            quantity[0] + " × " + (item.getName() == null ? "" : item.getName()) +
                                     (selectedCustomization != null && selectedCustomization.getSpiceLevel() != null
                                             ? " (" + selectedCustomization.getSpiceLevel() + ")"
                                             : ""),

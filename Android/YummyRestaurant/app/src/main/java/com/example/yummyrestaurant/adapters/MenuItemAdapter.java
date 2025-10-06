@@ -45,7 +45,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         filter("All Dishes"); // default to show all
     }
 
-    // ✅ simplified filter: only by category
+    // simplified filter: only by category
     public void filter(String category) {
         Log.d("FilterStart", "Full list size: " + fullList.size());
         filteredList.clear();
@@ -119,32 +119,18 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         MenuItem item = filteredList.get(position);
 
         // Set text values
-        holder.dishName.setText(item.getName());
-        holder.dishDescription.setText(item.getDescription());
+        holder.dishName.setText(item.getName() != null ? item.getName() : "");
+        holder.dishDescription.setText(item.getDescription() != null ? item.getDescription() : "");
         holder.dishPrice.setText(String.format("$ %.2f", item.getPrice()));
 
-        // Spice level with chili icons 🌶️
+        // Spice level with chili icons
         holder.spiceIconContainer.removeAllViews();
 
-        String spice = item.getSpice_level() != null ? item.getSpice_level().toLowerCase() : "";
-        int spiceCount;
-
-        switch (spice) {
-            case "mild":
-                spiceCount = 1;
-                break;
-            case "medium":
-                spiceCount = 2;
-                break;
-            case "hot":
-                spiceCount = 3;
-                break;
-            case "numbing":
-                spiceCount = 4;
-                break;
-            default:
-                spiceCount = 0;
-                break;
+        int spiceCount = 0;
+        try {
+            spiceCount = Math.max(0, Math.min(4, item.getSpice_level()));
+        } catch (Exception e) {
+            spiceCount = 0;
         }
 
         if (spiceCount > 0) {
@@ -152,33 +138,35 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                 ImageView chili = new ImageView(context);
                 chili.setImageResource(R.drawable.ic_chili);
 
-                // Tint color depending on spice level
-                switch (spice) {
-                    case "mild":
+                // Tint color depending on spice index
+                switch (spiceCount) {
+                    case 1:
                         chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_mild));
                         break;
-                    case "medium":
+                    case 2:
                         chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_medium));
                         break;
-                    case "hot":
+                    case 3:
                         chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_hot));
                         break;
-                    case "numbing":
+                    case 4:
                         chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_numbing));
+                        break;
+                    default:
+                        chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_medium));
                         break;
                 }
 
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        24, 24
-                );
-                if (i > 0) params.setMarginStart(4);
+                int sizePx = dpToPx(16);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePx, sizePx);
+                if (i > 0) params.setMarginStart(dpToPx(4));
                 chili.setLayoutParams(params);
                 holder.spiceIconContainer.addView(chili);
             }
         } else {
             TextView noSpice = new TextView(context);
             noSpice.setText("No spice");
-            noSpice.setTextSize(5);
+            noSpice.setTextSize(10);
             noSpice.setTextColor(Color.GRAY);
             holder.spiceIconContainer.addView(noSpice);
         }
@@ -218,6 +206,11 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     @Override
     public int getItemCount() {
         return filteredList.size();
+    }
+
+    private int dpToPx(int dp) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

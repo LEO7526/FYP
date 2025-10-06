@@ -2,24 +2,11 @@ package com.example.yummyrestaurant.models;
 
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 public class MenuItem implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MenuItem menuItem = (MenuItem) o;
-        return id == menuItem.id; // or compare by name if no id
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id); // or Objects.hash(name)
-    }
-
 
     @SerializedName("price")
     private double price;
@@ -37,13 +24,28 @@ public class MenuItem implements Serializable {
     private String image_url;
 
     @SerializedName("spice_level")
-    private String spice_level;
+    private int spice_level;
 
     @SerializedName("tags")
-    private String tags;
+    private List<String> tags;
 
     @SerializedName("category")
     private String category;
+
+    public MenuItem() {}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MenuItem menuItem = (MenuItem) o;
+        return id == menuItem.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     public int getId() {
         return id;
@@ -85,19 +87,19 @@ public class MenuItem implements Serializable {
         this.image_url = image_url;
     }
 
-    public String getSpice_level() {
+    public int getSpice_level() {
         return spice_level;
     }
 
-    public void setSpice_level(String spice_level) {
+    public void setSpice_level(int spice_level) {
         this.spice_level = spice_level;
     }
 
-    public String getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(String tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 
