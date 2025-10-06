@@ -42,4 +42,15 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="search_hint">Search menu...</string>
+
+    <!-- Filter Buttons -->
+    <string name="filter_all">All Dishes</string>
+    <string name="filter_appetizers">Appetizers</string>
+    <string name="filter_main_courses">Main Courses</string>
+    <string name="filter_soup">Soup</string>
+    <string name="filter_dessert">Dessert</string>
+
+
 </resources>

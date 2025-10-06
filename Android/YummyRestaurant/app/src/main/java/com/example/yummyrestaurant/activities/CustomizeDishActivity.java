@@ -29,7 +29,6 @@ public class CustomizeDishActivity extends AppCompatActivity {
         notesEditText = findViewById(R.id.notesEditText);
         saveBtn = findViewById(R.id.saveCustomizationBtn);
 
-        // Example spice levels
         String[] spiceLevels = {"Mild", "Medium", "Hot", "Numbing"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, spiceLevels);
@@ -38,6 +37,8 @@ public class CustomizeDishActivity extends AppCompatActivity {
         saveBtn.setOnClickListener(v -> {
             String chosenSpiceLevel = spiceSpinner.getSelectedItem().toString();
             String notes = notesEditText.getText().toString();
+
+            android.util.Log.d("CartDebug", "Customize save clicked: spice=" + chosenSpiceLevel + " notes=" + notes);
 
             Intent result = new Intent();
             result.putExtra(EXTRA_SPICE_LEVEL, chosenSpiceLevel);

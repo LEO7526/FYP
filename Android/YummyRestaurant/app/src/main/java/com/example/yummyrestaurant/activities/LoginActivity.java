@@ -136,41 +136,58 @@ public class LoginActivity extends AppCompatActivity {
         RoleManager.setUserTel(loginResponse.getUserTel());
         RoleManager.setUserImageUrl(loginResponse.getUserImageUrl());
 
-        // ✅ Restore pending cart item if present
+        // Restore pending cart item if present
         Intent data = getIntent();
-        MenuItem pendingItem = (MenuItem) data.getSerializableExtra("pendingMenuItem");
-        int qty = data.getIntExtra("pendingQuantity", 0);
-        String spice = data.getStringExtra("pendingSpice");
-        String notes = data.getStringExtra("pendingNotes");
+        if (data != null) {
+            MenuItem pendingItem = (MenuItem) data.getSerializableExtra("pendingMenuItem");
+            int qty = data.getIntExtra("pendingQuantity", 0);
+            String spice = data.getStringExtra("pendingSpice");
+            String notes = data.getStringExtra("pendingNotes");
 
-        if (pendingItem != null && qty > 0) {
-            Customization customization = new Customization(spice, notes);
-            CartItem cartItem = new CartItem(pendingItem, customization);
-            int currentQty = CartManager.getItemQuantity(cartItem);
-            CartManager.updateQuantity(cartItem, currentQty + qty);
+            if (pendingItem != null && qty > 0) {
+                // Only create customization object when at least one field is present
+                Customization customization = null;
+                boolean hasSpice = spice != null && !spice.isEmpty();
+                boolean hasNotes = notes != null && !notes.isEmpty();
+                if (hasSpice || hasNotes) {
+                    customization = new Customization(hasSpice ? spice : null, hasNotes ? notes : null);
+                }
 
-            Toast.makeText(
-                    this,
-                    qty + " × " + pendingItem.getName() +
-                            (customization != null && customization.getSpiceLevel() != null
-                                    ? " (" + customization.getSpiceLevel() + ")"
-                                    : "") +
-                            " added to cart",
-                    Toast.LENGTH_SHORT
-            ).show();
+                CartItem cartItem = new CartItem(pendingItem, customization);
+                // Use addItem to aggregate quantities correctly
+                CartManager.addItem(cartItem, qty);
 
-            // ✅ Clear extras so they won’t be reused
-            data.removeExtra("pendingMenuItem");
-            data.removeExtra("pendingQuantity");
-            data.removeExtra("pendingSpice");
-            data.removeExtra("pendingNotes");
+                android.util.Log.d("CartDebug", "Restored pending item: stableId="
+                        + (pendingItem != null ? pendingItem.hashCode() : "null")
+                        + " customization=" + customization + " qty=" + qty);
+
+                Toast.makeText(
+                        this,
+                        qty + " × " + (pendingItem.getName() == null ? "" : pendingItem.getName()) +
+                                (customization != null && customization.getSpiceLevel() != null
+                                        ? " (" + customization.getSpiceLevel() + ")"
+                                        : "") +
+                                " added to cart",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                // Clear extras so they won’t be reused
+                try {
+                    data.removeExtra("pendingMenuItem");
+                    data.removeExtra("pendingQuantity");
+                    data.removeExtra("pendingSpice");
+                    data.removeExtra("pendingNotes");
+                } catch (Exception ignored) {}
+            }
         }
 
-        //set login to true
+        // set login to true
         BrowseMenuActivity.setLogin(true);
 
-        // ✅ Redirect to home activity
+        // Redirect to home activity
         Intent intent = new Intent(LoginActivity.this, BrowseMenuActivity.class);
+        // Optionally clear back stack so user cannot go back to login
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
     }

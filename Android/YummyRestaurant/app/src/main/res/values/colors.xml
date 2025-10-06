@@ -75,6 +75,9 @@
 
     <!-- Purple 500 (Material Design standard) -->
     <color name="purple_500">#9C27B0</color>
+    <color name="purple_200">#BB86FC</color>
+    <color name="purple_700">#3700B3</color>
+
 
 
 </resources>

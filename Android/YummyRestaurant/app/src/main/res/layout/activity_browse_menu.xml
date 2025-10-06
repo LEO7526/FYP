@@ -64,8 +64,6 @@
                     android:ellipsize="end" />
             </FrameLayout>
 
-
-
             <TextView
                 android:id="@+id/appTitle"
                 android:layout_width="wrap_content"
@@ -104,35 +102,80 @@
                 android:padding="16dp"
                 android:gravity="center_vertical">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAll"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="All Dishes" />
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:paddingHorizontal="12dp"
+                    android:text="All Dishes"
+                    android:textSize="12sp"
+                    android:textColor="@color/purple_700"
+                    app:cornerRadius="20dp"
+                    app:strokeColor="@color/purple_700"
+                    app:strokeWidth="1dp"
+                    app:rippleColor="@color/purple_200" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAppetizers"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Appetizers" />
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:paddingHorizontal="12dp"
+                    android:text="Appetizers"
+                    android:textSize="12sp"
+                    android:textColor="@color/purple_700"
+                    app:cornerRadius="20dp"
+                    app:strokeColor="@color/purple_700"
+                    app:strokeWidth="1dp"
+                    app:rippleColor="@color/purple_200" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnMainCourses"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Main Courses" />
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:paddingHorizontal="12dp"
+                    android:text="Main Courses"
+                    android:textSize="12sp"
+                    android:textColor="@color/purple_700"
+                    app:cornerRadius="20dp"
+                    app:strokeColor="@color/purple_700"
+                    app:strokeWidth="1dp"
+                    app:rippleColor="@color/purple_200" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSoup"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Soup" />
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:paddingHorizontal="12dp"
+                    android:text="Soup"
+                    android:textSize="12sp"
+                    android:textColor="@color/purple_700"
+                    app:cornerRadius="20dp"
+                    app:strokeColor="@color/purple_700"
+                    app:strokeWidth="1dp"
+                    app:rippleColor="@color/purple_200" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDessert"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dessert" />
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:paddingHorizontal="12dp"
+                    android:text="Dessert"
+                    android:textSize="12sp"
+                    android:textColor="@color/purple_700"
+                    app:cornerRadius="20dp"
+                    app:strokeColor="@color/purple_700"
+                    app:strokeWidth="1dp"
+                    app:rippleColor="@color/purple_200" />
             </LinearLayout>
         </HorizontalScrollView>
 

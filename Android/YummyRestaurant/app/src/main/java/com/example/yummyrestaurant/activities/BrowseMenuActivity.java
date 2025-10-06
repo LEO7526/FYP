@@ -26,6 +26,7 @@ import com.example.yummyrestaurant.api.MenuApi;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuResponse;
+import com.example.yummyrestaurant.utils.BadgeManager;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.android.material.navigation.NavigationView;
@@ -39,7 +40,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class BrowseMenuActivity extends AppCompatActivity {
+public class BrowseMenuActivity extends BaseCustomerActivity {
 
     private RecyclerView menuRecyclerView;
     private MenuItemAdapter adapter;
@@ -55,7 +56,7 @@ public class BrowseMenuActivity extends AppCompatActivity {
 
     // New: cart badge views
     private ImageView cartIcon;
-    private TextView cartBadge;
+    private static TextView cartBadge;
 
     public static boolean isLogin() {
         return login;
@@ -73,6 +74,8 @@ public class BrowseMenuActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browse_menu);
+
+        setupBottomFunctionBar ();
 
         login = RoleManager.getUser() != null;
 
@@ -102,6 +105,7 @@ public class BrowseMenuActivity extends AppCompatActivity {
         // cart views (ensure your layout uses the FrameLayout with cartBadge)
         cartIcon = findViewById(R.id.cartIcon);
         cartBadge = findViewById(R.id.cartBadge);
+        BadgeManager.registerBadgeView(cartBadge);
     }
 
     private void setupRecyclerView() {
@@ -183,80 +187,7 @@ public class BrowseMenuActivity extends AppCompatActivity {
         });
     }
 
-    private void setupBottomFunctionBar() {
-        ImageView orderBellIcon = findViewById(R.id.orderBellIcon);
-        ImageView couponIcon = findViewById(R.id.couponIcon);
-        ImageView membershipIcon = findViewById(R.id.membershipIcon);
-        ImageView orderRecordIcon = findViewById(R.id.orderRecordIcon);
-        ImageView profileIcon = findViewById(R.id.profileIcon);
 
-        functionIcons.add(orderBellIcon);
-        functionIcons.add(couponIcon);
-        functionIcons.add(membershipIcon);
-        functionIcons.add(orderRecordIcon);
-        functionIcons.add(profileIcon);
-
-        iconBaseNames.put(orderBellIcon, "customer_main_page_function_item_background");
-        iconBaseNames.put(couponIcon, "customer_main_page_function_item_background");
-        iconBaseNames.put(membershipIcon, "customer_main_page_function_item_background_unique");
-        iconBaseNames.put(orderRecordIcon, "customer_main_page_function_item_background");
-        iconBaseNames.put(profileIcon, "customer_main_page_function_item_background");
-
-//        //default
-//        highlightIcon(orderBellIcon);
-
-        orderBellIcon.setOnClickListener(v -> {
-            highlightIcon(orderBellIcon);
-            Toast.makeText(this, "You're already on the Home page", Toast.LENGTH_SHORT).show();
-        });
-
-        couponIcon.setOnClickListener(v -> {
-            if (login) {
-                Intent intent = new Intent(this, CouponActivity.class);
-                intent.putExtra("selectedIcon", R.id.couponIcon); // tell Home which icon to highlight
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-        });
-
-        membershipIcon.setOnClickListener(v -> {
-            if (login) {
-                Intent intent = new Intent(this, MembershipActivity.class);
-                intent.putExtra("selectedIcon", R.id.membershipIcon); // tell Home which icon to highlight
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-
-        });
-
-        orderRecordIcon.setOnClickListener(v -> {
-
-            if (login) {
-                Intent intent = new Intent(this, OrderHistoryActivity.class);
-                intent.putExtra("selectedIcon", R.id.orderRecordIcon); // tell Home which icon to highlight
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-        });
-
-        profileIcon.setOnClickListener(v -> {
-
-            if (login) {
-                Intent intent = new Intent(this, ProfileActivity.class);
-                intent.putExtra("selectedIcon", R.id.profileIcon); // tell Home which icon to highlight
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-        });
-    }
 
     private void loadMenuItemsFromServer() {
         Log.d("MenuActivity", "Loading menu items for language: " + currentLanguage);
@@ -299,36 +230,7 @@ public class BrowseMenuActivity extends AppCompatActivity {
         adapter.filter(selectedCategory);
     }
 
-    private void highlightIcon(ImageView selectedIcon) {
-        for (ImageView icon : functionIcons) {
-            String baseName = iconBaseNames.get(icon);
-            if (baseName == null) continue;
 
-            int drawableId = (icon == selectedIcon)
-                    ? getResources().getIdentifier(baseName + "_current", "drawable", getPackageName())
-                    : getResources().getIdentifier(baseName, "drawable", getPackageName());
-
-            if (drawableId != 0) {
-                icon.setBackgroundResource(drawableId);
-            }
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Read which icon should be highlighted (default = Home/OrderBell)
-        int selectedIconId = getIntent().getIntExtra("selectedIcon", R.id.orderBellIcon);
-
-        ImageView selectedIcon = findViewById(selectedIconId);
-        if (selectedIcon != null) {
-            highlightIcon(selectedIcon);
-        }
-
-        // Refresh badge whenever activity resumes
-        updateCartBadge();
-    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -336,8 +238,15 @@ public class BrowseMenuActivity extends AppCompatActivity {
         setIntent(intent); // update the stored Intent so onResume() sees the latest extras
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateCartBadge(); // refresh badge every time this screen becomes visible
+    }
+
     // New: update cart badge from CartManager
-    private void updateCartBadge() {
+    public static void updateCartBadge() {
         int totalCount = 0;
         try {
             Map<CartItem, Integer> cart = CartManager.getCartItems();

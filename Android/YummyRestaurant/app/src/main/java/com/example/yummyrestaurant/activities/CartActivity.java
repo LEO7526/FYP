@@ -21,11 +21,13 @@ import java.util.Map;
 public class CartActivity extends AppCompatActivity {
 
     private RecyclerView cartRecyclerView;
-    private CartItemAdapter adapter;
     private TextView totalCostText;
     private Button checkoutBtn;
-    private Map<CartItem, Integer> cartItems;
     private double total;
+    private Map<CartItem, Integer> cartItems;
+
+    // 🔄 Expose adapter for external refresh
+    public static CartItemAdapter activeAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +40,9 @@ public class CartActivity extends AppCompatActivity {
 
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initialize adapter once
-        adapter = new CartItemAdapter(this, CartManager.getCartItems());
-        cartRecyclerView.setAdapter(adapter);
+        // Initialize adapter and expose it
+        activeAdapter = new CartItemAdapter(this, CartManager.getCartItems());
+        cartRecyclerView.setAdapter(activeAdapter);
 
         updateCartUI();
 
@@ -64,9 +66,18 @@ public class CartActivity extends AppCompatActivity {
         updateCartUI();
     }
 
+    // 🔁 Refresh cart UI from anywhere
+    public static void refreshCartUI() {
+        if (activeAdapter != null) {
+            activeAdapter.updateItems(CartManager.getCartItems());
+        }
+    }
+
     private void updateCartUI() {
         cartItems = CartManager.getCartItems();
-        adapter.updateItems(cartItems);
+        if (activeAdapter != null) {
+            activeAdapter.updateItems(cartItems);
+        }
 
         total = CartManager.getTotalCost();
         totalCostText.setText(String.format(Locale.getDefault(), "Total: HK$ %.2f", total));

@@ -9,6 +9,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,16 +21,20 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Customization;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.BadgeManager;
 import com.example.yummyrestaurant.utils.CartManager;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class DishDetailActivity extends AppCompatActivity {
 
-    private static final int REQUEST_CUSTOMIZE = 1001;
     private Customization selectedCustomization = null;
+    private ActivityResultLauncher<Intent> customizeLauncher;
+    private MenuItem item;                // current menu item shown
+    private int currentQuantity = 1;      // quantity chosen on UI
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +47,70 @@ public class DishDetailActivity extends AppCompatActivity {
             return insets;
         });
 
-        MenuItem item = (MenuItem) getIntent().getSerializableExtra("menuItem");
+        // Restore saved customization/quantity after configuration change
+        if (savedInstanceState != null) {
+            String savedSpice = savedInstanceState.getString("cust_spice");
+            String savedNotes = savedInstanceState.getString("cust_notes");
+            if (savedSpice != null || savedNotes != null) {
+                selectedCustomization = new Customization(savedSpice, savedNotes);
+                android.util.Log.d("CartDebug", "onCreate restored selectedCustomization: " + selectedCustomization);
+            }
+            currentQuantity = savedInstanceState.getInt("cust_qty", 1);
+        }
+
+        // Activity Result launcher for customization (will auto-add to cart on save)
+        customizeLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    android.util.Log.d("CartDebug", "ActivityResult callback: " + result);
+                    if (result != null && result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Intent data = result.getData();
+                        String spice = data.getStringExtra(CustomizeDishActivity.EXTRA_SPICE_LEVEL);
+                        String notes = data.getStringExtra(CustomizeDishActivity.EXTRA_NOTES);
+                        android.util.Log.d("CartDebug", "Customization returned: spice=" + spice + " notes=" + notes);
+
+                        // set selected customization
+                        selectedCustomization = new Customization(spice, notes);
+                        android.util.Log.d("CartDebug", "selectedCustomization set: " + selectedCustomization);
+
+                        // Immediately add customized item to cart using currentQuantity
+                        if (item != null) {
+                            CartItem cartItem = new CartItem(item, selectedCustomization);
+                            android.util.Log.d("CartDebug", "Auto-adding customized item to cart: menuId="
+                                    + stableMenuItemIdForLogging(item) + " qty=" + currentQuantity);
+                            CartManager.addItem(cartItem, currentQuantity);
+                            CartActivity.refreshCartUI();
+
+                            BadgeManager.updateCartBadge(CartManager.getTotalItems());
+
+
+
+
+                            // Log snapshot after add
+                            for (Map.Entry<CartItem, Integer> e : CartManager.getCartItems().entrySet()) {
+                                android.util.Log.d("CartDebug", "post-auto-add snapshot keyHash=" + e.getKey().hashCode()
+                                        + " stableId=" + stableMenuItemIdForLogging(e.getKey().getMenuItem())
+                                        + " customization=" + e.getKey().getCustomization()
+                                        + " qty=" + e.getValue());
+                            }
+
+                            Toast.makeText(this, currentQuantity + " × " +
+                                    (item.getName() == null ? "" : item.getName()) +
+                                    (selectedCustomization != null && selectedCustomization.getSpiceLevel() != null
+                                            ? " (" + selectedCustomization.getSpiceLevel() + ")"
+                                            : "") + " added to cart", Toast.LENGTH_SHORT).show();
+                        } else {
+                            android.util.Log.d("CartDebug", "Auto-add skipped: item == null");
+                            Toast.makeText(this, "Customization saved", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        android.util.Log.d("CartDebug", "Customization canceled or no data returned");
+                    }
+                }
+        );
+
+        // Obtain menu item
+        item = (MenuItem) getIntent().getSerializableExtra("menuItem");
 
         TextView name = findViewById(R.id.dishNameDetail);
         TextView description = findViewById(R.id.dishDescriptionDetail);
@@ -55,16 +124,17 @@ public class DishDetailActivity extends AppCompatActivity {
         Button increaseBtn = findViewById(R.id.increaseQtyBtn);
         TextView quantityText = findViewById(R.id.quantityText);
 
-        final int[] quantity = {1};
+        currentQuantity = 1;
+        quantityText.setText(String.valueOf(currentQuantity));
         decreaseBtn.setOnClickListener(v -> {
-            if (quantity[0] > 1) {
-                quantity[0]--;
-                quantityText.setText(String.valueOf(quantity[0]));
+            if (currentQuantity > 1) {
+                currentQuantity--;
+                quantityText.setText(String.valueOf(currentQuantity));
             }
         });
         increaseBtn.setOnClickListener(v -> {
-            quantity[0]++;
-            quantityText.setText(String.valueOf(quantity[0]));
+            currentQuantity++;
+            quantityText.setText(String.valueOf(currentQuantity));
         });
 
         if (item != null) {
@@ -97,7 +167,6 @@ public class DishDetailActivity extends AppCompatActivity {
                     tagsContainer.addView(tagView);
                 }
             } else {
-                // optional: hide container if no tags
                 tagsContainer.removeAllViews();
             }
 
@@ -112,7 +181,7 @@ public class DishDetailActivity extends AppCompatActivity {
                 image.setImageResource(R.drawable.placeholder);
             }
 
-            // Spice level bar (spice_level is int in model)
+            // Spice level bar
             spiceBar.removeAllViews();
             int spiceCount = 0;
             try {
@@ -141,29 +210,44 @@ public class DishDetailActivity extends AppCompatActivity {
                 spiceBar.addView(defaultSegment);
             }
 
-            // Add to Cart button logic
+            // Add to Cart button logic (kept for plain-add / manual add if user wants)
             addToCartBtn.setOnClickListener(v -> {
+                android.util.Log.d("CartDebug", "DishDetail add clicked: menuItemHash="
+                        + (item != null ? item.hashCode() : "null")
+                        + " selectedCustomization=" + selectedCustomization
+                        + " qty=" + currentQuantity);
+
+                CartItem cartItem = new CartItem(item, selectedCustomization);
+                android.util.Log.d("CartDebug", "DishDetail cartItem built: keyHash=" + cartItem.hashCode()
+                        + " menuStableId=" + stableMenuItemIdForLogging(item)
+                        + " customization=" + cartItem.getCustomization());
+
                 if (BrowseMenuActivity.isLogin()) {
-                    // User is logged in → add directly
-                    CartItem cartItem = new CartItem(item, selectedCustomization);
-                    int currentQty = CartManager.getItemQuantity(cartItem);
-                    CartManager.updateQuantity(cartItem, currentQty + quantity[0]);
+                    CartManager.addItem(cartItem, currentQuantity);
+                    CartActivity.refreshCartUI();
+
+
+                    for (Map.Entry<CartItem, Integer> e : CartManager.getCartItems().entrySet()) {
+                        android.util.Log.d("CartDebug", "post-add snapshot keyHash=" + e.getKey().hashCode()
+                                + " stableId=" + stableMenuItemIdForLogging(e.getKey().getMenuItem())
+                                + " customization=" + e.getKey().getCustomization()
+                                + " qty=" + e.getValue());
+                    }
 
                     Toast.makeText(
                             this,
-                            quantity[0] + " × " + (item.getName() == null ? "" : item.getName()) +
+                            currentQuantity + " × " + (item.getName() == null ? "" : item.getName()) +
                                     (selectedCustomization != null && selectedCustomization.getSpiceLevel() != null
                                             ? " (" + selectedCustomization.getSpiceLevel() + ")"
                                             : ""),
                             Toast.LENGTH_SHORT
                     ).show();
                 } else {
-                    // User not logged in → redirect to LoginActivity with pending extras
                     Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(this, LoginActivity.class);
-                    intent.putExtra("pendingMenuItem", item); // MenuItem must implement Serializable/Parcelable
-                    intent.putExtra("pendingQuantity", quantity[0]);
+                    intent.putExtra("pendingMenuItem", item);
+                    intent.putExtra("pendingQuantity", currentQuantity);
 
                     if (selectedCustomization != null) {
                         intent.putExtra("pendingSpice", selectedCustomization.getSpiceLevel());
@@ -181,30 +265,35 @@ public class DishDetailActivity extends AppCompatActivity {
             image.setImageResource(R.drawable.error_image);
         }
 
-        // Launch customization
+        // Launch customization with Activity Result API
         Button customizeBtn = findViewById(R.id.customizeBtn);
         customizeBtn.setOnClickListener(v -> {
+            // preserve currentQuantity when launching customize
             Intent intent = new Intent(this, CustomizeDishActivity.class);
-            startActivityForResult(intent, REQUEST_CUSTOMIZE);
+            customizeLauncher.launch(intent);
         });
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CUSTOMIZE && resultCode == RESULT_OK && data != null) {
-            String spiceLevel = data.getStringExtra(CustomizeDishActivity.EXTRA_SPICE_LEVEL);
-            String extraNotes = data.getStringExtra(CustomizeDishActivity.EXTRA_NOTES);
-
-            selectedCustomization = new Customization(spiceLevel, extraNotes);
-
-            Toast.makeText(
-                    this,
-                    "Customization saved: " + spiceLevel +
-                            (extraNotes != null && !extraNotes.isEmpty() ? " (" + extraNotes + ")" : ""),
-                    Toast.LENGTH_SHORT
-            ).show();
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (selectedCustomization != null) {
+            outState.putString("cust_spice", selectedCustomization.getSpiceLevel());
+            outState.putString("cust_notes", selectedCustomization.getExtraNotes());
         }
+        outState.putInt("cust_qty", currentQuantity);
+    }
+
+    private Object stableMenuItemIdForLogging(MenuItem menu) {
+        if (menu == null) return null;
+        try { return menu.getClass().getMethod("getId").invoke(menu); } catch (Exception ignored) {}
+        try { return menu.getClass().getMethod("get_id").invoke(menu); } catch (Exception ignored) {}
+        try { return menu.getClass().getMethod("getUuid").invoke(menu); } catch (Exception ignored) {}
+        try {
+            String name = (String) menu.getClass().getMethod("getName").invoke(menu);
+            double price = (double) menu.getClass().getMethod("getPrice").invoke(menu);
+            return (name == null ? "" : name) + "|" + price;
+        } catch (Exception ignored) {}
+        return menu.hashCode();
     }
 }

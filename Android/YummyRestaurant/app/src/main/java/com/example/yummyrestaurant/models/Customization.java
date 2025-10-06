@@ -3,8 +3,8 @@ package com.example.yummyrestaurant.models;
 import java.util.Objects;
 
 public class Customization {
-    private String spiceLevel; // e.g. "Mild", "Medium", "Hot"
-    private String extraNotes; // e.g. "No onions", "Extra sauce"
+    private String spiceLevel;
+    private String extraNotes;
 
     public Customization(String spiceLevel, String extraNotes) {
         this.spiceLevel = spiceLevel;
@@ -26,5 +26,10 @@ public class Customization {
     @Override
     public int hashCode() {
         return Objects.hash(spiceLevel, extraNotes);
+    }
+
+    @Override
+    public String toString() {
+        return "Customization{spiceLevel=" + spiceLevel + ", extraNotes=" + extraNotes + "}";
     }
 }
