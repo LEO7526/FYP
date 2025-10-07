@@ -48,7 +48,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
     private EditText searchBar;
     private String currentLanguage = "en";
     private static boolean login;
-    private Button btnAll, btnAppetizers, btnMainCourses, btnSoup, btnDessert;
+    private Button btnAll, btnAppetizers, btnMainCourses, btnSoup, btnDessert, btnDrink;
     private String selectedCategory = "All Dishes"; // default
 
     private List<ImageView> functionIcons = new ArrayList<>();
@@ -101,6 +101,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         btnMainCourses = findViewById(R.id.btnMainCourses);
         btnSoup = findViewById(R.id.btnSoup);
         btnDessert = findViewById(R.id.btnDessert);
+        btnDrink = findViewById(R.id.btnDrink);
 
         // cart views (ensure your layout uses the FrameLayout with cartBadge)
         cartIcon = findViewById(R.id.cartIcon);
@@ -139,6 +140,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
                 selectedCategory = "Soup";
             } else if (id == R.id.btnDessert) {
                 selectedCategory = "Dessert";
+            } else if (id == R.id.btnDrink) {
+                selectedCategory = "Drink";
             }
             applyFilters();
         };
@@ -148,6 +151,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         btnMainCourses.setOnClickListener(listener);
         btnSoup.setOnClickListener(listener);
         btnDessert.setOnClickListener(listener);
+        btnDrink.setOnClickListener(listener); // new
     }
 
     private void setupNavigationDrawer() {

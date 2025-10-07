@@ -164,11 +164,15 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                 holder.spiceIconContainer.addView(chili);
             }
         } else {
-            TextView noSpice = new TextView(context);
-            noSpice.setText("No spice");
-            noSpice.setTextSize(10);
-            noSpice.setTextColor(Color.GRAY);
-            holder.spiceIconContainer.addView(noSpice);
+
+            if (!item.getCategory().equalsIgnoreCase("Drink")) {
+                TextView noSpice = new TextView(context);
+                noSpice.setText("No spice");
+                noSpice.setTextSize(10);
+                noSpice.setTextColor(Color.GRAY);
+                holder.spiceIconContainer.addView(noSpice);
+            }
+
         }
 
         // Load dish image with Glide
