@@ -163,16 +163,30 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
+            // Check login status
+            boolean isLoggedIn = RoleManager.getUserId() != null && !RoleManager.getUserId().isEmpty();
+
+            // Block access to all items except logout if not logged in
+            if (!isLoggedIn && id != R.id.nav_logout) {
+                Toast.makeText(this, "Please log in to access this feature.", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
             if (id == R.id.nav_settings) {
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             } else if (id == R.id.nav_logout) {
+                if (!isLoggedIn) {
+                    Toast.makeText(this, "You are not logged in.", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
                 new AlertDialog.Builder(this)
                         .setTitle("Confirm Logout")
                         .setMessage("Are you sure you want to log out?")
                         .setPositiveButton("Logout", (dialog, which) -> {
                             RoleManager.clearUserData();
-                            startActivity(new Intent(this, LoginActivity.class));
+                            startActivity(new Intent(this, BrowseMenuActivity.class));
                             finish();
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())

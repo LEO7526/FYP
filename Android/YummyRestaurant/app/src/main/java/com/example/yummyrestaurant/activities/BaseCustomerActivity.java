@@ -1,14 +1,14 @@
 package com.example.yummyrestaurant.activities;
 
-
 import android.content.Intent;
+import android.os.Bundle;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-
+import com.example.yummyrestaurant.LoginBottomSheetFragment;
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.models.MenuItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,12 +20,17 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
     protected List<ImageView> functionIcons = new ArrayList<>();
     protected Map<ImageView, String> iconBaseNames = new HashMap<>();
 
-    private boolean login ;
+    private boolean login;
+    private Runnable pendingAction;
 
     @Override
     protected void onResume() {
         super.onResume();
-        int selectedIconId = getIntent().getIntExtra("selectedIcon", 0); // no default highlight
+        // Refresh login state whenever the user returns
+        login = BrowseMenuActivity.getLogin();
+
+        // Highlight whichever icon was passed in the Intent
+        int selectedIconId = getIntent().getIntExtra("selectedIcon", 0);
         if (selectedIconId != 0) {
             ImageView selectedIcon = findViewById(selectedIconId);
             if (selectedIcon != null) {
@@ -41,14 +46,11 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
     }
 
     protected void setupBottomFunctionBar() {
-
-        login = BrowseMenuActivity.getLogin();
-
-        ImageView orderBellIcon = findViewById(R.id.orderBellIcon);
-        ImageView couponIcon = findViewById(R.id.couponIcon);
-        ImageView membershipIcon = findViewById(R.id.membershipIcon);
-        ImageView orderRecordIcon = findViewById(R.id.orderRecordIcon);
-        ImageView profileIcon = findViewById(R.id.profileIcon);
+        ImageView orderBellIcon     = findViewById(R.id.orderBellIcon);
+        ImageView couponIcon        = findViewById(R.id.couponIcon);
+        ImageView membershipIcon    = findViewById(R.id.membershipIcon);
+        ImageView orderRecordIcon   = findViewById(R.id.orderRecordIcon);
+        ImageView profileIcon       = findViewById(R.id.profileIcon);
 
         functionIcons.clear();
         functionIcons.add(orderBellIcon);
@@ -57,75 +59,106 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
         functionIcons.add(orderRecordIcon);
         functionIcons.add(profileIcon);
 
-        iconBaseNames.put(orderBellIcon, "customer_main_page_function_item_background");
-        iconBaseNames.put(couponIcon, "customer_main_page_function_item_background");
-        iconBaseNames.put(membershipIcon, "customer_main_page_function_item_background_unique");
+        iconBaseNames.put(orderBellIcon,   "customer_main_page_function_item_background");
+        iconBaseNames.put(couponIcon,      "customer_main_page_function_item_background");
+        iconBaseNames.put(membershipIcon,  "customer_main_page_function_item_background_unique");
         iconBaseNames.put(orderRecordIcon, "customer_main_page_function_item_background");
-        iconBaseNames.put(profileIcon, "customer_main_page_function_item_background");
+        iconBaseNames.put(profileIcon,     "customer_main_page_function_item_background");
 
-        // Set click listeners to navigate
-        orderBellIcon.setOnClickListener(v -> {
-            Intent intent = new Intent(this, BrowseMenuActivity.class);
-            intent.putExtra("selectedIcon", R.id.orderBellIcon);
-            startActivity(intent);
-        });
-
-        couponIcon.setOnClickListener(v -> {
-            if (login) {
-                Intent intent = new Intent(this, CouponActivity.class);
-                intent.putExtra("selectedIcon", R.id.couponIcon); // tell Home which icon to highlight
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-        });
-
-        membershipIcon.setOnClickListener(v -> {
-            if (login) {
-                Intent intent = new Intent(this, MembershipActivity.class);
-                intent.putExtra("selectedIcon", R.id.membershipIcon); // tell Home which icon to highlight
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-
-        });
-
-        orderRecordIcon.setOnClickListener(v -> {
-
-            if (login) {
-                Intent intent = new Intent(this, OrderHistoryActivity.class);
-                intent.putExtra("selectedIcon", R.id.orderRecordIcon); // tell Home which icon to highlight
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-        });
-
-        profileIcon.setOnClickListener(v -> {
-
-            if (login) {
-                Intent intent = new Intent(this, ProfileActivity.class);
-                intent.putExtra("selectedIcon", R.id.profileIcon); // tell Home which icon to highlight
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-        });
+        orderBellIcon.setOnClickListener(v ->
+                navigateProtected(R.id.orderBellIcon, BrowseMenuActivity.class, null, 0, null, null)
+        );
+        couponIcon.setOnClickListener(v ->
+                navigateProtected(R.id.couponIcon, CouponActivity.class, null, 0, null, null)
+        );
+        membershipIcon.setOnClickListener(v ->
+                navigateProtected(R.id.membershipIcon, MembershipActivity.class, null, 0, null, null)
+        );
+        orderRecordIcon.setOnClickListener(v ->
+                navigateProtected(R.id.orderRecordIcon, OrderHistoryActivity.class, null, 0, null, null)
+        );
+        profileIcon.setOnClickListener(v ->
+                navigateProtected(R.id.profileIcon, ProfileActivity.class, null, 0, null, null)
+        );
     }
 
+    /**
+     * Checks login state; BrowseMenuActivity is always allowed.
+     * Other activities require login. Optionally passes pending cart extras.
+     */
+    protected void navigateProtected(int iconId,
+                                     Class<? extends AppCompatActivity> target,
+                                     MenuItem pendingItem,
+                                     int pendingQuantity,
+                                     String pendingSpice,
+                                     String pendingNotes) {
+        if (target == BrowseMenuActivity.class) {
+            launchScreen(iconId, target);
+            return;
+        }
+
+        if (login) {
+            launchScreen(iconId, target);
+        } else {
+            showInlineLogin(() -> launchScreen(iconId, target),
+                    pendingItem, pendingQuantity, pendingSpice, pendingNotes);
+        }
+    }
+
+    /**
+     * Actually starts the target Activity and passes along the selected icon ID.
+     */
+    private void launchScreen(int iconId, Class<? extends AppCompatActivity> cls) {
+        Intent intent = new Intent(this, cls);
+        intent.putExtra("selectedIcon", iconId);
+        startActivity(intent);
+    }
+
+    /**
+     * Shows the inline login bottom sheet, passing pending cart extras.
+     */
+    private void showInlineLogin(Runnable onSuccess,
+                                 MenuItem pendingItem,
+                                 int pendingQuantity,
+                                 String pendingSpice,
+                                 String pendingNotes) {
+
+        Bundle args = new Bundle();
+        if (pendingItem != null) {
+            args.putSerializable("pendingMenuItem", pendingItem);
+            args.putInt("pendingQuantity", pendingQuantity);
+            args.putString("pendingSpice", pendingSpice);
+            args.putString("pendingNotes", pendingNotes);
+        }
+
+        LoginBottomSheetFragment sheet = new LoginBottomSheetFragment();
+        sheet.setArguments(args);
+
+        sheet.setLoginListener(success -> {
+            if (success) {
+                login = true;
+                if (onSuccess != null) onSuccess.run();
+            }
+        });
+
+        sheet.show(getSupportFragmentManager(), "login_sheet");
+    }
+
+    /**
+     * Highlights the tapped icon by switching its background drawable
+     * to the "_current" variant, and resets all others.
+     */
     protected void highlightIcon(ImageView selectedIcon) {
         for (ImageView icon : functionIcons) {
             String baseName = iconBaseNames.get(icon);
             if (baseName == null) continue;
 
-            int drawableId = (icon == selectedIcon)
-                    ? getResources().getIdentifier(baseName + "_current", "drawable", getPackageName())
-                    : getResources().getIdentifier(baseName, "drawable", getPackageName());
+            String drawableName = icon == selectedIcon
+                    ? baseName + "_current"
+                    : baseName;
+
+            int drawableId = getResources()
+                    .getIdentifier(drawableName, "drawable", getPackageName());
 
             if (drawableId != 0) {
                 icon.setBackgroundResource(drawableId);

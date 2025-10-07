@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
+import com.example.yummyrestaurant.LoginBottomSheetFragment;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Customization;
@@ -245,23 +246,43 @@ public class DishDetailActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
 
-                    Intent intent = new Intent(this, LoginActivity.class);
-                    intent.putExtra("pendingMenuItem", item);
-                    intent.putExtra("pendingQuantity", currentQuantity);
-
+                    // Prepare arguments for login bottom sheet
+                    Bundle args = new Bundle();
+                    args.putSerializable("pendingMenuItem", item);
+                    args.putInt("pendingQuantity", currentQuantity);
                     if (selectedCustomization != null) {
-                        intent.putExtra("pendingSpice", selectedCustomization.getSpiceLevel());
-                        intent.putExtra("pendingNotes", selectedCustomization.getExtraNotes());
+                        args.putString("pendingSpice", selectedCustomization.getSpiceLevel());
+                        args.putString("pendingNotes", selectedCustomization.getExtraNotes());
                     }
 
-                    startActivity(intent);
+                    // Show inline login bottom sheet
+                    LoginBottomSheetFragment sheet = new LoginBottomSheetFragment();
+                    sheet.setArguments(args);
+                    sheet.setLoginListener(success -> {
+                        if (success) {
+                            // After login, reuse existing cartItem
+                            CartItem restoredItem = new CartItem(item, selectedCustomization);
+                            CartManager.addItem(restoredItem, currentQuantity);
+                            CartActivity.refreshCartUI();
+
+                            Toast.makeText(
+                                    this,
+                                    currentQuantity + " × " + (item.getName() == null ? "" : item.getName()) +
+                                            (selectedCustomization != null && selectedCustomization.getSpiceLevel() != null
+                                                    ? " (" + selectedCustomization.getSpiceLevel() + ")"
+                                                    : ""),
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    });
+                    sheet.show(getSupportFragmentManager(), "login_sheet");
                 }
             });
 
         } else {
             name.setText("Dish not found");
             description.setText("Unable to load dish details.");
-            price.setText("¥ --");
+            price.setText("$ --");
             image.setImageResource(R.drawable.error_image);
         }
 
