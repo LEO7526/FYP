@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+
+    <!-- Fork -->
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M8.1,13.34L10,11.44V2h-2v6H7V2H5v6H4V2H2v9.44l1.9,1.9V22h2v-8.66z" />
+
+    <!-- Knife -->
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M14,2h2v20h-2z" />
+
+    <!-- Plate (circle outline) -->
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M22,12c0,-5.52 -4.48,-10 -10,-10S2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10zm-2,0c0,4.42 -3.58,8 -8,8s-8,-3.58 -8,-8 3.58,-8 8,-8 8,3.58 8,8z" />
+</vector>

@@ -55,7 +55,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
     private Map<ImageView, String> iconBaseNames = new HashMap<>();
 
     // New: cart badge views
-    private ImageView cartIcon;
+    private ImageView cartIcon,setMenuIcon;
     private static TextView cartBadge;
 
     public static boolean isLogin() {
@@ -107,6 +107,10 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         cartIcon = findViewById(R.id.cartIcon);
         cartBadge = findViewById(R.id.cartBadge);
         BadgeManager.registerBadgeView(cartBadge);
+
+
+        setMenuIcon = findViewById(R.id.setMenuIcon);
+
     }
 
     private void setupRecyclerView() {
@@ -164,6 +168,17 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
             cartIcon.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
         }
 
+
+        if (setMenuIcon != null) {
+            setMenuIcon.setOnClickListener(v -> {
+                // Reuse BaseCustomerActivity’s login check
+                navigateProtected(
+                        0, // no bottom bar icon ID to highlight
+                        BuildSetMenuActivity.class,
+                        null, 0, null, null
+                );
+            });
+        }
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
@@ -224,6 +239,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().success) {
                     adapter.setMenuItems(response.body().data);
                     applyFilters();
+
+
                 } else {
                     Toast.makeText(BrowseMenuActivity.this, "Failed to load menu items", Toast.LENGTH_SHORT).show();
                 }

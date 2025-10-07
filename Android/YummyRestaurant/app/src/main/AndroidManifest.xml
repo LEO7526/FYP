@@ -30,6 +30,9 @@
         android:theme="@style/Theme.YummyRestaurant"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".activities.BuildSetMenuActivity"
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"
@@ -111,11 +114,13 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
-                    android:scheme="com.example.yummyrestaurant"
-                    android:host="stripe-redirect" />
+                    android:host="stripe-redirect"
+                    android:scheme="com.example.yummyrestaurant" />
             </intent-filter>
         </activity>
         <activity

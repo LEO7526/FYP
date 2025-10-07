@@ -19,6 +19,7 @@
             android:padding="16dp"
             android:background="@color/white">
 
+            <!-- Left menu icon -->
             <ImageView
                 android:id="@+id/menuIcon"
                 android:layout_width="24dp"
@@ -26,6 +27,17 @@
                 android:src="@drawable/ic_menu"
                 android:contentDescription="Menu"
                 android:layout_alignParentStart="true"
+                android:layout_centerVertical="true" />
+
+            <!-- Set Menu icon (new) -->
+            <ImageView
+                android:id="@+id/setMenuIcon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_set_menu"
+                android:contentDescription="Set Menu"
+                android:layout_toStartOf="@id/cartIconContainer"
+                android:layout_marginEnd="16dp"
                 android:layout_centerVertical="true" />
 
             <!-- FrameLayout container around cart icon -->
@@ -64,6 +76,7 @@
                     android:ellipsize="end" />
             </FrameLayout>
 
+            <!-- Title in the center -->
             <TextView
                 android:id="@+id/appTitle"
                 android:layout_width="wrap_content"
