@@ -106,21 +106,29 @@ public class RoleManager {
     }
 
     public static String getUserImageUrl() {
-        String role = getUserRole();
-        String resolvedPath;
+        // Return the stored URL as-is, don't concatenate again
+        return userImageUrl;
+    }
 
-        if ("staff".equals(role)) {
-            resolvedPath = (userImageUrl != null && !userImageUrl.isEmpty()) ? "uploads/staff/" + userImageUrl : null;
-        } else {
-            resolvedPath = (userImageUrl != null && !userImageUrl.isEmpty()) ? "uploads/customers/" + userImageUrl : null;
+    public static void setUserImageUrl(String imagePathOrFileName) {
+        if (imagePathOrFileName == null || imagePathOrFileName.isEmpty()) {
+            userImageUrl = null;
+            return;
         }
 
-        Log.d(TAG, "getUserImageUrl: role=" + role + ", resolvedPath=" + resolvedPath);
-        return resolvedPath;
+        // If caller passed just a filename, prepend the correct folder
+        if (!imagePathOrFileName.contains("Image/Profile_image")) {
+            if ("staff".equals(userRole)) {
+                userImageUrl = "../Image/Profile_image/Staff/" + imagePathOrFileName;
+            } else {
+                userImageUrl = "../Image/Profile_image/Customer/" + imagePathOrFileName;
+            }
+        } else {
+            // Already a relative path
+            userImageUrl = imagePathOrFileName;
+        }
+
+        Log.d(TAG, "setUserImageUrl: stored=" + userImageUrl);
     }
 
-    public static void setUserImageUrl(String userImageUrl) {
-        Log.d(TAG, "setUserImageUrl: " + userImageUrl);
-        RoleManager.userImageUrl = userImageUrl;
-    }
 }

@@ -104,9 +104,8 @@ public class EditProfileActivity extends AppCompatActivity {
         emailInput.setText(currentEmail != null ? currentEmail : "");
 
         if (imagePath != null && !imagePath.isEmpty()) {
-            // Ensure we're using the correctly formatted path
-            String correctImagePath = RoleManager.getUserImageUrl();
-            String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + correctImagePath;
+            // Build the full URL using the base URL + relative path
+            String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + imagePath;
             Log.d(TAG, "Loading profile image from: " + fullImageUrl);
 
             Glide.with(this)
@@ -193,16 +192,21 @@ public class EditProfileActivity extends AppCompatActivity {
                             if (response.isSuccessful() && response.body() != null) {
                                 UploadResponse uploadResponse = response.body();
                                 if ("success".equals(uploadResponse.getStatus())) {
-                                    // ✅ FIX: Extract just the filename from the full path
-                                    String fullPath = uploadResponse.getPath();
-                                    String fileName = extractFileNameFromPath(fullPath);
+                                    String fileName = extractFileNameFromPath(uploadResponse.getPath());
 
-                                    // Store only the filename in RoleManager
-                                    RoleManager.setUserImageUrl(fileName);
+                                    String role = RoleManager.getUserRole();
+                                    String relativePath;
+                                    if ("staff".equals(role)) {
+                                        relativePath = "../Image/Profile_image/Staff/" + fileName;
+                                    } else {
+                                        relativePath = "../Image/Profile_image/Customer/" + fileName;
+                                    }
 
-                                    // Get the correctly formatted path for immediate display
-                                    String correctImagePath = RoleManager.getUserImageUrl();
-                                    String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + correctImagePath;
+                                    // Store the correct relative path
+                                    RoleManager.setUserImageUrl(relativePath);
+
+                                    // Build full URL for display
+                                    String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + relativePath;
 
                                     Glide.with(EditProfileActivity.this)
                                             .load(fullImageUrl)
@@ -214,7 +218,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                                     Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
                                     // Pass the correctly formatted path
-                                    intent.putExtra("updatedImageUrl", correctImagePath);
+                                    intent.putExtra("updatedImageUrl", relativePath);
                                     startActivity(intent);
                                     finish();
                                 } else {

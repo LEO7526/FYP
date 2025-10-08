@@ -61,7 +61,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:gravity="start" />
+            android:gravity="start"/>
 
         <LinearLayout
             android:id="@+id/spiceBarDetail"
@@ -103,7 +103,70 @@
                 android:background="#FFF3E0" />
         </LinearLayout>
 
-        <!-- Removed Quantity Selector, Customize, and Add to Cart buttons -->
+        <!-- Quantity Selector -->
+        <LinearLayout
+            android:id="@+id/quantitySelector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
+
+            <Button
+                android:id="@+id/decreaseQtyBtn"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:text="-"
+                android:textSize="24sp"
+                android:backgroundTint="@color/primaryColor"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-black"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/quantityText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textColor="#333333" />
+
+            <Button
+                android:id="@+id/increaseQtyBtn"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:text="+"
+                android:textSize="24sp"
+                android:backgroundTint="@color/primaryColor"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-black"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Customization Button -->
+        <Button
+            android:id="@+id/customizeBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Customize"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/colorSecondary"
+            android:textColor="@android:color/white" />
+
+
+        <Button
+            android:id="@+id/addToCartBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add to Cart"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/primaryColor"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 </ScrollView>

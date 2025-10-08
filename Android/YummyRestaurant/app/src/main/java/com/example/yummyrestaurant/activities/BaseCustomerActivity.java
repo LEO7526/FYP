@@ -21,7 +21,6 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
     protected Map<ImageView, String> iconBaseNames = new HashMap<>();
 
     private boolean login;
-    private Runnable pendingAction;
 
     @Override
     protected void onResume() {
@@ -93,14 +92,14 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
                                      String pendingSpice,
                                      String pendingNotes) {
         if (target == BrowseMenuActivity.class) {
-            launchScreen(iconId, target);
+            launchScreen(iconId, target, null, 0, null, null);
             return;
         }
 
         if (login) {
-            launchScreen(iconId, target);
+            launchScreen(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes);
         } else {
-            showInlineLogin(() -> launchScreen(iconId, target),
+            showInlineLogin(() -> launchScreen(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes),
                     pendingItem, pendingQuantity, pendingSpice, pendingNotes);
         }
     }
@@ -108,9 +107,34 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
     /**
      * Actually starts the target Activity and passes along the selected icon ID.
      */
-    private void launchScreen(int iconId, Class<? extends AppCompatActivity> cls) {
+    private void launchScreen(int iconId,
+                              Class<? extends AppCompatActivity> cls,
+                              MenuItem pendingItem,
+                              int pendingQuantity,
+                              String pendingSpice,
+                              String pendingNotes) {
         Intent intent = new Intent(this, cls);
         intent.putExtra("selectedIcon", iconId);
+
+        // Forward dish context if customizing
+        if (cls == CustomizeDishActivity.class) {
+            // Always forward the dish context if DishDetailActivity set it
+            MenuItem dish = (MenuItem) getIntent().getSerializableExtra("menuItem");
+            int qty = getIntent().getIntExtra("quantity", 1);
+            if (dish != null) {
+                intent.putExtra(CustomizeDishActivity.EXTRA_MENU_ITEM, dish);
+                intent.putExtra(CustomizeDishActivity.EXTRA_QUANTITY, qty);
+            }
+        }
+
+        // Forward pending cart extras for cart-related actions
+        if (pendingItem != null && cls != CustomizeDishActivity.class) {
+            intent.putExtra("pendingMenuItem", pendingItem);
+            intent.putExtra("pendingQuantity", pendingQuantity);
+            intent.putExtra("pendingSpice", pendingSpice);
+            intent.putExtra("pendingNotes", pendingNotes);
+        }
+
         startActivity(intent);
     }
 

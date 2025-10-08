@@ -155,6 +155,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         // Save user info
         RoleManager.setUserEmail(email);
         RoleManager.setUserRole(loginResponse.getRole());
+        android.util.Log.d("LoginBottomSheetFragment",""+RoleManager.getUserRole());
         RoleManager.setUserName(loginResponse.getUserName());
         RoleManager.setUserId(loginResponse.getUserId());
         RoleManager.setUserTel(loginResponse.getUserTel());
@@ -177,7 +178,10 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                 }
 
                 CartItem cartItem = new CartItem(pendingItem, customization);
-                CartManager.addItem(cartItem, qty);
+                Integer existing = CartManager.getItemQuantity(cartItem);
+                int base = (existing != null) ? existing : 0;
+                CartManager.updateQuantity(cartItem, base + qty);
+
 
                 Log.d("CartDebug", "Restored pending item: stableId="
                         + pendingItem.hashCode()

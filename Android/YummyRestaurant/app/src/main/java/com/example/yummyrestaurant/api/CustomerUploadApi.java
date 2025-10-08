@@ -12,7 +12,7 @@ import retrofit2.http.Part;
 public interface CustomerUploadApi {
 
     @Multipart
-    @POST("save_customerImage.php")
+    @POST("save_customerProfileImage.php")
     Call<UploadResponse> uploadImage(
             @Part MultipartBody.Part image,
             @Part("cemail") RequestBody email

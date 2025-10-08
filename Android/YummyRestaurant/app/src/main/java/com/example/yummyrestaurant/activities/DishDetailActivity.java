@@ -1,27 +1,32 @@
 package com.example.yummyrestaurant.activities;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.models.CartItem;
+import com.example.yummyrestaurant.models.Customization;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.CartManager;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class DishDetailActivity extends AppCompatActivity {
+public class DishDetailActivity extends BaseCustomerActivity {
 
-    private MenuItem item;                // current menu item shown
+    private Customization selectedCustomization = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,26 +39,43 @@ public class DishDetailActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Obtain menu item
-        item = (MenuItem) getIntent().getSerializableExtra("menuItem");
+        MenuItem item = (MenuItem) getIntent().getSerializableExtra("menuItem");
 
         TextView name = findViewById(R.id.dishNameDetail);
         TextView description = findViewById(R.id.dishDescriptionDetail);
         TextView price = findViewById(R.id.dishPriceDetail);
         ImageView image = findViewById(R.id.dishImageDetail);
         LinearLayout spiceBar = findViewById(R.id.spiceBarDetail);
+        Button addToCartBtn = findViewById(R.id.addToCartBtn);
+
+        // Quantity controls
+        Button decreaseBtn = findViewById(R.id.decreaseQtyBtn);
+        Button increaseBtn = findViewById(R.id.increaseQtyBtn);
+        TextView quantityText = findViewById(R.id.quantityText);
+
+        final int[] quantity = {1};
+        decreaseBtn.setOnClickListener(v -> {
+            if (quantity[0] > 1) {
+                quantity[0]--;
+                quantityText.setText(String.valueOf(quantity[0]));
+            }
+        });
+        increaseBtn.setOnClickListener(v -> {
+            quantity[0]++;
+            quantityText.setText(String.valueOf(quantity[0]));
+        });
 
         if (item != null) {
             name.setText(item.getName() != null ? item.getName() : "Unknown Dish");
             description.setText(item.getDescription() != null ? item.getDescription() : "No description available.");
             price.setText(String.format(Locale.getDefault(), "¥ %.2f", item.getPrice()));
 
+            // Tags
             LinearLayout tagsContainer = findViewById(R.id.tagsContainer);
-            List<String> itemTags = item.getTags();
-            if (itemTags != null && !itemTags.isEmpty()) {
+            if (item.getTags() != null && !item.getTags().isEmpty()) {
                 tagsContainer.removeAllViews();
-                for (String rawTag : itemTags) {
-                    String tag = rawTag == null ? "" : rawTag.trim();
+                for (String rawTag : item.getTags()) {
+                    String tag = rawTag.trim();
                     if (tag.isEmpty()) continue;
 
                     TextView tagView = new TextView(this);
@@ -66,16 +88,14 @@ public class DishDetailActivity extends AppCompatActivity {
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                     );
-                    int marginPx = (int) (8 * getResources().getDisplayMetrics().density);
-                    params.setMargins(marginPx, marginPx, marginPx, marginPx);
+                    params.setMargins(8, 8, 8, 8);
                     tagView.setLayoutParams(params);
 
                     tagsContainer.addView(tagView);
                 }
-            } else {
-                tagsContainer.removeAllViews();
             }
 
+            // Image
             String imageUrl = item.getImage_url();
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(this)
@@ -89,38 +109,86 @@ public class DishDetailActivity extends AppCompatActivity {
 
             // Spice level bar
             spiceBar.removeAllViews();
-            int spiceCount = 0;
-            try {
-                spiceCount = Math.max(0, Math.min(4, item.getSpice_level()));
-            } catch (Exception e) {
-                spiceCount = 0;
+            int spiceLevel = item.getSpice_level();
+            int spiceCount;
+            switch (spiceLevel) {
+                case 1: spiceCount = 1; break;
+                case 2: spiceCount = 2; break;
+                case 3: spiceCount = 3; break;
+                case 4: spiceCount = 4; break;
+                default: spiceCount = 0; break;
             }
-
             List<String> spiceColors = Arrays.asList("#FFECB3", "#FFC107", "#FF9800", "#F44336");
-            int segmentWidthPx = (int) (24 * getResources().getDisplayMetrics().density);
-            int segmentHeightPx = (int) (8 * getResources().getDisplayMetrics().density);
-            int gapPx = (int) (4 * getResources().getDisplayMetrics().density);
-
             for (int i = 0; i < spiceCount; i++) {
                 TextView segment = new TextView(this);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(segmentWidthPx, segmentHeightPx);
-                if (i > 0) params.setMarginStart(gapPx);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(24, 8);
+                if (i > 0) params.setMarginStart(4);
                 segment.setLayoutParams(params);
-                segment.setBackgroundColor(Color.parseColor(spiceColors.get(Math.min(i, spiceColors.size() - 1))));
+                segment.setBackgroundColor(Color.parseColor(spiceColors.get(i)));
                 spiceBar.addView(segment);
             }
             if (spiceCount == 0) {
                 TextView defaultSegment = new TextView(this);
-                defaultSegment.setLayoutParams(new LinearLayout.LayoutParams(segmentWidthPx, segmentHeightPx));
+                defaultSegment.setLayoutParams(new LinearLayout.LayoutParams(24, 8));
                 defaultSegment.setBackgroundColor(Color.parseColor("#BDBDBD"));
                 spiceBar.addView(defaultSegment);
             }
 
+            // Add to Cart button
+            addToCartBtn.setOnClickListener(v -> {
+                CartItem cartItem = new CartItem(item, selectedCustomization);
+
+                Integer qtyFromCart = CartManager.getItemQuantity(cartItem);
+                int currentQty = (qtyFromCart != null) ? qtyFromCart : 0;
+
+                String pendingSpice = (selectedCustomization != null) ? selectedCustomization.getSpiceLevel() : null;
+                String pendingNotes = (selectedCustomization != null) ? selectedCustomization.getExtraNotes() : null;
+
+                if (BrowseMenuActivity.isLogin()) {
+                    // Update cart immediately
+                    CartManager.updateQuantity(cartItem, currentQty + quantity[0]);
+
+                    String customizationText = (pendingSpice != null) ? " (" + pendingSpice + ")" : "";
+                    Toast.makeText(
+                            this,
+                            quantity[0] + " × " + item.getName() + customizationText,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                } else {
+                    // Defer cart action until after login
+                    navigateProtected(
+                            R.id.addToCartBtn,
+                            CartActivity.class,   // go to cart after login
+                            item,
+                            currentQty + quantity[0],
+                            pendingSpice,
+                            pendingNotes
+                    );
+                }
+            });
+
         } else {
             name.setText("Dish not found");
             description.setText("Unable to load dish details.");
-            price.setText("$ --");
+            price.setText("¥ --");
             image.setImageResource(R.drawable.error_image);
         }
+
+        // Customize button
+        Button customizeBtn = findViewById(R.id.customizeBtn);
+        customizeBtn.setOnClickListener(v -> {
+            if (BrowseMenuActivity.isLogin()) {
+                Intent intent = new Intent(this, CustomizeDishActivity.class);
+                intent.putExtra(CustomizeDishActivity.EXTRA_MENU_ITEM, item);
+                intent.putExtra(CustomizeDishActivity.EXTRA_QUANTITY, quantity[0]);
+                startActivity(intent);
+            } else {
+                navigateProtected(
+                        R.id.customizeBtn,
+                        CustomizeDishActivity.class,
+                        null, 0, null, null   // ✅ just gate access, don’t add to cart
+                );
+            }
+        });
     }
 }
