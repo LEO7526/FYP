@@ -20,7 +20,7 @@ spassword varchar(255) NOT NULL,
 sname varchar(255) NOT NULL,
 srole varchar(45) DEFAULT NULL,
 stel int DEFAULT NULL,
-simageurl VARCHAR(45) NULL,
+simageurl VARCHAR(255) NULL,
 PRIMARY KEY (sid),
 UNIQUE KEY semail_UNIQUE (semail) -- Ensure emails are unique
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
