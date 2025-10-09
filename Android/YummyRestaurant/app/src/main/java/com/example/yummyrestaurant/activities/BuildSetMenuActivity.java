@@ -1,8 +1,13 @@
 package com.example.yummyrestaurant.activities;
 
 import android.app.AlertDialog;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,8 +20,9 @@ import com.example.yummyrestaurant.api.MenuApi;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
-import com.example.yummyrestaurant.models.MenuResponse;
+import com.example.yummyrestaurant.models.PackageType;
 import com.example.yummyrestaurant.models.SetMenu;
+import com.example.yummyrestaurant.models.SetMenuResponse;
 import com.example.yummyrestaurant.utils.CartManager;
 
 import java.util.ArrayList;
@@ -28,115 +34,132 @@ import retrofit2.Response;
 
 public class BuildSetMenuActivity extends AppCompatActivity {
 
-    private RecyclerView appetizerRecycler, soupRecycler, mainsRecycler, dessertRecycler, drinkRecycler;
+    private LinearLayout packageContainer;
     private Button confirmBtn;
-
-    private static final double DISCOUNT_RATE = 0.10; // 10% off
-
-    private SelectableMenuItemAdapter appetizerAdapter, soupAdapter, mainsAdapter, dessertAdapter, drinkAdapter;
+    private final List<SelectableMenuItemAdapter> adapters = new ArrayList<>();
+    private SetMenu currentSetMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_build_set_menu);
 
-        appetizerRecycler = findViewById(R.id.appetizerRecycler);
-        soupRecycler = findViewById(R.id.soupRecycler);
-        mainsRecycler = findViewById(R.id.mainsRecycler);
-        dessertRecycler = findViewById(R.id.dessertRecycler);
-        drinkRecycler = findViewById(R.id.drinkRecycler);
+        packageContainer = findViewById(R.id.packageContainer);
         confirmBtn = findViewById(R.id.confirmSetMenuBtn);
 
-        // Fetch menu items from server
+        int packageId = getIntent().getIntExtra("package_id", 1); // default to 1 if not passed
+
         MenuApi menuApi = RetrofitClient.getClient().create(MenuApi.class);
-        Call<MenuResponse> call = menuApi.getMenuItems("en");
+        Call<SetMenuResponse> call = menuApi.getSetMenu(packageId, "en");
 
-        call.enqueue(new Callback<MenuResponse>() {
+        call.enqueue(new Callback<SetMenuResponse>() {
             @Override
-            public void onResponse(Call<MenuResponse> call, Response<MenuResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().success) {
-                    List<MenuItem> allItems = response.body().data;
-
-                    // Filter into categories
-                    List<MenuItem> appetizers = filterByCategory(allItems, "Appetizers");
-                    List<MenuItem> soups = filterByCategory(allItems, "Soup");
-                    List<MenuItem> mains = filterByCategory(allItems, "Main Courses");
-                    List<MenuItem> desserts = filterByCategory(allItems, "Dessert");
-                    List<MenuItem> drinks = filterByCategory(allItems, "Drink");
-
-                    // Setup adapters
-                    appetizerAdapter = new SelectableMenuItemAdapter(appetizers, 1); // single
-                    soupAdapter = new SelectableMenuItemAdapter(soups, 1); // single
-                    mainsAdapter = new SelectableMenuItemAdapter(mains, 2); // allow 2
-                    dessertAdapter = new SelectableMenuItemAdapter(desserts, 1);
-                    drinkAdapter = new SelectableMenuItemAdapter(drinks, 1);
-
-                    setupRecycler(appetizerRecycler, appetizerAdapter);
-                    setupRecycler(soupRecycler, soupAdapter);
-                    setupRecycler(mainsRecycler, mainsAdapter);
-                    setupRecycler(dessertRecycler, dessertAdapter);
-                    setupRecycler(drinkRecycler, drinkAdapter);
-
-                    confirmBtn.setOnClickListener(v -> confirmSelection());
+            public void onResponse(Call<SetMenuResponse> call, Response<SetMenuResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    currentSetMenu = response.body().getData();
+                    if (currentSetMenu != null) {
+                        Log.d("BuildSetMenuActivity", "Loaded SetMenu: " + currentSetMenu.getName());
+                        setupAdaptersFromPackage(currentSetMenu);
+                    } else {
+                        Log.w("BuildSetMenuActivity", "SetMenu data is null");
+                        Toast.makeText(BuildSetMenuActivity.this, "No menu data", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Toast.makeText(BuildSetMenuActivity.this, "Failed to load menu items", Toast.LENGTH_SHORT).show();
+                    Log.e("BuildSetMenuActivity", "API failed: " + response.code());
+                    Toast.makeText(BuildSetMenuActivity.this, "Failed to load set menu", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<MenuResponse> call, Throwable t) {
+            public void onFailure(Call<SetMenuResponse> call, Throwable t) {
+                Log.e("BuildSetMenuActivity", "API error", t);
                 Toast.makeText(BuildSetMenuActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void setupRecycler(RecyclerView rv, RecyclerView.Adapter adapter) {
-        rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rv.setAdapter(adapter);
-    }
+    private void setupAdaptersFromPackage(SetMenu setMenu) {
+        packageContainer.removeAllViews();
+        adapters.clear();
 
-    private List<MenuItem> filterByCategory(List<MenuItem> items, String category) {
-        List<MenuItem> result = new ArrayList<>();
-        for (MenuItem item : items) {
-            if (item.getCategory() != null && item.getCategory().equalsIgnoreCase(category)) {
-                result.add(item);
-            }
-        }
-        return result;
-    }
-
-    private void confirmSelection() {
-        List<MenuItem> chosenApp = appetizerAdapter.getSelectedItems();
-        List<MenuItem> chosenSoup = soupAdapter.getSelectedItems();
-        List<MenuItem> chosenMains = mainsAdapter.getSelectedItems();
-        List<MenuItem> chosenDessert = dessertAdapter.getSelectedItems();
-        List<MenuItem> chosenDrink = drinkAdapter.getSelectedItems();
-
-        if (chosenApp.size() != 1 || chosenSoup.size() != 1 ||
-                chosenMains.size() != 2 || chosenDessert.size() != 1 || chosenDrink.size() != 1) {
-            Toast.makeText(this, "Please complete your set menu selection", Toast.LENGTH_SHORT).show();
+        if (setMenu == null) {
+            Log.e("BuildSetMenuActivity", "SetMenu is null!");
             return;
         }
 
-        final List<MenuItem> allChosen = new ArrayList<>();
-        allChosen.addAll(chosenApp);
-        allChosen.addAll(chosenSoup);
-        allChosen.addAll(chosenMains);
-        allChosen.addAll(chosenDessert);
-        allChosen.addAll(chosenDrink);
+        Log.d("BuildSetMenuActivity", "SetMenu loaded: id=" + setMenu.getId()
+                + ", name=" + setMenu.getName()
+                + ", numOfType=" + setMenu.getNumOfType()
+                + ", discount=" + setMenu.getDiscount());
 
-        // Calculate total price
+        List<PackageType> types = setMenu.getTypes();
+        if (types == null || types.isEmpty()) {
+            Log.w("BuildSetMenuActivity", "No types found in SetMenu");
+            return;
+        }
+
+        for (PackageType type : types) {
+            Log.d("BuildSetMenuActivity", "Type: id=" + type.getId()
+                    + ", name=" + type.getName()
+                    + ", optionalQuantity=" + type.getOptionalQuantity()
+                    + ", items=" + (type.getItems() != null ? type.getItems().size() : 0));
+
+            // 1. Create label
+            TextView label = new TextView(this);
+            label.setText("Choose " + type.getOptionalQuantity() + " " + type.getName());
+            label.setTextSize(16f);
+            label.setTypeface(null, Typeface.BOLD);
+            label.setPadding(0, 24, 0, 8);
+            packageContainer.addView(label);
+
+            // 2. Create RecyclerView
+            RecyclerView rv = new RecyclerView(this);
+            rv.setLayoutParams(new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    (int) getResources().getDimension(R.dimen.recycler_height)
+            ));
+            rv.setNestedScrollingEnabled(false);
+
+            // 3. Setup adapter
+            SelectableMenuItemAdapter adapter = new SelectableMenuItemAdapter(
+                    type.getItems(),
+                    type.getOptionalQuantity()
+            );
+            rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            rv.setAdapter(adapter);
+
+            // 4. Add to container and keep reference
+            packageContainer.addView(rv);
+            adapters.add(adapter);
+        }
+
+        confirmBtn.setOnClickListener(v -> confirmSelection());
+    }
+    private void confirmSelection() {
+        // Collect all chosen items from each adapter
+        final List<MenuItem> allChosen = new ArrayList<>();
+
+        for (SelectableMenuItemAdapter adapter : adapters) {
+            List<MenuItem> selected = adapter.getSelectedItems();
+            if (selected.size() < adapter.getRequiredCount()) {
+                Toast.makeText(this, "Please complete your selection", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            allChosen.addAll(selected);
+        }
+
+        // Calculate totals
         double total = 0.0;
         for (MenuItem m : allChosen) {
             total += m.getPrice();
         }
-        final double totalPrice = total;
+        final double finalTotal = total;
 
-        // Apply discount (example: 10%)
+        // Use discount from DB if available, otherwise fallback
+        double discountRate = currentSetMenu.getDiscount() > 0 ? currentSetMenu.getDiscount() : 1.0;
+        final double discountedPrice = finalTotal * discountRate;
 
-        final double discountedPrice = totalPrice * (1 - DISCOUNT_RATE);
-
-        // Build a string with all selected dish names + prices
+        // Build summary string
         StringBuilder summary = new StringBuilder();
         for (MenuItem item : allChosen) {
             summary.append("• ")
@@ -146,31 +169,25 @@ public class BuildSetMenuActivity extends AppCompatActivity {
                     .append("\n");
         }
 
-        // Add totals at the bottom
-        summary.append("\nOriginal Total: $").append(String.format("%.2f", totalPrice))
+        summary.append("\nOriginal Total: $").append(String.format("%.2f", finalTotal))
                 .append("\nDiscounted Total: $").append(String.format("%.2f", discountedPrice));
 
         // Show confirmation dialog
         new AlertDialog.Builder(this)
-                .setTitle("Confirm Your Set Menu")
+                .setTitle("Confirm Your " + currentSetMenu.getName())
                 .setMessage(summary.toString())
                 .setPositiveButton("Confirm", (dialog, which) -> {
-                    SetMenu customMenu = new SetMenu(
-                            "Custom Menu",
-                            "Your own combination",
-                            discountedPrice,
-                            allChosen
-                    );
-
-                    // Add to cart
-                    for (MenuItem item : customMenu.getItems()) {
+                    for (MenuItem item : allChosen) {
                         CartItem cartItem = new CartItem(item, null);
                         CartManager.addItem(cartItem, 1);
                     }
 
-                    Toast.makeText(this,
-                            "Custom Menu added! You saved $" + String.format("%.2f", totalPrice - discountedPrice),
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(
+                            BuildSetMenuActivity.this,
+                            currentSetMenu.getName() + " added! You saved $" +
+                                    String.format("%.2f", finalTotal - discountedPrice),
+                            Toast.LENGTH_LONG
+                    ).show();
 
                     finish();
                 })

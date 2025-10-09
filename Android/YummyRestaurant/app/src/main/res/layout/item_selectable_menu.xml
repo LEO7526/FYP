@@ -1,10 +1,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemRoot"
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:padding="8dp"
-    android:gravity="center">
-
+    android:gravity="center"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/itemImage"
@@ -13,9 +16,8 @@
         android:scaleType="centerCrop"
         android:layout_marginTop="6dp"
         android:background="@drawable/image_rounded_bg"
-        android:contentDescription="@string/menu_item_image_desc"/>
+        android:contentDescription="@string/menu_item_image_desc" />
 
-    <!-- Dish name -->
     <TextView
         android:id="@+id/itemName"
         android:layout_width="wrap_content"
@@ -24,6 +26,7 @@
         android:textStyle="bold"
         android:textSize="14sp"
         android:textColor="#333333"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:layout_marginTop="4dp" />
 
 </LinearLayout>

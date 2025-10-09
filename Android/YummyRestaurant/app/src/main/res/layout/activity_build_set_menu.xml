@@ -8,74 +8,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Appetizer -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Choose 1 Appetizer"
-            style="@style/TextAppearance.MaterialComponents.Subtitle1" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/appetizerRecycler"
+        <!-- 🔹 This is the container your Activity will populate dynamically -->
+        <LinearLayout
+            android:id="@+id/packageContainer"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:overScrollMode="never" />
-
-        <!-- Soup -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Choose 1 Soup"
-            style="@style/TextAppearance.MaterialComponents.Subtitle1"
-            android:layout_marginTop="16dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/soupRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:overScrollMode="never" />
-
-        <!-- Mains -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Choose 2 Mains"
-            style="@style/TextAppearance.MaterialComponents.Subtitle1"
-            android:layout_marginTop="16dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mainsRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:overScrollMode="never" />
-
-        <!-- Dessert -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Choose 1 Dessert"
-            style="@style/TextAppearance.MaterialComponents.Subtitle1"
-            android:layout_marginTop="16dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/dessertRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:overScrollMode="never" />
-
-        <!-- Drink -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Choose 1 Drink"
-            style="@style/TextAppearance.MaterialComponents.Subtitle1"
-            android:layout_marginTop="16dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/drinkRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:overScrollMode="never" />
+            android:layout_height="wrap_content" />
 
         <!-- Confirm Button -->
         <Button
@@ -86,5 +24,6 @@
             android:layout_marginTop="24dp"
             android:backgroundTint="@color/primaryColor"
             android:textColor="@android:color/white" />
+
     </LinearLayout>
 </ScrollView>

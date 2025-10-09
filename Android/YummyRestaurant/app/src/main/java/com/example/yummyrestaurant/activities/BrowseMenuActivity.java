@@ -174,7 +174,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
                 // Reuse BaseCustomerActivity’s login check
                 navigateProtected(
                         0, // no bottom bar icon ID to highlight
-                        BuildSetMenuActivity.class,
+                        PackagesActivity.class,
                         null, 0, null, null
                 );
             });

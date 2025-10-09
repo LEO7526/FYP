@@ -1,7 +1,7 @@
 package com.example.yummyrestaurant.adapters;
 
-import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,13 +20,11 @@ import java.util.List;
 
 public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMenuItemAdapter.ViewHolder> {
 
-    private final Context context;
     private final List<MenuItem> items;
     private final List<MenuItem> selectedItems = new ArrayList<>();
     private final int maxSelection; // how many items can be selected in this category
 
     public SelectableMenuItemAdapter(List<MenuItem> items, int maxSelection) {
-        this.context = null; // not strictly needed, we use itemView.getContext()
         this.items = items != null ? items : new ArrayList<>();
         this.maxSelection = maxSelection;
     }
@@ -43,7 +41,8 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MenuItem item = items.get(position);
 
-        // Set name
+        Log.d("SelectableAdapter", "Binding item: id=" + item.getId() + ", name=" + item.getName());
+
         holder.name.setText(item.getName() != null ? item.getName() : "Unnamed Dish");
 
         // Load image with Glide
@@ -60,9 +59,9 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
 
         // Highlight if selected
         if (selectedItems.contains(item)) {
-            holder.itemView.setBackgroundResource(R.drawable.item_selected_background);
+            holder.root.setBackgroundResource(R.drawable.item_selected_background);
         } else {
-            holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            holder.root.setBackgroundColor(Color.TRANSPARENT);
         }
 
         // Handle click
@@ -84,16 +83,24 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         return items.size();
     }
 
+    /** Returns the currently selected items */
     public List<MenuItem> getSelectedItems() {
         return new ArrayList<>(selectedItems);
+    }
+
+    /** Returns how many items must/can be selected (used in validation) */
+    public int getRequiredCount() {
+        return maxSelection;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         ImageView image;
+        View root;
 
         ViewHolder(View itemView) {
             super(itemView);
+            root = itemView.findViewById(R.id.itemRoot);
             name = itemView.findViewById(R.id.itemName);
             image = itemView.findViewById(R.id.itemImage);
         }
