@@ -116,15 +116,20 @@ public class RoleManager {
             return;
         }
 
-        // If caller passed just a filename, prepend the correct folder
-        if (!imagePathOrFileName.contains("Image/Profile_image")) {
+        // ✅ If it's a full GitHub URL, store it directly
+        if (imagePathOrFileName.startsWith("http://") || imagePathOrFileName.startsWith("https://")) {
+            userImageUrl = imagePathOrFileName;
+        }
+        // ✅ If it's a raw filename, prepend local folder
+        else if (!imagePathOrFileName.contains("Image/Profile_image")) {
             if ("staff".equals(userRole)) {
                 userImageUrl = "../Image/Profile_image/Staff/" + imagePathOrFileName;
             } else {
                 userImageUrl = "../Image/Profile_image/Customer/" + imagePathOrFileName;
             }
-        } else {
-            // Already a relative path
+        }
+        // ✅ Already a relative path
+        else {
             userImageUrl = imagePathOrFileName;
         }
 

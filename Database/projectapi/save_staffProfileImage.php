@@ -121,12 +121,19 @@ if ($httpCode === 201 || $httpCode === 200) {
     $responseData = json_decode($response, true);
     $imageUrl     = $responseData['content']['download_url'] ?? null;
 
-    echo json_encode([
-        'success'   => true,
-        'message'   => 'Staff profile image uploaded successfully',
-        'imageUrl'  => $imageUrl,
-        'fileName'  => $fileName
-    ]);
+
+// Update staff table with new image URL
+$updateQuery = "UPDATE staff SET simageurl = ? WHERE semail = ?";
+$stmt = $conn->prepare($updateQuery);
+$stmt->bind_param("ss", $imageUrl, $staffId);
+$stmt->execute();
+
+echo json_encode([
+    'success'   => true,
+    'message'   => 'Staff profile image uploaded and saved',
+    'imageUrl'  => $imageUrl,
+    'fileName'  => $fileName
+]);
 } else {
     $errorData    = json_decode($response, true);
     $errorMessage = $errorData['message'] ?? 'Upload failed, HTTP status code: ' . $httpCode;

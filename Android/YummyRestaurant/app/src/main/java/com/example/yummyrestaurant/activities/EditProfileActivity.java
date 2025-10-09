@@ -104,8 +104,7 @@ public class EditProfileActivity extends AppCompatActivity {
         emailInput.setText(currentEmail != null ? currentEmail : "");
 
         if (imagePath != null && !imagePath.isEmpty()) {
-            // Build the full URL using the base URL + relative path
-            String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + imagePath;
+            String fullImageUrl = imagePath; // Now imagePath is the full GitHub URL
             Log.d(TAG, "Loading profile image from: " + fullImageUrl);
 
             Glide.with(this)
@@ -189,27 +188,32 @@ public class EditProfileActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(Call<UploadResponse> call, Response<UploadResponse> response) {
                             progressDialog.dismiss();
+
+                            Log.e(TAG, "Server response code: " + response.code());
+
                             if (response.isSuccessful() && response.body() != null) {
                                 UploadResponse uploadResponse = response.body();
+                                Log.d(TAG, "UploadResponse status: " + uploadResponse.getStatus());
+                                Log.d(TAG, "UploadResponse path: " + uploadResponse.getPath());
+                                Log.d(TAG, "UploadResponse message: " + uploadResponse.getMessage());
+
                                 if ("success".equals(uploadResponse.getStatus())) {
                                     String fileName = extractFileNameFromPath(uploadResponse.getPath());
-
                                     String role = RoleManager.getUserRole();
-                                    String relativePath;
+
+                                    String githubBaseUrl = "https://raw.githubusercontent.com/LEO7526/FYP/main/Image/Profile_image/";
+                                    String githubImageUrl;
+
                                     if ("staff".equals(role)) {
-                                        relativePath = "../Image/Profile_image/Staff/" + fileName;
+                                        githubImageUrl = githubBaseUrl + "Staff/" + fileName;
                                     } else {
-                                        relativePath = "../Image/Profile_image/Customer/" + fileName;
+                                        githubImageUrl = githubBaseUrl + "Customer/" + fileName;
                                     }
 
-                                    // Store the correct relative path
-                                    RoleManager.setUserImageUrl(relativePath);
-
-                                    // Build full URL for display
-                                    String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + relativePath;
+                                    RoleManager.setUserImageUrl(githubImageUrl);
 
                                     Glide.with(EditProfileActivity.this)
-                                            .load(fullImageUrl)
+                                            .load(githubImageUrl)
                                             .placeholder(R.drawable.default_avatar)
                                             .error(R.drawable.error_image)
                                             .into(profilePreview);
@@ -217,8 +221,7 @@ public class EditProfileActivity extends AppCompatActivity {
                                     Toast.makeText(EditProfileActivity.this, "✅ Image uploaded!", Toast.LENGTH_SHORT).show();
 
                                     Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
-                                    // Pass the correctly formatted path
-                                    intent.putExtra("updatedImageUrl", relativePath);
+                                    intent.putExtra("updatedImageUrl", githubImageUrl);
                                     startActivity(intent);
                                     finish();
                                 } else {
@@ -226,6 +229,15 @@ public class EditProfileActivity extends AppCompatActivity {
                                 }
                             } else {
                                 Toast.makeText(EditProfileActivity.this, "❌ Server error: " + response.code(), Toast.LENGTH_LONG).show();
+
+                                try {
+                                    if (response.errorBody() != null) {
+                                        String errorBody = response.errorBody().string();
+                                        Log.e(TAG, "Error body content: " + errorBody);
+                                    }
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Error reading errorBody", e);
+                                }
                             }
                         }
 

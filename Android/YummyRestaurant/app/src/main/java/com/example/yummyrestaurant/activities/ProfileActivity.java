@@ -87,7 +87,7 @@ public class ProfileActivity extends BaseCustomerActivity {
 
     private void loadProfileImage(String imagePath) {
         if (imagePath != null && !imagePath.isEmpty()) {
-            String fullImageUrl = RetrofitClient.getBASE_Simulator_URL() + imagePath;
+            String fullImageUrl = imagePath; // ✅ Use GitHub URL directly
             Log.d(TAG, "loadProfileImage: Loading image from URL = " + fullImageUrl);
 
             Glide.with(this)
