@@ -7,7 +7,7 @@ if ($conn->connect_error) {
 }
 
 // ⚠️ Hardcoded GitHub token (for demo; not safe for production)
-$githubToken = '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'; 
+$githubToken = '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'; 
 $repoOwner   = 'LEO7526';
 $repoName    = 'FYP';
 $branch      = 'main';
@@ -21,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Validate file upload
-if (!isset($_FILES['profileImage']) || $_FILES['profileImage']['error'] !== UPLOAD_ERR_OK) {
-    $errorCode = $_FILES['profileImage']['error'] ?? 'undefined';
+// Validate file upload (Android sends "image")
+if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+    $errorCode = $_FILES['image']['error'] ?? 'undefined';
     http_response_code(400);
     echo json_encode([
         'success'    => false,
@@ -33,8 +33,17 @@ if (!isset($_FILES['profileImage']) || $_FILES['profileImage']['error'] !== UPLO
     exit;
 }
 
-$uploadedFile = $_FILES['profileImage'];
-$staffId      = $_POST['semail'] ?? null; // use staffId for staff profile images
+$uploadedFile = $_FILES['image'];
+$staffEmail   = $_POST['semail'] ?? null;
+
+if (!$staffEmail) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Missing staff email'
+    ]);
+    exit;
+}
 
 // Validate file type
 $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -51,7 +60,7 @@ if (!in_array($fileType, $allowedTypes)) {
 
 // Generate filename
 $fileExtension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-$fileName = $staffId ? ($staffId . '.' . $fileExtension) : (uniqid() . '_' . time() . '.' . $fileExtension);
+$fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $staffEmail) . '.' . $fileExtension;
 
 // Save under staff profile folder
 $filePathInRepo = 'Image/Profile_image/Staff/' . $fileName;
@@ -68,13 +77,12 @@ curl_setopt_array($ch, [
     CURLOPT_URL            => $apiUrl,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_HTTPHEADER     => [
-        'Authorization: token ' . $githubToken,
+        'Authorization: Bearer ' . $githubToken,
         'User-Agent: PHP-Script',
         'Accept: application/vnd.github.v3+json'
     ],
     CURLOPT_TIMEOUT        => 30
 ]);
-
 $checkResponse = curl_exec($ch);
 $checkHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $sha = null;
@@ -103,7 +111,7 @@ curl_setopt_array($ch, [
     CURLOPT_CUSTOMREQUEST  => 'PUT',
     CURLOPT_POSTFIELDS     => json_encode($postData),
     CURLOPT_HTTPHEADER     => [
-        'Authorization: token ' . $githubToken,
+        'Authorization: Bearer ' . $githubToken,
         'User-Agent: PHP-Script',
         'Content-Type: application/json',
         'Accept: application/vnd.github.v3+json'
@@ -121,19 +129,29 @@ if ($httpCode === 201 || $httpCode === 200) {
     $responseData = json_decode($response, true);
     $imageUrl     = $responseData['content']['download_url'] ?? null;
 
+    if (!$imageUrl) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Upload succeeded but no image URL returned'
+        ]);
+        exit;
+    }
 
-// Update staff table with new image URL
-$updateQuery = "UPDATE staff SET simageurl = ? WHERE semail = ?";
-$stmt = $conn->prepare($updateQuery);
-$stmt->bind_param("ss", $imageUrl, $staffId);
-$stmt->execute();
+    // ✅ Update staff table with full GitHub URL
+    $updateQuery = "UPDATE staff SET simageurl = ? WHERE semail = ?";
+    $stmt = $conn->prepare($updateQuery);
+    $stmt->bind_param("ss", $imageUrl, $staffEmail);
+    $stmt->execute();
 
-echo json_encode([
-    'success'   => true,
-    'message'   => 'Staff profile image uploaded and saved',
-    'imageUrl'  => $imageUrl,
-    'fileName'  => $fileName
-]);
+    // ✅ Return full GitHub URL in response
+    echo json_encode([
+        'success'   => true,
+        'status'    => 'success',
+        'message'   => 'Staff profile image uploaded and saved',
+        'imageUrl'  => $imageUrl,
+        'fileName'  => $fileName
+    ]);
 } else {
     $errorData    = json_decode($response, true);
     $errorMessage = $errorData['message'] ?? 'Upload failed, HTTP status code: ' . $httpCode;
@@ -141,6 +159,7 @@ echo json_encode([
     http_response_code(400);
     echo json_encode([
         'success'   => false,
+        'status'    => 'error',
         'message'   => $errorMessage,
         'httpCode'  => $httpCode,
         'response'  => $response,

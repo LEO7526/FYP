@@ -112,6 +112,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         handleLoginSuccess(response.body(), email);
+
                     } else {
                         // Try customer login if staff login fails
                         Call<LoginResponse> customerCall = loginCustomerApi.loginUser(email, password);
@@ -120,6 +121,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                                     handleLoginSuccess(response.body(), email);
+
                                 } else {
                                     Toast.makeText(getContext(),
                                             "Login failed. Please check your credentials.",
@@ -153,13 +155,26 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         Toast.makeText(getContext(), "Login successful", Toast.LENGTH_SHORT).show();
 
         // Save user info
+        // Save user info
         RoleManager.setUserEmail(email);
         RoleManager.setUserRole(loginResponse.getRole());
-        android.util.Log.d("LoginBottomSheetFragment",""+RoleManager.getUserRole());
+        Log.d("LoginBottomSheetFragment", "Role = " + RoleManager.getUserRole());
         RoleManager.setUserName(loginResponse.getUserName());
         RoleManager.setUserId(loginResponse.getUserId());
         RoleManager.setUserTel(loginResponse.getUserTel());
+
+        // 🔑 Add this log BEFORE setting image URL
+        Log.d("LoginBottomSheetFragment",
+                "API returned userImageUrl = " + loginResponse.getUserImageUrl());
+
         RoleManager.setUserImageUrl(loginResponse.getUserImageUrl());
+
+        // 🔑 Add this log AFTER setting image URL
+        Log.d("LoginBottomSheetFragment",
+                "RoleManager stored userImageUrl = " + RoleManager.getUserImageUrl());
+
+
+
 
         // Restore pending cart item if present
         Bundle args = getArguments();
