@@ -42,7 +42,7 @@ $conn->close();
     </div>
 
     <nav class="main-nav">
-        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
+        <a href="colorPicker.html" class="nav-button insert-items">Menu Management</a>
         <a href="Inventory.php" class="nav-button insert-materials">Inventory</a>
         <a href="ReservationList.php" class="nav-button order-list">Reservations</a>
         <a href="SalesReport.php" class="nav-button report">Sales Reports</a>

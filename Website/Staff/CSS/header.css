@@ -1,3 +1,4 @@
+
 header {
     display: flex;
     justify-content: space-between;
@@ -90,17 +91,41 @@ header {
     background: rgba(255, 255, 255, 0.15);
 }
 
+
+.profile-btn {
+    background: rgb(101, 99, 99);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
 .logout-btn {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* 响应式设计 */
+/* ---------- Hamburger Button (Hidden by Default) ---------- */
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 24px;
+    cursor: pointer;
+    z-index: 1100;
+}
+
+.hamburger-menu span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* ---------- Tablet Adjustments ---------- */
 @media (max-width: 1024px) {
     .main-nav {
         gap: 6px;
     }
-
     .nav-button {
         padding: 10px 15px;
         font-size: 13px;
@@ -108,29 +133,105 @@ header {
     }
 }
 
+/* ---------- Mobile: Half-screen Left Menu ---------- */
 @media (max-width: 768px) {
     header {
-        flex-direction: column;
-        height: auto;
-        padding: 15px;
+        height: 60px;
+        padding: 0 15px;
     }
 
-    .logo {
-        margin-bottom: 15px;
+    /* Hamburger on Left */
+    .hamburger-menu {
+        display: flex;
+        order: -1;
+        margin-right: 12px;
     }
 
+    /* Main Menu: Half-screen + Slide from Left */
     .main-nav {
-        margin: 15px 0;
-        gap: 8px;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: linear-gradient(135deg, #2c3e50, #1a2530);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        margin: 4px 0;
+        padding: 60px 0 20px 0;
+        box-sizing: border-box;
+        transform: translateX(-100%);
+        transition: transform 0.4s ease;
+        gap: 4px 0;
+        z-index: 1050;
+    }
+    .main-nav.active {
+        display: flex;
+        transform: translateX(0);
     }
 
+    /* Buttons Full Width */
     .nav-button {
-        min-width: auto;
-        padding: 10px 15px;
-        font-size: 12px;
+        width: 100%;
+        margin: 4px 0;
+        padding: 12px 10px;
+        font-size: 15px;
+        text-align: center;
+        box-sizing: border-box;
+        min-width: unset;
     }
 
+    /* User Actions: Bottom of Half-screen */
     .user-actions {
-        margin-top: 15px;
+        display: none;
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        padding: 0 8px 20px;
+        flex-direction: column;
+        gap: 6px;
+        transform: translateX(-100%);
+        transition: transform 0.4s ease;
+        z-index: 1060;
+    }
+    .main-nav.active ~ .user-actions {
+        display: flex;
+        transform: translateX(0);
+    }
+    .user-actions a {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    /* Lock Background Scroll */
+    body.menu-open {
+        overflow: hidden;
+    }
+}
+
+
+
+/* ---------- Extra Small Screens ---------- */
+@media (max-width: 360px) {
+    header {
+        height: 55px;
+        padding: 0 10px;
+    }
+    .logo a {
+        font-size: 16px;
+    }
+    .nav-button {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+    .user-actions a {
+        padding: 8px;
+        font-size: 13px;
     }
 }
