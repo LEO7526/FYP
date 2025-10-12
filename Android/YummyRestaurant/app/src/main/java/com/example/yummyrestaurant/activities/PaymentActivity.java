@@ -38,6 +38,8 @@ import retrofit2.Response;
 
 public class PaymentActivity extends AppCompatActivity {
 
+    private static final String TAG = "PaymentActivity";
+
     private ProgressBar loadingSpinner;
     private ImageView successIcon;
     private Button payButton;
@@ -52,15 +54,19 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
+        Log.d(TAG, "onCreate: PaymentActivity started");
+
         loadingSpinner = findViewById(R.id.loadingSpinner);
         successIcon = findViewById(R.id.successIcon);
         payButton = findViewById(R.id.payButton);
         amountText = findViewById(R.id.amountText);
 
         int totalAmount = CartManager.getTotalAmountInCents();
+        Log.d(TAG, "onCreate: totalAmount=" + totalAmount);
         amountText.setText(String.format(Locale.getDefault(), "Total: HK$%.2f", totalAmount / 100.0));
 
         payButton.setOnClickListener(v -> {
+            Log.d(TAG, "Pay button clicked");
             payButton.setEnabled(false);
             loadingSpinner.setVisibility(android.view.View.VISIBLE);
             fetchPayDollarUrl();
@@ -68,11 +74,18 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void fetchPayDollarUrl() {
+        Log.d(TAG, "fetchPayDollarUrl: preparing request");
+
         Map<String, Object> data = new HashMap<>();
         int totalAmount = CartManager.getTotalAmountInCents();
+        String userId = RoleManager.getUserId(); // or however you get the logged-in customer ID
+
         data.put("amount", totalAmount);
-        data.put("currency", "344"); // HKD
-        data.put("payType", "ALIPAY"); // or FPS, OCTOPUS, etc.
+        data.put("cid", Integer.parseInt(userId)); // REQUIRED by PHP
+        data.put("currency", "344"); // or "HKD" depending on backend
+        data.put("payType", "Card");
+
+        Log.d(TAG, "fetchPayDollarUrl: request body = " + new Gson().toJson(data));
 
         PaymentApiService service = RetrofitClient.getClient().create(PaymentApiService.class);
         Call<PaymentUrlResponse> call = service.getPayDollarUrl(data);
@@ -80,19 +93,28 @@ public class PaymentActivity extends AppCompatActivity {
         call.enqueue(new Callback<PaymentUrlResponse>() {
             @Override
             public void onResponse(Call<PaymentUrlResponse> call, Response<PaymentUrlResponse> response) {
+                Log.d(TAG, "fetchPayDollarUrl onResponse: success=" + response.isSuccessful() + ", code=" + response.code());
                 loadingSpinner.setVisibility(android.view.View.GONE);
                 payButton.setEnabled(true);
 
                 if (response.isSuccessful() && response.body() != null) {
                     String paymentUrl = response.body().getPaymentUrl();
+                    Log.i(TAG, "Payment URL received: " + paymentUrl);
                     redirectToPayDollar(paymentUrl);
                 } else {
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "null";
+                        Log.e(TAG, "Failed to get payment URL. Code=" + response.code() + ", errorBody=" + errorBody);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading errorBody", e);
+                    }
                     Toast.makeText(PaymentActivity.this, "Failed to get payment URL", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<PaymentUrlResponse> call, Throwable t) {
+                Log.e(TAG, "fetchPayDollarUrl onFailure: " + t.getMessage(), t);
                 loadingSpinner.setVisibility(android.view.View.GONE);
                 payButton.setEnabled(true);
                 Toast.makeText(PaymentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -101,6 +123,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void redirectToPayDollar(String paymentUrl) {
+        Log.d(TAG, "redirectToPayDollar: opening browser with URL=" + paymentUrl);
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
         startActivity(browserIntent);
     }
@@ -111,8 +134,12 @@ public class PaymentActivity extends AppCompatActivity {
         setIntent(intent);
 
         Uri data = intent.getData();
+        Log.d(TAG, "onNewIntent: data=" + data);
+
         if (data != null && data.getQueryParameter("status") != null) {
             String status = data.getQueryParameter("status");
+            Log.d(TAG, "onNewIntent: payment status=" + status);
+
             if ("success".equals(status)) {
                 successIcon.setAlpha(0f);
                 successIcon.setVisibility(android.view.View.VISIBLE);
@@ -120,9 +147,11 @@ public class PaymentActivity extends AppCompatActivity {
 
                 String userId = RoleManager.getUserId();
                 int amount = CartManager.getTotalAmountInCents();
+                Log.i(TAG, "Payment success. userId=" + userId + ", amount=" + amount);
                 saveOrderToBackend(userId, amount, "PayDollar");
 
                 new Handler().postDelayed(() -> {
+                    Log.d(TAG, "Navigating to OrderConfirmationActivity");
                     Intent confirmIntent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
                     confirmIntent.putExtra("customerId", userId);
                     confirmIntent.putExtra("totalAmount", amount);
@@ -134,12 +163,15 @@ public class PaymentActivity extends AppCompatActivity {
 
                 CartManager.clearCart();
             } else {
+                Log.w(TAG, "Payment failed or canceled. status=" + status);
                 Toast.makeText(this, "Payment failed or canceled", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private void saveOrderToBackend(String userId, int amount, String paymentIntentId) {
+        Log.d(TAG, "saveOrderToBackend: userId=" + userId + ", amount=" + amount);
+
         Map<String, Object> orderData = new HashMap<>();
         boolean isStaff = RoleManager.isStaff();
         int customerId;
@@ -148,6 +180,7 @@ public class PaymentActivity extends AppCompatActivity {
             customerId = 0;
             orderData.put("sid", RoleManager.getUserId());
             orderData.put("table_number", RoleManager.getAssignedTable());
+            Log.d(TAG, "saveOrderToBackend: staff order, sid=" + RoleManager.getUserId());
         } else {
             customerId = Integer.parseInt(userId);
         }
@@ -161,6 +194,8 @@ public class PaymentActivity extends AppCompatActivity {
             CartItem cartItem = entry.getKey();
             MenuItem menuItem = cartItem.getMenuItem();
             int quantity = entry.getValue();
+
+            Log.d(TAG, "Adding item to order: " + menuItem.getName() + " x" + quantity);
 
             Map<String, Object> item = new HashMap<>();
             item.put("item_id", menuItem.getId());
@@ -190,21 +225,24 @@ public class PaymentActivity extends AppCompatActivity {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d(TAG, "saveOrderToBackend onResponse: success=" + response.isSuccessful());
                 if (response.isSuccessful()) {
                     try {
                         String responseText = response.body() != null ? response.body().string() : "";
-                        Log.i("PaymentActivity", "Order saved successfully. Response: " + responseText);
+                        Log.i(TAG, "Order saved successfully. Response: " + responseText);
                         Toast.makeText(PaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {
-                        Log.e("PaymentActivity", "Failed to read response body", e);
+                        Log.e(TAG, "Failed to read response body", e);
                     }
                 } else {
+                    Log.e(TAG, "Failed to save order. Code=" + response.code());
                     Toast.makeText(PaymentActivity.this, "Failed to save order", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e(TAG, "saveOrderToBackend onFailure: " + t.getMessage(), t);
                 Toast.makeText(PaymentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

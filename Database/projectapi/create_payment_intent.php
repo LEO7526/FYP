@@ -1,5 +1,5 @@
 <?php
-require 'vendor/autoload.php';
+require 'stripe-demo/vendor/autoload.php';
 
 \Stripe\Stripe::setApiKey('sk_test_51S56QLC1wirzkW6G7v8Ckh7IZEbXZrlj8aAFsIM6IYpxt0dh2x0uglpncPOUJ4d62zFW38nHmNvAtZk14EFdf7au00GsAaPdIS');
 
