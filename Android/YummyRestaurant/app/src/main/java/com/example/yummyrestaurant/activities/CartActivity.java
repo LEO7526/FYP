@@ -54,7 +54,8 @@ public class CartActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Proceeding to payment...", Toast.LENGTH_SHORT).show();
 
-            Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
+            //change to TempPaymentActivity for testing
+            Intent intent = new Intent(CartActivity.this, TempPaymentActivity.class);
             intent.putExtra("totalAmount", CartManager.getTotalAmountInCents());
             startActivity(intent);
         });

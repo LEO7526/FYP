@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Coupon Title -->
+        <TextView
+            android:id="@+id/tvCouponTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coupon Title"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Coupon Description -->
+        <TextView
+            android:id="@+id/tvCouponDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coupon description"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+
+        <!-- Points Required -->
+        <TextView
+            android:id="@+id/tvCouponPointsRequired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Requires: 100 pts"
+            android:textSize="14sp"
+            android:textColor="@android:color/holo_blue_dark"
+            android:layout_marginTop="6dp" />
+
+        <!-- Expiry Date -->
+        <TextView
+            android:id="@+id/tvCouponExpiry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Valid until ..."
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginTop="4dp" />
+
+        <!-- Redeem Button -->
+        <Button
+            android:id="@+id/btnRedeem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Redeem"
+            android:layout_marginTop="8dp"/>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

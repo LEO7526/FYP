@@ -82,7 +82,7 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
     }
 
     /**
-     * Checks login state; BrowseMenuActivity is always allowed.
+     * Checks login state; BrowseMenuActivity and CouponActivity are always allowed.
      * Other activities require login. Optionally passes pending cart extras.
      */
     protected void navigateProtected(int iconId,
@@ -91,16 +91,20 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
                                      int pendingQuantity,
                                      String pendingSpice,
                                      String pendingNotes) {
-        if (target == BrowseMenuActivity.class) {
+        // Always allow BrowseMenuActivity and CouponActivity
+        if (target == BrowseMenuActivity.class || target == CouponActivity.class) {
             launchScreen(iconId, target, null, 0, null, null);
             return;
         }
 
+        // For other activities, check login
         if (login) {
             launchScreen(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes);
         } else {
-            showInlineLogin(() -> launchScreen(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes),
-                    pendingItem, pendingQuantity, pendingSpice, pendingNotes);
+            showInlineLogin(
+                    () -> launchScreen(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes),
+                    pendingItem, pendingQuantity, pendingSpice, pendingNotes
+            );
         }
     }
 
