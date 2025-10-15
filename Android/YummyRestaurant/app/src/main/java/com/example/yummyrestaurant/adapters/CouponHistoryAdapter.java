@@ -15,6 +15,7 @@ import com.example.yummyrestaurant.models.CouponHistoryItem;
 import java.util.List;
 
 public class CouponHistoryAdapter extends RecyclerView.Adapter<CouponHistoryAdapter.ViewHolder> {
+
     private final List<CouponHistoryItem> items;
 
     public CouponHistoryAdapter(List<CouponHistoryItem> items) {
@@ -24,6 +25,7 @@ public class CouponHistoryAdapter extends RecyclerView.Adapter<CouponHistoryAdap
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Inflate the layout for a single history item
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_coupon_history, parent, false);
         return new ViewHolder(v);
@@ -32,17 +34,22 @@ public class CouponHistoryAdapter extends RecyclerView.Adapter<CouponHistoryAdap
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CouponHistoryItem item = items.get(position);
+
+        // Bind data to UI
         holder.tvAction.setText(item.getAction());
-        holder.tvDelta.setText((item.getDelta() > 0 ? "+" : "") + item.getDelta());
+        holder.tvCouponTitle.setText(item.getCouponTitle()); // show coupon name
         holder.tvResulting.setText("Balance: " + item.getResulting_points());
         holder.tvDate.setText(item.getCreated_at());
-        holder.tvNote.setText(item.getNote() != null ? item.getNote() : "");
 
-        // Color coding: green for earned, red for redeemed
-        if (item.getDelta() > 0) {
-            holder.tvDelta.setTextColor(Color.parseColor("#4CAF50")); // green
+        // Handle delta display
+        if (item.getDelta() == 0) {
+            holder.tvDelta.setText(""); // hide for free coupons
         } else {
-            holder.tvDelta.setTextColor(Color.parseColor("#F44336")); // red
+            String deltaText = (item.getDelta() > 0 ? "+" : "") + item.getDelta();
+            holder.tvDelta.setText(deltaText);
+            holder.tvDelta.setTextColor(item.getDelta() > 0
+                    ? Color.parseColor("#4CAF50") // green for earned
+                    : Color.parseColor("#F44336")); // red for redeemed
         }
     }
 
@@ -51,15 +58,19 @@ public class CouponHistoryAdapter extends RecyclerView.Adapter<CouponHistoryAdap
         return items.size();
     }
 
+    /**
+     * ViewHolder pattern for efficient view recycling.
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvAction, tvDelta, tvResulting, tvDate, tvNote;
+        TextView tvAction, tvCouponTitle, tvDelta, tvResulting, tvDate;
+
         ViewHolder(View itemView) {
             super(itemView);
             tvAction = itemView.findViewById(R.id.tvAction);
+            tvCouponTitle = itemView.findViewById(R.id.tvCouponTitle);
             tvDelta = itemView.findViewById(R.id.tvDelta);
             tvResulting = itemView.findViewById(R.id.tvResulting);
             tvDate = itemView.findViewById(R.id.tvDate);
-            tvNote = itemView.findViewById(R.id.tvNote);
         }
     }
 }

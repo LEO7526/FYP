@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) {
@@ -13,10 +13,16 @@ if ($cid <= 0) {
     exit;
 }
 
-$sql = "SELECT delta, resulting_points, action, note, created_at
-        FROM coupon_point_history
-        WHERE cid = ?
-        ORDER BY created_at DESC";
+$sql = "SELECT h.delta,
+               h.resulting_points,
+               h.action,
+               h.note,
+               h.created_at,
+               c.title AS coupon_title
+        FROM coupon_point_history h
+        LEFT JOIN coupons c ON h.coupon_id = c.coupon_id
+        WHERE h.cid = ?
+        ORDER BY h.created_at DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $cid);
@@ -25,13 +31,20 @@ $result = $stmt->get_result();
 
 $history = [];
 while ($row = $result->fetch_assoc()) {
-    $history[] = $row;
+    $history[] = [
+        "delta" => intval($row['delta']),
+        "resulting_points" => intval($row['resulting_points']),
+        "action" => $row['action'],
+        "note" => $row['note'],
+        "created_at" => $row['created_at'],
+        "coupon_title" => $row['coupon_title'] // must match alias
+    ];
 }
 
 echo json_encode([
     "success" => true,
     "history" => $history
-]);
+], JSON_UNESCAPED_UNICODE);
 
 $stmt->close();
 $conn->close();

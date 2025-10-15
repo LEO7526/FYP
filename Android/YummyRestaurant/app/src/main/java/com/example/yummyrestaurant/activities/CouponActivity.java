@@ -19,6 +19,7 @@ import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.CouponListResponse;
 import com.example.yummyrestaurant.models.CouponPointResponse;
 import com.example.yummyrestaurant.models.GenericResponse;
+import com.example.yummyrestaurant.models.RedeemCouponResponse;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class CouponActivity extends BaseCustomerActivity {
     private CouponAdapter adapter;
     private final List<Coupon> couponList = new ArrayList<>();
     private int customerId;
+    private Button btnHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +51,9 @@ public class CouponActivity extends BaseCustomerActivity {
 
         tvCouponPoints = findViewById(R.id.tvCouponPoints);
         rvCoupons = findViewById(R.id.rvCoupons);
+        btnHistory = findViewById(R.id.btnHistory);
 
+        // Initial login state
         try {
             customerId = Integer.parseInt(RoleManager.getUserId());
         } catch (Exception e) {
@@ -67,15 +71,8 @@ public class CouponActivity extends BaseCustomerActivity {
             @Override
             public void onLoginRequired() {
                 showInlineLogin(() -> {
-                    try {
-                        customerId = Integer.parseInt(RoleManager.getUserId());
-                    } catch (Exception e) {
-                        customerId = 0;
-                    }
-                    adapter.setLoggedIn(customerId != 0);
-                    if (customerId != 0) {
-                        fetchCouponPoints(customerId);
-                    }
+                    // After successful login, RoleManager has been updated by LoginBottomSheetFragment
+                    refreshLoginState();
                 }, null, 0, null, null);
             }
         }, customerId != 0);
@@ -90,32 +87,67 @@ public class CouponActivity extends BaseCustomerActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshLoginState();
+    }
+
+    private void refreshLoginState() {
+        try {
+            customerId = Integer.parseInt(RoleManager.getUserId());
+        } catch (Exception e) {
+            customerId = 0;
+        }
+
+        Log.d(TAG, "refreshLoginState: RoleManager.getUserId() = " + RoleManager.getUserId());
+        Log.d(TAG, "refreshLoginState: Parsed customerId = " + customerId);
+
+        if (customerId == 0) {
+            Log.d(TAG, "refreshLoginState: User not logged in → hiding History button");
+            btnHistory.setVisibility(View.GONE);
+            btnHistory.setOnClickListener(null);
+            tvCouponPoints.setText("Login to earn and redeem points");
+            adapter.setLoggedIn(false);
+        } else {
+            Log.d(TAG, "refreshLoginState: User logged in (id=" + customerId + ") → showing History button");
+            btnHistory.setVisibility(View.VISIBLE);
+
+            final int finalCustomerId = customerId;
+            btnHistory.setOnClickListener(v -> {
+                Log.d(TAG, "History button clicked → opening CouponHistoryActivity with customerId=" + finalCustomerId);
+                Intent intent = new Intent(CouponActivity.this, CouponHistoryActivity.class);
+                intent.putExtra("customer_id", finalCustomerId);
+                startActivity(intent);
+            });
+
+            adapter.setLoggedIn(true);
+            fetchCouponPoints(customerId);
+        }
+    }
+
     private void fetchCouponPoints(int customerId) {
         Log.d(TAG, "Fetching coupon points for customerId=" + customerId);
 
-        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        service.getCouponPoints(customerId).enqueue(new Callback<CouponPointResponse>() {
+        CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
+        api.getCouponPoints(customerId).enqueue(new Callback<CouponPointResponse>() {
             @Override
             public void onResponse(Call<CouponPointResponse> call, Response<CouponPointResponse> response) {
-                Log.d(TAG, "fetchCouponPoints onResponse: code=" + response.code());
-
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     int points = response.body().getPoints();
-                    Log.d(TAG, "fetchCouponPoints success: points=" + points);
                     tvCouponPoints.setText("Points: " + points);
                     adapter.setCurrentPoints(points);
+                    Log.d(TAG, "fetchCouponPoints success: points=" + points);
                 } else {
-                    Log.w(TAG, "fetchCouponPoints failed: body=" + response.body());
-                    tvCouponPoints.setText("Points: 0");
-                    adapter.setCurrentPoints(0);
+                    Log.w(TAG, "fetchCouponPoints failed: code=" + response.code());
+                    tvCouponPoints.setText("Failed to load points");
                 }
             }
 
             @Override
             public void onFailure(Call<CouponPointResponse> call, Throwable t) {
                 Log.e(TAG, "fetchCouponPoints onFailure", t);
-                tvCouponPoints.setText("Points: 0");
-                adapter.setCurrentPoints(0);
+                tvCouponPoints.setText("Error loading points");
             }
         });
     }
@@ -157,27 +189,21 @@ public class CouponActivity extends BaseCustomerActivity {
         Log.d(TAG, "Redeeming coupon: id=" + coupon.getCoupon_id() + " for customerId=" + customerId);
 
         CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        Map<String, Object> body = new HashMap<>();
-        body.put("cid", customerId);
-        body.put("coupon_id", coupon.getCoupon_id());
-
-        service.redeemCoupon(body).enqueue(new Callback<GenericResponse>() {
+        service.redeemCoupon(customerId, coupon.getCoupon_id()).enqueue(new Callback<RedeemCouponResponse>() {
             @Override
-            public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                Log.d(TAG, "redeemCoupon onResponse: code=" + response.code());
-
+            public void onResponse(Call<RedeemCouponResponse> call, Response<RedeemCouponResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    GenericResponse res = response.body();
-                    Log.d(TAG, "redeemCoupon response: success=" + res.isSuccess() +
-                            ", message=" + res.getMessage() +
-                            ", error=" + res.getError() +
-                            ", remaining_points=" + res.getRemaining_points());
+                    RedeemCouponResponse res = response.body();
+                    Log.d(TAG, "redeemCoupon response: success=" + res.isSuccess()
+                            + ", message=" + res.getMessage()
+                            + ", error=" + res.getError()
+                            + ", points_before=" + res.getPointsBefore()
+                            + ", points_after=" + res.getPointsAfter());
 
                     if (res.isSuccess()) {
                         Toast.makeText(CouponActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
-
-                        if (res.getRemaining_points() != null) {
-                            int remaining = res.getRemaining_points();
+                        if (res.getPointsAfter() != null) {
+                            int remaining = res.getPointsAfter();
                             tvCouponPoints.setText("Points: " + remaining);
                             adapter.setCurrentPoints(remaining);
                         }
@@ -185,51 +211,16 @@ public class CouponActivity extends BaseCustomerActivity {
                         Toast.makeText(CouponActivity.this, res.getError(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Log.w(TAG, "redeemCoupon failed: body=" + response.body());
+                    Log.w(TAG, "redeemCoupon failed: code=" + response.code());
                     Toast.makeText(CouponActivity.this, "Redeem failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<GenericResponse> call, Throwable t) {
+            public void onFailure(Call<RedeemCouponResponse> call, Throwable t) {
                 Log.e(TAG, "redeemCoupon onFailure", t);
                 Toast.makeText(CouponActivity.this, "Redeem failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        Button btnHistory = findViewById(R.id.btnHistory);
-
-        int customerId;
-        try {
-            customerId = Integer.parseInt(RoleManager.getUserId());
-        } catch (Exception e) {
-            Log.w(TAG, "onResume: Failed to parse userId from RoleManager", e);
-            customerId = 0;
-        }
-
-        Log.d(TAG, "onResume: RoleManager.getUserId() = " + RoleManager.getUserId());
-        Log.d(TAG, "onResume: Parsed customerId = " + customerId);
-
-        if (customerId == 0) {
-            Log.d(TAG, "onResume: User not logged in → hiding History button");
-            btnHistory.setVisibility(View.GONE);
-            btnHistory.setOnClickListener(null);
-        } else {
-            Log.d(TAG, "onResume: User logged in (id=" + customerId + ") → showing History button");
-            btnHistory.setVisibility(View.VISIBLE);
-
-            final int finalCustomerId = customerId;
-            btnHistory.setOnClickListener(v -> {
-                Log.d(TAG, "History button clicked → opening CouponHistoryActivity with customerId=" + finalCustomerId);
-                Intent intent = new Intent(CouponActivity.this, CouponHistoryActivity.class);
-                intent.putExtra("customer_id", finalCustomerId);
-                startActivity(intent);
-            });
-        }
     }
 }

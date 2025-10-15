@@ -1,11 +1,15 @@
 package com.example.yummyrestaurant.models;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class CouponHistoryResponse {
+
+    @SerializedName("success")
     private boolean success;
+
+    @SerializedName("history")
     private List<CouponHistoryItem> history;
-    private String error; // optional, in case backend sends error message
 
     public boolean isSuccess() {
         return success;
@@ -13,9 +17,5 @@ public class CouponHistoryResponse {
 
     public List<CouponHistoryItem> getHistory() {
         return history;
-    }
-
-    public String getError() {
-        return error;
     }
 }

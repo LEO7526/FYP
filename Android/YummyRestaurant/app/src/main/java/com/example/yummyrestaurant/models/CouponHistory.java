@@ -2,7 +2,7 @@ package com.example.yummyrestaurant.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class CouponHistoryItem {
+public class CouponHistory {
 
     @SerializedName("delta")
     private int delta;
@@ -27,7 +27,7 @@ public class CouponHistoryItem {
         return delta;
     }
 
-    public int getResulting_points() {
+    public int getResultingPoints() {
         return resultingPoints;
     }
 
@@ -39,7 +39,7 @@ public class CouponHistoryItem {
         return note;
     }
 
-    public String getCreated_at() {
+    public String getCreatedAt() {
         return createdAt;
     }
 

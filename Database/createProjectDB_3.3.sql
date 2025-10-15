@@ -68,45 +68,9 @@ cid, cname, cpassword, ctel, caddr, company, cemail, crole, cimageurl
 
 
 
-CREATE TABLE coupon_point (
-  cp_id INT NOT NULL AUTO_INCREMENT,
-  cid INT NOT NULL,
-  points INT NOT NULL DEFAULT 0,
-  last_changed_by VARCHAR(255) DEFAULT NULL,
-  reason VARCHAR(255) DEFAULT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  expire_at DATETIME DEFAULT NULL,
-  is_active TINYINT(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (cp_id),
-  CONSTRAINT uq_coupon_point_cid UNIQUE (cid),   -- ✅ enforce one row per customer
-  CONSTRAINT fk_coupon_point_cid FOREIGN KEY (cid) REFERENCES customer(cid) 
-    ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Insert walk-in customers with 0 points if not already present
-INSERT INTO coupon_point (cid, points)
-SELECT cid, 0 FROM customer
-WHERE cid NOT IN (SELECT cid FROM coupon_point);
-
-CREATE TABLE IF NOT EXISTS coupon_point_history (
-  cph_id INT NOT NULL AUTO_INCREMENT,
-  cp_id INT NOT NULL,
-  cid INT NOT NULL,
-  delta INT NOT NULL,
-  resulting_points INT NOT NULL,
-  action VARCHAR(50) NOT NULL,
-  note VARCHAR(255) DEFAULT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (cph_id),
-  KEY idx_cph_cp_id (cp_id),
-  KEY idx_cph_cid (cid),
-  CONSTRAINT fk_cph_cp_id FOREIGN KEY (cp_id) REFERENCES coupon_point(cp_id) ON DELETE CASCADE,
-  CONSTRAINT fk_cph_cid FOREIGN KEY (cid) REFERENCES customer(cid) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 -- Coupon master table
-CREATE TABLE IF NOT EXISTS coupons (
+DROP TABLE IF EXISTS coupons;
+CREATE TABLE coupons (
   coupon_id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(255) NOT NULL,
   description TEXT,
@@ -118,14 +82,57 @@ CREATE TABLE IF NOT EXISTS coupons (
   PRIMARY KEY (coupon_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO coupons (title, description, points_required, expiry_date, is_active) VALUES
-('10% OFF Any Order', 'Get 10% discount on your next order.', 100, '2025-12-31', 1),
-('Free Drink', 'Redeem one free drink of your choice.', 50, '2025-06-30', 1),
-('HK$50 OFF', 'Enjoy HK$50 off when you spend HK$300 or more.', 200, '2025-12-31', 1),
-('Birthday Special', 'Exclusive coupon for your birthday month.', 0, NULL, 1);
+-- Per-customer coupon points balance
+DROP TABLE IF EXISTS coupon_point;
+CREATE TABLE coupon_point (
+  cp_id INT NOT NULL AUTO_INCREMENT,
+  cid INT NOT NULL,
+  points INT NOT NULL DEFAULT 0,
+  last_changed_by VARCHAR(255) DEFAULT NULL,
+  reason VARCHAR(255) DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  expire_at DATETIME DEFAULT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (cp_id),
+  CONSTRAINT uq_coupon_point_cid UNIQUE (cid),
+  CONSTRAINT fk_coupon_point_cid FOREIGN KEY (cid) REFERENCES customer(cid)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Track redemptions
-CREATE TABLE IF NOT EXISTS coupon_redemptions (
+-- Ensure every customer has a coupon_point row
+INSERT INTO coupon_point (cid, points)
+SELECT cid, 0 FROM customer
+WHERE cid NOT IN (SELECT cid FROM coupon_point);
+
+UPDATE coupon_point
+SET points = 200
+WHERE cid = 1;
+
+-- History of all point changes (earn/redeem), now with coupon_id
+DROP TABLE IF EXISTS coupon_point_history;
+CREATE TABLE coupon_point_history (
+  cph_id INT NOT NULL AUTO_INCREMENT,
+  cp_id INT NOT NULL,
+  cid INT NOT NULL,
+  coupon_id INT NULL,  -- direct link to coupons
+  delta INT NOT NULL,
+  resulting_points INT NOT NULL,
+  action VARCHAR(50) NOT NULL,
+  note VARCHAR(255) DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (cph_id),
+  KEY idx_cph_cp_id (cp_id),
+  KEY idx_cph_cid (cid),
+  KEY idx_cph_coupon_id (coupon_id),
+  CONSTRAINT fk_cph_cp_id FOREIGN KEY (cp_id) REFERENCES coupon_point(cp_id) ON DELETE CASCADE,
+  CONSTRAINT fk_cph_cid FOREIGN KEY (cid) REFERENCES customer(cid) ON DELETE CASCADE,
+  CONSTRAINT fk_cph_coupon FOREIGN KEY (coupon_id) REFERENCES coupons(coupon_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Track actual coupon redemptions
+DROP TABLE IF EXISTS coupon_redemptions;
+CREATE TABLE coupon_redemptions (
   redemption_id INT NOT NULL AUTO_INCREMENT,
   coupon_id INT NOT NULL,
   cid INT NOT NULL, -- customer who redeemed
@@ -135,6 +142,17 @@ CREATE TABLE IF NOT EXISTS coupon_redemptions (
   CONSTRAINT fk_redemption_customer FOREIGN KEY (cid) REFERENCES customer(cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Sample coupons
+INSERT INTO coupons (title, description, points_required, expiry_date, is_active) VALUES
+('10% OFF Any Order', 'Get 10% discount on your next order.', 100, '2025-12-31', 1),
+('Free Drink', 'Redeem one free drink of your choice.', 50, '2025-06-30', 1),
+('HK$50 OFF', 'Enjoy HK$50 off when you spend HK$300 or more.', 200, '2025-12-31', 1),
+('Birthday Special', 'Exclusive coupon for your birthday month.', 0, NULL, 1);
+
+-- 🔄 Backfill old rows (run only if you already had history data before adding coupon_id)
+UPDATE coupon_point_history h
+SET h.coupon_id = CAST(SUBSTRING_INDEX(h.note, ' ', -1) AS UNSIGNED)
+WHERE h.note LIKE 'Coupon ID %' AND h.coupon_id IS NULL;
 
 
 -- Table structure for table product
