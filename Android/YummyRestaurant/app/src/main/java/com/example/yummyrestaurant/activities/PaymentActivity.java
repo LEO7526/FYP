@@ -87,7 +87,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         Log.d(TAG, "fetchPayDollarUrl: request body = " + new Gson().toJson(data));
 
-        PaymentApiService service = RetrofitClient.getClient().create(PaymentApiService.class);
+        PaymentApiService service = RetrofitClient.getClient(this).create(PaymentApiService.class);
         Call<PaymentUrlResponse> call = service.getPayDollarUrl(data);
 
         call.enqueue(new Callback<PaymentUrlResponse>() {
@@ -219,7 +219,7 @@ public class PaymentActivity extends AppCompatActivity {
         orderData.put("items", items);
         dishJson = new Gson().toJson(itemsForDisplay);
 
-        OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
+        OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
         Call<ResponseBody> call = service.saveOrder(orderData);
 
         call.enqueue(new Callback<ResponseBody>() {

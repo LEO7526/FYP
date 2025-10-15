@@ -5,7 +5,6 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,10 +29,12 @@ import retrofit2.Response;
 
 public class CouponActivity extends BaseCustomerActivity {
 
+    private static final String TAG = "CouponActivity";
+
     private TextView tvCouponPoints;
     private RecyclerView rvCoupons;
     private CouponAdapter adapter;
-    private List<Coupon> couponList = new ArrayList<>();
+    private final List<Coupon> couponList = new ArrayList<>();
     private int customerId;
 
     @Override
@@ -46,15 +47,46 @@ public class CouponActivity extends BaseCustomerActivity {
         tvCouponPoints = findViewById(R.id.tvCouponPoints);
         rvCoupons = findViewById(R.id.rvCoupons);
 
-        rvCoupons.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CouponAdapter(couponList, this::redeemCoupon, customerId != 0);
-        rvCoupons.setAdapter(adapter);
-
+        // Determine login state first
         try {
             customerId = Integer.parseInt(RoleManager.getUserId());
         } catch (Exception e) {
+            Log.w(TAG, "Invalid userId, defaulting to 0");
             customerId = 0;
         }
+
+        rvCoupons.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new CouponAdapter(couponList, new CouponAdapter.OnRedeemClickListener() {
+            @Override
+            public void onRedeemClick(Coupon coupon) {
+                // Logged-in user clicked Redeem
+                redeemCoupon(coupon);
+            }
+
+            @Override
+            public void onLoginRequired() {
+                // Guest clicked "Login to Redeem"
+                showInlineLogin(() -> {
+                    // After successful login, refresh state
+                    try {
+                        customerId = Integer.parseInt(RoleManager.getUserId());
+                    } catch (Exception e) {
+                        customerId = 0;
+                    }
+
+                    adapter.setLoggedIn(customerId != 0);
+
+                    if (customerId != 0) {
+                        // Refresh points after login
+                        fetchCouponPoints(customerId);
+
+                        // Optionally, you could auto-trigger the pending redeem action here
+                        // e.g., redeemCoupon(pendingCoupon);
+                    }
+                }, null, 0, null, null);
+            }
+        }, customerId != 0);
+        rvCoupons.setAdapter(adapter);
 
         // Always show coupons
         fetchCoupons();
@@ -68,23 +100,30 @@ public class CouponActivity extends BaseCustomerActivity {
     }
 
     private void fetchCouponPoints(int customerId) {
-        CouponApiService service = RetrofitClient.getClient().create(CouponApiService.class);
+        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
         service.getCouponPoints(customerId).enqueue(new Callback<CouponPointResponse>() {
             @Override
             public void onResponse(Call<CouponPointResponse> call, Response<CouponPointResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    tvCouponPoints.setText("Points: " + response.body().getPoints());
+                    int points = response.body().getPoints();
+                    tvCouponPoints.setText("Points: " + points);
+                    adapter.setCurrentPoints(points); // update adapter
+                } else {
+                    tvCouponPoints.setText("Points: 0");
+                    adapter.setCurrentPoints(0);
                 }
             }
+
             @Override
             public void onFailure(Call<CouponPointResponse> call, Throwable t) {
                 tvCouponPoints.setText("Points: 0");
+                adapter.setCurrentPoints(0);
             }
         });
     }
 
     private void fetchCoupons() {
-        CouponApiService service = RetrofitClient.getClient().create(CouponApiService.class);
+        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
         service.getCoupons().enqueue(new Callback<CouponListResponse>() {
             @Override
             public void onResponse(Call<CouponListResponse> call, Response<CouponListResponse> response) {
@@ -94,16 +133,23 @@ public class CouponActivity extends BaseCustomerActivity {
                     adapter.notifyDataSetChanged();
                 }
             }
+
             @Override
             public void onFailure(Call<CouponListResponse> call, Throwable t) {
                 Toast.makeText(CouponActivity.this, "Failed to load coupons", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "fetchCoupons failed", t);
             }
         });
     }
 
     private void redeemCoupon(Coupon coupon) {
-        CouponApiService service = RetrofitClient.getClient().create(CouponApiService.class);
-        Map<String,Object> body = new HashMap<>();
+        if (customerId == 0) {
+            Toast.makeText(this, "Please login to redeem", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
+        Map<String, Object> body = new HashMap<>();
         body.put("cid", customerId);
         body.put("coupon_id", coupon.getCoupon_id());
 
@@ -113,15 +159,26 @@ public class CouponActivity extends BaseCustomerActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     GenericResponse res = response.body();
                     if (res.isSuccess()) {
+                        // ✅ Success: show message
                         Toast.makeText(CouponActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
+
+                        // ✅ Update points in UI
                         if (res.getRemaining_points() != null) {
-                            tvCouponPoints.setText("Points: " + res.getRemaining_points());
+                            int remaining = res.getRemaining_points();
+                            tvCouponPoints.setText("Points: " + remaining);
+
+                            // ✅ Update adapter so other coupons dim/enable correctly
+                            adapter.setCurrentPoints(remaining);
                         }
                     } else {
+                        // ❌ Backend returned error
                         Toast.makeText(CouponActivity.this, res.getError(), Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    Toast.makeText(CouponActivity.this, "Redeem failed", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onFailure(Call<GenericResponse> call, Throwable t) {
                 Toast.makeText(CouponActivity.this, "Redeem failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();

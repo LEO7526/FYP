@@ -24,6 +24,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.api.ApiConfig;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.utils.QRScannerActivity;
 import com.example.yummyrestaurant.utils.RoleManager;
@@ -79,7 +80,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         } else {
             String imagePath = RoleManager.getUserImageUrl();
             if (imagePath != null && !imagePath.trim().isEmpty()) {
-                String fullUrl = RetrofitClient.getBASE_Simulator_URL() + imagePath;
+                String fullUrl = ApiConfig.getBaseUrl(this) + imagePath;
                 Log.d("DashboardActivity", "Loading profile image from: " + fullUrl);
 
                 Glide.with(this)

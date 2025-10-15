@@ -36,7 +36,7 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.registerBtn);
         loginLink = findViewById(R.id.loginLink);
 
-        Retrofit retrofit = RetrofitClient.getClient();
+        Retrofit retrofit = RetrofitClient.getClient(this);
         registerApi = retrofit.create(RegisterApi.class);
 
         registerButton.setOnClickListener(v -> {

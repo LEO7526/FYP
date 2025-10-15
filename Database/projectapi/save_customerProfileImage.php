@@ -7,7 +7,7 @@ if ($conn->connect_error) {
 }
 
 // ⚠️ Hardcoded GitHub token (for demo; not safe for production)
-$githubToken = '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'; // replace with your token
+$githubToken = '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'; // replace with your token
 $repoOwner   = 'LEO7526';
 $repoName    = 'FYP';
 $branch      = 'main';

@@ -122,7 +122,7 @@ public class TempPaymentActivity extends AppCompatActivity {
         dishJson = new Gson().toJson(itemsForDisplay);
 
         // Call the backend via Retrofit. Make sure OrderApiService has an endpoint like saveOrderDirect(Map)
-        OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
+        OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
         Call<ResponseBody> call = service.saveOrderDirect(orderHeader);
 
         call.enqueue(new Callback<ResponseBody>() {

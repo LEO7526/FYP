@@ -39,7 +39,7 @@ public class PackagesActivity extends AppCompatActivity implements PackagesAdapt
     }
 
     private void loadPackages() {
-        MenuApi menuApi = RetrofitClient.getClient().create(MenuApi.class);
+        MenuApi menuApi = RetrofitClient.getClient(this).create(MenuApi.class);
         Call<PackagesResponse> call = menuApi.getPackages();
 
         call.enqueue(new Callback<PackagesResponse>() {

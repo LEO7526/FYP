@@ -168,25 +168,23 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
             cartIcon.setOnClickListener(v -> startActivity(new Intent(this, CartActivity.class)));
         }
 
-
         if (setMenuIcon != null) {
             setMenuIcon.setOnClickListener(v -> {
-                // Reuse BaseCustomerActivity’s login check
                 navigateProtected(
-                        0, // no bottom bar icon ID to highlight
+                        0,
                         PackagesActivity.class,
                         null, 0, null, null
                 );
             });
         }
+
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
-            // Check login status
             boolean isLoggedIn = RoleManager.getUserId() != null && !RoleManager.getUserId().isEmpty();
 
-            // Block access to all items except logout if not logged in
-            if (!isLoggedIn && id != R.id.nav_logout) {
+            // ✅ Allow nav_settings even if not logged in
+            if (!isLoggedIn && id != R.id.nav_logout && id != R.id.nav_settings) {
                 Toast.makeText(this, "Please log in to access this feature.", Toast.LENGTH_SHORT).show();
                 return false;
             }
@@ -227,7 +225,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         loadingSpinner.setVisibility(View.VISIBLE);
         menuRecyclerView.setVisibility(View.GONE);
 
-        MenuApi menuApi = RetrofitClient.getClient().create(MenuApi.class);
+        MenuApi menuApi = RetrofitClient.getClient(this).create(MenuApi.class);
         Call<MenuResponse> call = menuApi.getMenuItems(currentLanguage);
 
         call.enqueue(new Callback<MenuResponse>() {

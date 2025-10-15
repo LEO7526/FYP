@@ -49,7 +49,7 @@ public class BuildSetMenuActivity extends AppCompatActivity {
 
         int packageId = getIntent().getIntExtra("package_id", 1); // default to 1 if not passed
 
-        MenuApi menuApi = RetrofitClient.getClient().create(MenuApi.class);
+        MenuApi menuApi = RetrofitClient.getClient(this).create(MenuApi.class);
         Call<SetMenuResponse> call = menuApi.getSetMenu(packageId, "en");
 
         call.enqueue(new Callback<SetMenuResponse>() {

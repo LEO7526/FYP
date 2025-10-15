@@ -145,7 +145,7 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
     /**
      * Shows the inline login bottom sheet, passing pending cart extras.
      */
-    private void showInlineLogin(Runnable onSuccess,
+    protected void showInlineLogin(Runnable onSuccess,
                                  MenuItem pendingItem,
                                  int pendingQuantity,
                                  String pendingSpice,

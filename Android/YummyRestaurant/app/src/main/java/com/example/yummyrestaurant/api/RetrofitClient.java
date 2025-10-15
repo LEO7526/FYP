@@ -1,5 +1,6 @@
 package com.example.yummyrestaurant.api;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.util.concurrent.TimeUnit;
@@ -10,20 +11,18 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_Simulator_URL = "http://10.0.2.2/NewFolder/Database/projectapi/";
-    private static final String BASE_Phone_URL = "http://192.168.0.120/NewFolder/Database/projectapi/";
+    private static Retrofit retrofit;
 
-    private static Retrofit retrofit = null;
+    public static synchronized Retrofit getClient(Context context) {
+        String baseUrl = ApiConfig.getBaseUrl(context);
 
-    public static Retrofit getClient() {
-        if (retrofit == null) {
-            // Create logging interceptor
+        if (retrofit == null || !retrofit.baseUrl().toString().equals(baseUrl)) {
+            Log.d("RetrofitClient", "Building Retrofit with baseUrl: " + baseUrl);
+
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor(
-                    message -> Log.d("HTTP", message)
-            );
+                    message -> Log.d("HTTP", message));
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-            // Build OkHttp client with logging
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(logging)
                     .connectTimeout(30, TimeUnit.SECONDS)
@@ -31,9 +30,8 @@ public class RetrofitClient {
                     .writeTimeout(30, TimeUnit.SECONDS)
                     .build();
 
-            // Build Retrofit with the client
             retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_Simulator_URL) // switch to BASE_Phone_URL if testing on device
+                    .baseUrl(baseUrl)
                     .client(client)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
@@ -41,11 +39,8 @@ public class RetrofitClient {
         return retrofit;
     }
 
-    public static String getBASE_Simulator_URL() {
-        return BASE_Simulator_URL;
-    }
-
-    public static String getBASE_Phone_URL() {
-        return BASE_Phone_URL;
+    // 🔑 Call this when environment changes
+    public static synchronized void reset() {
+        retrofit = null;
     }
 }

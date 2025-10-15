@@ -52,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginBtn);
 
-        Retrofit retrofit = RetrofitClient.getClient();
+        Retrofit retrofit = RetrofitClient.getClient(this);
         loginStaffApi = retrofit.create(LoginStaffApi.class);
 
         // Set click listener for the login button
@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         if (!email.isEmpty() && !password.isEmpty()) {
             Log.d("LoginActivity", "Attempting login with email: " + email);
 
-            Retrofit retrofit = RetrofitClient.getClient();
+            Retrofit retrofit = RetrofitClient.getClient(this);
             LoginStaffApi loginStaffApi = retrofit.create(LoginStaffApi.class);
             LoginCustomerApi loginCustomerApi = retrofit.create(LoginCustomerApi.class);
 

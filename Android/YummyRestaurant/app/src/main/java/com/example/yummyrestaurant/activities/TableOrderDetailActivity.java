@@ -51,7 +51,7 @@ public class TableOrderDetailActivity extends AppCompatActivity {
     }
 
     private void fetchOrderItems(int orderId) {
-        OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
+        OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
         Call<List<OrderItem>> call = service.getOrderItems(orderId);
 
         call.enqueue(new Callback<List<OrderItem>>() {

@@ -56,7 +56,7 @@ public class OrderHistoryActivity extends BaseCustomerActivity {
     }
 
     private void fetchOrderHistory(int cid) {
-        OrderApiService service = RetrofitClient.getClient().create(OrderApiService.class);
+        OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
         Call<List<Order>> call = service.getOrdersByCustomer(cid); // 👈 Updated method
 
         call.enqueue(new Callback<List<Order>>() {

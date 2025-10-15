@@ -13,13 +13,16 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface CouponApiService {
+
+    // Fetch current points for a customer
     @GET("getCouponPoints.php")
     Call<CouponPointResponse> getCouponPoints(@Query("cid") int customerId);
 
+    // Fetch all available coupons
     @GET("getCoupons.php")
     Call<CouponListResponse> getCoupons();
 
+    // Redeem a coupon (deduct points, record redemption)
     @POST("redeemCoupon.php")
-    Call<GenericResponse> redeemCoupon(@Body Map<String,Object> payload);
-
+    Call<GenericResponse> redeemCoupon(@Body Map<String, Object> payload);
 }

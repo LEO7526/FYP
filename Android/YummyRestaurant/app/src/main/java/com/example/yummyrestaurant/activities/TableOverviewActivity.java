@@ -33,7 +33,7 @@ public class TableOverviewActivity extends AppCompatActivity {
     }
 
     private void fetchTableOrders() {
-        TableApiService service = RetrofitClient.getClient().create(TableApiService.class);
+        TableApiService service = RetrofitClient.getClient(this).create(TableApiService.class);
         Call<List<TableOrder>> call = service.getAllTableOrders();
 
         call.enqueue(new Callback<List<TableOrder>>() {

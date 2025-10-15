@@ -72,7 +72,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         passwordEditText = view.findViewById(R.id.password);
         loginButton = view.findViewById(R.id.loginBtn);
 
-        Retrofit retrofit = RetrofitClient.getClient();
+        Retrofit retrofit = RetrofitClient.getClient(requireContext());
         LoginStaffApi loginStaffApi = retrofit.create(LoginStaffApi.class);
 
         // Set click listener for the login button
@@ -102,7 +102,8 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         if (!email.isEmpty() && !password.isEmpty()) {
             Log.d("LoginBottomSheet", "Attempting login with email: " + email);
 
-            Retrofit retrofit = RetrofitClient.getClient();
+            // ✅ Pass context into getClient()
+            Retrofit retrofit = RetrofitClient.getClient(requireContext());
             LoginStaffApi loginStaffApi = retrofit.create(LoginStaffApi.class);
             LoginCustomerApi loginCustomerApi = retrofit.create(LoginCustomerApi.class);
 
@@ -112,7 +113,6 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         handleLoginSuccess(response.body(), email);
-
                     } else {
                         // Try customer login if staff login fails
                         Call<LoginResponse> customerCall = loginCustomerApi.loginUser(email, password);
@@ -121,7 +121,6 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                                     handleLoginSuccess(response.body(), email);
-
                                 } else {
                                     Toast.makeText(getContext(),
                                             "Login failed. Please check your credentials.",

@@ -80,7 +80,7 @@ public class EditProfileActivity extends AppCompatActivity {
         progressDialog.setMessage("Uploading image...");
         progressDialog.setCancelable(false);
 
-        apiService = RetrofitClient.getClient().create(LoginCustomerApi.class);
+        apiService = RetrofitClient.getClient(this).create(LoginCustomerApi.class);
 
         // Request storage access permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -169,11 +169,11 @@ public class EditProfileActivity extends AppCompatActivity {
 
                     if (RoleManager.getUserRole().equals("customer")) {
                         RequestBody emailBody = RequestBody.create(MediaType.parse("text/plain"), newEmail);
-                        CustomerUploadApi uploadApi = RetrofitClient.getClient().create(CustomerUploadApi.class);
+                        CustomerUploadApi uploadApi = RetrofitClient.getClient(this).create(CustomerUploadApi.class);
                         uploadCall = uploadApi.uploadImage(body, emailBody); // API expects "cemail"
                     } else if (RoleManager.getUserRole().equals("staff")) {
                         RequestBody emailBody = RequestBody.create(MediaType.parse("text/plain"), newEmail);
-                        StaffUploadApi uploadApi = RetrofitClient.getClient().create(StaffUploadApi.class);
+                        StaffUploadApi uploadApi = RetrofitClient.getClient(this).create(StaffUploadApi.class);
                         uploadCall = uploadApi.uploadImage(body, emailBody); // API expects "semail"
                     } else {
                         Toast.makeText(this, "Unknown user role", Toast.LENGTH_SHORT).show();

@@ -48,7 +48,7 @@ public class RegisterBottomSheetFragment extends BottomSheetDialogFragment {
         loginLink = view.findViewById(R.id.loginLink);
 
         // Retrofit setup
-        Retrofit retrofit = RetrofitClient.getClient();
+        Retrofit retrofit = RetrofitClient.getClient(requireContext());
         registerApi = retrofit.create(RegisterApi.class);
 
         // Register button click
