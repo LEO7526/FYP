@@ -3,7 +3,6 @@ header('Content-Type: application/json');
 
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) {
-    http_response_code(500);
     echo json_encode(["success"=>false,"error"=>"DB connection failed"]);
     exit;
 }
@@ -11,11 +10,10 @@ if ($conn->connect_error) {
 $inputRaw = file_get_contents("php://input");
 $input = json_decode($inputRaw, true);
 
-$cid = isset($input['cid']) ? intval($input['cid']) : 0;
+$cid       = isset($input['cid']) ? intval($input['cid']) : 0;
 $coupon_id = isset($input['coupon_id']) ? intval($input['coupon_id']) : 0;
 
 if ($cid <= 0 || $coupon_id <= 0) {
-    http_response_code(400);
     echo json_encode(["success"=>false,"error"=>"Missing cid or coupon_id"]);
     exit;
 }
@@ -23,8 +21,9 @@ if ($cid <= 0 || $coupon_id <= 0) {
 $conn->begin_transaction();
 
 try {
-    // Get coupon info
-    $stmt = $conn->prepare("SELECT points_required, expiry_date, is_active FROM coupons WHERE coupon_id=? LIMIT 1");
+    // 1. Get coupon info
+    $stmt = $conn->prepare("SELECT points_required, expiry_date, is_active 
+                            FROM coupons WHERE coupon_id=? LIMIT 1");
     $stmt->bind_param("i", $coupon_id);
     $stmt->execute();
     $stmt->bind_result($points_required, $expiry_date, $is_active);
@@ -33,14 +32,10 @@ try {
     }
     $stmt->close();
 
-    if ($is_active != 1) {
-        throw new Exception("Coupon inactive");
-    }
-    if ($expiry_date && strtotime($expiry_date) < time()) {
-        throw new Exception("Coupon expired");
-    }
+    if ($is_active != 1) throw new Exception("Coupon inactive");
+    if ($expiry_date && strtotime($expiry_date) < time()) throw new Exception("Coupon expired");
 
-    // Get customer points
+    // 2. Get customer points
     $stmt = $conn->prepare("SELECT cp_id, points FROM coupon_point WHERE cid=? LIMIT 1");
     $stmt->bind_param("i", $cid);
     $stmt->execute();
@@ -54,7 +49,7 @@ try {
         throw new Exception("Not enough points");
     }
 
-    // Deduct points
+    // 3. Deduct points
     $newPoints = $current_points - $points_required;
     $stmt = $conn->prepare("UPDATE coupon_point SET points=?, updated_at=CURRENT_TIMESTAMP WHERE cp_id=?");
     $stmt->bind_param("ii", $newPoints, $cp_id);
@@ -63,7 +58,7 @@ try {
     }
     $stmt->close();
 
-    // Record redemption
+    // 4. Record redemption
     $stmt = $conn->prepare("INSERT INTO coupon_redemptions (coupon_id, cid) VALUES (?, ?)");
     $stmt->bind_param("ii", $coupon_id, $cid);
     if (!$stmt->execute()) {
@@ -71,12 +66,30 @@ try {
     }
     $stmt->close();
 
+    // 5. Record into history
+    $delta  = -$points_required;
+    $action = "Redeemed";
+    $note   = "Coupon ID $coupon_id";
+
+    $stmt = $conn->prepare("
+        INSERT INTO coupon_point_history (cp_id, cid, delta, resulting_points, action, note)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->bind_param("iiiiss", $cp_id, $cid, $delta, $newPoints, $action, $note);
+    if (!$stmt->execute()) {
+        throw new Exception("Failed to insert history: ".$stmt->error);
+    }
+    $stmt->close();
+
     $conn->commit();
-    echo json_encode(["success"=>true,"message"=>"Coupon redeemed","remaining_points"=>$newPoints]);
+    echo json_encode([
+        "success" => true,
+        "message" => "Coupon redeemed",
+        "remaining_points" => $newPoints
+    ]);
 
 } catch (Exception $e) {
     $conn->rollback();
-    http_response_code(400);
     echo json_encode(["success"=>false,"error"=>$e->getMessage()]);
 }
 

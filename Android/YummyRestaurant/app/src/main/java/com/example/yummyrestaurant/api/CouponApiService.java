@@ -3,6 +3,7 @@ package com.example.yummyrestaurant.api;
 import com.example.yummyrestaurant.models.CouponListResponse;
 import com.example.yummyrestaurant.models.CouponPointResponse;
 import com.example.yummyrestaurant.models.GenericResponse;
+import com.example.yummyrestaurant.models.CouponHistoryResponse;
 
 import java.util.Map;
 
@@ -25,4 +26,8 @@ public interface CouponApiService {
     // Redeem a coupon (deduct points, record redemption)
     @POST("redeemCoupon.php")
     Call<GenericResponse> redeemCoupon(@Body Map<String, Object> payload);
+
+    // ✅ Fetch coupon history for a customer
+    @GET("getCouponHistory.php")
+    Call<CouponHistoryResponse> getCouponHistory(@Query("cid") int customerId);
 }
