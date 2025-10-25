@@ -52,12 +52,11 @@ public class CartActivity extends AppCompatActivity {
                 return;
             }
 
-            Toast.makeText(this, "Proceeding to payment...", Toast.LENGTH_SHORT).show();
+            // Step 1: go to MyCouponsActivity to let user view/select coupon
+            Intent couponIntent = new Intent(CartActivity.this, MyCouponsActivity.class);
+            couponIntent.putExtra("fromCart", true);   // 👈 add this flag
+            startActivityForResult(couponIntent, 2001);
 
-            //change to TempPaymentActivity for testing
-            Intent intent = new Intent(CartActivity.this, TempPaymentActivity.class);
-            intent.putExtra("totalAmount", CartManager.getTotalAmountInCents());
-            startActivity(intent);
         });
     }
 
@@ -84,5 +83,56 @@ public class CartActivity extends AppCompatActivity {
         totalCostText.setText(String.format(Locale.getDefault(), "Total: HK$ %.2f", total));
 
         checkoutBtn.setEnabled(!cartItems.isEmpty());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 2001 && resultCode == RESULT_OK && data != null) {
+            int couponId = data.getIntExtra("selectedCouponId", 0);
+            int discountAmount = data.getIntExtra("discountAmount", 0);
+            String couponType = data.getStringExtra("couponType");   // 👈 add this
+            String itemCategory = data.getStringExtra("itemCategory"); // 👈 for free item
+
+            int totalCents = CartManager.getTotalAmountInCents();
+            int finalAmount = totalCents;
+
+            if ("cash".equals(couponType)) {
+                // Fixed cash discount
+                finalAmount = Math.max(0, totalCents - discountAmount);
+
+            } else if ("percent".equals(couponType)) {
+                // Percentage discount (discountAmount = percentage, e.g. 10 for 10%)
+                finalAmount = (int) Math.round(totalCents * (1 - discountAmount / 100.0));
+
+            } else if ("free_item".equals(couponType)) {
+                // Free item (e.g. drink)
+                if (CartManager.hasItemCategory(itemCategory)) {
+                    int cheapestItemPrice = CartManager.getCheapestItemPrice(itemCategory);
+                    finalAmount = Math.max(0, totalCents - cheapestItemPrice);
+                } else {
+                    Toast.makeText(this, "This coupon requires ordering a " + itemCategory, Toast.LENGTH_SHORT).show();
+                    return; // don’t proceed to payment
+                }
+            }
+
+            // Launch TempPaymentActivity with discounted total
+            Intent payIntent = new Intent(CartActivity.this, TempPaymentActivity.class);
+            payIntent.putExtra("totalAmount", finalAmount);
+            payIntent.putExtra("selectedCouponId", couponId);
+            payIntent.putExtra("discountAmount", discountAmount);
+            payIntent.putExtra("couponType", couponType);
+            payIntent.putExtra("itemCategory", itemCategory);
+            startActivity(payIntent);
+
+        } else if (requestCode == 2001) {
+            // User backed out without selecting a coupon → just proceed to payment
+            int totalCents = CartManager.getTotalAmountInCents();
+
+            Intent payIntent = new Intent(CartActivity.this, TempPaymentActivity.class);
+            payIntent.putExtra("totalAmount", totalCents);
+            startActivity(payIntent);
+        }
     }
 }

@@ -16,17 +16,20 @@ public class CartItem implements Serializable {
     public MenuItem getMenuItem() { return menuItem; }
     public Customization getCustomization() { return customization; }
 
+    /** Delegate category to MenuItem */
+    public String getCategory() {
+        return menuItem != null ? menuItem.getCategory() : null;
+    }
+
+    /** Base price in cents (delegates to MenuItem) */
+    public int getPriceInCents() {
+        return menuItem != null ? menuItem.getPriceInCents() : 0;
+    }
+
     private Object menuItemStableId() {
         if (menuItem == null) return null;
         try {
-            try { return menuItem.getClass().getMethod("getId").invoke(menuItem); } catch (NoSuchMethodException ignored) {}
-            try { return menuItem.getClass().getMethod("get_id").invoke(menuItem); } catch (NoSuchMethodException ignored) {}
-            try { return menuItem.getClass().getMethod("getUuid").invoke(menuItem); } catch (NoSuchMethodException ignored) {}
-        } catch (Exception ignored) {}
-        try {
-            String name = (String) menuItem.getClass().getMethod("getName").invoke(menuItem);
-            double price = (double) menuItem.getClass().getMethod("getPrice").invoke(menuItem);
-            return (name == null ? "" : name) + "|" + price;
+            return menuItem.getId();
         } catch (Exception ignored) {}
         return menuItem.hashCode();
     }
@@ -56,6 +59,9 @@ public class CartItem implements Serializable {
 
     @Override
     public String toString() {
-        return "CartItem{menuId=" + menuItemStableId() + ", customization=" + customization + "}";
+        return "CartItem{" +
+                "menuItem=" + menuItem +
+                ", customization=" + customization +
+                '}';
     }
 }

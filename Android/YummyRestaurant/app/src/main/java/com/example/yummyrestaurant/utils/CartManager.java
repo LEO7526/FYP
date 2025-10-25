@@ -109,4 +109,36 @@ public final class CartManager {
         for (int qty : cartItems.values()) total += qty;
         return total;
     }
+
+    public static boolean hasItemCategory(String category) {
+        if (cartItems == null || cartItems.isEmpty()) return false;
+
+        for (CartItem cartItem : cartItems.keySet()) {
+            MenuItem menuItem = cartItem.getMenuItem();
+            if (menuItem != null && menuItem.getCategory() != null &&
+                    menuItem.getCategory().equalsIgnoreCase(category)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int getCheapestItemPrice(String category) {
+        if (cartItems == null || cartItems.isEmpty()) return 0;
+
+        int cheapest = Integer.MAX_VALUE;
+        for (CartItem cartItem : cartItems.keySet()) {
+            MenuItem menuItem = cartItem.getMenuItem();
+            if (menuItem != null && menuItem.getCategory() != null &&
+                    menuItem.getCategory().equalsIgnoreCase(category)) {
+                int priceCents = menuItem.getPriceInCents(); // 👈 use helper
+                if (priceCents < cheapest) {
+                    cheapest = priceCents;
+                }
+            }
+        }
+        return cheapest == Integer.MAX_VALUE ? 0 : cheapest;
+    }
+
+
 }

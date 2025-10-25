@@ -13,9 +13,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.CartItem;
+import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
@@ -46,6 +48,10 @@ public class TempPaymentActivity extends AppCompatActivity {
     private final List<Map<String, Object>> items = new ArrayList<>();
     private final List<Map<String, Object>> itemsForDisplay = new ArrayList<>();
 
+    private int discount;
+    private int couponId;
+    private int finalAmount;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +62,21 @@ public class TempPaymentActivity extends AppCompatActivity {
         confirmButton = findViewById(R.id.confirmButton1);
         amountText = findViewById(R.id.amountText);
 
-        int totalAmount = CartManager.getTotalAmountInCents();
-        amountText.setText(String.format(Locale.getDefault(), "Total: HK$%.2f", totalAmount / 100.0));
+        // 👇 Get values passed from CartActivity
+        int totalAmount = getIntent().getIntExtra("totalAmount", 0);   // already discounted if coupon applied
+        discount = getIntent().getIntExtra("discountAmount", 0);
+        couponId = getIntent().getIntExtra("selectedCouponId", 0);
+
+        // Final amount is just the total passed in (CartActivity already subtracted discount)
+        finalAmount = Math.max(0, totalAmount);
+
+        // Show amount to user
+        amountText.setText(String.format(
+                Locale.getDefault(),
+                "Total: HK$%.2f%s",
+                finalAmount / 100.0,
+                discount > 0 ? " (after discount)" : ""
+        ));
 
         confirmButton.setOnClickListener(v -> {
             confirmButton.setEnabled(false);
@@ -76,13 +95,12 @@ public class TempPaymentActivity extends AppCompatActivity {
         boolean isStaff = RoleManager.isStaff();
         String userId = RoleManager.getUserId();
         int customerId = isStaff ? 0 : Integer.parseInt(userId);
-        int totalAmount = CartManager.getTotalAmountInCents();
 
         // Build order header map
         Map<String, Object> orderHeader = new HashMap<>();
         orderHeader.put("cid", customerId);              // customer id (0 for walk-in/staff)
         orderHeader.put("ostatus", 1);                   // default order status
-        orderHeader.put("odate", System.currentTimeMillis()); // optional: timestamp, adapt to backend format
+        orderHeader.put("odate", System.currentTimeMillis()); // optional: timestamp
         orderHeader.put("orderRef", "temp_order_" + System.currentTimeMillis()); // unique ref
         if (isStaff) {
             orderHeader.put("sid", Integer.parseInt(RoleManager.getUserId()));
@@ -118,10 +136,13 @@ public class TempPaymentActivity extends AppCompatActivity {
         }
 
         orderHeader.put("items", items);
-        orderHeader.put("total_amount", totalAmount); // cents
+        orderHeader.put("total_amount", finalAmount); // cents after discount
+        if (couponId != 0) {
+            orderHeader.put("coupon_id", couponId);
+        }
         dishJson = new Gson().toJson(itemsForDisplay);
 
-        // Call the backend via Retrofit. Make sure OrderApiService has an endpoint like saveOrderDirect(Map)
+        // Call the backend via Retrofit
         OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
         Call<ResponseBody> call = service.saveOrderDirect(orderHeader);
 
@@ -138,12 +159,19 @@ public class TempPaymentActivity extends AppCompatActivity {
                         successIcon.setVisibility(View.VISIBLE);
                         Toast.makeText(TempPaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
 
-                        // Navigate to confirmation (pass useful details)
+                        // 👉 Mark coupon as used if one was applied
+                        if (couponId != 0) {
+                            markCouponAsUsed(customerId, couponId);
+                        }
+
+                        // Navigate to confirmation
                         Intent intent = new Intent(TempPaymentActivity.this, OrderConfirmationActivity.class);
                         intent.putExtra("customerId", String.valueOf(customerId));
-                        intent.putExtra("totalAmount", totalAmount);
+                        intent.putExtra("totalAmount", finalAmount);
                         intent.putExtra("itemCount", items.size());
                         intent.putExtra("dishJson", dishJson);
+                        intent.putExtra("discountAmount", discount);
+                        intent.putExtra("couponId", couponId);
                         startActivity(intent);
                         finish();
 
@@ -170,6 +198,30 @@ public class TempPaymentActivity extends AppCompatActivity {
                 confirmButton.setEnabled(true);
                 Log.e(TAG, "saveOrderDirectly onFailure: " + t.getMessage(), t);
                 Toast.makeText(TempPaymentActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void markCouponAsUsed(int customerId, int couponId) {
+        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
+        service.useCoupon(customerId, couponId).enqueue(new Callback<GenericResponse>() {
+            @Override
+            public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    GenericResponse res = response.body();
+                    if (res.isSuccess()) {
+                        Log.i(TAG, "Coupon marked as used: " + res.getMessage());
+                    } else {
+                        Log.w(TAG, "Coupon use failed: " + res.getMessage());
+                    }
+                } else {
+                    Log.w(TAG, "Coupon use API call failed, code=" + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GenericResponse> call, Throwable t) {
+                Log.e(TAG, "Coupon use API error: " + t.getMessage(), t);
             }
         });
     }

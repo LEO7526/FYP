@@ -42,6 +42,9 @@ public class CouponActivity extends BaseCustomerActivity {
     private int customerId;
     private Button btnHistory;
 
+    private Button btnMyCoupons; // new
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +55,8 @@ public class CouponActivity extends BaseCustomerActivity {
         tvCouponPoints = findViewById(R.id.tvCouponPoints);
         rvCoupons = findViewById(R.id.rvCoupons);
         btnHistory = findViewById(R.id.btnHistory);
+        btnMyCoupons = findViewById(R.id.btnMyCoupons);
+
 
         // Initial login state
         try {
@@ -104,19 +109,32 @@ public class CouponActivity extends BaseCustomerActivity {
         Log.d(TAG, "refreshLoginState: Parsed customerId = " + customerId);
 
         if (customerId == 0) {
-            Log.d(TAG, "refreshLoginState: User not logged in → hiding History button");
+            Log.d(TAG, "User not logged in → hiding buttons");
             btnHistory.setVisibility(View.GONE);
             btnHistory.setOnClickListener(null);
+
+            btnMyCoupons.setVisibility(View.GONE);
+            btnMyCoupons.setOnClickListener(null);
+
             tvCouponPoints.setText("Login to earn and redeem points");
             adapter.setLoggedIn(false);
         } else {
-            Log.d(TAG, "refreshLoginState: User logged in (id=" + customerId + ") → showing History button");
+            Log.d(TAG, "User logged in (id=" + customerId + ") → showing buttons");
             btnHistory.setVisibility(View.VISIBLE);
+            btnMyCoupons.setVisibility(View.VISIBLE);
 
             final int finalCustomerId = customerId;
+
             btnHistory.setOnClickListener(v -> {
-                Log.d(TAG, "History button clicked → opening CouponHistoryActivity with customerId=" + finalCustomerId);
+                Log.d(TAG, "History button clicked → opening CouponHistoryActivity");
                 Intent intent = new Intent(CouponActivity.this, CouponHistoryActivity.class);
+                intent.putExtra("customer_id", finalCustomerId);
+                startActivity(intent);
+            });
+
+            btnMyCoupons.setOnClickListener(v -> {
+                Log.d(TAG, "My Coupons button clicked → opening MyCouponsActivity");
+                Intent intent = new Intent(CouponActivity.this, MyCouponsActivity.class);
                 intent.putExtra("customer_id", finalCustomerId);
                 startActivity(intent);
             });

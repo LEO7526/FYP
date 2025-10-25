@@ -18,13 +18,30 @@
         android:paddingBottom="16dp" />
 
     <TextView
-        android:id="@+id/orderSummary"
+    android:id="@+id/orderSummary"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Order Summary"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/discountInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Order Summary"
+        android:textSize="16sp"
+        android:textColor="@android:color/holo_red_dark"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/totalInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:textColor="@android:color/holo_green_dark"
+        android:paddingBottom="16dp" />
 
     <TextView
         android:id="@+id/dishSummary"

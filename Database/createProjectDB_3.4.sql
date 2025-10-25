@@ -75,12 +75,21 @@ CREATE TABLE coupons (
   title VARCHAR(255) NOT NULL,
   description TEXT,
   points_required INT NOT NULL DEFAULT 0,
+  type ENUM('cash','percent','free_item') NOT NULL DEFAULT 'cash',
+  discount_amount INT DEFAULT 0,              -- in cents for cash, or percentage value for percent
+  item_category VARCHAR(50) DEFAULT NULL,     -- e.g. 'drink' for free_item
   expiry_date DATE DEFAULT NULL,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (coupon_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+UPDATE coupons
+SET type = 'free_item',
+    discount_amount = 0,
+    item_category = 'drink'
+WHERE title = 'Free Drink';
 
 -- Per-customer coupon points balance
 DROP TABLE IF EXISTS coupon_point;
@@ -147,11 +156,11 @@ ADD COLUMN is_used TINYINT(1) NOT NULL DEFAULT 0,
 ADD COLUMN used_at DATETIME NULL;
 
 -- Sample coupons
-INSERT INTO coupons (title, description, points_required, expiry_date, is_active) VALUES
-('10% OFF Any Order', 'Get 10% discount on your next order.', 100, '2025-12-31', 1),
-('Free Drink', 'Redeem one free drink of your choice.', 50, '2025-06-30', 1),
-('HK$50 OFF', 'Enjoy HK$50 off when you spend HK$300 or more.', 200, '2025-12-31', 1),
-('Birthday Special', 'Exclusive coupon for your birthday month.', 0, NULL, 1);
+INSERT INTO coupons (title, description, points_required, type, discount_amount, item_category, expiry_date, is_active) VALUES
+('10% OFF Any Order', 'Get 10% discount on your next order.', 100, 'percent', 10, NULL, '2025-12-31', 1),
+('Free Drink', 'Redeem one free drink of your choice.', 50, 'free_item', 0, 'drink', '2025-12-30', 1),
+('HK$50 OFF', 'Enjoy HK$50 off when you spend HK$300 or more.', 200, 'cash', 5000, NULL, '2025-12-31', 1), -- 5000 cents = HK$50
+('Birthday Special', 'Exclusive coupon for your birthday month.', 0, 'percent', 20, NULL, NULL, 1); -- e.g. 20% off
 
 -- 🔄 Backfill old rows (run only if you already had history data before adding coupon_id)
 UPDATE coupon_point_history h

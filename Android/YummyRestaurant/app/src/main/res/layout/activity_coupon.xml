@@ -29,6 +29,14 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"/>
 
+        <!-- 👇 New button -->
+        <Button
+            android:id="@+id/btnMyCoupons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="My Coupons"
+            android:layout_marginEnd="8dp"/>
+
         <Button
             android:id="@+id/btnHistory"
             android:layout_width="wrap_content"

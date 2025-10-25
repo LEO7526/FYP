@@ -2,19 +2,17 @@ package com.example.yummyrestaurant.api;
 
 import com.example.yummyrestaurant.models.CouponListResponse;
 import com.example.yummyrestaurant.models.CouponPointResponse;
-import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.CouponHistoryResponse;
+import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.RedeemCouponResponse;
-
-import java.util.Map;
+import com.example.yummyrestaurant.models.MyCouponListResponse;
 
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
-import retrofit2.http.POST;
 import retrofit2.http.Query;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
+import retrofit2.http.Field;
 
 public interface CouponApiService {
     @GET("getCouponPoints.php")
@@ -32,4 +30,15 @@ public interface CouponApiService {
 
     @GET("getCouponHistory.php")
     Call<CouponHistoryResponse> getCouponHistory(@Query("cid") int customerId);
+
+    // 👉 Add this new endpoint for redeemed but unused coupons
+    @GET("getMyCoupons.php")
+    Call<MyCouponListResponse> getMyCoupons(@Query("cid") int customerId);
+
+    @FormUrlEncoded
+    @POST("useCoupon.php")
+    Call<GenericResponse> useCoupon(
+            @Field("cid") int customerId,
+            @Field("coupon_id") int couponId
+    );
 }

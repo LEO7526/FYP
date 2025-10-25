@@ -68,7 +68,7 @@ public class DishDetailActivity extends BaseCustomerActivity {
         if (item != null) {
             name.setText(item.getName() != null ? item.getName() : "Unknown Dish");
             description.setText(item.getDescription() != null ? item.getDescription() : "No description available.");
-            price.setText(String.format(Locale.getDefault(), "¥ %.2f", item.getPrice()));
+            price.setText(String.format(Locale.getDefault(), "$ %.2f", item.getPrice()));
 
             // Tags
             LinearLayout tagsContainer = findViewById(R.id.tagsContainer);
@@ -170,7 +170,7 @@ public class DishDetailActivity extends BaseCustomerActivity {
         } else {
             name.setText("Dish not found");
             description.setText("Unable to load dish details.");
-            price.setText("¥ --");
+            price.setText("$ --");
             image.setImageResource(R.drawable.error_image);
         }
 

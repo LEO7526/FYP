@@ -75,6 +75,12 @@ public class MenuItem implements Serializable {
         return price;
     }
 
+    /** New helper: price in cents (int) */
+    public int getPriceInCents() {
+        return (int) Math.round(price * 100);
+    }
+
+
     public void setPrice(double price) {
         this.price = price;
     }
