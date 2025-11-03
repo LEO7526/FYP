@@ -12,6 +12,7 @@ playServicesLocation = "21.3.0"
 playServicesMaps = "19.2.0"
 firebaseCrashlytics = "20.0.1"
 googleFirebaseCrashlytics = "3.0.6"
+kotlin = "1.9.22"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -29,4 +30,5 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 

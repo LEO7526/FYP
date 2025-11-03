@@ -3,41 +3,44 @@ header('Content-Type: application/json; charset=utf-8');
 
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) {
-    http_response_code(500);
-    echo json_encode(["success" => false, "error" => "DB connection failed"]);
+    echo json_encode(["success"=>false,"error"=>"DB connection failed"]);
     exit;
 }
 
 $cid = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
-if ($cid === 0) {
-    echo json_encode(["success" => true, "coupons" => []]);
+$lang = isset($_GET['lang']) ? $conn->real_escape_string($_GET['lang']) : 'en';
+
+if ($cid <= 0) {
+    echo json_encode(["success"=>false,"error"=>"Invalid customer id"]);
     exit;
 }
 
 $sql = "
     SELECT c.coupon_id,
-           c.title,
-           c.description,
            c.points_required,
            c.type,
            c.discount_amount,
            c.item_category,
            DATE_FORMAT(c.expiry_date, '%Y-%m-%d') AS expiry_date,
+           t.title,
+           t.description,
            COUNT(r.redemption_id) AS quantity,
            MIN(r.redeemed_at) AS first_redeemed_at
     FROM coupon_redemptions r
     INNER JOIN coupons c ON r.coupon_id = c.coupon_id
+    INNER JOIN coupon_translation t ON c.coupon_id = t.coupon_id
     WHERE r.cid = ?
       AND r.is_used = 0
       AND c.is_active = 1
       AND (c.expiry_date IS NULL OR c.expiry_date >= CURDATE())
-    GROUP BY c.coupon_id, c.title, c.description, c.points_required,
-             c.type, c.discount_amount, c.item_category, c.expiry_date
+      AND t.language_code = ?
+    GROUP BY c.coupon_id, c.points_required, c.type, c.discount_amount,
+             c.item_category, c.expiry_date, t.title, t.description
     ORDER BY first_redeemed_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $cid);
+$stmt->bind_param("is", $cid, $lang);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -56,7 +59,7 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
-echo json_encode(["success" => true, "coupons" => $coupons], JSON_UNESCAPED_UNICODE);
+echo json_encode(["success"=>true,"coupons"=>$coupons], JSON_UNESCAPED_UNICODE);
 
 $stmt->close();
 $conn->close();

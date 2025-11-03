@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) {
@@ -8,12 +8,16 @@ if ($conn->connect_error) {
     exit;
 }
 
-$sql = "SELECT coupon_id, title, description, points_required,
-               DATE_FORMAT(expiry_date, '%Y-%m-%d') AS expiry_date,
-               is_active
-        FROM coupons
-        WHERE is_active = 1
-          AND (expiry_date IS NULL OR expiry_date >= CURDATE())";
+$lang = isset($_GET['lang']) ? $conn->real_escape_string($_GET['lang']) : 'en';
+
+$sql = "SELECT c.coupon_id, c.points_required, c.type, c.discount_amount, c.item_category,
+               DATE_FORMAT(c.expiry_date, '%Y-%m-%d') AS expiry_date,
+               t.title, t.description
+        FROM coupons c
+        JOIN coupon_translation t ON c.coupon_id = t.coupon_id
+        WHERE c.is_active = 1
+          AND (c.expiry_date IS NULL OR c.expiry_date >= CURDATE())
+          AND t.language_code = '$lang'";
 
 $result = $conn->query($sql);
 
@@ -24,6 +28,9 @@ while ($row = $result->fetch_assoc()) {
         "title"           => $row['title'],
         "description"     => $row['description'],
         "points_required" => (int)$row['points_required'],
+        "type"            => $row['type'],
+        "discount_amount" => (int)$row['discount_amount'],
+        "item_category"   => $row['item_category'],
         "expiry_date"     => $row['expiry_date']
     ];
 }

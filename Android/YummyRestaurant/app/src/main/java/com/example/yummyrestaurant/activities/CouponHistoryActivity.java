@@ -57,7 +57,7 @@ public class CouponHistoryActivity extends BaseCustomerActivity {
         Log.d(TAG, "loadHistory: Fetching history for customerId=" + customerId);
 
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.getCouponHistory(customerId).enqueue(new Callback<CouponHistoryResponse>() {
+        api.getCouponHistory(customerId,"en").enqueue(new Callback<CouponHistoryResponse>() {
             @Override
             public void onResponse(Call<CouponHistoryResponse> call, Response<CouponHistoryResponse> response) {
                 Log.d(TAG, "onResponse: HTTP code=" + response.code());

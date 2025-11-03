@@ -21,14 +21,24 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
         void onLoginRequired();
     }
 
+    // 👉 New interface for opening detail page
+    public interface OnCouponClickListener {
+        void onCouponClick(Coupon coupon);
+    }
+
     private final List<Coupon> couponList;
-    private final OnRedeemClickListener listener;
+    private final OnRedeemClickListener redeemListener;
+    private final OnCouponClickListener detailListener;
     private boolean isLoggedIn;
     private int currentPoints; // track user's current points
 
-    public CouponAdapter(List<Coupon> couponList, OnRedeemClickListener listener, boolean isLoggedIn) {
+    public CouponAdapter(List<Coupon> couponList,
+                         OnRedeemClickListener redeemListener,
+                         OnCouponClickListener detailListener,
+                         boolean isLoggedIn) {
         this.couponList = couponList;
-        this.listener = listener;
+        this.redeemListener = redeemListener;
+        this.detailListener = detailListener;
         this.isLoggedIn = isLoggedIn;
         this.currentPoints = 0;
     }
@@ -58,37 +68,41 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
 
         holder.tvTitle.setText(coupon.getTitle());
         holder.tvDescription.setText(coupon.getDescription());
-        holder.tvPoints.setText("Requires: " + coupon.getPoints_required() + " pts");
+        holder.tvPoints.setText("Requires: " + coupon.getPointsRequired() + " pts");
         holder.tvExpiry.setText(
-                coupon.getExpiry_date() != null && !coupon.getExpiry_date().isEmpty()
-                        ? "Valid until: " + coupon.getExpiry_date()
+                coupon.getExpiryDate() != null && !coupon.getExpiryDate().isEmpty()
+                        ? "Valid until: " + coupon.getExpiryDate()
                         : "No expiry"
         );
 
+        // 👉 Handle item click for details
+        holder.itemView.setOnClickListener(v -> {
+            if (detailListener != null) {
+                detailListener.onCouponClick(coupon);
+            }
+        });
+
         // Check if user can redeem
-        boolean canRedeem = isLoggedIn && currentPoints >= coupon.getPoints_required();
+        boolean canRedeem = isLoggedIn && currentPoints >= coupon.getPointsRequired();
 
         if (!isLoggedIn) {
-            // Guest user
             holder.btnRedeem.setText("Login to Redeem");
             holder.btnRedeem.setEnabled(true);
-            holder.itemView.setAlpha(1f); // show normally
+            holder.itemView.setAlpha(1f);
             holder.btnRedeem.setOnClickListener(v -> {
-                if (listener != null) listener.onLoginRequired();
+                if (redeemListener != null) redeemListener.onLoginRequired();
             });
         } else if (canRedeem) {
-            // Logged in and enough points
             holder.btnRedeem.setText("Redeem");
             holder.btnRedeem.setEnabled(true);
-            holder.itemView.setAlpha(1f); // normal brightness
+            holder.itemView.setAlpha(1f);
             holder.btnRedeem.setOnClickListener(v -> {
-                if (listener != null) listener.onRedeemClick(coupon);
+                if (redeemListener != null) redeemListener.onRedeemClick(coupon);
             });
         } else {
-            // Logged in but not enough points
             holder.btnRedeem.setText("Not enough points");
             holder.btnRedeem.setEnabled(false);
-            holder.itemView.setAlpha(0.5f); // dim the whole card
+            holder.itemView.setAlpha(0.5f);
             holder.btnRedeem.setOnClickListener(null);
         }
     }

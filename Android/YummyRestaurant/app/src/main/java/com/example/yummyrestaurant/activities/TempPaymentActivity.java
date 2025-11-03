@@ -52,6 +52,9 @@ public class TempPaymentActivity extends AppCompatActivity {
     private int couponId;
     private int finalAmount;
 
+    private int qty = 1; //temp
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -204,7 +207,8 @@ public class TempPaymentActivity extends AppCompatActivity {
 
     private void markCouponAsUsed(int customerId, int couponId) {
         CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        service.useCoupon(customerId, couponId).enqueue(new Callback<GenericResponse>() {
+        //temp qty
+        service.useCoupon(customerId, couponId,qty).enqueue(new Callback<GenericResponse>() {
             @Override
             public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {

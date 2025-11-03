@@ -98,7 +98,7 @@ public class SettingsActivity extends AppCompatActivity {
                 CouponApiService service = RetrofitClient.getClient(SettingsActivity.this)
                         .create(CouponApiService.class);
 
-                service.getCoupons().enqueue(new Callback<CouponListResponse>() {
+                service.getCoupons("en").enqueue(new Callback<CouponListResponse>() {
                     @Override
                     public void onResponse(Call<CouponListResponse> call, Response<CouponListResponse> response) {
                         if (response.isSuccessful()) {

@@ -43,6 +43,8 @@ public class CouponActivity extends BaseCustomerActivity {
     private Button btnHistory;
 
     private Button btnMyCoupons; // new
+    private int currentPoints = 0; // add this field
+
 
 
     @Override
@@ -67,20 +69,29 @@ public class CouponActivity extends BaseCustomerActivity {
         }
 
         rvCoupons.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CouponAdapter(couponList, new CouponAdapter.OnRedeemClickListener() {
-            @Override
-            public void onRedeemClick(Coupon coupon) {
-                redeemCoupon(coupon);
-            }
+        adapter = new CouponAdapter(
+                couponList,
+                new CouponAdapter.OnRedeemClickListener() {
+                    @Override
+                    public void onRedeemClick(Coupon coupon) {
+                        redeemCoupon(coupon);
+                    }
 
-            @Override
-            public void onLoginRequired() {
-                showInlineLogin(() -> {
-                    // After successful login, RoleManager has been updated by LoginBottomSheetFragment
-                    refreshLoginState();
-                }, null, 0, null, null);
-            }
-        }, customerId != 0);
+                    @Override
+                    public void onLoginRequired() {
+                        showInlineLogin(() -> refreshLoginState(), null, 0, null, null);
+                    }
+                },
+                coupon -> {
+                    // 👉 Navigate to detail page
+                    Intent intent = new Intent(CouponActivity.this, CouponDetailActivity.class);
+                    intent.putExtra("coupon_id", coupon.getCouponId());
+                    intent.putExtra("current_points", currentPoints); // ✅ pass points
+                    startActivity(intent);
+                },
+                customerId != 0
+        );
+
         rvCoupons.setAdapter(adapter);
 
         fetchCoupons();
@@ -153,6 +164,7 @@ public class CouponActivity extends BaseCustomerActivity {
             public void onResponse(Call<CouponPointResponse> call, Response<CouponPointResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     int points = response.body().getPoints();
+                    currentPoints = response.body().getPoints(); // ✅ store here
                     tvCouponPoints.setText("Points: " + points);
                     adapter.setCurrentPoints(points);
                     Log.d(TAG, "fetchCouponPoints success: points=" + points);
@@ -174,7 +186,7 @@ public class CouponActivity extends BaseCustomerActivity {
         Log.d(TAG, "Fetching coupons...");
 
         CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        service.getCoupons().enqueue(new Callback<CouponListResponse>() {
+        service.getCoupons("en").enqueue(new Callback<CouponListResponse>() {
             @Override
             public void onResponse(Call<CouponListResponse> call, Response<CouponListResponse> response) {
                 Log.d(TAG, "fetchCoupons onResponse: code=" + response.code());
@@ -204,41 +216,66 @@ public class CouponActivity extends BaseCustomerActivity {
             return;
         }
 
-        Log.d(TAG, "Redeeming coupon: id=" + coupon.getCoupon_id() + " for customerId=" + customerId);
+        int requiredPoints = coupon.getPointsRequired();
 
-        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        service.redeemCoupon(customerId, coupon.getCoupon_id()).enqueue(new Callback<RedeemCouponResponse>() {
-            @Override
-            public void onResponse(Call<RedeemCouponResponse> call, Response<RedeemCouponResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    RedeemCouponResponse res = response.body();
-                    Log.d(TAG, "redeemCoupon response: success=" + res.isSuccess()
-                            + ", message=" + res.getMessage()
-                            + ", error=" + res.getError()
-                            + ", points_before=" + res.getPointsBefore()
-                            + ", points_after=" + res.getPointsAfter());
+        // Calculate max redeemable quantity using the Activity’s currentPoints field
+        int maxRedeemable;
+        if (requiredPoints > 0) {
+            maxRedeemable = currentPoints / requiredPoints;
+        } else {
+            maxRedeemable = 1; // free coupon, only allow one
+        }
 
-                    if (res.isSuccess()) {
-                        Toast.makeText(CouponActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
-                        if (res.getPointsAfter() != null) {
-                            int remaining = res.getPointsAfter();
-                            tvCouponPoints.setText("Points: " + remaining);
-                            adapter.setCurrentPoints(remaining);
-                        }
-                    } else {
-                        Toast.makeText(CouponActivity.this, res.getError(), Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Log.w(TAG, "redeemCoupon failed: code=" + response.code());
-                    Toast.makeText(CouponActivity.this, "Redeem failed", Toast.LENGTH_SHORT).show();
-                }
-            }
 
-            @Override
-            public void onFailure(Call<RedeemCouponResponse> call, Throwable t) {
-                Log.e(TAG, "redeemCoupon onFailure", t);
-                Toast.makeText(CouponActivity.this, "Redeem failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (maxRedeemable <= 0) {
+            Toast.makeText(this, "Not enough points to redeem this coupon", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Build options array: "1", "2", "3", ...
+        String[] options = new String[maxRedeemable];
+        for (int i = 0; i < maxRedeemable; i++) {
+            options[i] = String.valueOf(i + 1);
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Select quantity to redeem")
+                .setItems(options, (dialog, which) -> {
+                    int quantity = which + 1;
+                    Log.d(TAG, "Redeeming " + quantity + " of couponId=" + coupon.getCouponId());
+
+                    CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
+                    service.redeemCoupon(customerId, coupon.getCouponId(), quantity)
+                            .enqueue(new Callback<RedeemCouponResponse>() {
+                                @Override
+                                public void onResponse(Call<RedeemCouponResponse> call, Response<RedeemCouponResponse> response) {
+                                    if (response.isSuccessful() && response.body() != null) {
+                                        RedeemCouponResponse res = response.body();
+                                        if (res.isSuccess()) {
+                                            Toast.makeText(CouponActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
+                                            if (res.getPointsAfter() != null) {
+                                                int remaining = res.getPointsAfter();
+                                                currentPoints = remaining; // ✅ update field
+                                                tvCouponPoints.setText("Points: " + remaining);
+                                                adapter.setCurrentPoints(remaining);
+                                            }
+                                        } else {
+                                            Toast.makeText(CouponActivity.this, res.getError(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    } else {
+                                        Toast.makeText(CouponActivity.this, "Redeem failed", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<RedeemCouponResponse> call, Throwable t) {
+                                    Toast.makeText(CouponActivity.this, "Redeem failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                })
+                .show();
     }
+
+
+
 }

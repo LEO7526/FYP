@@ -39,20 +39,23 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
         return new MyCouponViewHolder(view);
     }
 
-    public void decrementCouponQuantity(int position) {
+    public void decrementCouponQuantity(int position, int quantity) {
         if (position >= 0 && position < myCoupons.size()) {
             Coupon coupon = myCoupons.get(position);
             int currentQty = coupon.getQuantity();
 
-            if (currentQty > 1) {
-                coupon.setQuantity(currentQty - 1);
+            int newQty = currentQty - quantity;
+            if (newQty > 0) {
+                coupon.setQuantity(newQty);
                 notifyItemChanged(position);
             } else {
+                // remove if quantity drops to 0 or below
                 myCoupons.remove(position);
                 notifyItemRemoved(position);
             }
         }
     }
+
 
     @Override
     public void onBindViewHolder(@NonNull MyCouponViewHolder holder, int position) {
@@ -76,18 +79,18 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
         } else if ("percent".equalsIgnoreCase(coupon.getType())) {
             holder.tvReward.setVisibility(View.GONE);
             holder.tvDiscount.setVisibility(View.VISIBLE);
-            holder.tvDiscount.setText("Discount: " + coupon.getDiscount_amount() + "% OFF");
+            holder.tvDiscount.setText("Discount: " + coupon.getDiscountAmount() + "% OFF");
         } else { // cash
             holder.tvReward.setVisibility(View.GONE);
             holder.tvDiscount.setVisibility(View.VISIBLE);
             holder.tvDiscount.setText(
-                    String.format(Locale.getDefault(), "Discount: HK$%.2f", coupon.getDiscount_amount() / 100.0)
+                    String.format(Locale.getDefault(), "Discount: HK$%.2f", coupon.getDiscountAmount() / 100.0)
             );
         }
 
         // Expiry
-        if (coupon.getExpiry_date() != null && !coupon.getExpiry_date().isEmpty()) {
-            holder.tvExpiry.setText("Valid until: " + coupon.getExpiry_date());
+        if (coupon.getExpiryDate() != null && !coupon.getExpiryDate().isEmpty()) {
+            holder.tvExpiry.setText("Valid until: " + coupon.getExpiryDate());
         } else {
             holder.tvExpiry.setText("No expiry");
         }
