@@ -100,9 +100,7 @@ public class Coupon implements Parcelable {
     public int getDiscountAmount() { return discountAmount; }
     public String getType() { return type; }
     public String getItemCategory() { return itemCategory; }
-    public int getQuantity() {
-        return Math.max(1, quantity);
-    }
+    public int getQuantity() { return Math.max(1, quantity); }
     public List<Integer> getApplicableItems() { return applicableItems; }
     public List<Integer> getApplicableCategories() { return applicableCategories; }
 

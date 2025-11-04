@@ -560,24 +560,6 @@ UNIQUE KEY (tag_name)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- Coupon applies to specific menu items
 CREATE TABLE coupon_applicable_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -597,10 +579,6 @@ INSERT INTO coupon_applicable_items (coupon_id, item_id) VALUES
 -- Coupon 4: Birthday Special – could apply to one free main dish (example: Mapo Tofu item_id=6)
 INSERT INTO coupon_applicable_items (coupon_id, item_id) VALUES
 (4, 6);
-
-
-
-
 
 
 
