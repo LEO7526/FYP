@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.CouponDetailResponse;
 import com.example.yummyrestaurant.models.RedeemCouponResponse;
 import com.example.yummyrestaurant.utils.RoleManager;
@@ -29,7 +30,9 @@ public class CouponDetailActivity extends BaseCustomerActivity {
     private int couponId;
     private int customerId;
     private int requiredPoints = 0;   // from API
-    private int currentPoints = 0;    // optional: pass from intent or fetch separately
+    private int currentPoints = 0;    // passed from intent or fetched separately
+
+    private Coupon currentCoupon;     // hold the full coupon object
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +47,8 @@ public class CouponDetailActivity extends BaseCustomerActivity {
         tvRemainingPoints = findViewById(R.id.tvRemainingPoints);
         btnRedeem = findViewById(R.id.btnRedeem);
 
-        // Get couponId from intent
         couponId = getIntent().getIntExtra("coupon_id", 0);
-
-        currentPoints = getIntent().getIntExtra("current_points", 0); // 👈 receive points
+        currentPoints = getIntent().getIntExtra("current_points", 0);
 
         if (couponId == 0) {
             Toast.makeText(this, "Invalid coupon selected", Toast.LENGTH_SHORT).show();
@@ -62,10 +63,8 @@ public class CouponDetailActivity extends BaseCustomerActivity {
             customerId = 0;
         }
 
-        // Fetch details from API
         fetchCouponDetails(couponId);
 
-        // Redeem button
         btnRedeem.setOnClickListener(v -> {
             if (customerId == 0) {
                 Toast.makeText(this, "Please login to redeem", Toast.LENGTH_SHORT).show();
@@ -81,7 +80,8 @@ public class CouponDetailActivity extends BaseCustomerActivity {
             @Override
             public void onResponse(Call<CouponDetailResponse> call, Response<CouponDetailResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    updateCouponUI(response.body());
+                    currentCoupon = response.body().getCoupon();
+                    updateCouponUI(currentCoupon);
                 } else {
                     Log.w(TAG, "fetchCouponDetails failed: " + response.code());
                     tvTerms.setText("Failed to load terms");
@@ -96,16 +96,15 @@ public class CouponDetailActivity extends BaseCustomerActivity {
         });
     }
 
-    private void updateCouponUI(CouponDetailResponse detailResponse) {
-        if (detailResponse.getCoupon() != null) {
-            tvTitle.setText(detailResponse.getCoupon().getTitle());
-            requiredPoints = detailResponse.getCoupon().getRequiredPoints();
+    private void updateCouponUI(Coupon coupon) {
+        if (coupon != null) {
+            tvTitle.setText(coupon.getTitle());
+            requiredPoints = coupon.getPointsRequired();
             tvRequiredPoints.setText("Points required: " + requiredPoints);
 
-            // Build bullet list of terms
-            if (detailResponse.getCoupon().getTerms() != null && !detailResponse.getCoupon().getTerms().isEmpty()) {
+            if (coupon.getTerms() != null && !coupon.getTerms().isEmpty()) {
                 StringBuilder sb = new StringBuilder();
-                for (String term : detailResponse.getCoupon().getTerms()) {
+                for (String term : coupon.getTerms()) {
                     sb.append("• ").append(term).append("\n");
                 }
                 tvTerms.setText(sb.toString());
@@ -138,7 +137,6 @@ public class CouponDetailActivity extends BaseCustomerActivity {
                 })
                 .show();
     }
-
 
     private void redeemCoupon(int couponId, int customerId, int quantity) {
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);

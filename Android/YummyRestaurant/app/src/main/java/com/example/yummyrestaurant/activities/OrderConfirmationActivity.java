@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -40,35 +41,56 @@ public class OrderConfirmationActivity extends AppCompatActivity {
         String customerId = RoleManager.getUserId();
         int totalAmount = intent.getIntExtra("totalAmount", 0);
         int itemCount = intent.getIntExtra("itemCount", 0);
-        int discountAmount = intent.getIntExtra("discountAmount", 0);
-        int couponId = intent.getIntExtra("couponId", 0);
         String dishJson = intent.getStringExtra("dishJson");
 
-        // Subtotal = total + discount
-        double subtotal = (totalAmount + discountAmount) / 100.0;
-        double discount = discountAmount / 100.0;
-        double total = totalAmount / 100.0;
+        // Full Coupon object passed from TempPaymentActivity
+        Coupon selectedCoupon = intent.getParcelableExtra("selectedCoupon");
 
         // Bind views
         TextView orderSummary = findViewById(R.id.orderSummary);
         TextView discountInfo = findViewById(R.id.discountInfo);
         TextView totalInfo = findViewById(R.id.totalInfo);
         TextView dishSummary = findViewById(R.id.dishSummary);
+        TextView couponDetails = findViewById(R.id.couponDetails); // 👈 add this TextView in layout
+
+        // Calculate subtotal/discount/total
+        int discountAmount = 0;
+        if (selectedCoupon != null) {
+            discountAmount = selectedCoupon.getDiscountAmount();
+        }
+        double subtotal = (totalAmount + discountAmount) / 100.0;
+        double discount = discountAmount / 100.0;
+        double total = totalAmount / 100.0;
 
         // Fill in summary
         orderSummary.setText("Customer ID: " + customerId +
                 "\nItems: " + itemCount +
                 "\nSubtotal: HK$" + String.format("%.2f", subtotal));
 
-        if (discountAmount > 0) {
+        if (selectedCoupon != null && discountAmount > 0) {
+            // Show discount line
             String discountText = "Discount: -HK$" + String.format("%.2f", discount);
-            if (couponId != 0) {
-                discountText += " (Coupon #" + couponId + ")";
-            }
+            discountText += " (" + selectedCoupon.getTitle() + ")";
             discountInfo.setText(discountText);
-            discountInfo.setVisibility(View.VISIBLE);   // always show when discount exists
+            discountInfo.setVisibility(View.VISIBLE);
+
+            // Show concise coupon details
+            StringBuilder details = new StringBuilder();
+            details.append("Coupon: ").append(selectedCoupon.getTitle()).append("\n");
+            if ("percent".equals(selectedCoupon.getDiscountType())) {
+                details.append("Discount: ").append((int) selectedCoupon.getDiscountValue()).append("% off");
+            } else if ("cash".equals(selectedCoupon.getDiscountType())) {
+                details.append("Discount: HK$")
+                        .append(String.format("%.2f", selectedCoupon.getDiscountValue()));
+            } else if ("free_item".equals(selectedCoupon.getDiscountType())) {
+                details.append("Discount: Free ").append(selectedCoupon.getItemCategory());
+            }
+            couponDetails.setText(details.toString());
+            couponDetails.setVisibility(View.VISIBLE);
+
         } else {
-            discountInfo.setVisibility(View.GONE);      // hide completely if no discount
+            discountInfo.setVisibility(View.GONE);
+            couponDetails.setVisibility(View.GONE);
         }
 
         totalInfo.setText("Total: HK$" + String.format("%.2f", total));
@@ -96,9 +118,9 @@ public class OrderConfirmationActivity extends AppCompatActivity {
             double itemSubtotal = qty * price;
 
             summary.append(name)
-                    .append(" — Qty: ").append(qty)
-                    .append(" — Price: HK$").append(String.format("%.2f", price))
-                    .append(" — Subtotal: HK$").append(String.format("%.2f", itemSubtotal))
+                    .append(" • Qty: ").append(qty)
+                    .append(" • Price: HK$").append(String.format("%.2f", price))
+                    .append(" • Subtotal: HK$").append(String.format("%.2f", itemSubtotal))
                     .append("\n");
         }
 

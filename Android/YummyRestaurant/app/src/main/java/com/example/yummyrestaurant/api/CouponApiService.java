@@ -17,26 +17,26 @@ import retrofit2.http.Query;
 
 public interface CouponApiService {
 
-    // --- Coupon list with language ---
+    // --- Get all active coupons (with translations) ---
     @GET("getCoupons.php")
     Call<CouponListResponse> getCoupons(
             @Query("lang") String lang
     );
 
-    // --- Coupon detail with language ---
+    // --- Get detailed info for a single coupon ---
     @GET("getCouponDetail.php")
     Call<CouponDetailResponse> getCouponDetail(
             @Query("coupon_id") int couponId,
             @Query("lang") String lang
     );
 
-    // --- Get user points ---
+    // --- Get current coupon points for a customer ---
     @GET("getCouponPoints.php")
     Call<CouponPointResponse> getCouponPoints(
             @Query("cid") int customerId
     );
 
-    // --- Redeem coupon with quantity ---
+    // --- Redeem a coupon (spend points to acquire) ---
     @FormUrlEncoded
     @POST("redeemCoupon.php")
     Call<RedeemCouponResponse> redeemCoupon(
@@ -45,27 +45,26 @@ public interface CouponApiService {
             @Field("quantity") int quantity
     );
 
+    // --- Get coupon usage history for a customer ---
     @GET("getCouponHistory.php")
     Call<CouponHistoryResponse> getCouponHistory(
             @Query("cid") int customerId,
             @Query("lang") String lang
     );
 
-    // --- Use coupon (from MyCouponsActivity) ---
+    // --- Mark coupon as used (during checkout) ---
     @FormUrlEncoded
     @POST("useCoupon.php")
     Call<GenericResponse> useCoupon(
             @Field("cid") int customerId,
             @Field("coupon_id") int couponId,
-            @Field("quantity") int quantity   // 👈 new
+            @Field("quantity") int quantity
     );
 
+    // --- Get all coupons currently owned by a customer ---
     @GET("getMyCoupons.php")
     Call<MyCouponListResponse> getMyCoupons(
             @Query("cid") int customerId,
-            @Query("lang") String lang   // optional if your PHP supports translations
+            @Query("lang") String lang
     );
-
-
-
 }

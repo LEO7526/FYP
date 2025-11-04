@@ -17,6 +17,7 @@ import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.CartItem;
+import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
@@ -48,12 +49,9 @@ public class TempPaymentActivity extends AppCompatActivity {
     private final List<Map<String, Object>> items = new ArrayList<>();
     private final List<Map<String, Object>> itemsForDisplay = new ArrayList<>();
 
-    private int discount;
-    private int couponId;
     private int finalAmount;
-
-    private int qty = 1; //temp
-
+    private Coupon selectedCoupon;   // 👈 full object
+    private int qty = 1; // temp
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,20 +63,20 @@ public class TempPaymentActivity extends AppCompatActivity {
         confirmButton = findViewById(R.id.confirmButton1);
         amountText = findViewById(R.id.amountText);
 
-        // 👇 Get values passed from CartActivity
-        int totalAmount = getIntent().getIntExtra("totalAmount", 0);   // already discounted if coupon applied
-        discount = getIntent().getIntExtra("discountAmount", 0);
-        couponId = getIntent().getIntExtra("selectedCouponId", 0);
+        // Get values passed from CartActivity
+        int totalAmount = getIntent().getIntExtra("totalAmount", 0);
+        selectedCoupon = getIntent().getParcelableExtra("selectedCoupon"); // 👈 full object
 
         // Final amount is just the total passed in (CartActivity already subtracted discount)
         finalAmount = Math.max(0, totalAmount);
 
         // Show amount to user
+        String discountLabel = (selectedCoupon != null) ? " (after discount)" : "";
         amountText.setText(String.format(
                 Locale.getDefault(),
                 "Total: HK$%.2f%s",
                 finalAmount / 100.0,
-                discount > 0 ? " (after discount)" : ""
+                discountLabel
         ));
 
         confirmButton.setOnClickListener(v -> {
@@ -88,10 +86,6 @@ public class TempPaymentActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Build payload and call backend endpoint to save order directly into orders and order_items.
-     * Expected server behavior: create a new row in orders and rows in order_items; return success and order id.
-     */
     private void saveOrderDirectly() {
         Log.d(TAG, "saveOrderDirectly: preparing payload");
 
@@ -101,10 +95,10 @@ public class TempPaymentActivity extends AppCompatActivity {
 
         // Build order header map
         Map<String, Object> orderHeader = new HashMap<>();
-        orderHeader.put("cid", customerId);              // customer id (0 for walk-in/staff)
-        orderHeader.put("ostatus", 1);                   // default order status
-        orderHeader.put("odate", System.currentTimeMillis()); // optional: timestamp
-        orderHeader.put("orderRef", "temp_order_" + System.currentTimeMillis()); // unique ref
+        orderHeader.put("cid", customerId);
+        orderHeader.put("ostatus", 1);
+        orderHeader.put("odate", System.currentTimeMillis());
+        orderHeader.put("orderRef", "temp_order_" + System.currentTimeMillis());
         if (isStaff) {
             orderHeader.put("sid", Integer.parseInt(RoleManager.getUserId()));
             orderHeader.put("table_number", RoleManager.getAssignedTable());
@@ -139,9 +133,9 @@ public class TempPaymentActivity extends AppCompatActivity {
         }
 
         orderHeader.put("items", items);
-        orderHeader.put("total_amount", finalAmount); // cents after discount
-        if (couponId != 0) {
-            orderHeader.put("coupon_id", couponId);
+        orderHeader.put("total_amount", finalAmount);
+        if (selectedCoupon != null) {
+            orderHeader.put("coupon_id", selectedCoupon.getCouponId());
         }
         dishJson = new Gson().toJson(itemsForDisplay);
 
@@ -162,9 +156,9 @@ public class TempPaymentActivity extends AppCompatActivity {
                         successIcon.setVisibility(View.VISIBLE);
                         Toast.makeText(TempPaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
 
-                        // 👉 Mark coupon as used if one was applied
-                        if (couponId != 0) {
-                            markCouponAsUsed(customerId, couponId);
+                        // Mark coupon as used if one was applied
+                        if (selectedCoupon != null) {
+                            markCouponAsUsed(customerId, selectedCoupon.getCouponId());
                         }
 
                         // Navigate to confirmation
@@ -173,8 +167,9 @@ public class TempPaymentActivity extends AppCompatActivity {
                         intent.putExtra("totalAmount", finalAmount);
                         intent.putExtra("itemCount", items.size());
                         intent.putExtra("dishJson", dishJson);
-                        intent.putExtra("discountAmount", discount);
-                        intent.putExtra("couponId", couponId);
+                        if (selectedCoupon != null) {
+                            intent.putExtra("selectedCoupon", selectedCoupon); // 👈 pass full object forward
+                        }
                         startActivity(intent);
                         finish();
 
@@ -207,8 +202,7 @@ public class TempPaymentActivity extends AppCompatActivity {
 
     private void markCouponAsUsed(int customerId, int couponId) {
         CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        //temp qty
-        service.useCoupon(customerId, couponId,qty).enqueue(new Callback<GenericResponse>() {
+        service.useCoupon(customerId, couponId, qty).enqueue(new Callback<GenericResponse>() {
             @Override
             public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {

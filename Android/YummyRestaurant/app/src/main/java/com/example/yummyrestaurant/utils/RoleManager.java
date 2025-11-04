@@ -3,6 +3,9 @@ package com.example.yummyrestaurant.utils;
 import android.util.Log;
 
 import com.example.yummyrestaurant.models.User;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class RoleManager {
 
@@ -11,6 +14,39 @@ public class RoleManager {
             return null; // Not logged in or incomplete data
         }
         return new User(userId, userName, userEmail, userTel);
+    }
+
+    private static String userBirthday; // format: "yyyy-MM-dd"
+
+    public static String getUserBirthday() {
+        return userBirthday;
+    }
+
+    public static void setUserBirthday(String birthday) {
+        userBirthday = birthday;
+    }
+
+
+
+    public static boolean isTodayUserBirthday() {
+        if (userBirthday == null || userBirthday.isEmpty()) return false;
+
+        try {
+            // Parse stored birthday
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            java.util.Date dob = sdf.parse(userBirthday);
+
+            Calendar today = Calendar.getInstance();
+            Calendar birthCal = Calendar.getInstance();
+            birthCal.setTime(dob);
+
+            // Compare month and day only
+            return today.get(Calendar.MONTH) == birthCal.get(Calendar.MONTH) &&
+                    today.get(Calendar.DAY_OF_MONTH) == birthCal.get(Calendar.DAY_OF_MONTH);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse birthday: " + userBirthday, e);
+            return false;
+        }
     }
     private static final String TAG = "RoleManager";
 

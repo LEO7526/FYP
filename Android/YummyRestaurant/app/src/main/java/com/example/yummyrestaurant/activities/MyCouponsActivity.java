@@ -16,6 +16,7 @@ import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.MyCouponListResponse;
+import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 import java.util.ArrayList;
@@ -119,35 +120,31 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                 .setTitle("Select quantity to use")
                 .setItems(options, (dialog, which) -> {
                     int quantity = which + 1;
-                    Log.d(TAG, "User selected quantity=" + quantity + " for couponId=" + coupon.getCouponId());
+
+                    // 🚨 Validate coupon before using
+                    if (!isCouponValidForCart(coupon)) {
+                        return;
+                    }
+
                     useCoupon(coupon, position, quantity);
                 })
                 .show();
     }
 
     private void useCoupon(Coupon coupon, int position, int quantity) {
-        Log.d(TAG, "useCoupon: couponId=" + coupon.getCouponId() + ", quantity=" + quantity);
-
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
         api.useCoupon(customerId, coupon.getCouponId(), quantity).enqueue(new Callback<GenericResponse>() {
             @Override
             public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                Log.d(TAG, "useCoupon onResponse: code=" + response.code());
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Log.i(TAG, "Coupon applied successfully: id=" + coupon.getCouponId());
-
                     Intent result = new Intent();
-                    result.putExtra("selectedCouponId", coupon.getCouponId());
-                    result.putExtra("discountAmount", coupon.getDiscountAmount());
-                    result.putExtra("couponType", coupon.getType());
-                    result.putExtra("itemCategory", coupon.getItemCategory());
+                    result.putExtra("selectedCoupon", coupon); // 👈 pass full object
                     setResult(RESULT_OK, result);
 
                     adapter.decrementCouponQuantity(position, quantity);
                     finish();
                 } else {
                     Toast.makeText(MyCouponsActivity.this, "Failed to apply coupon", Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "useCoupon failed: body=" + response.body());
                     reEnableButton(position);
                 }
             }
@@ -155,7 +152,6 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             @Override
             public void onFailure(Call<GenericResponse> call, Throwable t) {
                 Toast.makeText(MyCouponsActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "useCoupon onFailure", t);
                 reEnableButton(position);
             }
         });
@@ -174,5 +170,102 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         Log.d(TAG, "Back pressed → RESULT_CANCELED");
         setResult(RESULT_CANCELED);
         super.onBackPressed();
+    }
+
+    private boolean isCouponValidForCart(Coupon coupon) {
+        if (coupon == null) {
+            Log.d("CouponDebug", "Coupon is null");
+            return false;
+        }
+
+        Log.d("CouponDebug", "Validating coupon: " + coupon.getTitle() + " (ID=" + coupon.getCouponId() + ")");
+        int totalCents = CartManager.getTotalAmountInCents();
+        Log.d("CouponDebug", "Cart total (cents): " + totalCents);
+
+        // 1. Minimum spend
+        Double minSpend = coupon.getMinSpend();
+        if (minSpend != null) {
+            Log.d("CouponDebug", "Coupon minSpend=" + minSpend);
+            if (totalCents < (int) Math.round(minSpend * 100)) {
+                Log.d("CouponDebug", "Invalid: below min spend");
+                return false;
+            }
+        }
+
+        // 2. Applies to scope
+        String appliesTo = coupon.getAppliesTo();
+        Log.d("CouponDebug", "Coupon appliesTo=" + appliesTo);
+
+        if ("item".equalsIgnoreCase(appliesTo)) {
+            List<Integer> itemIds = coupon.getApplicableItems();
+            if (itemIds != null && !itemIds.isEmpty()) {
+                Log.d("CouponDebug", "Checking applicableItems=" + itemIds);
+                if (!CartManager.hasAnyItem(itemIds)) {
+                    Log.d("CouponDebug", "Invalid: no matching items in cart");
+                    return false;
+                }
+            }
+
+            String category = coupon.getItemCategory();
+            if (category != null && !category.trim().isEmpty()) {
+                Log.d("CouponDebug", "Checking itemCategory=" + category);
+                if (!CartManager.hasItemCategory(category)) {
+                    Log.d("CouponDebug", "Invalid: no matching category in cart");
+                    return false;
+                }
+            }
+        } else if ("category".equalsIgnoreCase(appliesTo)) {
+            List<Integer> categoryIds = coupon.getApplicableCategories();
+            if (categoryIds != null && !categoryIds.isEmpty()) {
+                Log.d("CouponDebug", "Checking applicableCategories=" + categoryIds);
+                if (!CartManager.hasAnyCategory(categoryIds)) {
+                    Log.d("CouponDebug", "Invalid: no matching categories in cart");
+                    return false;
+                }
+            }
+        }
+
+        // 3. Order type
+        String orderType = CartManager.getOrderType();
+        Log.d("CouponDebug", "Order type=" + orderType);
+
+        if ("dine_in".equals(orderType) && !coupon.isValidDineIn()) {
+            Log.d("CouponDebug", "Invalid: not valid for dine-in");
+            return false;
+        }
+        if ("takeaway".equals(orderType) && !coupon.isValidTakeaway()) {
+            Log.d("CouponDebug", "Invalid: not valid for takeaway");
+            return false;
+        }
+        if ("delivery".equals(orderType) && !coupon.isValidDelivery()) {
+            Log.d("CouponDebug", "Invalid: not valid for delivery");
+            return false;
+        }
+
+        // 4. Birthday-only
+        if (coupon.isBirthdayOnly()) {
+            Log.d("CouponDebug", "Coupon is birthday-only, checking RoleManager...");
+            try {
+                if (!RoleManager.isTodayUserBirthday()) {
+                    Log.d("CouponDebug", "Invalid: not user's birthday");
+                    return false;
+                }
+            } catch (Exception e) {
+                Log.e("CouponDebug", "Error checking birthday", e);
+                return false;
+            }
+        }
+
+        // 5. Discount stacking
+        if (!coupon.isCombineWithOtherDiscounts()) {
+            Log.d("CouponDebug", "Coupon cannot combine with other discounts");
+            if (CartManager.hasOtherDiscountsApplied()) {
+                Log.d("CouponDebug", "Invalid: other discounts already applied");
+                return false;
+            }
+        }
+
+        Log.d("CouponDebug", "Coupon is valid ✅");
+        return true;
     }
 }

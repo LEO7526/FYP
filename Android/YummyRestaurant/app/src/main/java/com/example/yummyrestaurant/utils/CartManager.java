@@ -5,6 +5,7 @@ import com.example.yummyrestaurant.models.MenuItem;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class CartManager {
@@ -111,7 +112,7 @@ public final class CartManager {
     }
 
     public static boolean hasItemCategory(String category) {
-        if (cartItems == null || cartItems.isEmpty()) return false;
+        if (cartItems == null || cartItems.isEmpty() || category == null) return false;
 
         for (CartItem cartItem : cartItems.keySet()) {
             MenuItem menuItem = cartItem.getMenuItem();
@@ -131,7 +132,7 @@ public final class CartManager {
             MenuItem menuItem = cartItem.getMenuItem();
             if (menuItem != null && menuItem.getCategory() != null &&
                     menuItem.getCategory().equalsIgnoreCase(category)) {
-                int priceCents = menuItem.getPriceInCents(); // 👈 use helper
+                int priceCents = menuItem.getPriceInCents();
                 if (priceCents < cheapest) {
                     cheapest = priceCents;
                 }
@@ -140,5 +141,28 @@ public final class CartManager {
         return cheapest == Integer.MAX_VALUE ? 0 : cheapest;
     }
 
+    public static boolean hasAnyItem(List<Integer> itemIds) {
+        if (cartItems == null || cartItems.isEmpty() || itemIds == null) return false;
 
+        for (CartItem cartItem : cartItems.keySet()) {
+            MenuItem menuItem = cartItem.getMenuItem();
+            if (menuItem != null && itemIds.contains(menuItem.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Disabled until backend confirms category IDs
+    public static boolean hasAnyCategory(List<Integer> categoryIds) {
+        return false;
+    }
+
+    public static String getOrderType() {
+        return "dine_in"; // placeholder
+    }
+
+    public static boolean hasOtherDiscountsApplied() {
+        return false;
+    }
 }
