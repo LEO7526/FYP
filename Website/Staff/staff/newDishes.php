@@ -336,6 +336,9 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
 
         <!-- Tag Selector -->
         <div class="form-group">
+            <label>Select Tag
+                <button type="button" id="deleteTagBtn" class="btn btn-danger" style="margin-left: 10px; float: right;">Delete Mode</button>
+            </label>
             <div style="clear: both;"></div>
 
             <div id="tagCategoryButtons" class="tag-category-buttons">
@@ -344,7 +347,7 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
             <div id="tagSelectorBox" class="tag-selector-box">
             </div>
 
-           
+            <button type="button" id="newTagBtn" class="btn btn-secondary">+ Add New Tag</button>
 
             <!-- New Tag Form -->
             <div id="newTagForm" class="new-tag-form">
