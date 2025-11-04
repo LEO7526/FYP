@@ -51,20 +51,66 @@ if ($row = $result->fetch_assoc()) {
         $termStmt->close();
     }
 
+    // Fetch rules
+    $rule = null;
+    $ruleSql = "SELECT applies_to, discount_type, discount_value, min_spend,
+                       valid_dine_in, valid_takeaway, valid_delivery,
+                       combine_with_other_discounts, birthday_only
+                FROM coupon_rules WHERE coupon_id = ?";
+    $ruleStmt = $conn->prepare($ruleSql);
+    if ($ruleStmt) {
+        $ruleStmt->bind_param("i", $couponId);
+        $ruleStmt->execute();
+        $rule = $ruleStmt->get_result()->fetch_assoc();
+        $ruleStmt->close();
+    }
+
+    // Fetch applicable items
+    $applicableItems = [];
+    $itemSql = "SELECT item_id FROM coupon_applicable_items WHERE coupon_id = ?";
+    $itemStmt = $conn->prepare($itemSql);
+    if ($itemStmt) {
+        $itemStmt->bind_param("i", $couponId);
+        $itemStmt->execute();
+        $itemRes = $itemStmt->get_result();
+        while ($i = $itemRes->fetch_assoc()) {
+            $applicableItems[] = (int)$i['item_id'];
+        }
+        $itemStmt->close();
+    }
+
+    // Fetch applicable categories
+    $applicableCategories = [];
+    $catSql = "SELECT category_id FROM coupon_applicable_categories WHERE coupon_id = ?";
+    $catStmt = $conn->prepare($catSql);
+    if ($catStmt) {
+        $catStmt->bind_param("i", $couponId);
+        $catStmt->execute();
+        $catRes = $catStmt->get_result();
+        while ($c = $catRes->fetch_assoc()) {
+            $applicableCategories[] = (int)$c['category_id'];
+        }
+        $catStmt->close();
+    }
+
     echo json_encode([
         "success" => true,
         "coupon"  => [
-            "coupon_id"      => (int)$row['coupon_id'],
-            "title"          => $row['title'],
-            "description"    => $row['description'],
-            "requiredPoints" => (int)$row['points_required'],
-            "type"           => $row['type'],
-            "discountAmount" => (int)$row['discount_amount'],
-            "itemCategory"   => $row['item_category'],
-            "expiry_date"    => $row['expiry_date'],
-            "terms"          => $terms
+            "coupon_id"             => (int)$row['coupon_id'],
+            "title"                 => $row['title'],
+            "description"           => $row['description'],
+            "requiredPoints"        => (int)$row['points_required'],
+            "type"                  => $row['type'],
+            "discountAmount"        => (int)$row['discount_amount'],
+            "itemCategory"          => $row['item_category'],
+            "expiry_date"           => $row['expiry_date'],
+            "terms"                 => $terms,
+            "rules"                 => $rule,
+            "applicable_items"      => $applicableItems,
+            "applicable_categories" => $applicableCategories
         ]
     ], JSON_UNESCAPED_UNICODE);
+
 } else {
     echo json_encode(["success" => false, "error" => "Coupon not found"]);
 }
