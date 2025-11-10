@@ -78,9 +78,9 @@ public class Coupon implements Parcelable {
         @SerializedName("birthday_only")
         private int birthdayRaw;
 
-        // Getters
-        public String getAppliesTo() { return appliesTo; }
-        public String getDiscountType() { return discountType; }
+        // Getters with null safety
+        public String getAppliesTo() { return appliesTo != null ? appliesTo : ""; }
+        public String getDiscountType() { return discountType != null ? discountType : ""; }
         public double getDiscountValue() { return discountValue; }
         public Double getMinSpend() { return minSpend; }
         public boolean isValidDineIn() { return validDineInRaw == 1; }
@@ -90,23 +90,40 @@ public class Coupon implements Parcelable {
         public boolean isBirthdayOnly() { return birthdayRaw == 1; }
     }
 
-    // --- Getters (delegating to rules) ---
+    // --- Getters (delegating to rules, with safe defaults and fallbacks) ---
     public int getCouponId() { return couponId; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
+    public String getTitle() { return title != null ? title : ""; }
+    public String getDescription() { return description != null ? description : ""; }
     public List<String> getTerms() { return terms; }
     public int getPointsRequired() { return pointsRequired; }
-    public String getExpiryDate() { return expiryDate; }
+    public String getExpiryDate() { return expiryDate != null ? expiryDate : ""; }
     public int getDiscountAmount() { return discountAmount; }
-    public String getType() { return type; }
-    public String getItemCategory() { return itemCategory; }
+    public String getType() { return type != null ? type : ""; }
+    public String getItemCategory() { return itemCategory != null ? itemCategory : ""; }
     public int getQuantity() { return Math.max(1, quantity); }
     public List<Integer> getApplicableItems() { return applicableItems; }
     public List<Integer> getApplicableCategories() { return applicableCategories; }
 
-    public String getAppliesTo() { return rules != null ? rules.getAppliesTo() : null; }
-    public String getDiscountType() { return rules != null ? rules.getDiscountType() : null; }
-    public double getDiscountValue() { return rules != null ? rules.getDiscountValue() : 0; }
+    public String getAppliesTo() {
+        return rules != null ? rules.getAppliesTo() : "";
+    }
+
+    // 🔑 Edited: fall back to top-level "type"
+    public String getDiscountType() {
+        if (rules != null && !rules.getDiscountType().isEmpty()) {
+            return rules.getDiscountType();
+        }
+        return type != null ? type : "";
+    }
+
+    // 🔑 Edited: fall back to top-level "discountAmount"
+    public double getDiscountValue() {
+        if (rules != null) {
+            return rules.getDiscountValue();
+        }
+        return discountAmount;
+    }
+
     public Double getMinSpend() { return rules != null ? rules.getMinSpend() : null; }
     public boolean isValidDineIn() { return rules != null && rules.isValidDineIn(); }
     public boolean isValidTakeaway() { return rules != null && rules.isValidTakeaway(); }

@@ -68,10 +68,11 @@ public class CouponDetailActivity extends BaseCustomerActivity {
         btnRedeem.setOnClickListener(v -> {
             if (customerId == 0) {
                 Toast.makeText(this, "Please login to redeem", Toast.LENGTH_SHORT).show();
-            } else {
+            } else if (btnRedeem.isEnabled()) {
                 showQuantityPickerAndRedeem();
             }
         });
+
     }
 
     private void fetchCouponDetails(int couponId) {
@@ -102,6 +103,19 @@ public class CouponDetailActivity extends BaseCustomerActivity {
             requiredPoints = coupon.getPointsRequired();
             tvRequiredPoints.setText("Points required: " + requiredPoints);
 
+            // Show current points passed from intent
+            tvRemainingPoints.setText("Remaining points: " + currentPoints);
+
+            // 🚨 Disable redeem button if not enough points
+            if (requiredPoints > 0 && currentPoints < requiredPoints) {
+                btnRedeem.setEnabled(false);
+                btnRedeem.setAlpha(0.5f); // optional visual cue
+                Toast.makeText(this, "Not enough points to redeem this coupon", Toast.LENGTH_SHORT).show();
+            } else {
+                btnRedeem.setEnabled(true);
+                btnRedeem.setAlpha(1f);
+            }
+
             if (coupon.getTerms() != null && !coupon.getTerms().isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 for (String term : coupon.getTerms()) {
@@ -113,6 +127,8 @@ public class CouponDetailActivity extends BaseCustomerActivity {
             }
         }
     }
+
+
 
     private void showQuantityPickerAndRedeem() {
         int maxRedeemable = (requiredPoints > 0)

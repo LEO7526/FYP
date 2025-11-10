@@ -39,7 +39,7 @@ public class OrderConfirmationActivity extends AppCompatActivity {
         // Retrieve order details
         Intent intent = getIntent();
         String customerId = RoleManager.getUserId();
-        int totalAmount = intent.getIntExtra("totalAmount", 0);
+        int totalAmount = intent.getIntExtra("totalAmount", 0); // in cents
         int itemCount = intent.getIntExtra("itemCount", 0);
         String dishJson = intent.getStringExtra("dishJson");
 
@@ -51,23 +51,34 @@ public class OrderConfirmationActivity extends AppCompatActivity {
         TextView discountInfo = findViewById(R.id.discountInfo);
         TextView totalInfo = findViewById(R.id.totalInfo);
         TextView dishSummary = findViewById(R.id.dishSummary);
-        TextView couponDetails = findViewById(R.id.couponDetails); // 👈 add this TextView in layout
+        TextView couponDetails = findViewById(R.id.couponDetails);
 
         // Calculate subtotal/discount/total
-        int discountAmount = 0;
+        double subtotal = totalAmount / 100.0; // before discount
+        double discount = 0.0;
+
         if (selectedCoupon != null) {
-            discountAmount = selectedCoupon.getDiscountAmount();
+            String type = selectedCoupon.getDiscountType();
+            if ("percent".equalsIgnoreCase(type)) {
+                // discountValue is percentage (e.g. 10 for 10%)
+                discount = subtotal * (selectedCoupon.getDiscountValue() / 100.0);
+            } else if ("cash".equalsIgnoreCase(type)) {
+                // discountValue is fixed HK$ amount
+                discount = selectedCoupon.getDiscountValue();
+            } else if ("free_item".equalsIgnoreCase(type)) {
+                // free item logic: here just show info, no subtraction
+                discount = 0.0;
+            }
         }
-        double subtotal = (totalAmount + discountAmount) / 100.0;
-        double discount = discountAmount / 100.0;
-        double total = totalAmount / 100.0;
+
+        double total = subtotal - discount;
 
         // Fill in summary
         orderSummary.setText("Customer ID: " + customerId +
                 "\nItems: " + itemCount +
                 "\nSubtotal: HK$" + String.format("%.2f", subtotal));
 
-        if (selectedCoupon != null && discountAmount > 0) {
+        if (selectedCoupon != null && discount > 0) {
             // Show discount line
             String discountText = "Discount: -HK$" + String.format("%.2f", discount);
             discountText += " (" + selectedCoupon.getTitle() + ")";
@@ -77,12 +88,12 @@ public class OrderConfirmationActivity extends AppCompatActivity {
             // Show concise coupon details
             StringBuilder details = new StringBuilder();
             details.append("Coupon: ").append(selectedCoupon.getTitle()).append("\n");
-            if ("percent".equals(selectedCoupon.getDiscountType())) {
+            if ("percent".equalsIgnoreCase(selectedCoupon.getDiscountType())) {
                 details.append("Discount: ").append((int) selectedCoupon.getDiscountValue()).append("% off");
-            } else if ("cash".equals(selectedCoupon.getDiscountType())) {
+            } else if ("cash".equalsIgnoreCase(selectedCoupon.getDiscountType())) {
                 details.append("Discount: HK$")
                         .append(String.format("%.2f", selectedCoupon.getDiscountValue()));
-            } else if ("free_item".equals(selectedCoupon.getDiscountType())) {
+            } else if ("free_item".equalsIgnoreCase(selectedCoupon.getDiscountType())) {
                 details.append("Discount: Free ").append(selectedCoupon.getItemCategory());
             }
             couponDetails.setText(details.toString());
