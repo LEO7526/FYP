@@ -10,6 +10,16 @@ public class LoginResponse {
 
     private String userImageUrl;
 
+    private String userBirthday;
+
+    public String getUserBirthday() {
+        return userBirthday;
+    }
+
+    public void setUserBirthday(String userBirthday) {
+        this.userBirthday = userBirthday;
+    }
+
     public String getUserImageUrl() {
         return userImageUrl;
     }

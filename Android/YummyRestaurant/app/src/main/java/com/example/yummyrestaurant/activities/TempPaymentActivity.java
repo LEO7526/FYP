@@ -156,7 +156,7 @@ public class TempPaymentActivity extends AppCompatActivity {
                         successIcon.setVisibility(View.VISIBLE);
                         Toast.makeText(TempPaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
 
-                        // Mark coupon as used if one was applied
+                        // ✅ Only mark coupon as used here, after order save succeeds
                         if (selectedCoupon != null) {
                             markCouponAsUsed(customerId, selectedCoupon.getCouponId());
                         }
@@ -168,7 +168,7 @@ public class TempPaymentActivity extends AppCompatActivity {
                         intent.putExtra("itemCount", items.size());
                         intent.putExtra("dishJson", dishJson);
                         if (selectedCoupon != null) {
-                            intent.putExtra("selectedCoupon", selectedCoupon); // 👈 pass full object forward
+                            intent.putExtra("selectedCoupon", selectedCoupon);
                         }
                         startActivity(intent);
                         finish();
@@ -223,4 +223,5 @@ public class TempPaymentActivity extends AppCompatActivity {
             }
         });
     }
+
 }

@@ -43,6 +43,27 @@
             android:inputType="textEmailAddress"
             android:layout_marginBottom="24dp" />
 
+        <EditText
+            android:id="@+id/birthdayInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Birthday (MM-DD)"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="none"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:id="@+id/birthdayStatusLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#4CAF50"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:layout_marginBottom="24dp"/>
+
+
         <Button
             android:id="@+id/saveButton"
             android:layout_width="match_parent"

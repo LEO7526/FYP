@@ -82,29 +82,49 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
             }
         });
 
-        // Check if user can redeem
-        boolean canRedeem = isLoggedIn && currentPoints >= coupon.getPointsRequired();
-
+        // --- Redeem button logic ---
         if (!isLoggedIn) {
             holder.btnRedeem.setText("Login to Redeem");
             holder.btnRedeem.setEnabled(true);
-            holder.itemView.setAlpha(1f);
+            holder.btnRedeem.setAlpha(1f);
             holder.btnRedeem.setOnClickListener(v -> {
                 if (redeemListener != null) redeemListener.onLoginRequired();
             });
-        } else if (canRedeem) {
-            holder.btnRedeem.setText("Redeem");
-            holder.btnRedeem.setEnabled(true);
-            holder.itemView.setAlpha(1f);
-            holder.btnRedeem.setOnClickListener(v -> {
-                if (redeemListener != null) redeemListener.onRedeemClick(coupon);
-            });
-        } else {
+            return;
+        }
+
+        // If coupon is not redeemable (e.g. already redeemed, or birthday not eligible)
+        if (!coupon.isRedeemable()) {
+            if (coupon.isBirthdayOnly()) {
+                holder.btnRedeem.setText("Birthday Not Eligible");
+            } else {
+                holder.btnRedeem.setText("Already Redeemed");
+            }
+            holder.btnRedeem.setEnabled(false);
+            holder.btnRedeem.setAlpha(0.5f);
+            holder.btnRedeem.setOnClickListener(null);
+            return;
+        }
+
+        // Check points requirement
+        boolean hasEnoughPoints = currentPoints >= coupon.getPointsRequired();
+        if (!hasEnoughPoints) {
             holder.btnRedeem.setText("Not enough points");
             holder.btnRedeem.setEnabled(false);
-            holder.itemView.setAlpha(0.5f);
+            holder.btnRedeem.setAlpha(0.5f);
             holder.btnRedeem.setOnClickListener(null);
+            return;
         }
+
+        // ✅ Eligible to redeem
+        holder.btnRedeem.setText("Redeem");
+        holder.btnRedeem.setEnabled(true);
+        holder.btnRedeem.setAlpha(1f);
+        holder.btnRedeem.setOnClickListener(v -> {
+            if (redeemListener != null) {
+                redeemListener.onRedeemClick(coupon);
+            }
+        });
     }
 
     @Override

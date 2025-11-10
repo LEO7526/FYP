@@ -169,7 +169,18 @@ public class CouponDetailActivity extends BaseCustomerActivity {
                             tvRemainingPoints.setText("Remaining points: " + res.getPointsAfter());
                         }
                     } else {
-                        Toast.makeText(CouponDetailActivity.this, res.getError(), Toast.LENGTH_SHORT).show();
+                        if ("BIRTHDAY_ALREADY_REDEEMED".equals(res.getErrorCode())) {
+                            Toast.makeText(CouponDetailActivity.this,
+                                    "Birthday coupon already used this year 🎂",
+                                    Toast.LENGTH_LONG).show();
+                            // Optional: disable the redeem button so user doesn’t retry
+                            btnRedeem.setEnabled(false);
+                            btnRedeem.setAlpha(0.5f);
+                        } else {
+                            Toast.makeText(CouponDetailActivity.this,
+                                    res.getError() != null ? res.getError() : "Redeem failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
                 } else {
                     Log.w(TAG, "redeemCoupon failed: " + response.code());

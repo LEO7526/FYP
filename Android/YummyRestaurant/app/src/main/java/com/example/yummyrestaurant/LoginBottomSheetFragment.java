@@ -154,13 +154,14 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         Toast.makeText(getContext(), "Login successful", Toast.LENGTH_SHORT).show();
 
         // Save user info
-        // Save user info
         RoleManager.setUserEmail(email);
         RoleManager.setUserRole(loginResponse.getRole());
         Log.d("LoginBottomSheetFragment", "Role = " + RoleManager.getUserRole());
         RoleManager.setUserName(loginResponse.getUserName());
         RoleManager.setUserId(loginResponse.getUserId());
         RoleManager.setUserTel(loginResponse.getUserTel());
+        RoleManager.setUserBirthday(loginResponse.getUserBirthday()); // fetched from API
+        Log.d("LoginBottomSheetFragment", "Birthday = " + RoleManager.getUserBirthday());
 
         // 🔑 Add this log BEFORE setting image URL
         Log.d("LoginBottomSheetFragment",

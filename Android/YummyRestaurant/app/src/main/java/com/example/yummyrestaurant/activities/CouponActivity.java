@@ -15,6 +15,7 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.CouponAdapter;
 import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.BirthdayResponse;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.CouponListResponse;
 import com.example.yummyrestaurant.models.CouponPointResponse;
@@ -22,6 +23,7 @@ import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.RedeemCouponResponse;
 import com.example.yummyrestaurant.utils.RoleManager;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +76,11 @@ public class CouponActivity extends BaseCustomerActivity {
                 new CouponAdapter.OnRedeemClickListener() {
                     @Override
                     public void onRedeemClick(Coupon coupon) {
-                        redeemCoupon(coupon);
+                        if (coupon.isBirthdayOnly()) {
+                            checkBirthdayAndRedeem(coupon);   // ✅ birthday logic
+                        } else {
+                            redeemCoupon(coupon);             // ✅ normal logic
+                        }
                     }
 
                     @Override
@@ -83,10 +89,10 @@ public class CouponActivity extends BaseCustomerActivity {
                     }
                 },
                 coupon -> {
-                    // 👉 Navigate to detail page
+                    // detail page navigation
                     Intent intent = new Intent(CouponActivity.this, CouponDetailActivity.class);
                     intent.putExtra("coupon_id", coupon.getCouponId());
-                    intent.putExtra("current_points", currentPoints); // ✅ pass points
+                    intent.putExtra("current_points", currentPoints);
                     startActivity(intent);
                 },
                 customerId != 0
@@ -251,16 +257,28 @@ public class CouponActivity extends BaseCustomerActivity {
                                 public void onResponse(Call<RedeemCouponResponse> call, Response<RedeemCouponResponse> response) {
                                     if (response.isSuccessful() && response.body() != null) {
                                         RedeemCouponResponse res = response.body();
+
                                         if (res.isSuccess()) {
                                             Toast.makeText(CouponActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
                                             if (res.getPointsAfter() != null) {
                                                 int remaining = res.getPointsAfter();
-                                                currentPoints = remaining; // ✅ update field
+                                                currentPoints = remaining;
                                                 tvCouponPoints.setText("Points: " + remaining);
                                                 adapter.setCurrentPoints(remaining);
                                             }
                                         } else {
-                                            Toast.makeText(CouponActivity.this, res.getError(), Toast.LENGTH_SHORT).show();
+                                            if ("BIRTHDAY_ALREADY_REDEEMED".equals(res.getErrorCode())) {
+                                                Toast.makeText(CouponActivity.this,
+                                                        "You’ve already redeemed your birthday coupon this year 🎂",
+                                                        Toast.LENGTH_LONG).show();
+
+                                                coupon.setRedeemable(false);   // mark coupon
+                                                adapter.notifyDataSetChanged(); // refresh list
+                                            } else {
+                                                Toast.makeText(CouponActivity.this,
+                                                        res.getError() != null ? res.getError() : "Redeem failed",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
                                         }
                                     } else {
                                         Toast.makeText(CouponActivity.this, "Redeem failed", Toast.LENGTH_SHORT).show();
@@ -274,6 +292,67 @@ public class CouponActivity extends BaseCustomerActivity {
                             });
                 })
                 .show();
+    }
+
+    private void checkBirthdayAndRedeem(Coupon coupon) {
+        CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
+        api.getBirthday(customerId).enqueue(new Callback<BirthdayResponse>() {
+            @Override
+            public void onResponse(Call<BirthdayResponse> call, Response<BirthdayResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    String birthdayStr = response.body().getCbirthday();
+
+                    if (birthdayStr == null || birthdayStr.trim().isEmpty()) {
+                        // No birthday set → direct to ProfileActivity
+                        Toast.makeText(CouponActivity.this,
+                                "Please set your birthday to redeem this coupon",
+                                Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(CouponActivity.this, ProfileActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        return;
+                    }
+
+                    try {
+                        // Expecting format "MM-DD"
+                        String[] parts = birthdayStr.trim().split("-");
+                        if (parts.length == 2) {
+                            int birthdayMonth = Integer.parseInt(parts[0]); // "11" → 11
+                            int currentMonth = java.time.LocalDate.now().getMonthValue();
+
+                            if (birthdayMonth != currentMonth) {
+                                Toast.makeText(CouponActivity.this,
+                                        "Birthday coupon can only be redeemed in your birthday month",
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+
+                            // ✅ Safe to redeem now
+                            redeemCoupon(coupon);
+                        } else {
+                            Toast.makeText(CouponActivity.this,
+                                    "Invalid birthday format returned: " + birthdayStr,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(CouponActivity.this,
+                                "Error parsing birthday: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(CouponActivity.this,
+                            "Failed to check birthday",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BirthdayResponse> call, Throwable t) {
+                Toast.makeText(CouponActivity.this,
+                        "Error checking birthday: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 

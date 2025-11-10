@@ -16,31 +16,29 @@ public class RoleManager {
         return new User(userId, userName, userEmail, userTel);
     }
 
-    private static String userBirthday; // format: "yyyy-MM-dd"
+
+    private static String userBirthday; // format: "MM-DD"
 
     public static String getUserBirthday() {
         return userBirthday;
     }
 
     public static void setUserBirthday(String birthday) {
-        userBirthday = birthday;
+        userBirthday = birthday; // store as MM-DD
     }
-
-
 
     public static boolean isTodayUserBirthday() {
         if (userBirthday == null || userBirthday.isEmpty()) return false;
 
         try {
-            // Parse stored birthday
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            // Parse MM-DD
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd", Locale.getDefault());
             java.util.Date dob = sdf.parse(userBirthday);
 
             Calendar today = Calendar.getInstance();
             Calendar birthCal = Calendar.getInstance();
             birthCal.setTime(dob);
 
-            // Compare month and day only
             return today.get(Calendar.MONTH) == birthCal.get(Calendar.MONTH) &&
                     today.get(Calendar.DAY_OF_MONTH) == birthCal.get(Calendar.DAY_OF_MONTH);
         } catch (Exception e) {
@@ -117,6 +115,7 @@ public class RoleManager {
         userTel = null;
         assignedTableNumber = null;
         userImageUrl = null;
+        userBirthday = null;
     }
 
     public static boolean isStaff() {

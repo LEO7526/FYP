@@ -13,6 +13,9 @@ public class RedeemCouponResponse {
     @SerializedName("error")
     private String error;
 
+    @SerializedName("error_code")   // ✅ new field
+    private String errorCode;
+
     @SerializedName("coupon_title")
     private String couponTitle;
 
@@ -33,6 +36,10 @@ public class RedeemCouponResponse {
 
     public String getError() {
         return error;
+    }
+
+    public String getErrorCode() {   // ✅ getter for error_code
+        return errorCode;
     }
 
     public String getCouponTitle() {

@@ -2,6 +2,7 @@ package com.example.yummyrestaurant.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,11 +14,13 @@ import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -30,12 +33,15 @@ import com.example.yummyrestaurant.api.CustomerUploadApi;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.api.LoginCustomerApi;
 import com.example.yummyrestaurant.api.StaffUploadApi;
+import com.example.yummyrestaurant.models.BirthdayResponse;
 import com.example.yummyrestaurant.models.UploadResponse;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Locale;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -48,13 +54,16 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "EditProfileActivity";
 
-    private EditText nameInput, emailInput;
+    private EditText nameInput, emailInput,birthdayInput;
     private ImageView profilePreview;
     private Button selectImageButton, saveButton;
     private Uri selectedImageUri;
     private LoginCustomerApi apiService;
 
     private ProgressDialog progressDialog;
+
+    private TextView birthdayStatusLabel;
+
 
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -102,6 +111,40 @@ public class EditProfileActivity extends AppCompatActivity {
 
         nameInput.setText(currentName != null ? currentName : "");
         emailInput.setText(currentEmail != null ? currentEmail : "");
+
+        birthdayInput = findViewById(R.id.birthdayInput);
+        birthdayStatusLabel = findViewById(R.id.birthdayStatusLabel);
+        birthdayInput.setText(RoleManager.getUserBirthday() != null ? RoleManager.getUserBirthday() : "");
+
+        birthdayInput.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog dialog = new DatePickerDialog(
+                    EditProfileActivity.this,
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+                        // Format as MM-DD
+                        String formatted = String.format(Locale.getDefault(), "%02d-%02d", selectedMonth + 1, selectedDay);
+                        birthdayInput.setText(formatted);
+                    },
+                    calendar.get(Calendar.YEAR), month, day
+            );
+
+            // 👉 Insert the null‑safe year hiding code here
+            int yearId = getResources().getIdentifier("year", "id", "android");
+            View yearView = dialog.getDatePicker().findViewById(yearId);
+            if (yearView != null) {
+                yearView.setVisibility(View.GONE);
+            }
+
+            dialog.show();
+        });
+
+        if (RoleManager.getUserBirthday() != null && !RoleManager.getUserBirthday().isEmpty()) {
+            birthdayInput.setEnabled(false);
+            birthdayInput.setAlpha(0.6f); // visually dim it
+        }
 
         if (imagePath != null && !imagePath.isEmpty()) {
             String fullImageUrl = imagePath; // Now imagePath is the full GitHub URL
@@ -266,6 +309,10 @@ public class EditProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ProfileActivity.class));
                 finish();
             }
+
+
+            // Save birthday if applicable
+            saveBirthdayIfNeeded();
         });
     }
 
@@ -326,4 +373,49 @@ public class EditProfileActivity extends AppCompatActivity {
 
         return fullPath; // Return as-is if no slash found
     }
+
+    private void saveBirthdayIfNeeded() {
+        String birthday = birthdayInput.getText().toString().trim();
+        String role = RoleManager.getUserRole();
+        String email = RoleManager.getUserEmail();
+
+        if ("customer".equals(role)
+                && (RoleManager.getUserBirthday() == null || RoleManager.getUserBirthday().isEmpty())
+                && !birthday.isEmpty()) {
+
+            CustomerUploadApi birthdayApi = RetrofitClient.getClient(this).create(CustomerUploadApi.class);
+            Call<BirthdayResponse> birthdayCall = birthdayApi.updateBirthday(email, birthday);
+
+            birthdayCall.enqueue(new Callback<BirthdayResponse>() {
+                @Override
+                public void onResponse(Call<BirthdayResponse> call, Response<BirthdayResponse> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        RoleManager.setUserBirthday(response.body().getCbirthday());
+                        Log.d(TAG, "Birthday saved: " + response.body().getCbirthday());
+                        Toast.makeText(EditProfileActivity.this, "Birthday saved!", Toast.LENGTH_SHORT).show();
+
+                        // Disable the field immediately after saving
+                        birthdayInput.setEnabled(false);
+                        birthdayInput.setAlpha(0.6f);
+                        birthdayInput.setText(RoleManager.getUserBirthday());
+
+                        // Show status label
+                        if (birthdayStatusLabel != null) {
+                            birthdayStatusLabel.setText("Birthday saved");
+                            birthdayStatusLabel.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        Log.w(TAG, "Birthday save failed: " +
+                                (response.body() != null ? response.body().getMessage() : "Unknown error"));
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<BirthdayResponse> call, Throwable t) {
+                    Log.e(TAG, "Birthday save error", t);
+                }
+            });
+        }
+    }
+
 }

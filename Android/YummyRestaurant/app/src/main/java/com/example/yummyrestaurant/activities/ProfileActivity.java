@@ -1,6 +1,7 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +21,7 @@ import com.example.yummyrestaurant.utils.RoleManager;
 
 public class ProfileActivity extends BaseCustomerActivity {
 
-    private TextView userNameText, userEmailText;
+    private TextView userNameText, userEmailText, userBirthdayText;
     private ImageView profileImage;
     private Button editButton;
 
@@ -39,17 +40,30 @@ public class ProfileActivity extends BaseCustomerActivity {
 
         userNameText = findViewById(R.id.userNameText);
         userEmailText = findViewById(R.id.userEmailText);
+        userBirthdayText = findViewById(R.id.userBirthdayText);
         profileImage = findViewById(R.id.profileImage);
         editButton = findViewById(R.id.editButton);
 
         String name = RoleManager.getUserName();
         String email = RoleManager.getUserEmail();
+        String birthday = RoleManager.getUserBirthday();
         String imagePath = getIntent().getStringExtra("updatedImageUrl");
         String fallbackImageUrl = RoleManager.getUserImageUrl();
 
         Log.d(TAG, "onCreate: Retrieved name = " + name + ", email = " + email);
         Log.d(TAG, "onCreate: Intent imagePath = " + imagePath);
         Log.d(TAG, "onCreate: Fallback imagePath = " + fallbackImageUrl);
+
+
+        // Show birthday if available
+        if (birthday != null && !birthday.isEmpty()) {
+            userBirthdayText.setText("Birthday: " + birthday);
+            userBirthdayText.setTextColor(ContextCompat.getColor(this, R.color.teal_700));
+        } else {
+            userBirthdayText.setText("Birthday not set");
+            userBirthdayText.setTextColor(Color.GRAY);
+        }
+
 
         String finalImagePath = (imagePath != null && !imagePath.isEmpty())
                 ? imagePath
@@ -71,8 +85,9 @@ public class ProfileActivity extends BaseCustomerActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: Refreshing profile image");
+        Log.d(TAG, "onResume: Refreshing profile data");
 
+        // Refresh image
         String imagePath = getIntent().getStringExtra("updatedImageUrl");
         if (imagePath == null || imagePath.isEmpty()) {
             String fallbackImage = RoleManager.getUserImageUrl();
@@ -81,8 +96,21 @@ public class ProfileActivity extends BaseCustomerActivity {
         } else {
             Log.d(TAG, "onResume: Using updated image path = " + imagePath);
         }
-
         loadProfileImage(imagePath);
+
+        // 🔹 Refresh birthday
+        String birthday = RoleManager.getUserBirthday();
+        if (birthday != null && !birthday.isEmpty()) {
+            userBirthdayText.setText("Birthday: " + birthday);
+            userBirthdayText.setTextColor(ContextCompat.getColor(this, R.color.teal_700));
+        } else {
+            userBirthdayText.setText("Birthday not set");
+            userBirthdayText.setTextColor(Color.GRAY);
+        }
+
+        // Refresh name/email too, in case they were edited
+        userNameText.setText(RoleManager.getUserName() != null ? RoleManager.getUserName() : "Unknown");
+        userEmailText.setText(RoleManager.getUserEmail() != null ? RoleManager.getUserEmail() : "No email");
     }
 
     private void loadProfileImage(String imagePath) {

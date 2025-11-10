@@ -82,6 +82,7 @@
     <color name="hint_text">#757575</color>             <!-- Medium gray -->
     <color name="link_color">#0D47A1</color>            <!-- Deep blue -->
 
+    <color name="teal_700">#00796B</color>
 
 
 </resources>

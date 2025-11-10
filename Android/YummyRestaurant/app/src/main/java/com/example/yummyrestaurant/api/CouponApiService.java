@@ -1,5 +1,6 @@
 package com.example.yummyrestaurant.api;
 
+import com.example.yummyrestaurant.models.BirthdayResponse;
 import com.example.yummyrestaurant.models.CouponDetailResponse;
 import com.example.yummyrestaurant.models.CouponHistoryResponse;
 import com.example.yummyrestaurant.models.CouponListResponse;
@@ -67,4 +68,7 @@ public interface CouponApiService {
             @Query("cid") int customerId,
             @Query("lang") String lang
     );
+
+    @GET("getBirthday.php")
+    Call<BirthdayResponse> getBirthday(@Query("cid") int customerId);
 }

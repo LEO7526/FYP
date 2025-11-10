@@ -7,6 +7,11 @@ import android.os.Parcelable;
 
 public class Coupon implements Parcelable {
 
+    private boolean redeemable = true;
+
+    public boolean isRedeemable() { return redeemable; }
+    public void setRedeemable(boolean redeemable) { this.redeemable = redeemable; }
+
     // Quantity is not from backend, managed locally
     private int quantity;
 

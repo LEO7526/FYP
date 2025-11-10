@@ -1,8 +1,13 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
+
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) {
-    echo json_encode(["success"=>false,"error"=>"DB connection failed"]);
+    echo json_encode([
+        "success"    => false,
+        "error"      => "DB connection failed",
+        "error_code" => "DB_CONNECTION_FAILED"
+    ]);
     exit;
 }
 
@@ -11,13 +16,74 @@ $coupon_id = isset($_POST['coupon_id']) ? intval($_POST['coupon_id']) : 0;
 $quantity  = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
 
 if ($cid <= 0 || $coupon_id <= 0) {
-    echo json_encode(["success"=>false,"error"=>"Missing or invalid cid/coupon_id"]);
+    echo json_encode([
+        "success"    => false,
+        "error"      => "Missing or invalid cid/coupon_id",
+        "error_code" => "INVALID_INPUT"
+    ]);
     exit;
 }
 
 $conn->begin_transaction();
 
 try {
+    // ✅ Birthday coupon check (coupon_id = 4)
+    if ($coupon_id == 4) {
+        // Get customer's birthday (MM-DD)
+        $stmt = $conn->prepare("SELECT cbirthday FROM customer WHERE cid=?");
+        $stmt->bind_param("i", $cid);
+        $stmt->execute();
+        $brow = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$brow || empty($brow['cbirthday'])) {
+            echo json_encode([
+                "success"    => false,
+                "error"      => "Birthday not set",
+                "error_code" => "NO_BIRTHDAY_SET"
+            ]);
+            $conn->rollback();
+            $conn->close();
+            exit;
+        }
+
+        // Parse MM-DD
+        list($month, $day) = explode("-", $brow['cbirthday']);
+        $currentMonth = date("m");
+
+        if ($month != $currentMonth) {
+            echo json_encode([
+                "success"    => false,
+                "error"      => "Birthday coupon can only be redeemed during your birthday month",
+                "error_code" => "NOT_BIRTHDAY_MONTH"
+            ]);
+            $conn->rollback();
+            $conn->close();
+            exit;
+        }
+
+        // Check if already redeemed this year
+        $year = date("Y");
+        $stmt = $conn->prepare("SELECT COUNT(*) AS cnt 
+                                FROM coupon_redemptions 
+                                WHERE cid=? AND coupon_id=? AND YEAR(redeemed_at)=?");
+        $stmt->bind_param("iii", $cid, $coupon_id, $year);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if ($result['cnt'] > 0) {
+            echo json_encode([
+                "success"    => false,
+                "error"      => "Birthday coupon already redeemed this year",
+                "error_code" => "BIRTHDAY_ALREADY_REDEEMED"
+            ]);
+            $conn->rollback();
+            $conn->close();
+            exit;
+        }
+    }
+
     // Get coupon details
     $stmt = $conn->prepare("SELECT points_required FROM coupons WHERE coupon_id=? AND is_active=1");
     $stmt->bind_param("i", $coupon_id);
@@ -53,7 +119,8 @@ try {
     }
 
     // Insert redemption(s)
-    $stmt = $conn->prepare("INSERT INTO coupon_redemptions (coupon_id, cid, is_used, used_at) VALUES (?, ?, 0, NULL)");
+    $stmt = $conn->prepare("INSERT INTO coupon_redemptions (coupon_id, cid, redeemed_at, is_used, used_at) 
+                            VALUES (?, ?, NOW(), 0, NULL)");
     for ($i = 0; $i < $quantity; $i++) {
         $stmt->bind_param("ii", $coupon_id, $cid);
         $stmt->execute();
@@ -64,12 +131,14 @@ try {
     $delta = -$total_cost;
     $action = "redeem";
     $note = "Coupon ID $coupon_id x$quantity";
-    $stmt = $conn->prepare("INSERT INTO coupon_point_history (cp_id, cid, coupon_id, delta, resulting_points, action, note) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO coupon_point_history 
+        (cp_id, cid, coupon_id, delta, resulting_points, action, note) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("iiiisss", $cp_id, $cid, $coupon_id, $delta, $new_points, $action, $note);
     $stmt->execute();
     $stmt->close();
 
-    $conn->commit();
+        $conn->commit();
     echo json_encode([
         "success"       => true,
         "message"       => "Redeemed $quantity coupon(s) successfully",
@@ -78,7 +147,12 @@ try {
     ]);
 } catch (Exception $e) {
     $conn->rollback();
-    echo json_encode(["success"=>false,"error"=>$e->getMessage()]);
+    echo json_encode([
+        "success"    => false,
+        "error"      => $e->getMessage(),
+        "error_code" => "GENERIC_ERROR"
+    ]);
 }
+
 $conn->close();
 ?>
