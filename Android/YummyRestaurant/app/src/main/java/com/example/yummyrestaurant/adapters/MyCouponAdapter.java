@@ -20,6 +20,8 @@ import java.util.Locale;
 
 public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCouponViewHolder> {
 
+    private static final String TAG = "MyCouponAdapter"; // 👈 tag for logs
+
     public interface OnCouponClickListener {
         void onCouponSelected(Coupon coupon, int position);
     }
@@ -145,20 +147,20 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
 
     private boolean isCouponValidForCart(Coupon coupon) {
         if (coupon == null) {
-            Log.d("MyCouponAdapter", "Coupon is null");
+            Log.d(TAG, "Coupon is null");
             return false;
         }
 
-        Log.d("MyCouponAdapter", "Validating coupon: " + coupon.getTitle() + " (ID=" + coupon.getCouponId() + ")");
+        Log.d(TAG, "Validating coupon: " + coupon.getTitle() + " (ID=" + coupon.getCouponId() + ")");
         int totalCents = CartManager.getTotalAmountInCents();
-        Log.d("MyCouponAdapter", "Cart total (cents): " + totalCents);
+        Log.d(TAG, "Cart total (cents): " + totalCents);
 
         // 1. Minimum spend
         Double minSpend = coupon.getMinSpend();
         if (minSpend != null) {
-            Log.d("MyCouponAdapter", "Coupon minSpend=" + minSpend);
+            Log.d(TAG, "Coupon minSpend=" + minSpend);
             if (totalCents < (int) Math.round(minSpend * 100)) {
-                Log.d("MyCouponAdapter", "Invalid: below min spend");
+                Log.d(TAG, "Invalid: below min spend");
                 return false;
             }
         }
@@ -169,36 +171,36 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
         boolean appliesToAll = (appliesTo == null) || appliesTo.trim().isEmpty();
 
         if (!appliesToAll && !appliesTo.equalsIgnoreCase(orderType)) {
-            Log.d("MyCouponAdapter", "Invalid: not valid for " + orderType);
+            Log.d(TAG, "Invalid: not valid for " + orderType);
             return false;
         } else {
-            Log.d("MyCouponAdapter", "Valid: coupon applies");
+            Log.d(TAG, "Valid: coupon applies");
         }
 
         // 3. Birthday-only
         if (coupon.isBirthdayOnly()) {
-            Log.d("MyCouponAdapter", "Coupon is birthday-only, checking RoleManager...");
+            Log.d(TAG, "Coupon is birthday-only, checking RoleManager...");
             try {
                 if (!RoleManager.isTodayUserBirthday()) {
-                    Log.d("MyCouponAdapter", "Invalid: not user's birthday");
+                    Log.d(TAG, "Invalid: not user's birthday");
                     return false;
                 }
             } catch (Exception e) {
-                Log.e("MyCouponAdapter", "Error checking birthday", e);
+                Log.e(TAG, "Error checking birthday", e);
                 return false;
             }
         }
 
         // 4. Discount stacking
-        if (!coupon.isCombineWithOtherDiscounts()) {
-            Log.d("MyCouponAdapter", "Coupon cannot combine with other discounts");
+        if (!coupon.isCombineWithOtherDiscounts()) {   // now reflects JSON field (0 = false, 1 = true)
+            Log.d(TAG, "Coupon cannot combine with other discounts");
             if (CartManager.hasOtherDiscountsApplied()) {
-                Log.d("MyCouponAdapter", "Invalid: other discounts already applied");
+                Log.d(TAG, "Invalid: other discounts already applied");
                 return false;
             }
         }
 
-        Log.d("MyCouponAdapter", "Coupon is valid ✅");
+        Log.d(TAG, "Coupon is valid ✅");
         return true;
     }
 

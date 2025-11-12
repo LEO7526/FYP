@@ -11,6 +11,9 @@ import java.util.Map;
 public final class CartManager {
 
     private static final Map<CartItem, Integer> cartItems = new LinkedHashMap<>();
+
+    // Track applied discounts (could be coupon IDs, codes, or types)
+    private static final Map<String, Object> appliedDiscounts = new LinkedHashMap<>();
     private CartManager() {}
 
     private static final String TAG = "CartDebug";
@@ -162,7 +165,26 @@ public final class CartManager {
         return "dine_in"; // placeholder
     }
 
-    public static boolean hasOtherDiscountsApplied() {
-        return false;
+    public static synchronized boolean hasOtherDiscountsApplied() {
+        boolean result = !appliedDiscounts.isEmpty();
+        android.util.Log.d(TAG, "hasOtherDiscountsApplied: " + result + " (count=" + appliedDiscounts.size() + ")");
+        return result;
+    }
+
+    public static synchronized void applyDiscount(String discountKey, Object discountData) {
+        if (discountKey == null) return;
+        appliedDiscounts.put(discountKey, discountData);
+        android.util.Log.d(TAG, "applyDiscount: key=" + discountKey + " data=" + discountData);
+    }
+
+    public static synchronized void removeDiscount(String discountKey) {
+        if (discountKey == null) return;
+        appliedDiscounts.remove(discountKey);
+        android.util.Log.d(TAG, "removeDiscount: key=" + discountKey + " removed");
+    }
+
+    public static synchronized void clearDiscounts() {
+        appliedDiscounts.clear();
+        android.util.Log.d(TAG, "clearDiscounts: all discounts cleared");
     }
 }
