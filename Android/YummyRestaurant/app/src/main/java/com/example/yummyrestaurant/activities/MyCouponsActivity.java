@@ -120,6 +120,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
             for (Map.Entry<CartItem, Integer> entry : cartItems.entrySet()) {
                 MenuItem mItem = entry.getKey().getMenuItem();
+                Log.d(TAG, "Cart contains item_id=" + mItem.getId() + " category_id=" + mItem.getCategoryId());
                 if (mItem != null && applicableIds.contains(mItem.getId())) {
                     eligibleCount += entry.getValue();
                 }
@@ -139,6 +140,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             Map<CartItem, Integer> cartItems = CartManager.getCartItems();
             for (Map.Entry<CartItem, Integer> entry : cartItems.entrySet()) {
                 MenuItem mItem = entry.getKey().getMenuItem();
+                Log.d(TAG, "Cart contains item_id=" + mItem.getId() + " category_id=" + mItem.getCategoryId());
                 if (mItem != null && mItem.getCategoryId() != null && applicableCats.contains(mItem.getCategoryId())) {
                     eligibleCount += entry.getValue();
                 }

@@ -29,6 +29,7 @@ $sql = "
         mi.item_price AS price,
         mi.image_url,
         mi.spice_level,
+        mi.category_id AS category_id, 
         mc.category_name AS category,
         GROUP_CONCAT(t.tag_name SEPARATOR ',') AS tags_concat
     FROM menu_item mi
@@ -65,15 +66,17 @@ while ($row = $result->fetch_assoc()) {
     }
 
     $items[] = [
-        "id" => (int)$row['id'],
-        "name" => $row['name'],
-        "description" => $row['description'],
-        "price" => (float)$row['price'],
-        "image_url" => $row['image_url'],
-        "spice_level" => (int)$row['spice_level'],
-        "category" => $row['category'],
-        "tags" => $tags
+    "id" => (int)$row['id'],
+    "category_id" => (int)$row['category_id'],      // <-- add this line
+    "name" => $row['name'],
+    "description" => $row['description'],
+    "price" => (float)$row['price'],
+    "image_url" => $row['image_url'],
+    "spice_level" => (int)$row['spice_level'],
+    "category" => $row['category'],
+    "tags" => $tags
     ];
+
 }
 
 echo json_encode([
