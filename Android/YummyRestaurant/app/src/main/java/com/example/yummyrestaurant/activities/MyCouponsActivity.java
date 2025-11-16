@@ -2,7 +2,7 @@ package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;   // 👈 import Log
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -20,6 +20,7 @@ import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.models.MyCouponListResponse;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
+import com.example.yummyrestaurant.utils.CouponValidator;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MyCouponsActivity extends BaseCustomerActivity {
-    private static final String TAG = "MyCouponsActivity"; // 👈 tag for logs
+    private static final String TAG = "MyCouponsActivity";
 
     private RecyclerView rvMyCoupons;
     private MyCouponAdapter adapter;
@@ -42,26 +43,39 @@ public class MyCouponsActivity extends BaseCustomerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "=== Entering MyCouponsActivity ===");
         setContentView(R.layout.activity_my_coupons);
         setupBottomFunctionBar();
+
         rvMyCoupons = findViewById(R.id.rvMyCoupons);
         rvMyCoupons.setLayoutManager(new LinearLayoutManager(this));
-        fromCart = getIntent().getBooleanExtra("fromCart", false);
-        Log.d(TAG, "onCreate: fromCart=" + fromCart);
 
-        // Prefer the customer_id passed via Intent (from CartActivity). Fall back to RoleManager.
+        fromCart = getIntent().getBooleanExtra("fromCart", false);
         int intentCid = getIntent().getIntExtra("customer_id", Integer.MIN_VALUE);
+
+        if (fromCart) {
+            Log.i(TAG, "Activity launched from CartActivity");
+
+            ArrayList<Integer> menuItemIds = getIntent().getIntegerArrayListExtra("menu_item_ids");
+            if (menuItemIds != null) {
+                Log.d(TAG, "Received menu_item_ids: " + menuItemIds);
+            }
+
+        } else {
+            Log.i(TAG, "Activity launched directly (not from cart)");
+        }
+
         if (intentCid != Integer.MIN_VALUE) {
             customerId = intentCid;
-            Log.d(TAG, "onCreate: customerId from Intent = " + customerId);
+            Log.i(TAG, "Using customerId from Intent: " + customerId);
         } else {
             try {
                 customerId = Integer.parseInt(RoleManager.getUserId());
+                Log.i(TAG, "Using customerId from RoleManager: " + customerId);
             } catch (Exception e) {
                 Log.e(TAG, "Invalid userId from RoleManager", e);
                 customerId = 0;
             }
-            Log.d(TAG, "onCreate: customerId from RoleManager = " + customerId);
         }
 
         adapter = new MyCouponAdapter(myCoupons, (coupon, position) -> {
@@ -74,88 +88,53 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             showQuantityPickerAndUse(coupon, position);
         }, fromCart);
         rvMyCoupons.setAdapter(adapter);
+
         fetchMyCoupons(customerId);
     }
 
     private void fetchMyCoupons(int customerId) {
-        Log.d(TAG, "Fetching coupons for customerId=" + customerId);
+        Log.i(TAG, "Requesting coupons for customerId=" + customerId + ", lang=en");
 
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
         api.getMyCoupons(customerId, "en").enqueue(new Callback<MyCouponListResponse>() {
             @Override
             public void onResponse(Call<MyCouponListResponse> call, Response<MyCouponListResponse> response) {
-                Log.d(TAG, "fetchMyCoupons onResponse: code=" + response.code());
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    myCoupons.clear();
-                    myCoupons.addAll(response.body().getCoupons());
-                    adapter.notifyDataSetChanged();
-                    Log.d(TAG, "Coupons loaded: count=" + myCoupons.size());
+                Log.i(TAG, "fetchMyCoupons onResponse: HTTP " + response.code());
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "API Response body: " + new Gson().toJson(response.body()));
+                    if (response.body().isSuccess()) {
+                        myCoupons.clear();
+                        myCoupons.addAll(response.body().getCoupons());
+                        adapter.notifyDataSetChanged();
+                        Log.i(TAG, "Coupons loaded successfully, count=" + myCoupons.size());
+                    } else {
+                        Log.w(TAG, "API returned success=false, body=" + new Gson().toJson(response.body()));
+                        Toast.makeText(MyCouponsActivity.this, "No coupons found", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Toast.makeText(MyCouponsActivity.this, "No coupons found", Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "fetchMyCoupons failed: body=" + response.body());
+                    Log.e(TAG, "API call failed, errorBody=" + response.errorBody());
+                    Toast.makeText(MyCouponsActivity.this, "Failed to load coupons", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<MyCouponListResponse> call, Throwable t) {
-                Toast.makeText(MyCouponsActivity.this, "Failed to load coupons", Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "fetchMyCoupons onFailure", t);
+                Toast.makeText(MyCouponsActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // --- Coupon picker replacement ---
     private void showQuantityPickerAndUse(Coupon coupon, int position) {
-        String appliesTo = coupon.getAppliesTo();
-        int maxUsable;
         int ownedQty = coupon.getQuantity();
+        int maxUsable = ownedQty;
 
-        maxUsable = ownedQty;
+        Log.i(TAG, "Preparing to use couponId=" + coupon.getCouponId() + ", ownedQty=" + ownedQty);
 
-        // For item-specific coupons:
-        if ("item".equalsIgnoreCase(appliesTo) && coupon.getApplicableItems() != null && !coupon.getApplicableItems().isEmpty()) {
-            int eligibleCount = 0;
-            Map<CartItem, Integer> cartItems = CartManager.getCartItems();
-            List<Integer> applicableIds = coupon.getApplicableItems();
-
-            for (Map.Entry<CartItem, Integer> entry : cartItems.entrySet()) {
-                MenuItem mItem = entry.getKey().getMenuItem();
-                Log.d(TAG, "Cart contains item_id=" + mItem.getId() + " category_id=" + mItem.getCategoryId());
-                if (mItem != null && applicableIds.contains(mItem.getId())) {
-                    eligibleCount += entry.getValue();
-                }
-            }
-            if (eligibleCount == 0) {
-                Toast.makeText(this, "No applicable items in cart for this coupon", Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "Coupon not usable, no matching items in cart for couponId=" + coupon.getCouponId());
-                return;
-            }
-            maxUsable = Math.min(ownedQty, eligibleCount);
-        }
-
-        // For category-specific coupons (if used in backend, update similar to above)
-        if ("category".equalsIgnoreCase(appliesTo) && coupon.getApplicableCategories() != null && !coupon.getApplicableCategories().isEmpty()) {
-            int eligibleCount = 0;
-            List<Integer> applicableCats = coupon.getApplicableCategories();
-            Map<CartItem, Integer> cartItems = CartManager.getCartItems();
-            for (Map.Entry<CartItem, Integer> entry : cartItems.entrySet()) {
-                MenuItem mItem = entry.getKey().getMenuItem();
-                Log.d(TAG, "Cart contains item_id=" + mItem.getId() + " category_id=" + mItem.getCategoryId());
-                if (mItem != null && mItem.getCategoryId() != null && applicableCats.contains(mItem.getCategoryId())) {
-                    eligibleCount += entry.getValue();
-                }
-            }
-            if (eligibleCount == 0) {
-                Toast.makeText(this, "No applicable category items in cart for this coupon", Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "Coupon not usable, no matching category in cart for couponId=" + coupon.getCouponId());
-                return;
-            }
-            maxUsable = Math.min(ownedQty, eligibleCount);
-        }
-
-        // Clamp maxUsable per any 'per_customer_per_day' limit
+        // clamp by per_customer_per_day
         Integer perDayLimit = coupon.getPerCustomerPerDay();
         if (perDayLimit != null && perDayLimit > 0 && maxUsable > perDayLimit) {
+            Log.i(TAG, "Applying per_customer_per_day limit=" + perDayLimit);
             maxUsable = perDayLimit;
         }
 
@@ -174,7 +153,10 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                 .setTitle("Select quantity to use")
                 .setItems(options, (dialog, which) -> {
                     int quantity = which + 1;
-                    if (!isCouponValidForCart(coupon, quantity)) {
+                    Log.i(TAG, "User selected quantity=" + quantity + " for couponId=" + coupon.getCouponId());
+                    if (!CouponValidator.isCouponValidForCart(coupon, quantity)) {
+                        Toast.makeText(this, "Coupon not valid for this cart", Toast.LENGTH_SHORT).show();
+                        Log.w(TAG, "Coupon validation failed for couponId=" + coupon.getCouponId());
                         return;
                     }
                     useCoupon(coupon, position, quantity);
@@ -182,75 +164,18 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                 .show();
     }
 
-    // --- Validator replacement ---
-    private boolean isCouponValidForCart(Coupon coupon, int requestedQty) {
-        if (coupon == null) {
-            Log.d(TAG, "Coupon is null");
-            return false;
-        }
-
-        // Minimum spend
-        Double minSpend = coupon.getMinSpend();
-        int totalCents = CartManager.getTotalAmountInCents();
-        if (minSpend != null && totalCents < (int) Math.round(minSpend * 100)) {
-            Log.d(TAG, "Invalid: below min spend");
-            return false;
-        }
-
-        // Applies-to/order type
-        String appliesTo = coupon.getAppliesTo();
-        String orderType = CartManager.getOrderType();
-        boolean appliesToAll = (appliesTo == null) || appliesTo.trim().isEmpty();
-        if (!appliesToAll && !appliesTo.equalsIgnoreCase(orderType)) {
-            Log.d(TAG, "Invalid: not valid for " + orderType);
-            return false;
-        }
-
-        // Birthday-only
-        if (coupon.isBirthdayOnly()) {
-            try {
-                if (!RoleManager.isTodayUserBirthday()) {
-                    Log.d(TAG, "Invalid: not user's birthday");
-                    return false;
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error checking birthday", e);
-                return false;
-            }
-        }
-
-        // Coupon stacking: only allow if all applied coupons can be combined
-        if (!coupon.isCombineWithOtherDiscounts()) {
-            if (CartManager.hasOtherDiscountsApplied()) {
-                Log.d(TAG, "Invalid: other discounts already applied");
-                return false;
-            }
-        }
-
-        // Check per_customer_per_day (if tracked or can query from backend/history)
-        Integer perDayLimit = coupon.getPerCustomerPerDay();
-        if (perDayLimit != null && perDayLimit > 0 && requestedQty > perDayLimit) {
-            Log.d(TAG, "Invalid: requested exceeds per_customer_per_day limit");
-            return false;
-        }
-
-        // Item/category applicability already checked in picker above
-
-        Log.d(TAG, "Coupon is valid ✅");
-        return true;
-    }
-
-
-
     private void useCoupon(Coupon coupon, int position, int quantity) {
+        Log.i(TAG, "Attempting to use couponId=" + coupon.getCouponId() + ", qty=" + quantity);
+
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
         api.useCoupon(customerId, coupon.getCouponId(), quantity).enqueue(new Callback<GenericResponse>() {
             @Override
             public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                // 👇 Always log the raw body, regardless of success
-                Log.d(TAG, "useCoupon response: " + new Gson().toJson(response.body()));
+                Log.i(TAG, "useCoupon API Response: HTTP " + response.code());
+                Log.d(TAG, "useCoupon Response body: " + new Gson().toJson(response.body()));
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Log.i(TAG, "Coupon applied successfully, couponId=" + coupon.getCouponId());
                     Intent result = new Intent();
                     result.putExtra("selectedCoupon", coupon);
                     setResult(RESULT_OK, result);
@@ -258,6 +183,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                     adapter.decrementCouponQuantity(position, quantity);
                     finish();
                 } else {
+                    Log.w(TAG, "Coupon apply failed, body=" + new Gson().toJson(response.body()));
                     Toast.makeText(MyCouponsActivity.this, "Failed to apply coupon", Toast.LENGTH_SHORT).show();
                     reEnableButton(position);
                 }
@@ -265,13 +191,12 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
             @Override
             public void onFailure(Call<GenericResponse> call, Throwable t) {
-                Log.e(TAG, "useCoupon onFailure", t); // 👈 log the error too
+                Log.e(TAG, "useCoupon API request failed", t);
                 Toast.makeText(MyCouponsActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 reEnableButton(position);
             }
         });
     }
-
 
     private void reEnableButton(int position) {
         Log.d(TAG, "Re-enabling button at position=" + position);
@@ -287,65 +212,4 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         setResult(RESULT_CANCELED);
         super.onBackPressed();
     }
-
-    private boolean isCouponValidForCart(Coupon coupon) {
-        if (coupon == null) {
-            Log.d(TAG, "Coupon is null");
-            return false;
-        }
-
-        Log.d(TAG, "Validating coupon: " + coupon.getTitle() + " (ID=" + coupon.getCouponId() + ")");
-        int totalCents = CartManager.getTotalAmountInCents();
-        Log.d(TAG, "Cart total (cents): " + totalCents);
-
-        // 1. Minimum spend
-        Double minSpend = coupon.getMinSpend();
-        if (minSpend != null) {
-            Log.d(TAG, "Coupon minSpend=" + minSpend);
-            if (totalCents < (int) Math.round(minSpend * 100)) {
-                Log.d(TAG, "Invalid: below min spend");
-                return false;
-            }
-        }
-
-        // 2. AppliesTo simplified check
-        String appliesTo = coupon.getAppliesTo(); // may return null
-        String orderType = CartManager.getOrderType(); // e.g. "dine_in", "takeaway", "delivery"
-        boolean appliesToAll = (appliesTo == null) || appliesTo.trim().isEmpty();
-
-        if (!appliesToAll && !appliesTo.equalsIgnoreCase(orderType)) {
-            Log.d(TAG, "Invalid: not valid for " + orderType);
-            return false;
-        } else {
-            Log.d(TAG, "Valid: coupon applies");
-        }
-
-        // 3. Birthday-only
-        if (coupon.isBirthdayOnly()) {
-            Log.d(TAG, "Coupon is birthday-only, checking RoleManager...");
-            try {
-                if (!RoleManager.isTodayUserBirthday()) {
-                    Log.d(TAG, "Invalid: not user's birthday");
-                    return false;
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error checking birthday", e);
-                return false;
-            }
-        }
-
-        // 4. Discount stacking
-        if (!coupon.isCombineWithOtherDiscounts()) {   // now reflects JSON field (0 = false, 1 = true)
-            Log.d(TAG, "Coupon cannot combine with other discounts");
-            if (CartManager.hasOtherDiscountsApplied()) {
-                Log.d(TAG, "Invalid: other discounts already applied");
-                return false;
-            }
-        }
-
-        Log.d(TAG, "Coupon is valid ✅");
-        return true;
-    }
-
-
 }

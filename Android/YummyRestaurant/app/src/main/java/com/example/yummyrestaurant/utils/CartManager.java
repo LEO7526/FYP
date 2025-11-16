@@ -1,6 +1,7 @@
 package com.example.yummyrestaurant.utils;
 
 import com.example.yummyrestaurant.models.CartItem;
+import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.MenuItem;
 
 import java.util.Collections;
@@ -155,6 +156,43 @@ public final class CartManager {
         }
         return false;
     }
+
+    public static int getCheapestEligibleItemPrice(Coupon coupon) {
+        if (coupon == null) return 0;
+
+        Map<CartItem, Integer> cartItems = getCartItems();
+        int cheapest = Integer.MAX_VALUE;
+
+        for (CartItem cartItem : cartItems.keySet()) {
+            Integer itemId = cartItem.getMenuItemId();
+            Integer categoryId = cartItem.getCategoryId();
+            int price = cartItem.getPriceInCents();
+
+            boolean eligible = false;
+
+            // Check applicable items
+            if (coupon.getApplicableItems() != null && !coupon.getApplicableItems().isEmpty()) {
+                if (itemId != null && coupon.getApplicableItems().contains(itemId)) {
+                    eligible = true;
+                }
+            }
+
+            // Check applicable categories
+            if (coupon.getApplicableCategories() != null && !coupon.getApplicableCategories().isEmpty()) {
+                if (categoryId != null && coupon.getApplicableCategories().contains(categoryId)) {
+                    eligible = true;
+                }
+            }
+
+            if (eligible && price < cheapest) {
+                cheapest = price;
+            }
+        }
+
+        // If no eligible items found, return 0
+        return (cheapest == Integer.MAX_VALUE) ? 0 : cheapest;
+    }
+
 
     // Disabled until backend confirms category IDs
     public static boolean hasAnyCategory(List<Integer> categoryIds) {

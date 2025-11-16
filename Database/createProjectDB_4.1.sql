@@ -105,7 +105,7 @@ INSERT INTO coupons (points_required, type, discount_amount, item_category, expi
 (100, 'percent', 10, NULL, '2025-12-31', 1),
 (50, 'free_item', 0, 'drink', '2025-12-30', 1),
 (200, 'cash', 5000, NULL, '2025-12-31', 1), -- 5000 cents = HK$50
-(0, 'percent', 20, NULL, NULL, 1); -- e.g. 20% off
+(0, 'free_item', 0, NULL, NULL, 1); -- free 1 main dish
 
 
 -- Defines categories like Appetizers, Soup, etc

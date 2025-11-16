@@ -12,15 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.Coupon;
-import com.example.yummyrestaurant.utils.CartManager;
-import com.example.yummyrestaurant.utils.RoleManager;
+import com.example.yummyrestaurant.utils.CouponValidator;
 
 import java.util.List;
 import java.util.Locale;
 
 public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCouponViewHolder> {
 
-    private static final String TAG = "MyCouponAdapter"; // 👈 tag for logs
+    private static final String TAG = "MyCouponAdapter";
 
     public interface OnCouponClickListener {
         void onCouponSelected(Coupon coupon, int position);
@@ -99,7 +98,7 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
         }
 
         // --- Validation ---
-        boolean valid = fromCart && isCouponValidForCart(coupon);
+        boolean valid = fromCart && CouponValidator.isCouponValidForCart(coupon, 1);
 
         if (!valid) {
             holder.btnUse.setEnabled(false);
@@ -144,64 +143,4 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
             tvReward = itemView.findViewById(R.id.tvMyCouponReward);
         }
     }
-
-    private boolean isCouponValidForCart(Coupon coupon) {
-        if (coupon == null) {
-            Log.d(TAG, "Coupon is null");
-            return false;
-        }
-
-        Log.d(TAG, "Validating coupon: " + coupon.getTitle() + " (ID=" + coupon.getCouponId() + ")");
-        int totalCents = CartManager.getTotalAmountInCents();
-        Log.d(TAG, "Cart total (cents): " + totalCents);
-
-        // 1. Minimum spend
-        Double minSpend = coupon.getMinSpend();
-        if (minSpend != null) {
-            Log.d(TAG, "Coupon minSpend=" + minSpend);
-            if (totalCents < (int) Math.round(minSpend * 100)) {
-                Log.d(TAG, "Invalid: below min spend");
-                return false;
-            }
-        }
-
-        // 2. AppliesTo simplified check
-        String appliesTo = coupon.getAppliesTo(); // may return null
-        String orderType = CartManager.getOrderType(); // e.g. "dine_in", "takeaway", "delivery"
-        boolean appliesToAll = (appliesTo == null) || appliesTo.trim().isEmpty();
-
-        if (!appliesToAll && !appliesTo.equalsIgnoreCase(orderType)) {
-            Log.d(TAG, "Invalid: not valid for " + orderType);
-            return false;
-        } else {
-            Log.d(TAG, "Valid: coupon applies");
-        }
-
-        // 3. Birthday-only
-        if (coupon.isBirthdayOnly()) {
-            Log.d(TAG, "Coupon is birthday-only, checking RoleManager...");
-            try {
-                if (!RoleManager.isTodayUserBirthday()) {
-                    Log.d(TAG, "Invalid: not user's birthday");
-                    return false;
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error checking birthday", e);
-                return false;
-            }
-        }
-
-        // 4. Discount stacking
-        if (!coupon.isCombineWithOtherDiscounts()) {   // now reflects JSON field (0 = false, 1 = true)
-            Log.d(TAG, "Coupon cannot combine with other discounts");
-            if (CartManager.hasOtherDiscountsApplied()) {
-                Log.d(TAG, "Invalid: other discounts already applied");
-                return false;
-            }
-        }
-
-        Log.d(TAG, "Coupon is valid ✅");
-        return true;
-    }
-
 }

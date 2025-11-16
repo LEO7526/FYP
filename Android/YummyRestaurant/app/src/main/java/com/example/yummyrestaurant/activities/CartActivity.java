@@ -17,8 +17,9 @@ import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
+import com.example.yummyrestaurant.utils.CouponValidator;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class CartActivity extends AppCompatActivity {
     private double total;
     private Map<CartItem, Integer> cartItems;
 
-    // 🔄 Expose adapter for external refresh
+    // Expose adapter for external refresh
     public static CartItemAdapter activeAdapter;
 
     @Override
@@ -64,7 +65,7 @@ public class CartActivity extends AppCompatActivity {
             Log.d(TAG, "Launching MyCouponsActivity for coupon selection");
             Intent couponIntent = new Intent(CartActivity.this, MyCouponsActivity.class);
             couponIntent.putExtra("fromCart", true);
-            // Pass customer id (if available) so MyCouponsActivity can use it during checkout
+
             try {
                 int custId = Integer.parseInt(RoleManager.getUserId());
                 couponIntent.putExtra("customer_id", custId);
@@ -73,8 +74,24 @@ public class CartActivity extends AppCompatActivity {
                 Log.w(TAG, "No logged-in user, passing customer_id=0", e);
                 couponIntent.putExtra("customer_id", 0);
             }
+
+            // Collect and pass each MenuItem id
+            if (cartItems != null && !cartItems.isEmpty()) {
+                ArrayList<Integer> menuItemIds = new ArrayList<>();
+                for (CartItem item : cartItems.keySet()) {
+                    Integer id = item.getMenuItemId();
+                    if (id != null) {
+                        menuItemIds.add(id);
+                    }
+                }
+                couponIntent.putIntegerArrayListExtra("menu_item_ids", menuItemIds);
+                Log.d(TAG, "Passing menu_item_ids=" + menuItemIds + " to MyCouponsActivity");
+            }
+
             startActivityForResult(couponIntent, 2001);
         });
+
+
     }
 
     @Override
@@ -84,7 +101,7 @@ public class CartActivity extends AppCompatActivity {
         updateCartUI();
     }
 
-    // 🔁 Refresh cart UI from anywhere
+    // Refresh cart UI from anywhere
     public static void refreshCartUI() {
         Log.d(TAG, "refreshCartUI: External request to refresh cart UI");
         if (activeAdapter != null) {
@@ -121,9 +138,10 @@ public class CartActivity extends AppCompatActivity {
 
             Log.d(TAG, "onActivityResult: Coupon selected -> " + coupon.getTitle());
 
-            // ✅ Validate coupon before applying
-            if (!isCouponValidForCart(coupon)) {
+            // Validate coupon before applying
+            if (!CouponValidator.isCouponValidForCart(coupon, 1)) {
                 Log.d(TAG, "onActivityResult: Coupon invalid, aborting");
+                Toast.makeText(this, "Coupon not valid for this cart", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -140,15 +158,14 @@ public class CartActivity extends AppCompatActivity {
                     Log.d(TAG, "Applied percent discount: -" + coupon.getDiscountValue() + "%");
                     break;
                 case "free_item":
-                    if (CartManager.hasItemCategory(coupon.getItemCategory())) {
-                        int cheapest = CartManager.getCheapestItemPrice(coupon.getItemCategory());
+                    // NEW CODE: trust CouponValidator
+                    int cheapest = CartManager.getCheapestEligibleItemPrice(coupon);
+                    if (cheapest > 0) {
                         finalAmount = Math.max(0, totalCents - cheapest);
                         Log.d(TAG, "Applied free_item discount: -" + cheapest + " cents");
                     } else {
-                        Log.d(TAG, "Coupon requires category=" + coupon.getItemCategory() + " not found in cart");
-                        Toast.makeText(this,
-                                "This coupon requires ordering a " + coupon.getItemCategory(),
-                                Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "No eligible items in cart for couponId=" + coupon.getCouponId());
+                        Toast.makeText(this, "No eligible items in cart for this coupon", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     break;
@@ -168,65 +185,4 @@ public class CartActivity extends AppCompatActivity {
             startActivity(payIntent);
         }
     }
-
-    private boolean isCouponValidForCart(Coupon coupon) {
-        if (coupon == null) {
-            Log.d(TAG, "Coupon is null");
-            return false;
-        }
-
-        Log.d(TAG, "Validating coupon: " + coupon.getTitle() + " (ID=" + coupon.getCouponId() + ")");
-        int totalCents = CartManager.getTotalAmountInCents();
-        Log.d(TAG, "Cart total (cents): " + totalCents);
-
-        // 1. Minimum spend
-        Double minSpend = coupon.getMinSpend();
-        if (minSpend != null) {
-            Log.d(TAG, "Coupon minSpend=" + minSpend);
-            if (totalCents < (int) Math.round(minSpend * 100)) {
-                Log.d(TAG, "Invalid: below min spend");
-                return false;
-            }
-        }
-
-        // 2. AppliesTo simplified check
-        String appliesTo = coupon.getAppliesTo(); // may return null
-        String orderType = CartManager.getOrderType(); // e.g. "dine_in", "takeaway", "delivery"
-        boolean appliesToAll = (appliesTo == null) || appliesTo.trim().isEmpty();
-
-        if (!appliesToAll && !appliesTo.equalsIgnoreCase(orderType)) {
-            Log.d(TAG, "Invalid: not valid for " + orderType);
-            return false;
-        } else {
-            Log.d(TAG, "Valid: coupon applies");
-        }
-
-        // 3. Birthday-only
-        if (coupon.isBirthdayOnly()) {
-            Log.d(TAG, "Coupon is birthday-only, checking RoleManager...");
-            try {
-                if (!RoleManager.isTodayUserBirthday()) {
-                    Log.d(TAG, "Invalid: not user's birthday");
-                    return false;
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error checking birthday", e);
-                return false;
-            }
-        }
-
-        // 4. Discount stacking
-        if (!coupon.isCombineWithOtherDiscounts()) {   // now reflects JSON field (0 = false, 1 = true)
-            Log.d(TAG, "Coupon cannot combine with other discounts");
-            if (CartManager.hasOtherDiscountsApplied()) {
-                Log.d(TAG, "Invalid: other discounts already applied");
-                return false;
-            }
-        }
-
-        Log.d(TAG, "Coupon is valid ✅");
-        return true;
-    }
-
 }
-

@@ -12,8 +12,9 @@ public class Coupon implements Parcelable {
     public boolean isRedeemable() { return redeemable; }
     public void setRedeemable(boolean redeemable) { this.redeemable = redeemable; }
 
-    // Quantity is not from backend, managed locally
+    @SerializedName(value = "quantity", alternate = {"redemption_count"})
     private int quantity;
+
 
     public void setQuantity(int quantity) {
         this.quantity = Math.max(0, quantity);
