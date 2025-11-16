@@ -2,6 +2,7 @@ package com.example.yummyrestaurant.models;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
+import java.util.ArrayList;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -292,4 +293,3 @@ public class Coupon implements Parcelable {
         }
     };
 }
-
