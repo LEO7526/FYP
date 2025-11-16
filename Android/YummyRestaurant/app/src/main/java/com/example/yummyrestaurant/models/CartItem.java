@@ -21,6 +21,11 @@ public class CartItem implements Serializable {
         return menuItem != null ? menuItem.getCategory() : null;
     }
 
+    /** --- ADDED: Delegate categoryId to MenuItem --- */
+    public Integer getCategoryId() {
+        return menuItem != null ? menuItem.getCategoryId() : null;
+    }
+
     /** Base price in cents (delegates to MenuItem) */
     public int getPriceInCents() {
         return menuItem != null ? menuItem.getPriceInCents() : 0;

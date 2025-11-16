@@ -11,6 +11,10 @@ public class MenuItem implements Serializable {
     @SerializedName("price")
     private double price;
 
+    @SerializedName("category_id") // <--- Add this annotation for proper GSON mapping
+    private Integer categoryId;    // <--- Add this field (nullable to match backend if necessary)
+
+
     @SerializedName("id")
     private int id;
 
@@ -116,4 +120,8 @@ public class MenuItem implements Serializable {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    public Integer getCategoryId() { return categoryId; }
+    public void setCategoryId(Integer categoryId) { this.categoryId = categoryId; }
+
 }

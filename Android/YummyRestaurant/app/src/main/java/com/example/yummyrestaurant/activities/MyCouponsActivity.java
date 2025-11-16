@@ -13,8 +13,10 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.MyCouponAdapter;
 import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.GenericResponse;
+import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.models.MyCouponListResponse;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
@@ -22,6 +24,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -101,9 +104,58 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         });
     }
 
+    // --- Coupon picker replacement ---
     private void showQuantityPickerAndUse(Coupon coupon, int position) {
-        int maxUsable = coupon.getQuantity();
-        Log.d(TAG, "showQuantityPickerAndUse: couponId=" + coupon.getCouponId() + ", maxUsable=" + maxUsable);
+        String appliesTo = coupon.getAppliesTo();
+        int maxUsable;
+        int ownedQty = coupon.getQuantity();
+
+        maxUsable = ownedQty;
+
+        // For item-specific coupons:
+        if ("item".equalsIgnoreCase(appliesTo) && coupon.getApplicableItems() != null && !coupon.getApplicableItems().isEmpty()) {
+            int eligibleCount = 0;
+            Map<CartItem, Integer> cartItems = CartManager.getCartItems();
+            List<Integer> applicableIds = coupon.getApplicableItems();
+
+            for (Map.Entry<CartItem, Integer> entry : cartItems.entrySet()) {
+                MenuItem mItem = entry.getKey().getMenuItem();
+                if (mItem != null && applicableIds.contains(mItem.getId())) {
+                    eligibleCount += entry.getValue();
+                }
+            }
+            if (eligibleCount == 0) {
+                Toast.makeText(this, "No applicable items in cart for this coupon", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Coupon not usable, no matching items in cart for couponId=" + coupon.getCouponId());
+                return;
+            }
+            maxUsable = Math.min(ownedQty, eligibleCount);
+        }
+
+        // For category-specific coupons (if used in backend, update similar to above)
+        if ("category".equalsIgnoreCase(appliesTo) && coupon.getApplicableCategories() != null && !coupon.getApplicableCategories().isEmpty()) {
+            int eligibleCount = 0;
+            List<Integer> applicableCats = coupon.getApplicableCategories();
+            Map<CartItem, Integer> cartItems = CartManager.getCartItems();
+            for (Map.Entry<CartItem, Integer> entry : cartItems.entrySet()) {
+                MenuItem mItem = entry.getKey().getMenuItem();
+                if (mItem != null && mItem.getCategoryId() != null && applicableCats.contains(mItem.getCategoryId())) {
+                    eligibleCount += entry.getValue();
+                }
+            }
+            if (eligibleCount == 0) {
+                Toast.makeText(this, "No applicable category items in cart for this coupon", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Coupon not usable, no matching category in cart for couponId=" + coupon.getCouponId());
+                return;
+            }
+            maxUsable = Math.min(ownedQty, eligibleCount);
+        }
+
+        // Clamp maxUsable per any 'per_customer_per_day' limit
+        Integer perDayLimit = coupon.getPerCustomerPerDay();
+        if (perDayLimit != null && perDayLimit > 0 && maxUsable > perDayLimit) {
+            maxUsable = perDayLimit;
+        }
 
         if (maxUsable <= 0) {
             Toast.makeText(this, "No coupons available to use", Toast.LENGTH_SHORT).show();
@@ -120,16 +172,73 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                 .setTitle("Select quantity to use")
                 .setItems(options, (dialog, which) -> {
                     int quantity = which + 1;
-
-                    // 🚨 Validate coupon before using
-                    if (!isCouponValidForCart(coupon)) {
+                    if (!isCouponValidForCart(coupon, quantity)) {
                         return;
                     }
-
                     useCoupon(coupon, position, quantity);
                 })
                 .show();
     }
+
+    // --- Validator replacement ---
+    private boolean isCouponValidForCart(Coupon coupon, int requestedQty) {
+        if (coupon == null) {
+            Log.d(TAG, "Coupon is null");
+            return false;
+        }
+
+        // Minimum spend
+        Double minSpend = coupon.getMinSpend();
+        int totalCents = CartManager.getTotalAmountInCents();
+        if (minSpend != null && totalCents < (int) Math.round(minSpend * 100)) {
+            Log.d(TAG, "Invalid: below min spend");
+            return false;
+        }
+
+        // Applies-to/order type
+        String appliesTo = coupon.getAppliesTo();
+        String orderType = CartManager.getOrderType();
+        boolean appliesToAll = (appliesTo == null) || appliesTo.trim().isEmpty();
+        if (!appliesToAll && !appliesTo.equalsIgnoreCase(orderType)) {
+            Log.d(TAG, "Invalid: not valid for " + orderType);
+            return false;
+        }
+
+        // Birthday-only
+        if (coupon.isBirthdayOnly()) {
+            try {
+                if (!RoleManager.isTodayUserBirthday()) {
+                    Log.d(TAG, "Invalid: not user's birthday");
+                    return false;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error checking birthday", e);
+                return false;
+            }
+        }
+
+        // Coupon stacking: only allow if all applied coupons can be combined
+        if (!coupon.isCombineWithOtherDiscounts()) {
+            if (CartManager.hasOtherDiscountsApplied()) {
+                Log.d(TAG, "Invalid: other discounts already applied");
+                return false;
+            }
+        }
+
+        // Check per_customer_per_day (if tracked or can query from backend/history)
+        Integer perDayLimit = coupon.getPerCustomerPerDay();
+        if (perDayLimit != null && perDayLimit > 0 && requestedQty > perDayLimit) {
+            Log.d(TAG, "Invalid: requested exceeds per_customer_per_day limit");
+            return false;
+        }
+
+        // Item/category applicability already checked in picker above
+
+        Log.d(TAG, "Coupon is valid ✅");
+        return true;
+    }
+
+
 
     private void useCoupon(Coupon coupon, int position, int quantity) {
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
