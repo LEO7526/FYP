@@ -24,6 +24,7 @@ import com.example.yummyrestaurant.utils.CouponValidator;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,8 @@ public class MyCouponsActivity extends BaseCustomerActivity {
     private List<Coupon> myCoupons = new ArrayList<>();
     private int customerId;
     private boolean fromCart;
+
+    ArrayList<Coupon> selectedCoupons = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,29 +174,51 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             menuItemIds = new ArrayList<>();
         }
 
-        Log.i(TAG, "Attempting to use couponId=" + coupon.getCouponId() +
-                ", qty=" + quantity +
-                ", orderTotal=" + orderTotal +
-                ", eligibleItems=" + menuItemIds);
+        Log.i(TAG, "=== Attempting to use coupon ===");
+        Log.i(TAG, "couponId=" + coupon.getCouponId());
+        Log.i(TAG, "quantity=" + quantity);
+        Log.i(TAG, "orderTotal (cents)=" + orderTotal);
+        Log.i(TAG, "eligibleItemIds=" + menuItemIds);
+
+        // Build couponQuantities map for Retrofit
+        Map<String, Integer> couponQuantities = new HashMap<>();
+        couponQuantities.put(String.valueOf(coupon.getCouponId()), quantity);
+
+        Log.i(TAG, "Sending couponQuantities=" + new Gson().toJson(couponQuantities));
 
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.useCoupon(customerId, coupon.getCouponId(), quantity, orderTotal, menuItemIds)
+        api.useCoupons(customerId, orderTotal, couponQuantities, menuItemIds)
                 .enqueue(new Callback<GenericResponse>() {
                     @Override
                     public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                        Log.i(TAG, "useCoupon API Response: HTTP " + response.code());
-                        Log.d(TAG, "useCoupon Response body: " + new Gson().toJson(response.body()));
+                        Log.i(TAG, "useCoupons API response received");
+                        if (response.isSuccessful() && response.body() != null) {
+                            Log.i(TAG, "Response body: " + new Gson().toJson(response.body()));
+                            if (response.body().isSuccess()) {
+                                Log.i(TAG, "✅ Coupon applied successfully, couponId=" + coupon.getCouponId());
 
-                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            Log.i(TAG, "Coupon applied successfully, couponId=" + coupon.getCouponId());
-                            Intent result = new Intent();
-                            result.putExtra("selectedCoupon", coupon);
-                            setResult(RESULT_OK, result);
+                                // Set the chosen quantity on the coupon object
+                                coupon.setQuantity(quantity);
 
-                            adapter.decrementCouponQuantity(position, quantity);
-                            finish();
+                                // Add to the list of selected coupons
+                                selectedCoupons.add(coupon);
+
+                                // Return the full list
+                                Intent result = new Intent();
+                                result.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
+                                setResult(RESULT_OK, result);
+
+                                // Update UI
+                                adapter.decrementCouponQuantity(position, quantity);
+                            } else {
+                                Log.w(TAG, "❌ Coupon application failed: " + response.body().getMessage());
+                                Toast.makeText(MyCouponsActivity.this,
+                                        "Failed to apply coupon: " + response.body().getMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                                reEnableButton(position);
+                            }
                         } else {
-                            Log.w(TAG, "Coupon apply failed, body=" + new Gson().toJson(response.body()));
+                            Log.e(TAG, "❌ API call failed. HTTP " + response.code());
                             Toast.makeText(MyCouponsActivity.this,
                                     "Failed to apply coupon", Toast.LENGTH_SHORT).show();
                             reEnableButton(position);
@@ -202,13 +227,18 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
                     @Override
                     public void onFailure(Call<GenericResponse> call, Throwable t) {
-                        Log.e(TAG, "useCoupon API request failed", t);
+                        Log.e(TAG, "❌ useCoupons API request failed", t);
                         Toast.makeText(MyCouponsActivity.this,
-                                "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                         reEnableButton(position);
                     }
                 });
     }
+
+
+
+
+
 
 
 
@@ -222,8 +252,11 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
     @Override
     public void onBackPressed() {
-        Log.d(TAG, "Back pressed → RESULT_CANCELED");
-        setResult(RESULT_CANCELED);
+        Log.d(TAG, "Back pressed → returning selected coupons");
+        Intent result = new Intent();
+        result.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
+        setResult(RESULT_OK, result);
         super.onBackPressed();
     }
+
 }

@@ -10,9 +10,11 @@ import com.example.yummyrestaurant.models.MyCouponListResponse;
 import com.example.yummyrestaurant.models.RedeemCouponResponse;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
+import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -58,13 +60,14 @@ public interface CouponApiService {
     // --- Mark coupon as used (during checkout) ---
     @FormUrlEncoded
     @POST("useCoupon.php")
-    Call<GenericResponse> useCoupon(
+    Call<GenericResponse> useCoupons(
             @Field("cid") int customerId,
-            @Field("coupon_id") int couponId,
-            @Field("quantity") int quantity,
-            @Field("order_total") int orderTotal,                // in cents
-            @Field("eligible_item_ids[]") List<Integer> itemIds  // array of menu item IDs
+            @Field("order_total") int orderTotal,
+            @FieldMap Map<String, Integer> couponQuantities,
+            @Field("eligible_item_ids[]") List<Integer> itemIds
     );
+
+
 
 
     // --- Get all coupons currently owned by a customer ---

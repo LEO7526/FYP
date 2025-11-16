@@ -63,38 +63,50 @@ public class Coupon implements Parcelable {
     @SerializedName("combine_with_other_discounts") private Boolean combineRawTop;
     @SerializedName("birthday_only") private Boolean birthdayRawTop;
 
+    // Top-level rule fields
+    @SerializedName("applies_to") private String appliesToTop;
+    @SerializedName("discount_type") private String discountTypeTop;
+    @SerializedName("discount_value") private Double discountValueTop;
+    @SerializedName("min_spend") private Double minSpendTop;
+    public String getAppliesTo() {
+        if (rules != null && !rules.getAppliesTo().isEmpty()) {
+            return rules.getAppliesTo();
+        }
+        return appliesToTop != null ? appliesToTop : "";
+    }
+
+    public String getDiscountType() {
+        if (rules != null && !rules.getDiscountType().isEmpty()) {
+            return rules.getDiscountType();
+        }
+        return discountTypeTop != null ? discountTypeTop : (type != null ? type : "");
+    }
+
+    public double getDiscountValue() {
+        if (rules != null) return rules.getDiscountValue();
+        if (discountValueTop != null) return discountValueTop;
+        return discountAmount;
+    }
+
+    public Double getMinSpend() {
+        if (rules != null) return rules.getMinSpend();
+        return minSpendTop;
+    }
+
     public Coupon() {}
 
     // --- Nested Rules class ---
     public static class Rules {
-        @SerializedName("applies_to")
-        private String appliesTo;
+        @SerializedName("applies_to") private String appliesTo;
+        @SerializedName("discount_type") private String discountType;
+        @SerializedName("discount_value") private double discountValue;
+        @SerializedName("min_spend") private Double minSpend;
+        @SerializedName("valid_dine_in") private int validDineInRaw;
+        @SerializedName("valid_takeaway") private int validTakeawayRaw;
+        @SerializedName("valid_delivery") private int validDeliveryRaw;
+        @SerializedName("combine_with_other_discounts") private int combineRaw;
+        @SerializedName("birthday_only") private int birthdayRaw;
 
-        @SerializedName("discount_type")
-        private String discountType;
-
-        @SerializedName("discount_value")
-        private double discountValue;
-
-        @SerializedName("min_spend")
-        private Double minSpend;
-
-        @SerializedName("valid_dine_in")
-        private int validDineInRaw;
-
-        @SerializedName("valid_takeaway")
-        private int validTakeawayRaw;
-
-        @SerializedName("valid_delivery")
-        private int validDeliveryRaw;
-
-        @SerializedName("combine_with_other_discounts")
-        private int combineRaw;
-
-        @SerializedName("birthday_only")
-        private int birthdayRaw;
-
-        // Getters with null safety
         public String getAppliesTo() { return appliesTo != null ? appliesTo : ""; }
         public String getDiscountType() { return discountType != null ? discountType : ""; }
         public double getDiscountValue() { return discountValue; }
@@ -105,8 +117,6 @@ public class Coupon implements Parcelable {
         public boolean isCombineWithOtherDiscounts() { return combineRaw == 1; }
         public boolean isBirthdayOnly() { return birthdayRaw == 1; }
     }
-
-    // --- Getters (delegating to rules, with safe defaults and fallbacks) ---
     public int getCouponId() { return couponId; }
     public String getTitle() { return title != null ? title : ""; }
     public String getDescription() { return description != null ? description : ""; }
@@ -123,28 +133,6 @@ public class Coupon implements Parcelable {
     public void setPerCustomerPerDay(Integer value) { this.perCustomerPerDay = value; }
     public Integer getPerCustomerPerDay() { return perCustomerPerDay; }
 
-    public String getAppliesTo() {
-        return rules != null ? rules.getAppliesTo() : "";
-    }
-
-    // Fallbacks for discount type/value
-    public String getDiscountType() {
-        if (rules != null && !rules.getDiscountType().isEmpty()) {
-            return rules.getDiscountType();
-        }
-        return type != null ? type : "";
-    }
-
-    public double getDiscountValue() {
-        if (rules != null) {
-            return rules.getDiscountValue();
-        }
-        return discountAmount;
-    }
-
-    public Double getMinSpend() { return rules != null ? rules.getMinSpend() : null; }
-
-    // 🔑 Edited: fall back to top-level flags when rules is null
     public boolean isValidDineIn() {
         if (rules != null) return rules.isValidDineIn();
         return validDineIn != null && validDineIn;
@@ -157,7 +145,6 @@ public class Coupon implements Parcelable {
         if (rules != null) return rules.isValidDelivery();
         return validDelivery != null && validDelivery;
     }
-
     public boolean isCombineWithOtherDiscounts() {
         if (rules != null) return rules.isCombineWithOtherDiscounts();
         return combineRawTop != null && combineRawTop;
@@ -166,8 +153,6 @@ public class Coupon implements Parcelable {
         if (rules != null) return rules.isBirthdayOnly();
         return birthdayRawTop != null && birthdayRawTop;
     }
-
-    // --- Parcelable implementation ---
     protected Coupon(Parcel in) {
         couponId = in.readInt();
         title = in.readString();
@@ -179,6 +164,12 @@ public class Coupon implements Parcelable {
         type = in.readString();
         itemCategory = in.readString();
         quantity = in.readInt();
+
+        // Read top-level rule fields
+        appliesToTop = in.readString();
+        discountTypeTop = in.readString();
+        discountValueTop = (Double) in.readValue(Double.class.getClassLoader());
+        minSpendTop = (Double) in.readValue(Double.class.getClassLoader());
 
         // Read Rules
         if (in.readByte() == 1) {
@@ -200,7 +191,7 @@ public class Coupon implements Parcelable {
 
         int[] itemsArray = in.createIntArray();
         if (itemsArray != null) {
-            applicableItems = new java.util.ArrayList<>(itemsArray.length);
+            applicableItems = new ArrayList<>(itemsArray.length);
             for (int value : itemsArray) {
                 applicableItems.add(value);
             }
@@ -208,13 +199,19 @@ public class Coupon implements Parcelable {
 
         int[] categoriesArray = in.createIntArray();
         if (categoriesArray != null) {
-            applicableCategories = new java.util.ArrayList<>(categoriesArray.length);
+            applicableCategories = new ArrayList<>(categoriesArray.length);
             for (int value : categoriesArray) {
                 applicableCategories.add(value);
             }
         }
-    }
 
+        // Read top-level flags
+        validDineIn = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        validTakeaway = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        validDelivery = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        combineRawTop = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        birthdayRawTop = (Boolean) in.readValue(Boolean.class.getClassLoader());
+    }
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(couponId);
@@ -227,6 +224,12 @@ public class Coupon implements Parcelable {
         dest.writeString(type);
         dest.writeString(itemCategory);
         dest.writeInt(quantity);
+
+        // Write top-level rule fields
+        dest.writeString(appliesToTop);
+        dest.writeString(discountTypeTop);
+        dest.writeValue(discountValueTop);
+        dest.writeValue(minSpendTop);
 
         // Write Rules
         if (rules != null) {
@@ -249,6 +252,7 @@ public class Coupon implements Parcelable {
             dest.writeByte((byte) 0);
         }
 
+        // Write applicable items/categories
         if (applicableItems != null) {
             int[] arr = new int[applicableItems.size()];
             for (int i = 0; i < applicableItems.size(); i++) {
@@ -269,14 +273,13 @@ public class Coupon implements Parcelable {
             dest.writeIntArray(null);
         }
 
-        // Write top-level flags (so they survive parceling)
+        // Write top-level flags
         dest.writeValue(validDineIn);
         dest.writeValue(validTakeaway);
         dest.writeValue(validDelivery);
         dest.writeValue(combineRawTop);
         dest.writeValue(birthdayRawTop);
     }
-
     @Override
     public int describeContents() {
         return 0;
@@ -287,6 +290,7 @@ public class Coupon implements Parcelable {
         public Coupon createFromParcel(Parcel in) {
             return new Coupon(in);
         }
+
         @Override
         public Coupon[] newArray(int size) {
             return new Coupon[size];

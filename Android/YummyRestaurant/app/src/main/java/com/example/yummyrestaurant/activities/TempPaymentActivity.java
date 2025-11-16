@@ -50,28 +50,22 @@ public class TempPaymentActivity extends AppCompatActivity {
     private final List<Map<String, Object>> itemsForDisplay = new ArrayList<>();
 
     private int finalAmount;
-    private Coupon selectedCoupon;   // 👈 full object
     private int qty = 1; // temp
+
+    private ArrayList<Coupon> selectedCoupons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp_payment);
 
-        loadingSpinner = findViewById(R.id.loadingSpinner);
-        successIcon = findViewById(R.id.successIcon);
-        confirmButton = findViewById(R.id.confirmButton1);
-        amountText = findViewById(R.id.amountText);
-
-        // Get values passed from CartActivity
         int totalAmount = getIntent().getIntExtra("totalAmount", 0);
-        selectedCoupon = getIntent().getParcelableExtra("selectedCoupon"); // 👈 full object
+        selectedCoupons = getIntent().getParcelableArrayListExtra("selectedCoupons");
 
-        // Final amount is just the total passed in (CartActivity already subtracted discount)
         finalAmount = Math.max(0, totalAmount);
 
-        // Show amount to user
-        String discountLabel = (selectedCoupon != null) ? " (after discount)" : "";
+        String discountLabel = (selectedCoupons != null && !selectedCoupons.isEmpty())
+                ? " (after discounts)" : "";
         amountText.setText(String.format(
                 Locale.getDefault(),
                 "Total: HK$%.2f%s",
@@ -84,6 +78,16 @@ public class TempPaymentActivity extends AppCompatActivity {
             loadingSpinner.setVisibility(View.VISIBLE);
             saveOrderDirectly();
         });
+    }
+
+
+
+    private List<Integer> extractCouponIds(List<Coupon> coupons) {
+        List<Integer> ids = new ArrayList<>();
+        for (Coupon c : coupons) {
+            ids.add(c.getCouponId());
+        }
+        return ids;
     }
 
     private void saveOrderDirectly() {
@@ -105,6 +109,10 @@ public class TempPaymentActivity extends AppCompatActivity {
         } else {
             orderHeader.put("sid", null);
             orderHeader.put("table_number", "not chosen");
+        }
+
+        if (selectedCoupons != null && !selectedCoupons.isEmpty()) {
+            orderHeader.put("coupon_ids", extractCouponIds(selectedCoupons));
         }
 
         // Build order_items array
@@ -134,9 +142,6 @@ public class TempPaymentActivity extends AppCompatActivity {
 
         orderHeader.put("items", items);
         orderHeader.put("total_amount", finalAmount);
-        if (selectedCoupon != null) {
-            orderHeader.put("coupon_id", selectedCoupon.getCouponId());
-        }
         dishJson = new Gson().toJson(itemsForDisplay);
 
         // Call the backend via Retrofit
@@ -157,9 +162,10 @@ public class TempPaymentActivity extends AppCompatActivity {
                         Toast.makeText(TempPaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
 
                         // ✅ Only mark coupon as used here, after order save succeeds
-                        if (selectedCoupon != null) {
-                            markCouponAsUsed(customerId, selectedCoupon.getCouponId());
+                        if (selectedCoupons != null && !selectedCoupons.isEmpty()) {
+                            markCouponsAsUsed(customerId, selectedCoupons);
                         }
+
 
                         // Navigate to confirmation
                         Intent intent = new Intent(TempPaymentActivity.this, OrderConfirmationActivity.class);
@@ -167,10 +173,11 @@ public class TempPaymentActivity extends AppCompatActivity {
                         intent.putExtra("totalAmount", finalAmount);
                         intent.putExtra("itemCount", items.size());
                         intent.putExtra("dishJson", dishJson);
-                        if (selectedCoupon != null) {
-                            intent.putExtra("selectedCoupon", selectedCoupon);
+                        if (selectedCoupons != null && !selectedCoupons.isEmpty()) {
+                            intent.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
                         }
                         startActivity(intent);
+
                         finish();
 
                         CartManager.clearCart();
@@ -200,30 +207,38 @@ public class TempPaymentActivity extends AppCompatActivity {
         });
     }
 
-    private void markCouponAsUsed(int customerId, int couponId) {
+    private void markCouponsAsUsed(int customerId, List<Coupon> coupons) {
         int orderTotal = CartManager.getTotalAmountInCents();
         ArrayList<Integer> menuItemIds = new ArrayList<>();
         for (CartItem item : CartManager.getCartItems().keySet()) {
             Integer id = item.getMenuItemId();
-            if (id != null) {
-                menuItemIds.add(id);
-            }
+            if (id != null) menuItemIds.add(id);
+        }
+
+        // Build couponQuantities map
+        Map<String, Integer> couponQuantities = new HashMap<>();
+        for (Coupon c : coupons) {
+            couponQuantities.put(String.valueOf(c.getCouponId()), c.getQuantity());
         }
 
         CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        service.useCoupon(customerId, couponId, qty, orderTotal, menuItemIds)
+        service.useCoupons(customerId, orderTotal, couponQuantities, menuItemIds)
                 .enqueue(new Callback<GenericResponse>() {
                     @Override
                     public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            GenericResponse res = response.body();
-                            if (res.isSuccess()) {
-                                Log.i(TAG, "Coupon marked as used: " + res.getMessage());
-                            } else {
-                                Log.w(TAG, "Coupon use failed: " + res.getMessage());
-                            }
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            Log.i(TAG, "Coupons marked as used: " + new Gson().toJson(couponQuantities));
+
+                            Log.i(TAG, "Marking coupons as used:");
+                            Log.i(TAG, "customerId=" + customerId);
+                            Log.i(TAG, "orderTotal=" + orderTotal);
+                            Log.i(TAG, "couponQuantities=" + new Gson().toJson(couponQuantities));
+                            Log.i(TAG, "eligibleItemIds=" + menuItemIds);
+
+                            Log.i(TAG, "Coupon use response: " + new Gson().toJson(response.body()));
+
                         } else {
-                            Log.w(TAG, "Coupon use API call failed, code=" + response.code());
+                            Log.w(TAG, "Failed to mark coupons: " + new Gson().toJson(couponQuantities));
                         }
                     }
 
@@ -233,7 +248,5 @@ public class TempPaymentActivity extends AppCompatActivity {
                     }
                 });
     }
-
-
 
 }

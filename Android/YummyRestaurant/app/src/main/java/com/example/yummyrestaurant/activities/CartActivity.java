@@ -18,8 +18,11 @@ import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.example.yummyrestaurant.utils.CouponValidator;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -98,6 +101,35 @@ public class CartActivity extends AppCompatActivity {
 
     }
 
+    private int applyCoupons(List<Coupon> coupons) {
+        int finalAmount = CartManager.getTotalAmountInCents();
+        for (Coupon c : coupons) {
+            int qty = c.getQuantity(); // use the quantity set in MyCouponsActivity
+            if (!CouponValidator.isCouponValidForCart(c, qty)) continue;
+
+            for (int i = 0; i < qty; i++) {
+                switch (c.getDiscountType()) {
+                    case "cash":
+                        finalAmount -= (int)Math.round(c.getDiscountValue() * 100);
+                        break;
+                    case "percent":
+                        finalAmount = (int)Math.round(finalAmount * (1 - c.getDiscountValue() / 100.0));
+                        break;
+                    case "free_item":
+                        int cheapest = CartManager.getCheapestEligibleItemPrice(c);
+                        finalAmount -= cheapest;
+                        break;
+                }
+                finalAmount = Math.max(0, finalAmount);
+            }
+        }
+        return finalAmount;
+    }
+
+
+
+
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -131,62 +163,27 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
-
         if (requestCode == 2001 && resultCode == RESULT_OK && data != null) {
-            Coupon coupon = data.getParcelableExtra("selectedCoupon");
-            if (coupon == null) {
-                Log.d(TAG, "onActivityResult: No coupon returned");
-                return;
-            }
+            HashMap<Integer, Integer> couponQuantities =
+                    (HashMap<Integer, Integer>) data.getSerializableExtra("couponQuantities");
+            ArrayList<Coupon> selectedCoupons = data.getParcelableArrayListExtra("selectedCoupons");
 
-            Log.d(TAG, "onActivityResult: Coupon selected -> " + coupon.getTitle());
+            Log.d(TAG, "Returned from MyCouponsActivity with:");
+            Log.d(TAG, "couponQuantities=" + new Gson().toJson(couponQuantities));
+            Log.d(TAG, "selectedCoupons=" + new Gson().toJson(selectedCoupons));
 
-            // Validate coupon before applying
-            if (!CouponValidator.isCouponValidForCart(coupon, 1)) {
-                Log.d(TAG, "onActivityResult: Coupon invalid, aborting");
-                Toast.makeText(this, "Coupon not valid for this cart", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if (couponQuantities == null || couponQuantities.isEmpty()) return;
 
-            int totalCents = CartManager.getTotalAmountInCents();
-            int finalAmount = totalCents;
+            int finalAmount = applyCoupons(selectedCoupons);
+            Log.d(TAG, "Final amount after applying coupons: " + finalAmount);
 
-            switch (coupon.getDiscountType()) {
-                case "cash":
-                    finalAmount = Math.max(0, totalCents - (int) Math.round(coupon.getDiscountValue() * 100));
-                    Log.d(TAG, "Applied cash discount: -" + coupon.getDiscountValue());
-                    break;
-                case "percent":
-                    finalAmount = (int) Math.round(totalCents * (1 - coupon.getDiscountValue() / 100.0));
-                    Log.d(TAG, "Applied percent discount: -" + coupon.getDiscountValue() + "%");
-                    break;
-                case "free_item":
-                    // NEW CODE: trust CouponValidator
-                    int cheapest = CartManager.getCheapestEligibleItemPrice(coupon);
-                    if (cheapest > 0) {
-                        finalAmount = Math.max(0, totalCents - cheapest);
-                        Log.d(TAG, "Applied free_item discount: -" + cheapest + " cents");
-                    } else {
-                        Log.d(TAG, "No eligible items in cart for couponId=" + coupon.getCouponId());
-                        Toast.makeText(this, "No eligible items in cart for this coupon", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    break;
-            }
-
-            Log.d(TAG, "Final amount after coupon: " + finalAmount);
-            Intent payIntent = new Intent(CartActivity.this, TempPaymentActivity.class);
+            Intent payIntent = new Intent(this, TempPaymentActivity.class);
             payIntent.putExtra("totalAmount", finalAmount);
-            payIntent.putExtra("selectedCoupon", coupon);
-            startActivity(payIntent);
-
-        } else if (requestCode == 2001) {
-            int totalCents = CartManager.getTotalAmountInCents();
-            Log.d(TAG, "No coupon selected, proceeding with full amount: " + totalCents);
-            Intent payIntent = new Intent(CartActivity.this, TempPaymentActivity.class);
-            payIntent.putExtra("totalAmount", totalCents);
+            payIntent.putExtra("couponQuantities", couponQuantities);
+            payIntent.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
             startActivity(payIntent);
         }
     }
+
+
 }
