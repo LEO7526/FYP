@@ -108,8 +108,7 @@ while ($row = $result->fetch_assoc()) {
     $terms = isset($row['terms']) && $row['terms'] !== null && $row['terms'] !== ''
         ? array_filter(explode('||', $row['terms']), function($v){ return $v !== ''; })
         : [];
-
-    // normalize types to int where appropriate
+    // normalize types to int where appropriate, booleans for flags
     $coupons[] = [
         "coupon_id"            => (int)$row['coupon_id'],
         "title"                => $row['title'],
@@ -126,11 +125,13 @@ while ($row = $result->fetch_assoc()) {
         "min_spend"            => $row['min_spend'],
         "max_discount"         => $row['max_discount'],
         "per_customer_per_day" => $row['per_customer_per_day'],
-        "valid_dine_in"        => isset($row['valid_dine_in']) ? (int)$row['valid_dine_in'] : 0,
-        "valid_takeaway"       => isset($row['valid_takeaway']) ? (int)$row['valid_takeaway'] : 0,
-        "valid_delivery"       => isset($row['valid_delivery']) ? (int)$row['valid_delivery'] : 0,
-        "combine_with_other_discounts" => isset($row['combine_with_other_discounts']) ? (int)$row['combine_with_other_discounts'] : 0,
-        "birthday_only"        => isset($row['birthday_only']) ? (int)$row['birthday_only'] : 0,
+
+        // ✅ cast flags to boolean
+        "valid_dine_in"        => !empty($row['valid_dine_in']),
+        "valid_takeaway"       => !empty($row['valid_takeaway']),
+        "valid_delivery"       => !empty($row['valid_delivery']),
+        "combine_with_other_discounts" => !empty($row['combine_with_other_discounts']),
+        "birthday_only"        => !empty($row['birthday_only']),
 
         "applicable_items"     => $items,
         "applicable_categories"=> $cats,
@@ -139,6 +140,7 @@ while ($row = $result->fetch_assoc()) {
         "redemption_count"     => (int)$row['redemption_count'],
         "first_redeemed_at"    => $row['first_redeemed_at'],
     ];
+
 }
 
 echo json_encode(["success"=>true,"coupons"=>$coupons], JSON_UNESCAPED_UNICODE);

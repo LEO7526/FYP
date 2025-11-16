@@ -165,38 +165,52 @@ public class MyCouponsActivity extends BaseCustomerActivity {
     }
 
     private void useCoupon(Coupon coupon, int position, int quantity) {
-        Log.i(TAG, "Attempting to use couponId=" + coupon.getCouponId() + ", qty=" + quantity);
+        int orderTotal = getIntent().getIntExtra("order_total", 0);
+        ArrayList<Integer> menuItemIds = getIntent().getIntegerArrayListExtra("menu_item_ids");
+        if (menuItemIds == null) {
+            menuItemIds = new ArrayList<>();
+        }
+
+        Log.i(TAG, "Attempting to use couponId=" + coupon.getCouponId() +
+                ", qty=" + quantity +
+                ", orderTotal=" + orderTotal +
+                ", eligibleItems=" + menuItemIds);
 
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.useCoupon(customerId, coupon.getCouponId(), quantity).enqueue(new Callback<GenericResponse>() {
-            @Override
-            public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                Log.i(TAG, "useCoupon API Response: HTTP " + response.code());
-                Log.d(TAG, "useCoupon Response body: " + new Gson().toJson(response.body()));
+        api.useCoupon(customerId, coupon.getCouponId(), quantity, orderTotal, menuItemIds)
+                .enqueue(new Callback<GenericResponse>() {
+                    @Override
+                    public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
+                        Log.i(TAG, "useCoupon API Response: HTTP " + response.code());
+                        Log.d(TAG, "useCoupon Response body: " + new Gson().toJson(response.body()));
 
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Log.i(TAG, "Coupon applied successfully, couponId=" + coupon.getCouponId());
-                    Intent result = new Intent();
-                    result.putExtra("selectedCoupon", coupon);
-                    setResult(RESULT_OK, result);
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            Log.i(TAG, "Coupon applied successfully, couponId=" + coupon.getCouponId());
+                            Intent result = new Intent();
+                            result.putExtra("selectedCoupon", coupon);
+                            setResult(RESULT_OK, result);
 
-                    adapter.decrementCouponQuantity(position, quantity);
-                    finish();
-                } else {
-                    Log.w(TAG, "Coupon apply failed, body=" + new Gson().toJson(response.body()));
-                    Toast.makeText(MyCouponsActivity.this, "Failed to apply coupon", Toast.LENGTH_SHORT).show();
-                    reEnableButton(position);
-                }
-            }
+                            adapter.decrementCouponQuantity(position, quantity);
+                            finish();
+                        } else {
+                            Log.w(TAG, "Coupon apply failed, body=" + new Gson().toJson(response.body()));
+                            Toast.makeText(MyCouponsActivity.this,
+                                    "Failed to apply coupon", Toast.LENGTH_SHORT).show();
+                            reEnableButton(position);
+                        }
+                    }
 
-            @Override
-            public void onFailure(Call<GenericResponse> call, Throwable t) {
-                Log.e(TAG, "useCoupon API request failed", t);
-                Toast.makeText(MyCouponsActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                reEnableButton(position);
-            }
-        });
+                    @Override
+                    public void onFailure(Call<GenericResponse> call, Throwable t) {
+                        Log.e(TAG, "useCoupon API request failed", t);
+                        Toast.makeText(MyCouponsActivity.this,
+                                "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        reEnableButton(position);
+                    }
+                });
     }
+
+
 
     private void reEnableButton(int position) {
         Log.d(TAG, "Re-enabling button at position=" + position);

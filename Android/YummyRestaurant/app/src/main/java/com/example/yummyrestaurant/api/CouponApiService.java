@@ -9,6 +9,8 @@ import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.MyCouponListResponse;
 import com.example.yummyrestaurant.models.RedeemCouponResponse;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -59,8 +61,11 @@ public interface CouponApiService {
     Call<GenericResponse> useCoupon(
             @Field("cid") int customerId,
             @Field("coupon_id") int couponId,
-            @Field("quantity") int quantity
+            @Field("quantity") int quantity,
+            @Field("order_total") int orderTotal,                // in cents
+            @Field("eligible_item_ids[]") List<Integer> itemIds  // array of menu item IDs
     );
+
 
     // --- Get all coupons currently owned by a customer ---
     @GET("getMyCoupons.php")

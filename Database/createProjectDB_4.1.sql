@@ -389,7 +389,7 @@ SELECT cid, 0 FROM customer
 WHERE cid NOT IN (SELECT cid FROM coupon_point);
 
 UPDATE coupon_point
-SET points = 200
+SET points = 1000
 WHERE cid = 1;
 
 -- History of all point changes (earn/redeem), now with coupon_id

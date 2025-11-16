@@ -201,27 +201,39 @@ public class TempPaymentActivity extends AppCompatActivity {
     }
 
     private void markCouponAsUsed(int customerId, int couponId) {
-        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        service.useCoupon(customerId, couponId, qty).enqueue(new Callback<GenericResponse>() {
-            @Override
-            public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    GenericResponse res = response.body();
-                    if (res.isSuccess()) {
-                        Log.i(TAG, "Coupon marked as used: " + res.getMessage());
-                    } else {
-                        Log.w(TAG, "Coupon use failed: " + res.getMessage());
-                    }
-                } else {
-                    Log.w(TAG, "Coupon use API call failed, code=" + response.code());
-                }
+        int orderTotal = CartManager.getTotalAmountInCents();
+        ArrayList<Integer> menuItemIds = new ArrayList<>();
+        for (CartItem item : CartManager.getCartItems().keySet()) {
+            Integer id = item.getMenuItemId();
+            if (id != null) {
+                menuItemIds.add(id);
             }
+        }
 
-            @Override
-            public void onFailure(Call<GenericResponse> call, Throwable t) {
-                Log.e(TAG, "Coupon use API error: " + t.getMessage(), t);
-            }
-        });
+        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
+        service.useCoupon(customerId, couponId, qty, orderTotal, menuItemIds)
+                .enqueue(new Callback<GenericResponse>() {
+                    @Override
+                    public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            GenericResponse res = response.body();
+                            if (res.isSuccess()) {
+                                Log.i(TAG, "Coupon marked as used: " + res.getMessage());
+                            } else {
+                                Log.w(TAG, "Coupon use failed: " + res.getMessage());
+                            }
+                        } else {
+                            Log.w(TAG, "Coupon use API call failed, code=" + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<GenericResponse> call, Throwable t) {
+                        Log.e(TAG, "Coupon use API error: " + t.getMessage(), t);
+                    }
+                });
     }
+
+
 
 }

@@ -85,7 +85,11 @@ public class CartActivity extends AppCompatActivity {
                     }
                 }
                 couponIntent.putIntegerArrayListExtra("menu_item_ids", menuItemIds);
-                Log.d(TAG, "Passing menu_item_ids=" + menuItemIds + " to MyCouponsActivity");
+                Log.d(TAG, "Passing menu item id=" + menuItemIds + " to MyCouponsActivity");
+
+                // Pass order total (in cents)
+                couponIntent.putExtra("order_total", CartManager.getTotalAmountInCents());
+                Log.d(TAG, "Passing order total=" + CartManager.getTotalAmountInCents() + " to MyCouponsActivity");
             }
 
             startActivityForResult(couponIntent, 2001);
