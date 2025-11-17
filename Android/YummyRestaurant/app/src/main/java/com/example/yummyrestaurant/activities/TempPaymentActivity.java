@@ -50,19 +50,31 @@ public class TempPaymentActivity extends AppCompatActivity {
     private final List<Map<String, Object>> itemsForDisplay = new ArrayList<>();
 
     private int finalAmount;
-    private int qty = 1; // temp
-
+    private int subtotalAmount; // ✅ keep original subtotal
     private ArrayList<Coupon> selectedCoupons;
+    private HashMap<Integer, Integer> couponQuantities; // ✅ keep coupon quantities
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp_payment);
 
+        loadingSpinner = findViewById(R.id.loadingSpinner);
+        successIcon = findViewById(R.id.successIcon);
+        confirmButton = findViewById(R.id.confirmButton1);
+        amountText = findViewById(R.id.amountText);
+
+        // ✅ Read values passed from CartActivity
+        subtotalAmount = getIntent().getIntExtra("subtotalAmount", 0);
         int totalAmount = getIntent().getIntExtra("totalAmount", 0);
         selectedCoupons = getIntent().getParcelableArrayListExtra("selectedCoupons");
+        couponQuantities = (HashMap<Integer, Integer>) getIntent().getSerializableExtra("couponQuantities");
 
         finalAmount = Math.max(0, totalAmount);
+
+        Log.d(TAG, "Received subtotalAmount=" + subtotalAmount +
+                ", totalAmount=" + totalAmount +
+                ", couponQuantities=" + (couponQuantities != null ? new Gson().toJson(couponQuantities) : "null"));
 
         String discountLabel = (selectedCoupons != null && !selectedCoupons.isEmpty())
                 ? " (after discounts)" : "";
@@ -79,8 +91,6 @@ public class TempPaymentActivity extends AppCompatActivity {
             saveOrderDirectly();
         });
     }
-
-
 
     private List<Integer> extractCouponIds(List<Coupon> coupons) {
         List<Integer> ids = new ArrayList<>();
@@ -166,20 +176,22 @@ public class TempPaymentActivity extends AppCompatActivity {
                             markCouponsAsUsed(customerId, selectedCoupons);
                         }
 
-
                         // Navigate to confirmation
                         Intent intent = new Intent(TempPaymentActivity.this, OrderConfirmationActivity.class);
                         intent.putExtra("customerId", String.valueOf(customerId));
+                        intent.putExtra("subtotalAmount", subtotalAmount); // ✅ forward original subtotal
                         intent.putExtra("totalAmount", finalAmount);
                         intent.putExtra("itemCount", items.size());
                         intent.putExtra("dishJson", dishJson);
                         if (selectedCoupons != null && !selectedCoupons.isEmpty()) {
                             intent.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
                         }
+                        if (couponQuantities != null) {
+                            intent.putExtra("couponQuantities", couponQuantities); // ✅ forward quantities
+                        }
                         startActivity(intent);
 
                         finish();
-
                         CartManager.clearCart();
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to read response body", e);
@@ -215,30 +227,37 @@ public class TempPaymentActivity extends AppCompatActivity {
             if (id != null) menuItemIds.add(id);
         }
 
-        // Build couponQuantities map
-        Map<String, Integer> couponQuantities = new HashMap<>();
+        // Build couponQuantities map with proper keys: coupon_quantities[ID]
+        Map<String, Integer> couponQuantitiesMap = new HashMap<>();
         for (Coupon c : coupons) {
-            couponQuantities.put(String.valueOf(c.getCouponId()), c.getQuantity());
+            couponQuantitiesMap.put("coupon_quantities[" + c.getCouponId() + "]", c.getQuantity());
         }
 
+        // Get order type dynamically from CartManager
+        String orderType = CartManager.getOrderType();
+        Log.i(TAG, "Using orderType=" + orderType);
+
         CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        service.useCoupons(customerId, orderTotal, couponQuantities, menuItemIds)
+        service.useCoupons(customerId, orderTotal, orderType, couponQuantitiesMap, menuItemIds)
                 .enqueue(new Callback<GenericResponse>() {
                     @Override
                     public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            Log.i(TAG, "Coupons marked as used: " + new Gson().toJson(couponQuantities));
-
-                            Log.i(TAG, "Marking coupons as used:");
+                            Log.i(TAG, "Coupons marked as used: " + new Gson().toJson(couponQuantitiesMap));
                             Log.i(TAG, "customerId=" + customerId);
                             Log.i(TAG, "orderTotal=" + orderTotal);
-                            Log.i(TAG, "couponQuantities=" + new Gson().toJson(couponQuantities));
+                            Log.i(TAG, "orderType=" + orderType);
                             Log.i(TAG, "eligibleItemIds=" + menuItemIds);
-
                             Log.i(TAG, "Coupon use response: " + new Gson().toJson(response.body()));
-
                         } else {
-                            Log.w(TAG, "Failed to mark coupons: " + new Gson().toJson(couponQuantities));
+                            Log.w(TAG, "Failed to mark coupons: " + new Gson().toJson(couponQuantitiesMap));
+                            if (response.errorBody() != null) {
+                                try {
+                                    Log.w(TAG, "Error body: " + response.errorBody().string());
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Error reading errorBody", e);
+                                }
+                            }
                         }
                     }
 
@@ -248,5 +267,4 @@ public class TempPaymentActivity extends AppCompatActivity {
                     }
                 });
     }
-
 }

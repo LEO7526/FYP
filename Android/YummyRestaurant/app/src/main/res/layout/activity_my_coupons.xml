@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:padding="12dp">
 
+    <!-- Header -->
     <TextView
         android:id="@+id/tvMyCouponsHeader"
         android:layout_width="wrap_content"
@@ -15,12 +16,23 @@
         android:textStyle="bold"
         android:paddingBottom="8dp" />
 
+    <!-- Coupon list fills remaining space -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvMyCoupons"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:scrollbars="vertical" />
 
+    <!-- Done button always visible at bottom -->
+    <Button
+        android:id="@+id/btnDone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:layout_margin="12dp" />
+
+    <!-- Bottom bar -->
     <include
         android:id="@+id/bottomBar"
         layout="@layout/bottom_function_bar"

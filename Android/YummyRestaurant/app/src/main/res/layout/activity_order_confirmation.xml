@@ -1,81 +1,115 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:padding="24dp">
 
-    <TextView
-        android:id="@+id/paymentStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Payment Successful!"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#4CAF50"
-        android:layout_gravity="center"
-        android:paddingBottom="16dp" />
-
-    <TextView
-        android:id="@+id/orderSummary"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Order Summary"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/discountInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@android:color/holo_red_dark"
-        android:paddingBottom="4dp" />
+        <!-- Payment status -->
+        <TextView
+            android:id="@+id/paymentStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Payment Successful!"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"
+            android:layout_gravity="center"
+            android:paddingBottom="16dp" />
 
-    <!-- 👇 New concise coupon details section -->
-    <TextView
-        android:id="@+id/couponDetails"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:textColor="@android:color/black"
-        android:paddingBottom="8dp"
-        android:visibility="gone" />
+        <!-- Summary box -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="#F5F5F5"
+            android:elevation="2dp"
+            android:layout_marginBottom="16dp">
 
-    <TextView
-        android:id="@+id/totalInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/holo_green_dark"
-        android:paddingBottom="16dp" />
+            <TextView
+                android:id="@+id/orderSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Order Summary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingBottom="8dp" />
 
-    <TextView
-        android:id="@+id/dishSummary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:lineSpacingExtra="6dp"
-        android:paddingBottom="16dp" />
+            <TextView
+                android:id="@+id/subtotalInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Subtotal: HK$0.00"
+                android:textSize="16sp"
+                android:paddingBottom="4dp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#CCCCCC"
-        android:layout_marginBottom="16dp" />
+            <TextView
+                android:id="@+id/discountInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="- HK$50.00 off (HK$50 OFF)\n- Free drink (Free Drink)"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_red_dark"
+                android:paddingBottom="4dp" />
 
-    <Button
-        android:id="@+id/backToHomeBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Back to Home"
-        android:textSize="16sp"
-        android:backgroundTint="#2196F3"
-        android:textColor="#FFFFFF"
-        android:padding="12dp"
-        android:layout_marginTop="8dp" />
+            <TextView
+                android:id="@+id/totalInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Total: HK$0.00"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_green_dark"
+                android:paddingTop="8dp" />
+        </LinearLayout>
 
-</LinearLayout>
+        <!-- Coupon details -->
+        <TextView
+            android:id="@+id/couponDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Coupon: HK$50 OFF\nDiscount: HK$50.00\nCoupon: Free Drink\nDiscount: Free drink"
+            android:textSize="15sp"
+            android:textColor="#333333"
+            android:padding="12dp"
+            android:background="#EEEEEE"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" />
+
+        <!-- Dish breakdown -->
+        <TextView
+            android:id="@+id/dishSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="• Dish name — Qty: X, Price: HK$Y, Subtotal: HK$Z"
+            android:textSize="16sp"
+            android:lineSpacingExtra="6dp"
+            android:paddingBottom="16dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#CCCCCC"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Back button -->
+        <Button
+            android:id="@+id/backToHomeBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Back to Home"
+            android:textSize="16sp"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"
+            android:padding="12dp"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+</ScrollView>

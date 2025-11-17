@@ -63,9 +63,11 @@ public interface CouponApiService {
     Call<GenericResponse> useCoupons(
             @Field("cid") int customerId,
             @Field("order_total") int orderTotal,
+            @Field("order_type") String orderType,
             @FieldMap Map<String, Integer> couponQuantities,
             @Field("eligible_item_ids[]") List<Integer> itemIds
     );
+
 
 
 

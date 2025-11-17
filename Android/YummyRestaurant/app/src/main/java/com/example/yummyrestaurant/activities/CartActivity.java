@@ -102,18 +102,25 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private int applyCoupons(List<Coupon> coupons) {
+        Log.d(TAG, "applyCoupons called with " + coupons.size() + " coupons");
+
         int finalAmount = CartManager.getTotalAmountInCents();
         for (Coupon c : coupons) {
-            int qty = c.getQuantity(); // use the quantity set in MyCouponsActivity
+            int qty = c.getQuantity();
             if (!CouponValidator.isCouponValidForCart(c, qty)) continue;
 
+            double discountValue = c.getDiscountValue();
+            int discountAmount = c.getDiscountAmount(); // in cents
+
             for (int i = 0; i < qty; i++) {
-                switch (c.getDiscountType()) {
+                switch (c.getDiscountType().toLowerCase(Locale.ROOT)) {
                     case "cash":
-                        finalAmount -= (int)Math.round(c.getDiscountValue() * 100);
+                        // Prefer discountAmount if present, else discountValue * 100
+                        int cashOff = discountAmount > 0 ? discountAmount : (int)Math.round(discountValue * 100);
+                        finalAmount -= cashOff;
                         break;
                     case "percent":
-                        finalAmount = (int)Math.round(finalAmount * (1 - c.getDiscountValue() / 100.0));
+                        finalAmount = (int)Math.round(finalAmount * (1 - discountValue / 100.0));
                         break;
                     case "free_item":
                         int cheapest = CartManager.getCheapestEligibleItemPrice(c);
@@ -121,10 +128,17 @@ public class CartActivity extends AppCompatActivity {
                         break;
                 }
                 finalAmount = Math.max(0, finalAmount);
+
+                Log.d(TAG, "Applying coupon " + c.getCouponId() +
+                        " type=" + c.getDiscountType() +
+                        " discountValue=" + discountValue +
+                        " discountAmount=" + discountAmount +
+                        " finalAmount=" + finalAmount);
             }
         }
         return finalAmount;
     }
+
 
 
 
@@ -162,28 +176,45 @@ public class CartActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Log.d(TAG, "onActivityResult fired: requestCode=" + requestCode + " resultCode=" + resultCode);
+
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == 2001 && resultCode == RESULT_OK && data != null) {
             HashMap<Integer, Integer> couponQuantities =
                     (HashMap<Integer, Integer>) data.getSerializableExtra("couponQuantities");
-            ArrayList<Coupon> selectedCoupons = data.getParcelableArrayListExtra("selectedCoupons");
+            ArrayList<Coupon> selectedCoupons =
+                    data.getParcelableArrayListExtra("selectedCoupons");
 
             Log.d(TAG, "Returned from MyCouponsActivity with:");
-            Log.d(TAG, "couponQuantities=" + new Gson().toJson(couponQuantities));
-            Log.d(TAG, "selectedCoupons=" + new Gson().toJson(selectedCoupons));
+            Log.d(TAG, "couponQuantities=" + (couponQuantities != null ? new Gson().toJson(couponQuantities) : "null"));
+            Log.d(TAG, "selectedCoupons=" + (selectedCoupons != null ? new Gson().toJson(selectedCoupons) : "null"));
 
-            if (couponQuantities == null || couponQuantities.isEmpty()) return;
+            if ((couponQuantities == null || couponQuantities.isEmpty())
+                    && (selectedCoupons == null || selectedCoupons.isEmpty())) {
+                Log.d(TAG, "No coupons selected, proceeding without coupon");
+                Intent payIntent = new Intent(this, TempPaymentActivity.class);
+                payIntent.putExtra("totalAmount", CartManager.getTotalAmountInCents());
+                startActivity(payIntent);
+                return;
+            }
 
-            int finalAmount = applyCoupons(selectedCoupons);
-            Log.d(TAG, "Final amount after applying coupons: " + finalAmount);
+            int finalAmount = applyCoupons(selectedCoupons != null ? selectedCoupons : new ArrayList<>());
+            Log.d(TAG, "Final amount after applying "
+                    + (selectedCoupons != null ? selectedCoupons.size() : 0)
+                    + " coupons: " + finalAmount);
 
             Intent payIntent = new Intent(this, TempPaymentActivity.class);
+            payIntent.putExtra("subtotalAmount", CartManager.getTotalAmountInCents());
             payIntent.putExtra("totalAmount", finalAmount);
             payIntent.putExtra("couponQuantities", couponQuantities);
             payIntent.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
             startActivity(payIntent);
         }
     }
+
+
 
 
 }

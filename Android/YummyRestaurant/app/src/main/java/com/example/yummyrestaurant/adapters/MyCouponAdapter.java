@@ -47,17 +47,22 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
         if (position >= 0 && position < myCoupons.size()) {
             Coupon coupon = myCoupons.get(position);
             int currentQty = coupon.getQuantity();
-
             int newQty = currentQty - quantity;
+
             if (newQty > 0) {
+                // still has some left → update quantity
                 coupon.setQuantity(newQty);
                 notifyItemChanged(position);
             } else {
+                // reached 0 → remove from list
                 myCoupons.remove(position);
                 notifyItemRemoved(position);
+                Log.d(TAG, "Coupon id=" + coupon.getCouponId() + " removed (quantity=0)");
             }
         }
     }
+
+
 
     @Override
     public void onBindViewHolder(@NonNull MyCouponViewHolder holder, int position) {

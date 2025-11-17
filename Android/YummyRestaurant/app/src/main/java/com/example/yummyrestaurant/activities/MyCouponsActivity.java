@@ -3,6 +3,7 @@ package com.example.yummyrestaurant.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -13,10 +14,8 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.MyCouponAdapter;
 import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
-import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.GenericResponse;
-import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.models.MyCouponListResponse;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
@@ -41,7 +40,10 @@ public class MyCouponsActivity extends BaseCustomerActivity {
     private int customerId;
     private boolean fromCart;
 
-    ArrayList<Coupon> selectedCoupons = new ArrayList<>();
+    private Button btnDone;
+
+    private final ArrayList<Coupon> selectedCoupons = new ArrayList<>();
+    private final HashMap<Integer, Integer> couponQuantities = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,39 +55,33 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         rvMyCoupons = findViewById(R.id.rvMyCoupons);
         rvMyCoupons.setLayoutManager(new LinearLayoutManager(this));
 
+        btnDone = findViewById(R.id.btnDone);
+
         fromCart = getIntent().getBooleanExtra("fromCart", false);
         int intentCid = getIntent().getIntExtra("customer_id", Integer.MIN_VALUE);
 
         if (fromCart) {
             Log.i(TAG, "Activity launched from CartActivity");
-
-            ArrayList<Integer> menuItemIds = getIntent().getIntegerArrayListExtra("menu_item_ids");
-            if (menuItemIds != null) {
-                Log.d(TAG, "Received menu_item_ids: " + menuItemIds);
-            }
-
         } else {
             Log.i(TAG, "Activity launched directly (not from cart)");
+            // Disable Done button if not from cart
+            btnDone.setEnabled(false);
+            btnDone.setAlpha(0.5f);
         }
 
         if (intentCid != Integer.MIN_VALUE) {
             customerId = intentCid;
-            Log.i(TAG, "Using customerId from Intent: " + customerId);
         } else {
             try {
                 customerId = Integer.parseInt(RoleManager.getUserId());
-                Log.i(TAG, "Using customerId from RoleManager: " + customerId);
             } catch (Exception e) {
-                Log.e(TAG, "Invalid userId from RoleManager", e);
                 customerId = 0;
             }
         }
 
         adapter = new MyCouponAdapter(myCoupons, (coupon, position) -> {
-            Log.d(TAG, "Coupon clicked: id=" + coupon.getCouponId() + ", pos=" + position);
             if (!fromCart) {
                 Toast.makeText(this, "Coupons can only be used during checkout", Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "Attempted to use coupon outside checkout");
                 return;
             }
             showQuantityPickerAndUse(coupon, position);
@@ -93,37 +89,52 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         rvMyCoupons.setAdapter(adapter);
 
         fetchMyCoupons(customerId);
+
+        // Done button logic
+        // Done button logic: always return to CartActivity
+        btnDone.setOnClickListener(v -> {
+            // Build result to return to CartActivity
+            Intent result = new Intent();
+            result.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
+            result.putExtra("couponQuantities", couponQuantities);
+
+
+            // Whether zero or many coupons were selected, return to CartActivity
+            setResult(RESULT_OK, result);
+            finish();
+        });
+
     }
 
     private void fetchMyCoupons(int customerId) {
-        Log.i(TAG, "Requesting coupons for customerId=" + customerId + ", lang=en");
-
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
         api.getMyCoupons(customerId, "en").enqueue(new Callback<MyCouponListResponse>() {
             @Override
             public void onResponse(Call<MyCouponListResponse> call, Response<MyCouponListResponse> response) {
-                Log.i(TAG, "fetchMyCoupons onResponse: HTTP " + response.code());
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, "API Response body: " + new Gson().toJson(response.body()));
                     if (response.body().isSuccess()) {
                         myCoupons.clear();
                         myCoupons.addAll(response.body().getCoupons());
                         adapter.notifyDataSetChanged();
                         Log.i(TAG, "Coupons loaded successfully, count=" + myCoupons.size());
+
+                        if (myCoupons.isEmpty()) {
+                            btnDone.setText("Proceed without coupon");
+                        }
                     } else {
-                        Log.w(TAG, "API returned success=false, body=" + new Gson().toJson(response.body()));
                         Toast.makeText(MyCouponsActivity.this, "No coupons found", Toast.LENGTH_SHORT).show();
+                        btnDone.setText("Proceed without coupon");
                     }
                 } else {
-                    Log.e(TAG, "API call failed, errorBody=" + response.errorBody());
                     Toast.makeText(MyCouponsActivity.this, "Failed to load coupons", Toast.LENGTH_SHORT).show();
+                    btnDone.setText("Proceed without coupon");
                 }
             }
 
             @Override
             public void onFailure(Call<MyCouponListResponse> call, Throwable t) {
-                Log.e(TAG, "fetchMyCoupons onFailure", t);
                 Toast.makeText(MyCouponsActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                btnDone.setText("Proceed without coupon");
             }
         });
     }
@@ -132,18 +143,13 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         int ownedQty = coupon.getQuantity();
         int maxUsable = ownedQty;
 
-        Log.i(TAG, "Preparing to use couponId=" + coupon.getCouponId() + ", ownedQty=" + ownedQty);
-
-        // clamp by per_customer_per_day
         Integer perDayLimit = coupon.getPerCustomerPerDay();
         if (perDayLimit != null && perDayLimit > 0 && maxUsable > perDayLimit) {
-            Log.i(TAG, "Applying per_customer_per_day limit=" + perDayLimit);
             maxUsable = perDayLimit;
         }
 
         if (maxUsable <= 0) {
             Toast.makeText(this, "No coupons available to use", Toast.LENGTH_SHORT).show();
-            Log.w(TAG, "Coupon quantity is 0 for id=" + coupon.getCouponId());
             return;
         }
 
@@ -156,10 +162,8 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                 .setTitle("Select quantity to use")
                 .setItems(options, (dialog, which) -> {
                     int quantity = which + 1;
-                    Log.i(TAG, "User selected quantity=" + quantity + " for couponId=" + coupon.getCouponId());
                     if (!CouponValidator.isCouponValidForCart(coupon, quantity)) {
                         Toast.makeText(this, "Coupon not valid for this cart", Toast.LENGTH_SHORT).show();
-                        Log.w(TAG, "Coupon validation failed for couponId=" + coupon.getCouponId());
                         return;
                     }
                     useCoupon(coupon, position, quantity);
@@ -174,89 +178,35 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             menuItemIds = new ArrayList<>();
         }
 
-        Log.i(TAG, "=== Attempting to use coupon ===");
-        Log.i(TAG, "couponId=" + coupon.getCouponId());
-        Log.i(TAG, "quantity=" + quantity);
-        Log.i(TAG, "orderTotal (cents)=" + orderTotal);
-        Log.i(TAG, "eligibleItemIds=" + menuItemIds);
+        Map<String, Integer> apiCouponQuantities = new HashMap<>();
+        apiCouponQuantities.put("coupon_quantities[" + coupon.getCouponId() + "]", quantity);
 
-        // Build couponQuantities map for Retrofit
-        Map<String, Integer> couponQuantities = new HashMap<>();
-        couponQuantities.put(String.valueOf(coupon.getCouponId()), quantity);
-
-        Log.i(TAG, "Sending couponQuantities=" + new Gson().toJson(couponQuantities));
+        String orderType = CartManager.getOrderType();
 
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.useCoupons(customerId, orderTotal, couponQuantities, menuItemIds)
+        api.useCoupons(customerId, orderTotal, orderType, apiCouponQuantities, menuItemIds)
                 .enqueue(new Callback<GenericResponse>() {
                     @Override
                     public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                        Log.i(TAG, "useCoupons API response received");
-                        if (response.isSuccessful() && response.body() != null) {
-                            Log.i(TAG, "Response body: " + new Gson().toJson(response.body()));
-                            if (response.body().isSuccess()) {
-                                Log.i(TAG, "✅ Coupon applied successfully, couponId=" + coupon.getCouponId());
-
-                                // Set the chosen quantity on the coupon object
-                                coupon.setQuantity(quantity);
-
-                                // Add to the list of selected coupons
-                                selectedCoupons.add(coupon);
-
-                                // Return the full list
-                                Intent result = new Intent();
-                                result.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
-                                setResult(RESULT_OK, result);
-
-                                // Update UI
-                                adapter.decrementCouponQuantity(position, quantity);
-                            } else {
-                                Log.w(TAG, "❌ Coupon application failed: " + response.body().getMessage());
-                                Toast.makeText(MyCouponsActivity.this,
-                                        "Failed to apply coupon: " + response.body().getMessage(),
-                                        Toast.LENGTH_SHORT).show();
-                                reEnableButton(position);
-                            }
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            coupon.setQuantity(quantity);
+                            selectedCoupons.add(coupon);
+                            couponQuantities.put(coupon.getCouponId(), quantity);
+                            adapter.decrementCouponQuantity(position, quantity);
+                            Toast.makeText(MyCouponsActivity.this,
+                                    "Coupon applied. Press Done when finished selecting.",
+                                    Toast.LENGTH_SHORT).show();
                         } else {
-                            Log.e(TAG, "❌ API call failed. HTTP " + response.code());
                             Toast.makeText(MyCouponsActivity.this,
                                     "Failed to apply coupon", Toast.LENGTH_SHORT).show();
-                            reEnableButton(position);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<GenericResponse> call, Throwable t) {
-                        Log.e(TAG, "❌ useCoupons API request failed", t);
                         Toast.makeText(MyCouponsActivity.this,
                                 "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        reEnableButton(position);
                     }
                 });
     }
-
-
-
-
-
-
-
-
-    private void reEnableButton(int position) {
-        Log.d(TAG, "Re-enabling button at position=" + position);
-        RecyclerView.ViewHolder vh = rvMyCoupons.findViewHolderForAdapterPosition(position);
-        if (vh != null) {
-            vh.itemView.findViewById(R.id.btnUseCoupon).setEnabled(true);
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        Log.d(TAG, "Back pressed → returning selected coupons");
-        Intent result = new Intent();
-        result.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
-        setResult(RESULT_OK, result);
-        super.onBackPressed();
-    }
-
 }

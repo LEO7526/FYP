@@ -3,7 +3,6 @@ package com.example.yummyrestaurant.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -16,10 +15,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class OrderConfirmationActivity extends AppCompatActivity {
+
+    private static final String TAG = "OrderConfirmationActivity";
 
     private Button backToHomeBtn;
 
@@ -39,12 +42,20 @@ public class OrderConfirmationActivity extends AppCompatActivity {
         // Retrieve order details
         Intent intent = getIntent();
         String customerId = RoleManager.getUserId();
-        int totalAmount = intent.getIntExtra("totalAmount", 0); // in cents
+        int subtotalAmount = intent.getIntExtra("subtotalAmount", 0);
+        int totalAmount = intent.getIntExtra("totalAmount", 0);
         int itemCount = intent.getIntExtra("itemCount", 0);
         String dishJson = intent.getStringExtra("dishJson");
+        ArrayList<Coupon> selectedCoupons = intent.getParcelableArrayListExtra("selectedCoupons");
+        HashMap<Integer, Integer> couponQuantities =
+                (HashMap<Integer, Integer>) intent.getSerializableExtra("couponQuantities");
 
-        // Full Coupon object passed from TempPaymentActivity
-        Coupon selectedCoupon = intent.getParcelableExtra("selectedCoupon");
+        Log.d(TAG, "Received subtotalAmount=" + subtotalAmount +
+                ", totalAmount=" + totalAmount +
+                ", itemCount=" + itemCount +
+                ", customerId=" + customerId);
+        Log.d(TAG, "selectedCoupons=" + (selectedCoupons != null ? new Gson().toJson(selectedCoupons) : "null"));
+        Log.d(TAG, "couponQuantities=" + (couponQuantities != null ? new Gson().toJson(couponQuantities) : "null"));
 
         // Bind views
         TextView orderSummary = findViewById(R.id.orderSummary);
@@ -53,88 +64,95 @@ public class OrderConfirmationActivity extends AppCompatActivity {
         TextView dishSummary = findViewById(R.id.dishSummary);
         TextView couponDetails = findViewById(R.id.couponDetails);
 
-        // Calculate subtotal/discount/total
-        double subtotal = totalAmount / 100.0; // before discount
-        double discount = 0.0;
+        double subtotal = subtotalAmount / 100.0;
+        double finalTotal = totalAmount / 100.0;
 
-        if (selectedCoupon != null) {
-            String type = selectedCoupon.getDiscountType();
-            if ("percent".equalsIgnoreCase(type)) {
-                // discountValue is percentage (e.g. 10 for 10%)
-                discount = subtotal * (selectedCoupon.getDiscountValue() / 100.0);
-            } else if ("cash".equalsIgnoreCase(type)) {
-                // discountValue is fixed HK$ amount
-                discount = selectedCoupon.getDiscountValue();
-            } else if ("free_item".equalsIgnoreCase(type)) {
-                // free item logic: here just show info, no subtraction
-                discount = 0.0;
-            }
-        }
-
-        double total = subtotal - discount;
-
-        // Fill in summary
         orderSummary.setText("Customer ID: " + customerId +
                 "\nItems: " + itemCount +
-                "\nSubtotal: HK$" + String.format("%.2f", subtotal));
+                "\nSubtotal: HK$" + String.format(Locale.getDefault(), "%.2f", subtotal));
 
-        if (selectedCoupon != null && discount > 0) {
-            // Show discount line
-            String discountText = "Discount: -HK$" + String.format("%.2f", discount);
-            discountText += " (" + selectedCoupon.getTitle() + ")";
-            discountInfo.setText(discountText);
-            discountInfo.setVisibility(View.VISIBLE);
-
-            // Show concise coupon details
+        // Coupon discount breakdown
+        if (selectedCoupons != null && !selectedCoupons.isEmpty()) {
+            StringBuilder discountLines = new StringBuilder();
             StringBuilder details = new StringBuilder();
-            details.append("Coupon: ").append(selectedCoupon.getTitle()).append("\n");
-            if ("percent".equalsIgnoreCase(selectedCoupon.getDiscountType())) {
-                details.append("Discount: ").append((int) selectedCoupon.getDiscountValue()).append("% off");
-            } else if ("cash".equalsIgnoreCase(selectedCoupon.getDiscountType())) {
-                details.append("Discount: HK$")
-                        .append(String.format("%.2f", selectedCoupon.getDiscountValue()));
-            } else if ("free_item".equalsIgnoreCase(selectedCoupon.getDiscountType())) {
-                details.append("Discount: Free ").append(selectedCoupon.getItemCategory());
-            }
-            couponDetails.setText(details.toString());
-            couponDetails.setVisibility(View.VISIBLE);
 
+            for (Coupon c : selectedCoupons) {
+                String title = c.getTitle();
+                String type = c.getDiscountType().toLowerCase(Locale.ROOT);
+                int qty = couponQuantities != null ? couponQuantities.getOrDefault(c.getCouponId(), 1) : 1;
+
+                Log.d(TAG, "Coupon applied: id=" + c.getCouponId() +
+                        ", title=" + title +
+                        ", type=" + type +
+                        ", qty=" + qty +
+                        ", discountValue=" + c.getDiscountValue());
+
+                switch (type) {
+                    case "percent":
+                        discountLines.append("- ")
+                                .append((int) c.getDiscountValue())
+                                .append("% off ×").append(qty)
+                                .append(" (").append(title).append(")\n");
+                        details.append("Coupon: ").append(title)
+                                .append("\nDiscount: ").append((int) c.getDiscountValue())
+                                .append("% off ×").append(qty).append("\n\n");
+                        break;
+                    case "cash":
+                        discountLines.append("- HK$")
+                                .append(String.format(Locale.getDefault(), "%.2f", c.getDiscountValue()))
+                                .append(" ×").append(qty)
+                                .append(" (").append(title).append(")\n");
+                        details.append("Coupon: ").append(title)
+                                .append("\nDiscount: HK$")
+                                .append(String.format(Locale.getDefault(), "%.2f", c.getDiscountValue()))
+                                .append(" ×").append(qty).append("\n\n");
+                        break;
+                    case "free_item":
+                        discountLines.append("- Free ").append(c.getItemCategory())
+                                .append(" ×").append(qty)
+                                .append(" (").append(title).append(")\n");
+                        details.append("Coupon: ").append(title)
+                                .append("\nDiscount: Free ").append(c.getItemCategory())
+                                .append(" ×").append(qty).append("\n\n");
+                        break;
+                }
+            }
+
+            discountInfo.setText(discountLines.toString().trim());
+            discountInfo.setVisibility(TextView.VISIBLE);
+
+            couponDetails.setText(details.toString().trim());
+            couponDetails.setVisibility(TextView.VISIBLE);
         } else {
-            discountInfo.setVisibility(View.GONE);
-            couponDetails.setVisibility(View.GONE);
+            discountInfo.setVisibility(TextView.GONE);
+            couponDetails.setVisibility(TextView.GONE);
         }
 
-        totalInfo.setText("Total: HK$" + String.format("%.2f", total));
+        totalInfo.setText("Total: HK$" + String.format(Locale.getDefault(), "%.2f", finalTotal));
 
-        // Parse and display dish details
+        // Dish breakdown
         List<Map<String, Object>> dishes = new ArrayList<>();
         if (dishJson != null) {
             dishes = new Gson().fromJson(
                     dishJson, new TypeToken<List<Map<String, Object>>>() {}.getType()
             );
 
+            StringBuilder summary = new StringBuilder();
             for (Map<String, Object> dish : dishes) {
                 String name = (String) dish.get("dish_name");
                 int qty = ((Double) dish.get("qty")).intValue();
                 double price = (Double) dish.get("dish_price");
-                Log.d("OrderConfirmation", "Dish: " + name + ", Qty: " + qty + ", Price: HK$" + price);
+                double itemSubtotal = qty * price;
+
+                summary.append("• ").append(name)
+                        .append(" — Qty: ").append(qty)
+                        .append(", Price: HK$").append(String.format(Locale.getDefault(), "%.2f", price))
+                        .append(", Subtotal: HK$").append(String.format(Locale.getDefault(), "%.2f", itemSubtotal))
+                        .append("\n");
+
+                Log.d(TAG, "Dish: " + name + ", Qty: " + qty + ", Price: HK$" + price + ", Subtotal: HK$" + itemSubtotal);
             }
+            dishSummary.setText(summary.toString());
         }
-
-        StringBuilder summary = new StringBuilder();
-        for (Map<String, Object> dish : dishes) {
-            String name = (String) dish.get("dish_name");
-            int qty = ((Double) dish.get("qty")).intValue();
-            double price = (Double) dish.get("dish_price");
-            double itemSubtotal = qty * price;
-
-            summary.append(name)
-                    .append(" • Qty: ").append(qty)
-                    .append(" • Price: HK$").append(String.format("%.2f", price))
-                    .append(" • Subtotal: HK$").append(String.format("%.2f", itemSubtotal))
-                    .append("\n");
-        }
-
-        dishSummary.setText(summary.toString());
     }
 }
