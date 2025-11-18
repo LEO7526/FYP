@@ -31,8 +31,8 @@ public class Coupon implements Parcelable {
     @SerializedName(value = "points_required", alternate = {"requiredPoints"})
     private int pointsRequired;
 
-    @SerializedName("per_customer_per_day")
-    private Integer perCustomerPerDay;
+//    @SerializedName("per_customer_per_day")
+//    private Integer perCustomerPerDay;
 
     @SerializedName("expiry_date")
     private String expiryDate;
@@ -130,8 +130,8 @@ public class Coupon implements Parcelable {
     public List<Integer> getApplicableItems() { return applicableItems; }
     public List<Integer> getApplicableCategories() { return applicableCategories; }
 
-    public void setPerCustomerPerDay(Integer value) { this.perCustomerPerDay = value; }
-    public Integer getPerCustomerPerDay() { return perCustomerPerDay; }
+//    public void setPerCustomerPerDay(Integer value) { this.perCustomerPerDay = value; }
+//    public Integer getPerCustomerPerDay() { return perCustomerPerDay; }
 
     public boolean isValidDineIn() {
         if (rules != null) return rules.isValidDineIn();

@@ -143,11 +143,6 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         int ownedQty = coupon.getQuantity();
         int maxUsable = ownedQty;
 
-        Integer perDayLimit = coupon.getPerCustomerPerDay();
-        if (perDayLimit != null && perDayLimit > 0 && maxUsable > perDayLimit) {
-            maxUsable = perDayLimit;
-        }
-
         if (maxUsable <= 0) {
             Toast.makeText(this, "No coupons available to use", Toast.LENGTH_SHORT).show();
             return;
@@ -170,6 +165,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                 })
                 .show();
     }
+
 
     private void useCoupon(Coupon coupon, int position, int quantity) {
         int orderTotal = getIntent().getIntExtra("order_total", 0);

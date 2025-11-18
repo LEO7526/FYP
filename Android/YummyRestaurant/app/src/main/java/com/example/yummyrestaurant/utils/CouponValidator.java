@@ -141,12 +141,12 @@ public class CouponValidator {
             return false;
         }
 
-        // --- Per-day limit ---
-        Integer perDayLimit = coupon.getPerCustomerPerDay();
-        if (perDayLimit != null && perDayLimit > 0 && requestedQty > perDayLimit) {
-            Log.w(TAG, "Invalid: requested exceeds per_customer_per_day limit");
-            return false;
-        }
+//        // --- Per-day limit ---
+//        Integer perDayLimit = coupon.getPerCustomerPerDay();
+//        if (perDayLimit != null && perDayLimit > 0 && requestedQty > perDayLimit) {
+//            Log.w(TAG, "Invalid: requested exceeds per_customer_per_day limit");
+//            return false;
+//        }
 
         Log.d(TAG, "Coupon validation passed for couponId=" + coupon.getCouponId());
         return true;
