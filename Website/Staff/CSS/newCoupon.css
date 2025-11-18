@@ -1,0 +1,774 @@
+/* 基础样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2, h3 {
+    color: #1a5f7a;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 20px;
+    margin-top: 30px;
+}
+
+h3 {
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* 选项组样式 */
+.option-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 语言标签样式 */
+.language-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.language-tab {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.language-tab.active {
+    background-color: #1a5f7a;
+    color: white;
+}
+
+.language-content {
+    display: none;
+}
+
+.language-content.active {
+    display: block;
+}
+
+/* 适用范围选择区域 */
+.scope-section {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.scope-section.hidden {
+    display: none;
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: #1a5f7a;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0d3b4d;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    margin-left: 10px;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.buttons {
+    margin-top: 30px;
+    text-align: right;
+}
+
+/* 复选框和单选框样式 */
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.checkbox-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .option-group, .checkbox-group, .radio-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .language-tabs {
+        flex-wrap: wrap;
+    }
+
+    .language-tab {
+        flex: 1;
+        text-align: center;
+    }
+}
+/* Coupon specific styles */
+.hidden {
+    display: none !important;
+}
+
+.scope-section {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.selected-items-list, .selected-packages-list {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.selected-item, .selected-package {
+    display: flex;
+    align-items: center;
+    background: #e3f2fd;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #bbdefb;
+    gap: 8px;
+}
+
+.selected-item img, .selected-package img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.btn-remove-item, .btn-remove-package {
+    background: #ff5252;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.dish-item.selected, .package-item.selected {
+    border: 2px solid #4caf50;
+    background: #e8f5e8;
+}
+
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.package-item {
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.package-item img {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.package-item:hover {
+    border-color: #3498db;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+}
+
+.term-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.term-input {
+    flex: 1;
+}
+
+/* 为可选字段添加样式 */
+#min_spend_container,
+#max_discount_container,
+#per_customer_container {
+    margin-top: 8px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    border-left: 3px solid #3498db;
+}
+
+#min_spend_container input,
+#max_discount_container input,
+#per_customer_container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Language tabs for coupon */
+.language-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.language-tab {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.language-tab.active {
+    background-color: #1a5f7a;
+    color: white;
+}
+
+.language-content {
+    display: none;
+}
+
+.language-content.active {
+    display: block;
+}
+
+/* Checkbox and radio groups for coupon */
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.checkbox-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+/* Coupon specific styles */
+.hidden {
+    display: none !important;
+}
+
+.scope-section {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.selected-items-list, .selected-packages-list {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.selected-item, .selected-package {
+    display: flex;
+    align-items: center;
+    background: #e3f2fd;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #bbdefb;
+    gap: 8px;
+}
+
+.selected-item img, .selected-package img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.btn-remove-item, .btn-remove-package {
+    background: #ff5252;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.dish-item.selected, .package-item.selected {
+    border: 2px solid #4caf50;
+    background: #e8f5e8;
+}
+
+.packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.package-item {
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.package-item img {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.package-item:hover {
+    border-color: #3498db;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+}
+
+.term-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.term-input {
+    flex: 1;
+}
+
+.terms-container {
+    margin-bottom: 10px;
+}
+
+/* 为可选字段添加样式 */
+.usage-rule-group {
+    margin-bottom: 15px;
+}
+
+.usage-rule-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+#min_spend_container,
+#max_discount_container,
+#per_customer_container {
+    margin-top: 0;
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    border-left: 3px solid #3498db;
+    min-width: 200px;
+}
+
+#min_spend_container input,
+#max_discount_container input,
+#per_customer_container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Language tabs for coupon */
+.language-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.language-tab {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.language-tab.active {
+    background-color: #1a5f7a;
+    color: white;
+}
+
+.language-content {
+    display: none;
+}
+
+.language-content.active {
+    display: block;
+}
+
+/* Checkbox and radio groups for coupon */
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.checkbox-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+/* 修正 Usage Rules 部分样式 */
+.usage-rule-group {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.usage-rule-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.usage-rule-item .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+    flex-shrink: 0;
+}
+
+.usage-rule-item .checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.usage-rule-item .checkbox-item label {
+    margin-bottom: 0;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+#min_spend_container,
+#max_discount_container,
+#per_customer_container {
+    flex: 1;
+    min-width: 200px;
+    margin-top: 0;
+    padding: 0;
+    background: transparent;
+    border-left: none;
+}
+
+#min_spend_container input,
+#max_discount_container input,
+#per_customer_container input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#min_spend_container input:focus,
+#max_discount_container input:focus,
+#per_customer_container input:focus {
+    border-color: #1a5f7a;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(26, 95, 122, 0.2);
+}
+
+/* Valid For 部分样式修正 */
+.form-group:has(.checkbox-group) {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fafafa;
+    margin-bottom: 20px;
+}
+
+.form-group:has(.checkbox-group) label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 25px;
+    margin-top: 0;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.checkbox-item label {
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+/* 单独复选框样式 */
+.form-group .checkbox-item:not(:has(+ .checkbox-item)) {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 10px;
+}
+
+.form-group .checkbox-item:not(:has(+ .checkbox-item)) input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.form-group .checkbox-item:not(:has(+ .checkbox-item)) label {
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .usage-rule-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .usage-rule-item .checkbox-item {
+        min-width: auto;
+        justify-content: flex-start;
+    }
+
+    #min_spend_container,
+    #max_discount_container,
+    #per_customer_container {
+        min-width: auto;
+    }
+
+    .checkbox-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .checkbox-item {
+        justify-content: flex-start;
+    }
+}
+
+/* 确保隐藏状态正确 */
+.hidden {
+    display: none !important;
+}
+
+/* 为可选字段添加过渡效果 */
+#min_spend_container,
+#max_discount_container,
+#per_customer_container {
+    transition: all 0.3s ease;
+}
+/* 修正 Valid For 部分所有复选框的背景颜色一致 */
+.form-group:has(.checkbox-group) .checkbox-item {
+    background: white !important;
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group:has(.checkbox-group) .checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.form-group:has(.checkbox-group) .checkbox-item label {
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #333;
+}
+
+/* 确保所有 Valid For 的复选框在悬停时有一致的效果 */
+.form-group:has(.checkbox-group) .checkbox-item:hover {
+    border-color: #1a5f7a;
+    background: #f8f9fa !important;
+}
+
+/* 选中的复选框样式 */
+.form-group:has(.checkbox-group) .checkbox-item input[type="checkbox"]:checked + label {
+    color: #1a5f7a;
+    font-weight: 600;
+}
+
+/* 单独复选框样式 - 确保与上面一致 */
+.form-group .checkbox-item:not(:has(+ .checkbox-item)) {
+    background: white !important;
+    border: 1px solid #e0e0e0;
+    padding: 10px 15px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.form-group .checkbox-item:not(:has(+ .checkbox-item)) input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.form-group .checkbox-item:not(:has(+ .checkbox-item)) label {
+    margin-bottom: 0;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 确保所有复选框在选中状态时样式一致 */
+.form-group .checkbox-item input[type="checkbox"]:checked {
+    accent-color: #1a5f7a;
+}
