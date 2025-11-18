@@ -16,8 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $amounts = floatval($input['amounts']);
         $numOfType = count($input['types']);
 
-        $packageQuery = "INSERT INTO menu_package (package_name, num_of_type, amounts) 
-                         VALUES ('$packageName', $numOfType, $amounts)";
+        // Insert with NULL image_url initially
+        $packageQuery = "INSERT INTO menu_package (package_name, num_of_type, package_image_url, amounts) 
+                         VALUES ('$packageName', $numOfType, NULL, $amounts)";
         mysqli_query($conn, $packageQuery);
         $packageId = mysqli_insert_id($conn);
 
@@ -55,7 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         mysqli_commit($conn);
-        echo json_encode(['success' => true, 'message' => 'Package created successfully']);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Package created successfully',
+            'packageId' => $packageId
+        ]);
 
     } catch (Exception $e) {
         mysqli_rollback($conn);

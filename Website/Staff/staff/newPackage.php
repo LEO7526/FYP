@@ -71,6 +71,18 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
             </div>
         </div>
 
+        <!-- Package Image Upload Section -->
+        <div class="section package-image-upload">
+            <div class="section-title">Package Image</div>
+            <div class="form-group">
+                <input type="file" id="packageImage" accept="image/*">
+                <button type="button" id="removeImage" class="btn btn-secondary" style="display: none; margin-top: 10px;">Remove Image</button>
+            </div>
+            <div class="image-preview-container">
+                <img id="imagePreview" class="image-preview" src="" alt="Image Preview">
+            </div>
+        </div>
+
         <div id="typesContainer" class="types-container">
             <!-- Types will be added here dynamically -->
         </div>
@@ -135,6 +147,7 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
 
 <script>
     let currentTypeIndex = 0;
+    let selectedPackageImage = null;
 
     // Initialize with 2 default types
     document.addEventListener('DOMContentLoaded', function() {
@@ -143,6 +156,10 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
 
         // Initialize preset price display
         updatePresetPrice();
+
+        // Initialize image upload
+        document.getElementById('packageImage').addEventListener('change', handleImageUpload);
+        document.getElementById('removeImage').addEventListener('click', removeImage);
     });
 
     // Add new type
@@ -401,8 +418,31 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
         }
     });
 
+    // Image upload functions
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            selectedPackageImage = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                document.getElementById('removeImage').style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removeImage() {
+        selectedPackageImage = null;
+        document.getElementById('packageImage').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('removeImage').style.display = 'none';
+    }
+
     // Form submission
-    document.getElementById('packageForm').addEventListener('submit', function(e) {
+    document.getElementById('packageForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const formData = new FormData(this);
@@ -466,26 +506,137 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
             return;
         }
 
-        // Send data to server
-        $.ajax({
-            url: 'save_package.php',
-            type: 'POST',
-            data: JSON.stringify(packageData),
-            contentType: 'application/json',
-            success: function(response) {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    alert('Package created successfully!');
-                    location.reload();
-                } else {
-                    alert('Error creating package: ' + result.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                alert('Error creating package: ' + error);
+        // Show loading state
+        const submitBtn = document.querySelector('.btn-primary');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.textContent = 'Uploading...';
+        submitBtn.disabled = true;
+
+        try {
+            // Step 1: Create package and get packageId
+            const packageResult = await createPackage(packageData);
+
+            if (!packageResult.success) {
+                throw new Error(packageResult.message);
             }
-        });
+
+            const packageId = packageResult.packageId;
+
+            // Step 2: If there's an image, upload it
+            let imageUrl = 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/package/default.jpg';
+            if (selectedPackageImage) {
+                imageUrl = await uploadPackageImage(packageId);
+            }
+
+            // Step 3: Update package with image URL
+            await updatePackageImage(packageId, imageUrl);
+
+            // Success
+            alert('Package created successfully!');
+            location.reload();
+
+        } catch (error) {
+            alert('Error creating package: ' + error.message);
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
+        }
     });
+
+    // Create package and get packageId
+    function createPackage(packageData) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: 'save_package.php',
+                type: 'POST',
+                data: JSON.stringify(packageData),
+                contentType: 'application/json',
+                success: function(response) {
+                    try {
+                        const result = typeof response === 'string' ? JSON.parse(response) : response;
+                        if (result.success) {
+                            resolve(result);
+                        } else {
+                            reject(new Error(result.message || '未知服务器错误'));
+                        }
+                    } catch (e) {
+                        reject(new Error('服务器返回无效的JSON响应'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    const errorMsg = xhr.responseText ?
+                        (typeof xhr.responseText === 'string' ?
+                            (xhr.responseText.substring(0, 200) + '...') :
+                            '网络错误') :
+                        '发生网络错误';
+                    reject(new Error(`服务器错误 (${xhr.status}): ${errorMsg}`));
+                }
+            });
+        });
+    }
+
+    // Upload package image
+    function uploadPackageImage(packageId) {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append('packageImage', selectedPackageImage);
+            formData.append('packageId', packageId);
+
+            $.ajax({
+                url: 'save_packageImage.php',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    try {
+                        const result = typeof response === 'string' ? JSON.parse(response) : response;
+                        if (result.success) {
+                            resolve(result.imageUrl);
+                        } else {
+                            reject(new Error(result.message || '图片上传失败'));
+                        }
+                    } catch (e) {
+                        reject(new Error('图片上传返回无效的JSON响应'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    const errorMsg = xhr.responseText || '网络错误';
+                    reject(new Error(`图片上传失败 (${xhr.status}): ${errorMsg}`));
+                }
+            });
+        });
+    }
+
+    // Update package image URL
+    function updatePackageImage(packageId, imageUrl) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: 'update_package_image.php',
+                type: 'POST',
+                data: JSON.stringify({
+                    package_id: packageId,
+                    image_url: imageUrl
+                }),
+                contentType: 'application/json',
+                success: function(response) {
+                    try {
+                        const result = typeof response === 'string' ? JSON.parse(response) : response;
+                        if (result.success) {
+                            resolve();
+                        } else {
+                            reject(new Error(result.message || '更新图片URL失败'));
+                        }
+                    } catch (e) {
+                        reject(new Error('更新返回无效的JSON响应'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    const errorMsg = xhr.responseText || '网络错误';
+                    reject(new Error(`更新失败 (${xhr.status}): ${errorMsg}`));
+                }
+            });
+        });
+    }
 
     // Header menu functionality
     document.addEventListener('DOMContentLoaded', function() {

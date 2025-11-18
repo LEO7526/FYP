@@ -686,3 +686,63 @@
         top: -16px;
     }
 }
+
+
+.image-preview-container {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.image-preview {
+    max-width: 300px;
+    max-height: 200px;
+    border: 1px dashed #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+}
+/* Package Image Upload Section */
+.package-image-upload {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #ccc;
+}
+
+.package-image-upload .section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.package-image-upload .form-group {
+    margin-bottom: 15px;
+}
+
+.package-image-upload input[type="file"] {
+    padding: 5px;
+}
+
+.package-image-upload .image-preview-container {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.package-image-upload .image-preview {
+    max-width: 300px;
+    max-height: 200px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+    background: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .package-image-upload .image-preview {
+        max-width: 100%;
+        height: auto;
+    }
+}
