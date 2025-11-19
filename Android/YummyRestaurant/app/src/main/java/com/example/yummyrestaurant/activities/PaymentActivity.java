@@ -200,6 +200,44 @@ public class PaymentActivity extends AppCompatActivity {
             Map<String, Object> item = new HashMap<>();
             item.put("item_id", menuItem.getId());
             item.put("qty", quantity);
+
+            // Add customizations if present
+            if (cartItem.getCustomization() != null) {
+                com.example.yummyrestaurant.models.Customization customization = cartItem.getCustomization();
+                List<Map<String, Object>> customizations = new ArrayList<>();
+
+                Map<String, Object> customObj = new HashMap<>();
+                customObj.put("option_id", 1);
+                customObj.put("option_name", "Spice Level");
+
+                String spiceLevel = customization.getSpiceLevel();
+                if (spiceLevel != null && !spiceLevel.isEmpty()) {
+                    // Single choice customization
+                    List<String> choiceNames = new ArrayList<>();
+                    choiceNames.add(spiceLevel);
+                    customObj.put("choice_names", choiceNames);
+                }
+
+                String notes = customization.getExtraNotes();
+                if (notes != null && !notes.isEmpty()) {
+                    // Text note customization
+                    Map<String, Object> noteCustom = new HashMap<>();
+                    noteCustom.put("option_id", 2);
+                    noteCustom.put("option_name", "Special Requests");
+                    noteCustom.put("text_value", notes);
+                    customizations.add(noteCustom);
+                }
+
+                if (spiceLevel != null && !spiceLevel.isEmpty()) {
+                    customizations.add(customObj);
+                }
+
+                if (!customizations.isEmpty()) {
+                    item.put("customizations", customizations);
+                    Log.d(TAG, "Added " + customizations.size() + " customizations to item");
+                }
+            }
+
             items.add(item);
 
             Map<String, Object> displayItem = new HashMap<>();
@@ -219,8 +257,11 @@ public class PaymentActivity extends AppCompatActivity {
         orderData.put("items", items);
         dishJson = new Gson().toJson(itemsForDisplay);
 
+        orderData.put("total_amount", amount);
+        orderData.put("coupon_id", null);
+
         OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
-        Call<ResponseBody> call = service.saveOrder(orderData);
+        Call<ResponseBody> call = service.saveOrderDirect(orderData);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override

@@ -8,8 +8,8 @@ public class ApiConfig {
     private static final String KEY_API_ENV = "api_environment";
 
     // Define your environments here
-    public static final String BASE_SIMULATOR_URL = "http://10.0.2.2/NewFolder/Database/projectapi/";
-    public static final String BASE_PHONE_URL     = "http://192.168.0.120/NewFolder/Database/projectapi/";
+    public static final String BASE_SIMULATOR_URL = "http://10.0.2.2/newFolder/Database/projectapi/";
+    public static final String BASE_PHONE_URL     = "http://192.168.0.120/newFolder/Database/projectapi/";
 
     // Save environment choice
     public static void setApiEnv(Context context, String env) {

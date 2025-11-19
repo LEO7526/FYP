@@ -1055,3 +1055,215 @@ INSERT INTO `recipes` (`item_id`, `material_id`, `quantity_used`) VALUES
 
 INSERT INTO `recipes` (`item_id`, `material_id`, `quantity_used`) VALUES
 (1, (SELECT mid FROM materials WHERE mname = 'Cucumber'), 0.20);
+
+
+-- ================================================================
+-- 菜品自訂系統表結構 (YummyRestaurant 4.3+)
+-- ================================================================
+
+-- 自訂選項定義表 (每個菜品可以有多個自訂選項)
+CREATE TABLE IF NOT EXISTS item_customization_options (
+    option_id INT NOT NULL AUTO_INCREMENT,
+    item_id INT NOT NULL,
+    option_name VARCHAR(255) NOT NULL,      -- 例如: "Spice Level", "Temperature"
+    option_type ENUM('single_choice','multi_choice','quantity','text_note') NOT NULL DEFAULT 'single_choice',
+    is_required TINYINT(1) NOT NULL DEFAULT 0,  -- 是否必填
+    max_selections INT DEFAULT NULL,         -- 多選時的最大選擇數
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (option_id),
+    FOREIGN KEY (item_id) REFERENCES menu_item(item_id) ON DELETE CASCADE,
+    KEY idx_item_id (item_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 自訂選項的具體選擇項 (例如：辛辣度選項中的 "Mild", "Medium", "Hot")
+CREATE TABLE IF NOT EXISTS customization_option_choices (
+    choice_id INT NOT NULL AUTO_INCREMENT,
+    option_id INT NOT NULL,
+    choice_name VARCHAR(255) NOT NULL,
+    additional_cost DECIMAL(10,2) DEFAULT 0,  -- 例如：加冰需要額外費用
+    display_order INT DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (choice_id),
+    FOREIGN KEY (option_id) REFERENCES item_customization_options(option_id) ON DELETE CASCADE,
+    KEY idx_option_id (option_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 訂單項目的自訂詳情 (保存客戶的實際選擇)
+CREATE TABLE IF NOT EXISTS order_item_customizations (
+    customization_id INT NOT NULL AUTO_INCREMENT,
+    oid INT NOT NULL,                        -- 訂單 ID
+    item_id INT NOT NULL,                    -- 菜品 ID (關聯 order_items)
+    option_id INT NOT NULL,
+    option_name VARCHAR(255) NOT NULL,
+    choice_ids JSON DEFAULT NULL,             -- 多個選擇的 IDs 陣列
+    choice_names JSON DEFAULT NULL,           -- 多個選擇的名稱陣列
+    text_value VARCHAR(500) DEFAULT NULL,    -- 文字備註
+    additional_cost DECIMAL(10,2) DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (customization_id),
+    FOREIGN KEY (oid) REFERENCES orders(oid) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES menu_item(item_id) ON DELETE CASCADE,
+    FOREIGN KEY (option_id) REFERENCES item_customization_options(option_id) ON DELETE CASCADE,
+    KEY idx_order_id (oid),
+    KEY idx_item_id (item_id),
+    KEY idx_option_id (option_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ================================================================
+-- 示例數據：為不同菜品類別添加自訂選項
+-- ================================================================
+
+-- 開胃菜自訂選項：辛辣度 (Spice Level) - 為口水雞 (item_id=3)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (3, 'Spice Level', 'single_choice', 1, 1);
+
+SET @spice_option_id_3 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@spice_option_id_3, 'Mild', 0, 1),
+(@spice_option_id_3, 'Medium', 0, 2),
+(@spice_option_id_3, 'Hot', 0, 3),
+(@spice_option_id_3, 'Numbing', 0, 4);
+
+-- 主菜自訂選項：辛辣度 (Spice Level) - 為麻婆豆腐 (item_id=6)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (6, 'Spice Level', 'single_choice', 1, 1);
+
+SET @spice_option_id_6 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@spice_option_id_6, 'Mild', 0, 1),
+(@spice_option_id_6, 'Medium', 0, 2),
+(@spice_option_id_6, 'Hot', 0, 3),
+(@spice_option_id_6, 'Numbing', 0, 4);
+
+-- 主菜自訂選項：辛辣度 (Spice Level) - 為擔擔麵 (item_id=7)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (7, 'Spice Level', 'single_choice', 1, 1);
+
+SET @spice_option_id_7 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@spice_option_id_7, 'Mild', 0, 1),
+(@spice_option_id_7, 'Medium', 0, 2),
+(@spice_option_id_7, 'Hot', 0, 3),
+(@spice_option_id_7, 'Numbing', 0, 4);
+
+-- 主菜自訂選項：辛辣度 (Spice Level) - 為水煮牛肉 (item_id=9)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (9, 'Spice Level', 'single_choice', 1, 1);
+
+SET @spice_option_id_9 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@spice_option_id_9, 'Mild', 0, 1),
+(@spice_option_id_9, 'Medium', 0, 2),
+(@spice_option_id_9, 'Hot', 0, 3),
+(@spice_option_id_9, 'Numbing', 0, 4);
+
+-- 主菜自訂選項：特殊要求 (Special Requests) - 為所有辣菜
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (3, 'Special Requests', 'text_note', 0, NULL);
+
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (6, 'Special Requests', 'text_note', 0, NULL);
+
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (7, 'Special Requests', 'text_note', 0, NULL);
+
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (9, 'Special Requests', 'text_note', 0, NULL);
+
+-- 飲料自訂選項：溫度 (Temperature) - 為熱奶茶 (item_id=14)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (14, 'Temperature', 'single_choice', 1, 1);
+
+SET @temp_option_id_14 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@temp_option_id_14, 'Very Hot', 0, 1),
+(@temp_option_id_14, 'Hot', 0, 2),
+(@temp_option_id_14, 'Warm', 0, 3);
+
+-- 飲料自訂選項：溫度 (Temperature) - 為熱檸檬茶 (item_id=16)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (16, 'Temperature', 'single_choice', 1, 1);
+
+SET @temp_option_id_16 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@temp_option_id_16, 'Very Hot', 0, 1),
+(@temp_option_id_16, 'Hot', 0, 2),
+(@temp_option_id_16, 'Warm', 0, 3);
+
+-- 飲料自訂選項：糖度 (Sugar Level) - 為冷奶茶 (item_id=17)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (17, 'Sugar Level', 'single_choice', 0, 1);
+
+SET @sugar_option_id_17 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@sugar_option_id_17, 'Full Sugar', 0, 1),
+(@sugar_option_id_17, 'Less Sugar', 0, 2),
+(@sugar_option_id_17, 'Light Sugar', 0, 3),
+(@sugar_option_id_17, 'No Sugar', 0, 4);
+
+-- 飲料自訂選項：加冰 (Ice Level) - 為冷奶茶 (item_id=17)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (17, 'Ice Level', 'single_choice', 0, 1);
+
+SET @ice_option_id_17 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@ice_option_id_17, 'No Ice', 0, 1),
+(@ice_option_id_17, 'Light Ice', 0, 2),
+(@ice_option_id_17, 'Normal Ice', 0, 3),
+(@ice_option_id_17, 'Extra Ice', 0, 4);
+
+-- 飲料自訂選項：糖度 (Sugar Level) - 為凍檸茶 (item_id=18)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (18, 'Sugar Level', 'single_choice', 0, 1);
+
+SET @sugar_option_id_18 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@sugar_option_id_18, 'Full Sugar', 0, 1),
+(@sugar_option_id_18, 'Less Sugar', 0, 2),
+(@sugar_option_id_18, 'Light Sugar', 0, 3),
+(@sugar_option_id_18, 'No Sugar', 0, 4);
+
+-- 飲料自訂選項：加冰 (Ice Level) - 為凍檸茶 (item_id=18)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (18, 'Ice Level', 'single_choice', 0, 1);
+
+SET @ice_option_id_18 = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@ice_option_id_18, 'No Ice', 0, 1),
+(@ice_option_id_18, 'Light Ice', 0, 2),
+(@ice_option_id_18, 'Normal Ice', 0, 3),
+(@ice_option_id_18, 'Extra Ice', 0, 4);
+
+-- 甜品自訂選項：配菜 (Toppings) - 為四川糯米糕 (item_id=11)
+INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
+VALUES (11, 'Toppings', 'multi_choice', 0, 3);
+
+SET @topping_option_id = LAST_INSERT_ID();
+
+INSERT INTO customization_option_choices (option_id, choice_name, additional_cost, display_order)
+VALUES 
+(@topping_option_id, 'Extra Sesame', 0.50, 1),
+(@topping_option_id, 'Peanuts', 0.50, 2),
+(@topping_option_id, 'Honey Drizzle', 1.00, 3),
+(@topping_option_id, 'Chocolate Chips', 1.00, 4);

@@ -136,6 +136,40 @@ public class TempPaymentActivity extends AppCompatActivity {
             Map<String, Object> item = new HashMap<>();
             item.put("item_id", menuItem.getId());
             item.put("qty", qty);
+
+            // Add customizations if present
+            if (cartItem.getCustomization() != null) {
+                com.example.yummyrestaurant.models.Customization customization = cartItem.getCustomization();
+                List<Map<String, Object>> customizations = new ArrayList<>();
+
+                // Spice Level customization
+                String spiceLevel = customization.getSpiceLevel();
+                if (spiceLevel != null && !spiceLevel.isEmpty()) {
+                    Map<String, Object> spiceCustom = new HashMap<>();
+                    spiceCustom.put("option_id", 1);
+                    spiceCustom.put("option_name", "Spice Level");
+                    List<String> choiceNames = new ArrayList<>();
+                    choiceNames.add(spiceLevel);
+                    spiceCustom.put("choice_names", choiceNames);
+                    customizations.add(spiceCustom);
+                }
+
+                // Special Requests customization (text note)
+                String notes = customization.getExtraNotes();
+                if (notes != null && !notes.isEmpty()) {
+                    Map<String, Object> noteCustom = new HashMap<>();
+                    noteCustom.put("option_id", 2);
+                    noteCustom.put("option_name", "Special Requests");
+                    noteCustom.put("text_value", notes);
+                    customizations.add(noteCustom);
+                }
+
+                if (!customizations.isEmpty()) {
+                    item.put("customizations", customizations);
+                    Log.d(TAG, "Added " + customizations.size() + " customizations to item");
+                }
+            }
+
             items.add(item);
 
             Map<String, Object> display = new HashMap<>();

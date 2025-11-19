@@ -23,6 +23,7 @@ import com.example.yummyrestaurant.utils.CartManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class DishDetailActivity extends BaseCustomerActivity {
 
@@ -80,15 +81,19 @@ public class DishDetailActivity extends BaseCustomerActivity {
 
                     TextView tagView = new TextView(this);
                     tagView.setText("#" + tag);
-                    tagView.setTextSize(14);
+                    tagView.setTextSize(12);
                     tagView.setTextColor(Color.parseColor("#333333"));
-                    tagView.setBackgroundResource(R.drawable.tag_background);
+                    tagView.setPadding(12, 6, 12, 6);
+                    
+                    // 根據 tag 名稱設置顏色
+                    String bgColor = getTagColor(tag);
+                    tagView.setBackgroundColor(Color.parseColor(bgColor));
 
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                     );
-                    params.setMargins(8, 8, 8, 8);
+                    params.setMargins(6, 4, 6, 4);
                     tagView.setLayoutParams(params);
 
                     tagsContainer.addView(tagView);
@@ -190,5 +195,45 @@ public class DishDetailActivity extends BaseCustomerActivity {
                 );
             }
         });
+    }
+
+    /**
+     * 根據 tag 名稱返回顏色代碼
+     * 對應資料庫中定義的 tag 顏色
+     */
+    private String getTagColor(String tagName) {
+        Map<String, String> tagColors = new java.util.HashMap<>();
+        
+        // 辣度/風味標籤
+        tagColors.put("spicy", "#FFCDD2");      // 紅色淺色
+        tagColors.put("numbing", "#E1BEE7");    // 紫色淺色
+        tagColors.put("sour", "#C8E6C9");       // 綠色淺色
+        tagColors.put("sweet", "#FFE0B2");      // 橙色淺色
+        tagColors.put("salty", "#B2DFDB");      // 青色淺色
+        
+        // 食材標籤
+        tagColors.put("chicken", "#FFECB3");    // 黃色淺色
+        tagColors.put("beef", "#D1C4E9");       // 靛色淺色
+        tagColors.put("pork", "#F8BBD0");       // 粉紅色淺色
+        tagColors.put("seafood", "#B3E5FC");    // 淺藍色
+        tagColors.put("vegetarian", "#C5E1A5"); // 淺綠色
+        
+        // 飲品標籤
+        tagColors.put("milk", "#FFE0B2");       // 橙色淺色
+        tagColors.put("tea", "#BBDEFB");        // 藍色淺色
+        tagColors.put("cold", "#E0F2F1");       // 青綠色淺色
+        tagColors.put("hot", "#FFCCBC");        // 深橙色淺色
+        tagColors.put("refreshing", "#B2DFDB"); // 青色淺色
+        
+        // 特性標籤
+        tagColors.put("classic", "#DCEDC8");    // 淺綠色
+        tagColors.put("traditional", "#F0F4C3"); // 檸檬色
+        tagColors.put("glutinous", "#D1C4E9");  // 靛色淺色
+        tagColors.put("lemon", "#FFF9C4");      // 淺黃色
+        tagColors.put("soda", "#CFD8DC");       // 藍灰色淺色
+        tagColors.put("grape", "#CE93D8");      // 紫色
+        
+        // 返回 tag 對應的顏色，如果不存在則返回默認顏色
+        return tagColors.getOrDefault(tagName.toLowerCase(), "#E8EAED");
     }
 }

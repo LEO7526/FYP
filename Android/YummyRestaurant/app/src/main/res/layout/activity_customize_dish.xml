@@ -1,60 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/customizeLayout"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="top">
+    android:layout_height="match_parent">
 
-    <!-- Title -->
-    <TextView
-        android:id="@+id/customizeTitle"
+    <!-- Loading Spinner -->
+    <ProgressBar
+        android:id="@+id/loadingSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Customize Your Dish"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
-    <!-- Spice Level Dropdown -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Choose Spice Level:"
-        android:textSize="16sp"
-        android:layout_marginBottom="8dp" />
-
-    <Spinner
-        android:id="@+id/spiceSpinner"
+    <!-- Main Content -->
+    <LinearLayout
+        android:id="@+id/customizeLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:spinnerMode="dropdown"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="top">
 
-    <!-- Extra Notes -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Special Instructions:"
-        android:textSize="16sp"
-        android:layout_marginBottom="8dp" />
+        <!-- Title -->
+        <TextView
+            android:id="@+id/customizeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Customize Your Dish"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
 
-    <EditText
-        android:id="@+id/notesEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="e.g. No onions, extra sauce"
-        android:inputType="text"
-        android:layout_marginBottom="24dp" />
+        <!-- Spice Level Dropdown -->
+        <TextView
+            android:id="@+id/optionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose an option:"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
 
-    <!-- Save Button -->
-    <Button
-        android:id="@+id/saveCustomizationBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save &amp; Add To Cart"
-        android:backgroundTint="@color/colorSecondary"
-        android:textColor="@android:color/white" />
+        <Spinner
+            android:id="@+id/spiceSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"
+            android:layout_marginBottom="16dp" />
 
-</LinearLayout>
+        <!-- Extra Notes -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Special Instructions:"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/notesEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="e.g. No onions, extra sauce"
+            android:inputType="text"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/saveCustomizationBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save &amp; Add To Cart"
+            android:backgroundTint="@color/colorSecondary"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+</FrameLayout>

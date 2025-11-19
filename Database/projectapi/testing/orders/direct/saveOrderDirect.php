@@ -1,4 +1,14 @@
 <?php
+/**
+ * 保存訂單（支持菜品自訂選項）
+ * 
+ * 支持功能：
+ * - 不同菜品類別的自訂選項（主菜、飲料、甜品）
+ * - 自訂選項驗證和保存
+ * - 優惠券系統
+ * - 積分系統
+ * - 餐桌訂單管理
+ */
 header('Content-Type: application/json; charset=utf-8');
 
 // Connect to MySQL
@@ -58,9 +68,10 @@ try {
     $order_id = $stmt->insert_id;
     $stmt->close();
 
-    // Insert each item
+    // Insert each item with customizations
     $itemStmt = $conn->prepare("INSERT INTO order_items (oid, item_id, qty) VALUES (?, ?, ?)");
     if (!$itemStmt) throw new Exception("Prepare failed for order_items: " . $conn->error);
+    
     foreach ($items as $item) {
         $item_id = intval($item['item_id']);
         $qty     = intval($item['qty']);
@@ -68,6 +79,11 @@ try {
             $itemStmt->bind_param("iii", $order_id, $item_id, $qty);
             if (!$itemStmt->execute()) {
                 error_log("Execute failed for item: item_id=$item_id, qty=$qty — " . $itemStmt->error);
+            } else {
+                // Save customizations for this item
+                if (isset($item['customizations']) && is_array($item['customizations'])) {
+                    saveItemCustomizations($conn, $order_id, $item_id, $item['customizations']);
+                }
             }
         }
     }
@@ -187,6 +203,7 @@ try {
 } catch (Exception $e) {
     $conn->rollback();
     http_response_code(500);
+    error_log("Order save failed: " . $e->getMessage());
     echo json_encode([
         "success" => false,
         "error"   => $e->getMessage()
@@ -194,4 +211,64 @@ try {
 }
 
 $conn->close();
+
+/**
+ * 保存菜品項目的自訂選項
+ * 
+ * @param mysqli $conn 數據庫連接
+ * @param int $order_id 訂單 ID
+ * @param int $item_id 菜品 ID
+ * @param array $customizations 自訂選項陣列
+ */
+function saveItemCustomizations(&$conn, $order_id, $item_id, $customizations) {
+    if (!is_array($customizations) || empty($customizations)) {
+        error_log("No customizations to save for item_id=$item_id");
+        return; // 沒有自訂選項
+    }
+
+    $stmt = $conn->prepare(
+        "INSERT INTO order_item_customizations 
+         (oid, item_id, option_id, option_name, choice_ids, choice_names, text_value, additional_cost)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    );
+    
+    if (!$stmt) {
+        error_log("Prepare failed for customizations: " . $conn->error);
+        return;
+    }
+
+    foreach ($customizations as $custom) {
+        $option_id = isset($custom['option_id']) ? intval($custom['option_id']) : 0;
+        $option_name = isset($custom['option_name']) ? $custom['option_name'] : '';
+        
+        // Handle choice_ids and choice_names - convert arrays to JSON
+        $choice_ids = null;
+        $choice_names = null;
+        
+        if (isset($custom['choice_ids']) && is_array($custom['choice_ids']) && !empty($custom['choice_ids'])) {
+            $choice_ids = json_encode($custom['choice_ids']);
+        }
+        
+        if (isset($custom['choice_names']) && is_array($custom['choice_names']) && !empty($custom['choice_names'])) {
+            $choice_names = json_encode($custom['choice_names']);
+        }
+        
+        $text_value = isset($custom['text_value']) ? $custom['text_value'] : null;
+        $additional_cost = isset($custom['additional_cost']) ? floatval($custom['additional_cost']) : 0;
+
+        // Type: i=int, s=string, d=double
+        // Parameters: order_id, item_id, option_id, option_name, choice_ids, choice_names, text_value, additional_cost
+        $stmt->bind_param("iiissssd", $order_id, $item_id, $option_id, $option_name, 
+                         $choice_ids, $choice_names, $text_value, $additional_cost);
+        
+        if (!$stmt->execute()) {
+            error_log("Execute failed for customization: item_id=$item_id, option_id=$option_id — " . $stmt->error);
+        }
+    }
+
+    $stmt->close();
+    error_log("Saved " . count($customizations) . " customizations for item_id=$item_id");
+}
+
 ?>
+
