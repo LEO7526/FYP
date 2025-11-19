@@ -157,10 +157,18 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                 .setTitle("Select quantity to use")
                 .setItems(options, (dialog, which) -> {
                     int quantity = which + 1;
-                    if (!CouponValidator.isCouponValidForCart(coupon, quantity)) {
-                        Toast.makeText(this, "Coupon not valid for this cart", Toast.LENGTH_SHORT).show();
+                    
+                    // 客戶端驗證
+                    CouponValidator.ValidationResult validationResult = 
+                        CouponValidator.validateCouponWithReason(coupon, quantity);
+                    
+                    if (!validationResult.isValid) {
+                        String message = validationResult.reason.isEmpty() ? 
+                            "Coupon not valid for this cart" : validationResult.reason;
+                        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                         return;
                     }
+                    
                     useCoupon(coupon, position, quantity);
                 })
                 .show();
@@ -174,6 +182,19 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             menuItemIds = new ArrayList<>();
         }
 
+        // 防止重複使用檢查 - 檢查是否已經在此次結帳中使用過該優惠券
+        if (couponQuantities.containsKey(coupon.getCouponId())) {
+            int alreadyUsedQty = couponQuantities.get(coupon.getCouponId());
+            int remainingQty = coupon.getQuantity() - alreadyUsedQty;
+            
+            if (remainingQty < quantity) {
+                Toast.makeText(this, 
+                    "You can only use " + remainingQty + " more of this coupon", 
+                    Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         Map<String, Integer> apiCouponQuantities = new HashMap<>();
         apiCouponQuantities.put("coupon_quantities[" + coupon.getCouponId() + "]", quantity);
 
@@ -185,16 +206,24 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                     @Override
                     public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            coupon.setQuantity(quantity);
+                            // 更新已使用的數量
+                            int previousQty = couponQuantities.getOrDefault(coupon.getCouponId(), 0);
+                            couponQuantities.put(coupon.getCouponId(), previousQty + quantity);
+                            
+                            // 添加到已選擇列表（用於返回結果）
                             selectedCoupons.add(coupon);
-                            couponQuantities.put(coupon.getCouponId(), quantity);
+                            
+                            // 從列表中移除或更新數量
                             adapter.decrementCouponQuantity(position, quantity);
+                            
                             Toast.makeText(MyCouponsActivity.this,
-                                    "Coupon applied. Press Done when finished selecting.",
+                                    "Coupon applied (" + quantity + "). Press Done when finished selecting.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
+                            String errorMsg = response.body() != null ? 
+                                response.body().getMessage() : "Failed to apply coupon";
                             Toast.makeText(MyCouponsActivity.this,
-                                    "Failed to apply coupon", Toast.LENGTH_SHORT).show();
+                                    errorMsg, Toast.LENGTH_SHORT).show();
                         }
                     }
 

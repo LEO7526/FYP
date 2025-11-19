@@ -68,6 +68,19 @@
             android:textColor="@android:color/holo_red_dark"
             android:layout_marginTop="8dp" />
 
+        <!-- Disable Reason (shown when coupon is not applicable) -->
+        <TextView
+            android:id="@+id/tvMyCouponReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ℹ️ Minimum order value of HK$100 required"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:textColor="@android:color/holo_orange_dark"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            android:padding="8dp"
+            android:background="@android:color/transparent" />
+
         <!-- Use Coupon Button -->
         <Button
             android:id="@+id/btnUseCoupon"

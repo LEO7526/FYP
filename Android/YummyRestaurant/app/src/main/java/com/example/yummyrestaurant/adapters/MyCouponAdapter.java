@@ -102,7 +102,7 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
             holder.tvExpiry.setText("No expiry");
         }
 
-        // --- Validation ---
+        // --- Validation with reason ---
         boolean valid = fromCart && CouponValidator.isCouponValidForCart(coupon, 1);
 
         if (!valid) {
@@ -110,11 +110,23 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
             holder.btnUse.setText("Not Applicable");
             holder.btnUse.setAlpha(0.5f);
             holder.itemView.setAlpha(0.7f);
+            
+            // Get and display the reason why coupon is disabled
+            CouponValidator.ValidationResult result = 
+                CouponValidator.validateCouponWithReason(coupon, 1);
+            if (!result.reason.isEmpty()) {
+                holder.tvReason.setVisibility(View.VISIBLE);
+                holder.tvReason.setText("ℹ️ " + result.reason);
+                holder.tvReason.setTextColor(0xFFFF9800); // Orange warning color
+            } else {
+                holder.tvReason.setVisibility(View.GONE);
+            }
         } else {
             holder.btnUse.setEnabled(true);
             holder.btnUse.setText("Use Coupon");
             holder.btnUse.setAlpha(1f);
             holder.itemView.setAlpha(1f);
+            holder.tvReason.setVisibility(View.GONE);
 
             holder.btnUse.setOnClickListener(v -> {
                 holder.btnUse.setEnabled(false);
@@ -135,7 +147,7 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
     }
 
     static class MyCouponViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvDescription, tvDiscount, tvReward, tvExpiry;
+        TextView tvTitle, tvDescription, tvDiscount, tvReward, tvExpiry, tvReason;
         Button btnUse;
 
         public MyCouponViewHolder(@NonNull View itemView) {
@@ -146,6 +158,9 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
             tvExpiry = itemView.findViewById(R.id.tvMyCouponExpiry);
             btnUse = itemView.findViewById(R.id.btnUseCoupon);
             tvReward = itemView.findViewById(R.id.tvMyCouponReward);
+            
+            // New field for displaying disable reason
+            tvReason = itemView.findViewById(R.id.tvMyCouponReason);
         }
     }
 }
