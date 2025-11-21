@@ -1005,13 +1005,17 @@ CREATE TABLE coupon_applicable_package (
 
 COMMIT;
 
-CREATE TABLE `materials` (
-    `mid` INT AUTO_INCREMENT PRIMARY KEY,
-    `mname` VARCHAR(255) NOT NULL UNIQUE,
-    `mqty` DECIMAL(10, 2) NOT NULL COMMENT '目前庫存量',
-    `munit` VARCHAR(50) NOT NULL COMMENT '單位 (例如: kg, g, bottle, block)',
-    `mreorderqty` DECIMAL(10, 2) NOT NULL COMMENT '安全庫存量/再訂購點',
-    `last_updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE `consumption_history` (
+    `log_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `mid` INT NOT NULL,
+    `log_date` DATE NOT NULL,
+    `log_type` ENUM('Deduction', 'Forecast', 'Reorder') NOT NULL COMMENT '操作类型: 扣减, 预测, 补货',
+    `details` TEXT NOT NULL COMMENT '详细说明或备注',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_consumption_material`
+        FOREIGN KEY (`mid`) REFERENCES `materials`(`mid`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `recipes` (
