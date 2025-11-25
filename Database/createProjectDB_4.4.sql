@@ -1013,18 +1013,20 @@ CREATE TABLE materials (
   mname VARCHAR(255) NOT NULL,       -- e.g. "Chicken", "Soy Sauce"
   mcategory VARCHAR(100) DEFAULT NULL, -- e.g. "Meat", "Vegetable", "Condiment"
   unit VARCHAR(50) DEFAULT NULL,     -- e.g. "grams", "ml", "pieces"
+  mqty DECIMAL(10,2) DEFAULT NULL,   -- quantity available
   PRIMARY KEY (mid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Materials
-INSERT INTO materials (mname, mcategory, unit) VALUES
-('Cucumber', 'Vegetable', 'grams'),
-('Chicken', 'Meat', 'grams'),
-('Soy Sauce', 'Condiment', 'ml'),
-('Chili Oil', 'Condiment', 'ml'),
-('Rice', 'Grain', 'grams'),
-('Beef', 'Meat', 'grams'),
-('Tofu', 'Protein', 'grams');
+
+-- Materials sample data with quantities
+INSERT INTO materials (mname, mcategory, unit, mqty) VALUES
+('Cucumber', 'Vegetable', 'grams', 500.00),
+('Chicken', 'Meat', 'grams', 2000.00),
+('Soy Sauce', 'Condiment', 'ml', 1000.00),
+('Chili Oil', 'Condiment', 'ml', 500.00),
+('Rice', 'Grain', 'grams', 10000.00),
+('Beef', 'Meat', 'grams', 1500.00),
+('Tofu', 'Protein', 'grams', 800.00);
 
 
 CREATE TABLE `consumption_history` (
@@ -1040,28 +1042,20 @@ CREATE TABLE `consumption_history` (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `recipes` (
-    `recipe_id` INT AUTO_INCREMENT PRIMARY KEY,
-    `item_id` INT NOT NULL COMMENT '關聯到 menu_item 表的菜色ID',
-    `material_id` INT NOT NULL COMMENT '關聯到 materials 表的原料ID',
-    `quantity_used` DECIMAL(10, 2) NOT NULL COMMENT '製作一份此菜色所需的原料數量',
-    FOREIGN KEY (`item_id`) REFERENCES `menu_item`(`item_id`),
-    FOREIGN KEY (`material_id`) REFERENCES `materials`(`mid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Junction table linking dishes to ingredients
+DROP TABLE IF EXISTS recipe_materials;
 
--- Many-to-many relationship between menu items and materials
 CREATE TABLE recipe_materials (
   id INT NOT NULL AUTO_INCREMENT,
   item_id INT NOT NULL,   -- menu_item
   mid INT NOT NULL,       -- materials
-  quantity DECIMAL(10,2) DEFAULT NULL, -- e.g. 200.00 grams
+  quantity DECIMAL(10,2) DEFAULT NULL, -- required amount per dish
   PRIMARY KEY (id),
   FOREIGN KEY (item_id) REFERENCES menu_item(item_id) ON DELETE CASCADE,
   FOREIGN KEY (mid) REFERENCES materials(mid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
--- Link to menu items
+-- Example mappings
 -- Mouthwatering Chicken (item_id=3)
 INSERT INTO recipe_materials (item_id, mid, quantity) VALUES
 (3, 2, 200),  -- Chicken
@@ -1073,40 +1067,6 @@ INSERT INTO recipe_materials (item_id, mid, quantity) VALUES
 (6, 7, 150),  -- Tofu
 (6, 6, 50),   -- Beef
 (6, 3, 15);   -- Soy Sauce
-
-
-
-CREATE TABLE `consumption_history` (
-    `log_id` INT AUTO_INCREMENT PRIMARY KEY,
-    `log_date` DATE NOT NULL,
-    `log_type` ENUM('Deduction', 'Forecast', 'Reorder') NOT NULL COMMENT '紀錄類型: 每日扣減, 預測報告, 自動補貨',
-    `details` TEXT NOT NULL COMMENT '儲存詳細的文字描述',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
-INSERT INTO `materials` (`mname`, `mqty`, `munit`, `mreorderqty`) VALUES
-('Pork', 50.00, 'kg', 10.00),
-('Tofu', 100.00, 'block', 20.00),
-('Chili Bean Paste', 20.00, 'kg', 5.00),
-('Sichuan Peppercorns', 5.00, 'kg', 1.00),
-('Chicken', 40.00, 'kg', 10.00),
-('Cucumber', 30.00, 'kg', 5.00),
-('Beef', 30.00, 'kg', 8.00);
-
-
-
-INSERT INTO `recipes` (`item_id`, `material_id`, `quantity_used`) VALUES
-(6, (SELECT mid FROM materials WHERE mname = 'Tofu'), 1.00),
-(6, (SELECT mid FROM materials WHERE mname = 'Pork'), 0.15),
-(6, (SELECT mid FROM materials WHERE mname = 'Chili Bean Paste'), 0.02);
-
-INSERT INTO `recipes` (`item_id`, `material_id`, `quantity_used`) VALUES
-(3, (SELECT mid FROM materials WHERE mname = 'Chicken'), 0.25),
-(3, (SELECT mid FROM materials WHERE mname = 'Sichuan Peppercorns'), 0.01);
-
-INSERT INTO `recipes` (`item_id`, `material_id`, `quantity_used`) VALUES
-(1, (SELECT mid FROM materials WHERE mname = 'Cucumber'), 0.20);
 
 
 -- ================================================================
