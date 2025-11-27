@@ -48,6 +48,7 @@ CREATE TABLE customer (
   cbirthday CHAR(5) DEFAULT NULL,   -- store as MM-DD only
   crole VARCHAR(45) NOT NULL DEFAULT 'customer',
   cimageurl VARCHAR(255) NULL,
+  coupon_point INT NOT NULL DEFAULT 0,
   PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -178,6 +179,7 @@ oid INT NOT NULL AUTO_INCREMENT, -- Order ID
 odate DATETIME NOT NULL, -- Order date
 cid INT NOT NULL, -- Customer ID
 ostatus INT NOT NULL, -- Order status
+note TEXT DEFAULT NULL, -- Order note
 PRIMARY KEY (oid),
 CONSTRAINT fk_orders_cid FOREIGN KEY (cid) REFERENCES customer(cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -365,38 +367,10 @@ VALUES (3, 'whole_order', 'cash', 50.00, 300.00, 1, 1, 1);
 INSERT INTO coupon_rules (coupon_id, applies_to, discount_type, discount_value, birthday_only, valid_dine_in, valid_takeaway, valid_delivery)
 VALUES (4, 'category', 'free_item', 1, 1, 1, 1, 1);
 
--- Per-customer coupon points balance
-DROP TABLE IF EXISTS coupon_point;
-CREATE TABLE coupon_point (
-  cp_id INT NOT NULL AUTO_INCREMENT,
-  cid INT NOT NULL,
-  points INT NOT NULL DEFAULT 0,
-  last_changed_by VARCHAR(255) DEFAULT NULL,
-  reason VARCHAR(255) DEFAULT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  expire_at DATETIME DEFAULT NULL,
-  is_active TINYINT(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (cp_id),
-  CONSTRAINT uq_coupon_point_cid UNIQUE (cid),
-  CONSTRAINT fk_coupon_point_cid FOREIGN KEY (cid) REFERENCES customer(cid)
-    ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Ensure every customer has a coupon_point row
-INSERT INTO coupon_point (cid, points)
-SELECT cid, 0 FROM customer
-WHERE cid NOT IN (SELECT cid FROM coupon_point);
-
-UPDATE coupon_point
-SET points = 1000
-WHERE cid = 1;
-
 -- History of all point changes (earn/redeem), now with coupon_id
 DROP TABLE IF EXISTS coupon_point_history;
 CREATE TABLE coupon_point_history (
   cph_id INT NOT NULL AUTO_INCREMENT,
-  cp_id INT NOT NULL,
   cid INT NOT NULL,
   coupon_id INT NULL,  -- direct link to coupons
   delta INT NOT NULL,
@@ -405,10 +379,8 @@ CREATE TABLE coupon_point_history (
   note VARCHAR(255) DEFAULT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (cph_id),
-  KEY idx_cph_cp_id (cp_id),
   KEY idx_cph_cid (cid),
   KEY idx_cph_coupon_id (coupon_id),
-  CONSTRAINT fk_cph_cp_id FOREIGN KEY (cp_id) REFERENCES coupon_point(cp_id) ON DELETE CASCADE,
   CONSTRAINT fk_cph_cid FOREIGN KEY (cid) REFERENCES customer(cid) ON DELETE CASCADE,
   CONSTRAINT fk_cph_coupon FOREIGN KEY (coupon_id) REFERENCES coupons(coupon_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -751,6 +723,7 @@ CREATE TABLE order_items (
     oid INT NOT NULL,
     item_id INT NOT NULL,
     qty INT NOT NULL DEFAULT 1,
+    note TEXT DEFAULT NULL,
     PRIMARY KEY (oid, item_id),
     FOREIGN KEY (oid) REFERENCES orders(oid),
     FOREIGN KEY (item_id) REFERENCES menu_item(item_id)
@@ -1003,6 +976,19 @@ CREATE TABLE coupon_applicable_package (
     FOREIGN KEY (package_id) REFERENCES menu_package(package_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Create order_packages table (to list packages of an order)
+DROP TABLE IF EXISTS order_packages;
+CREATE TABLE order_packages (
+    op_id INT NOT NULL AUTO_INCREMENT,
+    oid INT NOT NULL,
+    package_id INT NOT NULL,
+    qty INT NOT NULL DEFAULT 1,
+    note TEXT DEFAULT NULL,
+    PRIMARY KEY (op_id),
+    FOREIGN KEY (oid) REFERENCES orders(oid) ON DELETE CASCADE,
+    FOREIGN KEY (package_id) REFERENCES menu_package(package_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 COMMIT;
 
 -- Table structure for table material
@@ -1078,11 +1064,7 @@ CREATE TABLE IF NOT EXISTS item_customization_options (
     option_id INT NOT NULL AUTO_INCREMENT,
     item_id INT NOT NULL,
     option_name VARCHAR(255) NOT NULL,      -- 例如: "Spice Level", "Temperature"
-    option_type ENUM('single_choice','multi_choice','quantity','text_note') NOT NULL DEFAULT 'single_choice',
-    is_required TINYINT(1) NOT NULL DEFAULT 0,  -- 是否必填
-    max_selections INT DEFAULT NULL,         -- 多選時的最大選擇數
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    max_selections INT DEFAULT NOT NULL,         -- 多選時的最大選擇數
     PRIMARY KEY (option_id),
     FOREIGN KEY (item_id) REFERENCES menu_item(item_id) ON DELETE CASCADE,
     KEY idx_item_id (item_id)
@@ -1127,8 +1109,8 @@ CREATE TABLE IF NOT EXISTS order_item_customizations (
 -- ================================================================
 
 -- 開胃菜自訂選項：辛辣度 (Spice Level) - 為口水雞 (item_id=3)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (3, 'Spice Level', 'single_choice', 1, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (3, 'Spice Level', 1);
 
 SET @spice_option_id_3 = LAST_INSERT_ID();
 
@@ -1140,8 +1122,8 @@ VALUES
 (@spice_option_id_3, 'Numbing', 0, 4);
 
 -- 主菜自訂選項：辛辣度 (Spice Level) - 為麻婆豆腐 (item_id=6)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (6, 'Spice Level', 'single_choice', 1, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (6, 'Spice Level', 1);
 
 SET @spice_option_id_6 = LAST_INSERT_ID();
 
@@ -1153,8 +1135,8 @@ VALUES
 (@spice_option_id_6, 'Numbing', 0, 4);
 
 -- 主菜自訂選項：辛辣度 (Spice Level) - 為擔擔麵 (item_id=7)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (7, 'Spice Level', 'single_choice', 1, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (7, 'Spice Level', 1);
 
 SET @spice_option_id_7 = LAST_INSERT_ID();
 
@@ -1166,8 +1148,8 @@ VALUES
 (@spice_option_id_7, 'Numbing', 0, 4);
 
 -- 主菜自訂選項：辛辣度 (Spice Level) - 為水煮牛肉 (item_id=9)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (9, 'Spice Level', 'single_choice', 1, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (9, 'Spice Level', 1);
 
 SET @spice_option_id_9 = LAST_INSERT_ID();
 
@@ -1179,21 +1161,21 @@ VALUES
 (@spice_option_id_9, 'Numbing', 0, 4);
 
 -- 主菜自訂選項：特殊要求 (Special Requests) - 為所有辣菜
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (3, 'Special Requests', 'text_note', 0, NULL);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (3, 'Special Requests', 1);
 
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (6, 'Special Requests', 'text_note', 0, NULL);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (6, 'Special Requests', 1);
 
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (7, 'Special Requests', 'text_note', 0, NULL);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (7, 'Special Requests', 1);
 
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (9, 'Special Requests', 'text_note', 0, NULL);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (9, 'Special Requests', 1);
 
 -- 飲料自訂選項：溫度 (Temperature) - 為熱奶茶 (item_id=14)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (14, 'Temperature', 'single_choice', 1, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (14, 'Temperature', 1);
 
 SET @temp_option_id_14 = LAST_INSERT_ID();
 
@@ -1204,8 +1186,8 @@ VALUES
 (@temp_option_id_14, 'Warm', 0, 3);
 
 -- 飲料自訂選項：溫度 (Temperature) - 為熱檸檬茶 (item_id=16)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (16, 'Temperature', 'single_choice', 1, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (16, 'Temperature', 1);
 
 SET @temp_option_id_16 = LAST_INSERT_ID();
 
@@ -1216,8 +1198,8 @@ VALUES
 (@temp_option_id_16, 'Warm', 0, 3);
 
 -- 飲料自訂選項：糖度 (Sugar Level) - 為冷奶茶 (item_id=17)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (17, 'Sugar Level', 'single_choice', 0, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (17, 'Sugar Level', 1);
 
 SET @sugar_option_id_17 = LAST_INSERT_ID();
 
@@ -1229,8 +1211,8 @@ VALUES
 (@sugar_option_id_17, 'No Sugar', 0, 4);
 
 -- 飲料自訂選項：加冰 (Ice Level) - 為冷奶茶 (item_id=17)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (17, 'Ice Level', 'single_choice', 0, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (17, 'Ice Level', 1);
 
 SET @ice_option_id_17 = LAST_INSERT_ID();
 
@@ -1242,8 +1224,8 @@ VALUES
 (@ice_option_id_17, 'Extra Ice', 0, 4);
 
 -- 飲料自訂選項：糖度 (Sugar Level) - 為凍檸茶 (item_id=18)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (18, 'Sugar Level', 'single_choice', 0, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (18, 'Sugar Level', 1);
 
 SET @sugar_option_id_18 = LAST_INSERT_ID();
 
@@ -1255,8 +1237,8 @@ VALUES
 (@sugar_option_id_18, 'No Sugar', 0, 4);
 
 -- 飲料自訂選項：加冰 (Ice Level) - 為凍檸茶 (item_id=18)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (18, 'Ice Level', 'single_choice', 0, 1);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (18, 'Ice Level', 1);
 
 SET @ice_option_id_18 = LAST_INSERT_ID();
 
@@ -1268,8 +1250,8 @@ VALUES
 (@ice_option_id_18, 'Extra Ice', 0, 4);
 
 -- 甜品自訂選項：配菜 (Toppings) - 為四川糯米糕 (item_id=11)
-INSERT INTO item_customization_options (item_id, option_name, option_type, is_required, max_selections)
-VALUES (11, 'Toppings', 'multi_choice', 0, 3);
+INSERT INTO item_customization_options (item_id, option_name, max_selections)
+VALUES (11, 'Toppings', 3);
 
 SET @topping_option_id = LAST_INSERT_ID();
 
