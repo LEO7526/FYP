@@ -1064,7 +1064,7 @@ CREATE TABLE IF NOT EXISTS item_customization_options (
     option_id INT NOT NULL AUTO_INCREMENT,
     item_id INT NOT NULL,
     option_name VARCHAR(255) NOT NULL,      -- 例如: "Spice Level", "Temperature"
-    max_selections INT DEFAULT NOT NULL,         -- 多選時的最大選擇數
+    max_selections INT NOT NULL,         -- 多選時的最大選擇數
     PRIMARY KEY (option_id),
     FOREIGN KEY (item_id) REFERENCES menu_item(item_id) ON DELETE CASCADE,
     KEY idx_item_id (item_id)
