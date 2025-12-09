@@ -1,7 +1,6 @@
 <?php
-$token = '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';
+$token = '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';
 
-// 正确的API端点 - 获取Image目录内容
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/LEO7526/FYP/contents/Image');
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -12,15 +11,15 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-echo "HTTP状态码: $httpCode\n";
-echo "响应:\n$response\n";
+echo "HTTP: $httpCode\n";
+echo "response:\n$response\n";
 
 if ($httpCode === 200) {
-    echo "\n✅ 令牌有效，有权限访问仓库\n";
+    echo "\n✅ efficient\n";
 } elseif ($httpCode === 401) {
-    echo "\n❌ 令牌无效或已过期\n";
+    echo "\n❌ Invalid or expired\n";
 } elseif ($httpCode === 403) {
-    echo "\n❌ 令牌权限不足或达到速率限制\n";
+    echo "\n❌ Insufficient permissions or rate limit reached\n";
 } elseif ($httpCode === 404) {
-    echo "\n❌ 仓库不存在或路径错误\n";
+    echo "\n❌ Does not exist or path is incorrect\n";
 }

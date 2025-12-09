@@ -134,12 +134,13 @@ if (!empty($salesData['category_sales'])) {
         <a href="staffIndex.php">Yummy Restaurant</a>
     </div>
     <nav class="main-nav">
-        <a href="MenuManagement.html" class="nav-button insert-items">Menu Management</a>
+        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
         <a href="Inventory.php" class="nav-button insert-materials">Inventory</a>
         <a href="bookingList.php" class="nav-button order-list">Reservations</a>
         <a href="SalesReport.php" class="nav-button report">Sales Reports</a>
         <a href="PurchaseReturn.php" class="nav-button delete">Purchase & Return</a>
     </nav>
+
     <div class="user-actions">
         <a href="staffProfile.php" class="profile-btn">Profile</a>
         <a href="../logout.php" class="logout-btn">Log out</a>

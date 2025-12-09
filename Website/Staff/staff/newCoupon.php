@@ -175,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="staffIndex.php">Yummy Restaurant</a>
     </div>
     <nav class="main-nav">
-        <a href="MenuManagement.html" class="nav-button insert-items">Menu Management</a>
+        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
         <a href="Inventory.php" class="nav-button insert-materials">Inventory</a>
         <a href="bookingList.php" class="nav-button order-list">Reservations</a>
         <a href="SalesReport.php" class="nav-button report">Sales Reports</a>

@@ -89,20 +89,24 @@ check_staff_auth();// Verify staff authentication status
 </head>
 <body>
 <header>
+    <div class="hamburger-menu" id="hamburgerMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
     <div class="logo">
         <a href="staffIndex.php">Yummy Restaurant</a>
     </div>
-
     <nav class="main-nav">
-        <a href="colorPicker.html" class="nav-button insert-items">Menu Management</a>
+        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
         <a href="Inventory.php" class="nav-button insert-materials">Inventory</a>
-        <a href="ReservationList.php" class="nav-button order-list">Reservations</a>
+        <a href="bookingList.php" class="nav-button order-list">Reservations</a>
         <a href="SalesReport.php" class="nav-button report">Sales Reports</a>
         <a href="PurchaseReturn.php" class="nav-button delete">Purchase & Return</a>
     </nav>
 
     <div class="user-actions">
-        <a href="staffProfile.php">Profile</a>
+        <a href="staffProfile.php" class="profile-btn">Profile</a>
         <a href="../logout.php" class="logout-btn">Log out</a>
     </div>
 </header>

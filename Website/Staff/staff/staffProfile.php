@@ -37,20 +37,24 @@ $conn->close();
 </head>
 <body>
 <header>
+    <div class="hamburger-menu" id="hamburgerMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
     <div class="logo">
         <a href="staffIndex.php">Yummy Restaurant</a>
     </div>
-
     <nav class="main-nav">
-        <a href="colorPicker.html" class="nav-button insert-items">Menu Management</a>
+        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
         <a href="Inventory.php" class="nav-button insert-materials">Inventory</a>
-        <a href="ReservationList.php" class="nav-button order-list">Reservations</a>
+        <a href="bookingList.php" class="nav-button order-list">Reservations</a>
         <a href="SalesReport.php" class="nav-button report">Sales Reports</a>
         <a href="PurchaseReturn.php" class="nav-button delete">Purchase & Return</a>
     </nav>
 
     <div class="user-actions">
-        <a href="staffProfile.php">Profile</a>
+        <a href="staffProfile.php" class="profile-btn">Profile</a>
         <a href="../logout.php" class="logout-btn">Log out</a>
     </div>
 </header>
@@ -82,5 +86,55 @@ $conn->close();
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const hamburger = document.getElementById('hamburgerMenu');
+        const mainNav = document.querySelector('.main-nav');
+        const userActions = document.querySelector('.user-actions');
+
+        hamburger.addEventListener('click', function() {
+            hamburger.classList.toggle('active');
+            mainNav.classList.toggle('active');
+            // 防止背景滚动
+            document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
+        });
+
+        // 点击菜单项后关闭菜单
+        document.querySelectorAll('.nav-button').forEach(button => {
+            button.addEventListener('click', function() {
+                hamburger.classList.remove('active');
+                mainNav.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // 点击用户操作链接后关闭菜单
+        document.querySelectorAll('.user-actions a').forEach(link => {
+            link.addEventListener('click', function() {
+                hamburger.classList.remove('active');
+                mainNav.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // 点击菜单外部区域关闭菜单
+        document.addEventListener('click', function(e) {
+            if (!hamburger.contains(e.target) && !mainNav.contains(e.target) && !userActions.contains(e.target)) {
+                hamburger.classList.remove('active');
+                mainNav.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // ESC键关闭菜单
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mainNav.classList.contains('active')) {
+                hamburger.classList.remove('active');
+                mainNav.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+</script>
 </body>
 </html>

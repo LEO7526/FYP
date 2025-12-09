@@ -56,11 +56,7 @@ if ($uploadedFile['size'] > 5 * 1024 * 1024) {
 try {
     // Generate filename: use packageId if available, otherwise use uniqid
     $fileExtension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-    if ($packageId) {
-        $fileName = 'package_' . $packageId . '.' . $fileExtension;
-    } else {
-        $fileName = 'package_' . uniqid() . '_' . time() . '.' . $fileExtension;
-    }
+    $fileName = uniqid() . '.' . $fileExtension;
     $filePathInRepo = 'Image/package/' . $fileName;
 
     // Read file content and encode as base64
