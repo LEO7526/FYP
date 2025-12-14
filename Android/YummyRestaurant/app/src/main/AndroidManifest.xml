@@ -48,6 +48,12 @@
         <activity
             android:name=".activities.BuildSetMenuActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.BookingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ConfirmBookingActivity"
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"

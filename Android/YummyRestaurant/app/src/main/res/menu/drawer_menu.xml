@@ -9,6 +9,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/nav_booking"
+        android:title="Make a Reservation"
+        android:icon="@drawable/ic_booking"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/nav_settings"
         android:title="Settings"
         android:icon="@drawable/ic_settings"
