@@ -20,7 +20,7 @@ if (empty($date) || empty($time) || $pnum <= 0) {
     exit();
 }
 
-/
+// Calculate time range for booking overlap check
 $startTime = date('H:i:s', strtotime($time . ' -2 hours'));
 $endTime = date('H:i:s', strtotime($time . ' +2 hours'));
 
@@ -44,7 +44,7 @@ if (count($booked_tids) > 0) {
     $types = "i" . str_repeat('i', count($booked_tids));
     $params = array_merge([$pnum], $booked_tids);
 } else {
-    /
+    // No booked tables
     $types = "i";
     $params = [$pnum];
 }
