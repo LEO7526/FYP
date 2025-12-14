@@ -78,8 +78,19 @@ public class BookingActivity extends AppCompatActivity {
         String time = buttonSelectTime.getText().toString();
         String pnum = editTextNumberOfPeople.getText().toString();
 
-        if (pnum.isEmpty() || Integer.parseInt(pnum) <= 0) {
+        if (pnum.isEmpty()) {
             Toast.makeText(this, "Please enter a valid number of people.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            int numPeople = Integer.parseInt(pnum);
+            if (numPeople <= 0) {
+                Toast.makeText(this, "Please enter a valid number of people.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Please enter a valid number.", Toast.LENGTH_SHORT).show();
             return;
         }
 
