@@ -70,8 +70,13 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.TableViewHol
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         // Update selection state
-                        notifyItemChanged(selectedPosition);
+                        int previousPosition = selectedPosition;
                         selectedPosition = position;
+                        
+                        // Only notify if there was a previously selected item
+                        if (previousPosition != -1) {
+                            notifyItemChanged(previousPosition);
+                        }
                         notifyItemChanged(selectedPosition);
 
                         listener.onItemClick(tableList.get(position));
