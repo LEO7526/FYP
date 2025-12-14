@@ -191,6 +191,11 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
 
             if (id == R.id.nav_settings) {
                 startActivity(new Intent(this, SettingsActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            } else if (id == R.id.nav_booking) {
+                startActivity(new Intent(this, BookingActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
             } else if (id == R.id.nav_logout) {
                 if (!isLoggedIn) {
@@ -208,9 +213,11 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                         .show();
+                drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
             } else if (id == R.id.nav_home) {
                 startActivity(new Intent(this, CustomerHomeActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
             }
 
