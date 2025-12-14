@@ -109,11 +109,13 @@ public class ConfirmBookingActivity extends AppCompatActivity {
         }
 
         new Thread(() -> {
+            HttpURLConnection conn = null;
+            OutputStream os = null;
             try {
                 String baseUrl = ApiConfig.getBaseUrl(this);
                 String urlString = baseUrl + "create_booking.php";
                 URL url = new URL(urlString);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
                 conn.setDoOutput(true);
@@ -133,10 +135,9 @@ public class ConfirmBookingActivity extends AppCompatActivity {
                 bookingJson.put("purpose", purpose);
                 bookingJson.put("remark", remark);
 
-                try (OutputStream os = conn.getOutputStream()) {
-                    byte[] input = bookingJson.toString().getBytes("utf-8");
-                    os.write(input, 0, input.length);
-                }
+                os = conn.getOutputStream();
+                byte[] input = bookingJson.toString().getBytes("utf-8");
+                os.write(input, 0, input.length);
 
                 int responseCode = conn.getResponseCode();
 
@@ -152,6 +153,13 @@ public class ConfirmBookingActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
                 runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            } finally {
+                try {
+                    if (os != null) os.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (conn != null) conn.disconnect();
             }
         }).start();
     }

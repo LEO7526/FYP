@@ -95,22 +95,22 @@ public class BookingActivity extends AppCompatActivity {
         }
 
         new Thread(() -> {
+            HttpURLConnection conn = null;
+            BufferedReader reader = null;
             try {
                 String baseUrl = ApiConfig.getBaseUrl(this);
                 String urlString = String.format("%sget_available_tables.php?date=%s&time=%s&pnum=%s",
                         baseUrl, date, time, pnum);
                 URL url = new URL(urlString);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
                 StringBuilder response = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
                 }
-                reader.close();
-                conn.disconnect();
 
                 String availableTablesJson = response.toString();
                 Log.d("BookingActivity", "API Response: " + availableTablesJson);
@@ -131,6 +131,13 @@ public class BookingActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
                 runOnUiThread(() -> Toast.makeText(BookingActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            } finally {
+                try {
+                    if (reader != null) reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (conn != null) conn.disconnect();
             }
         }).start();
     }
