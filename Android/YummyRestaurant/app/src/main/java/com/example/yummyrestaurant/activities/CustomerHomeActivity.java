@@ -1,5 +1,6 @@
 package com.example.yummyrestaurant.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,14 +9,22 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.utils.RoleManager;
+import com.google.android.material.navigation.NavigationView;
 
 public class CustomerHomeActivity extends BaseCustomerActivity {
 
     private ImageView imageView;
     private LinearLayout dotsContainer;
     private ImageButton btnPrev, btnNext;
+    private DrawerLayout drawerLayout;
 
     private int[] images = {
             R.drawable.img1,
@@ -44,6 +53,7 @@ public class CustomerHomeActivity extends BaseCustomerActivity {
         setContentView(R.layout.activity_customer_home);
 
         setupBottomFunctionBar();
+        setupNavigationDrawer();
 
         imageView = findViewById(R.id.myImageView);
         dotsContainer = findViewById(R.id.dotsContainer);
@@ -96,6 +106,63 @@ public class CustomerHomeActivity extends BaseCustomerActivity {
             // Resume auto-slideshow
             paused = false;
             handler.postDelayed(runnable, 3000);
+        });
+    }
+
+    private void setupNavigationDrawer() {
+        drawerLayout = findViewById(R.id.drawerLayout);
+        NavigationView navigationView = findViewById(R.id.navigationView);
+        ImageView menuIcon = findViewById(R.id.menuIcon);
+
+        // Open drawer when menu icon is clicked
+        menuIcon.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            boolean isLoggedIn = RoleManager.getUserId() != null && !RoleManager.getUserId().isEmpty();
+
+            // Allow nav_settings even if not logged in
+            if (!isLoggedIn && id != R.id.nav_settings && id != R.id.nav_home) {
+                Toast.makeText(this, "Please log in to access this feature.", Toast.LENGTH_SHORT).show();
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return false;
+            }
+
+            if (id == R.id.nav_home) {
+                // Already on home, just close drawer
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            } else if (id == R.id.nav_booking) {
+                startActivity(new Intent(this, BookingActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            } else if (id == R.id.nav_settings) {
+                startActivity(new Intent(this, SettingsActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            } else if (id == R.id.nav_logout) {
+                if (!isLoggedIn) {
+                    Toast.makeText(this, "You are not logged in.", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                new AlertDialog.Builder(this)
+                        .setTitle("Confirm Logout")
+                        .setMessage("Are you sure you want to log out?")
+                        .setPositiveButton("Logout", (dialog, which) -> {
+                            RoleManager.clearUserData();
+                            startActivity(new Intent(this, BrowseMenuActivity.class));
+                            finish();
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .show();
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return false;
         });
     }
 
