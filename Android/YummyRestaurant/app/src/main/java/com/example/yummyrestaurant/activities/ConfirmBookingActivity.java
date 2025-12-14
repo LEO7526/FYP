@@ -124,7 +124,12 @@ public class ConfirmBookingActivity extends AppCompatActivity {
                 bookingJson.put("tid", selectedTable.getTid());
                 bookingJson.put("bdate", bookingDate);
                 bookingJson.put("btime", bookingTime);
-                bookingJson.put("pnum", Integer.parseInt(numPeople));
+                try {
+                    bookingJson.put("pnum", Integer.parseInt(numPeople));
+                } catch (NumberFormatException e) {
+                    runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, "Invalid number of people.", Toast.LENGTH_LONG).show());
+                    return;
+                }
                 bookingJson.put("purpose", purpose);
                 bookingJson.put("remark", remark);
 
