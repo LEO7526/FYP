@@ -19,6 +19,7 @@ if ($date && $time && $guests) {
         SELECT tid FROM booking 
         WHERE CONCAT(bdate, ' ', btime) < ? 
         AND ADDTIME(CONCAT(bdate, ' ', btime), '01:30:00') > ?
+        AND status != 0
     ");
     $stmt->execute([$endStr, $startStr]);
     $bookedTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -27,16 +28,18 @@ if ($date && $time && $guests) {
     if ($guests > 0 && $guests <= 2) {
         $stmt = $pdo->prepare("SELECT tid FROM seatingchart WHERE capacity = 2");
         $stmt->execute();
+        $validTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
     } elseif ($guests >= 3 && $guests <= 4) {
         $stmt = $pdo->prepare("SELECT tid FROM seatingchart WHERE capacity = 4");
         $stmt->execute();
+        $validTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
     } elseif ($guests >= 5) {
         $stmt = $pdo->prepare("SELECT tid FROM seatingchart WHERE capacity = 8");
         $stmt->execute();
+        $validTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
     } else {
         $validTables = [];
     }
-    $validTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 
     $availableTables = array_diff($validTables, $bookedTables);
