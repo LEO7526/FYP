@@ -7,7 +7,7 @@ $time = $_POST['time'] ?? '';
 $guests = is_numeric($_POST['guests'] ?? '') ? (int)$_POST['guests'] : 0;
 
 if ($date && $time && $guests) {
-    $stmt = $pdo->prepare("SELECT tid FROM booking WHERE bdate = ? AND btime BETWEEN DATE_SUB(?, INTERVAL 90 MINUTE) AND DATE_ADD(?, INTERVAL 90 MINUTE)");
+    $stmt = $pdo->prepare("SELECT tid FROM booking WHERE bdate = ? AND btime BETWEEN DATE_SUB(?, INTERVAL 90 MINUTE) AND DATE_ADD(?, INTERVAL 90 MINUTE) AND status != 0");
     $stmt->execute([$date, $time, $time]);
     $booked = $stmt->fetchAll(PDO::FETCH_COLUMN);
 

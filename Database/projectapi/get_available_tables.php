@@ -24,7 +24,7 @@ if (empty($date) || empty($time) || $pnum <= 0) {
 $startTime = date('H:i:s', strtotime($time . ' -2 hours'));
 $endTime = date('H:i:s', strtotime($time . ' +2 hours'));
 
-$sql_booked = "SELECT tid FROM booking WHERE bdate = ? AND btime BETWEEN ? AND ?";
+$sql_booked = "SELECT tid FROM booking WHERE bdate = ? AND btime BETWEEN ? AND ? AND status != 0";
 $stmt_booked = $conn->prepare($sql_booked);
 $stmt_booked->bind_param("sss", $date, $startTime, $endTime);
 $stmt_booked->execute();
