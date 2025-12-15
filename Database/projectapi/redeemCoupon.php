@@ -101,10 +101,19 @@ try {
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    if (!$row) throw new Exception("Customer not found");
-
-    $cp_id = $row['cp_id'];
-    $current_points = intval($row['points']);
+    
+    // Initialize customer with 0 points if not found
+    if (!$row) {
+        $stmt = $conn->prepare("INSERT INTO coupon_point (cid, points) VALUES (?, 0)");
+        $stmt->bind_param("i", $cid);
+        $stmt->execute();
+        $cp_id = $stmt->insert_id;
+        $stmt->close();
+        $current_points = 0;
+    } else {
+        $cp_id = $row['cp_id'];
+        $current_points = intval($row['points']);
+    }
     if ($total_cost > 0 && $current_points < $total_cost) {
         throw new Exception("Not enough points");
     }
