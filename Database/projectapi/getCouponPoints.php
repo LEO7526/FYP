@@ -27,7 +27,8 @@ if ($row = $result->fetch_assoc()) {
 } else {
     $stmt->close();
     // Customer not found in coupon_point table - initialize with 0 points
-    $insertStmt = $conn->prepare("INSERT INTO coupon_point (cid, points) VALUES (?, 0)");
+    // Using INSERT IGNORE to handle concurrent requests gracefully
+    $insertStmt = $conn->prepare("INSERT IGNORE INTO coupon_point (cid, points) VALUES (?, 0)");
     $insertStmt->bind_param("i", $cid);
     if ($insertStmt->execute()) {
         echo json_encode([

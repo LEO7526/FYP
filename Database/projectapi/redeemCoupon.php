@@ -103,12 +103,21 @@ try {
     $stmt->close();
     
     // Initialize customer with 0 points if not found
+    // Using INSERT IGNORE to handle concurrent requests gracefully
     if (!$row) {
-        $stmt = $conn->prepare("INSERT INTO coupon_point (cid, points) VALUES (?, 0)");
+        $stmt = $conn->prepare("INSERT IGNORE INTO coupon_point (cid, points) VALUES (?, 0)");
         $stmt->bind_param("i", $cid);
         $stmt->execute();
-        $cp_id = $stmt->insert_id;
         $stmt->close();
+        
+        // Re-fetch to get cp_id (in case INSERT IGNORE skipped due to race condition)
+        $stmt = $conn->prepare("SELECT cp_id, points FROM coupon_point WHERE cid=?");
+        $stmt->bind_param("i", $cid);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        $cp_id = $row['cp_id'];
         $current_points = 0;
     } else {
         $cp_id = $row['cp_id'];
