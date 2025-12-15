@@ -30,44 +30,111 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
 
-        <!-- Spice Level Dropdown -->
-        <TextView
-            android:id="@+id/optionLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Choose an option:"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+        <!-- Scrollable Options Container -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <Spinner
-            android:id="@+id/spiceSpinner"
+            <LinearLayout
+                android:id="@+id/optionsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </ScrollView>
+
+        <!-- Price Summary Section -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:spinnerMode="dropdown"
-            android:layout_marginBottom="16dp" />
+            android:orientation="vertical"
+            android:background="@android:color/darker_gray"
+            android:padding="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp">
 
-        <!-- Extra Notes -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Special Instructions:"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
 
-        <EditText
-            android:id="@+id/notesEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="e.g. No onions, extra sauce"
-            android:inputType="text"
-            android:layout_marginBottom="24dp" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Base Price:"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/basePriceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₹0"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Add-ons:"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/addonsCostText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+₹0"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/white"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Total:"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/totalPriceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₹0"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_green_dark" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <!-- Save Button -->
         <Button
             android:id="@+id/saveCustomizationBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save &amp; Add To Cart"
+            android:text="Add To Cart"
             android:backgroundTint="@color/colorSecondary"
             android:textColor="@android:color/white" />
 

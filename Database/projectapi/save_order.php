@@ -54,6 +54,7 @@ $stmt->close();
 foreach ($items as $item) {
     $item_id = $item['item_id'] ?? null;
     $qty = $item['qty'] ?? null;
+    $customizations = $item['customization'] ?? null;  // ✅ 新增：提取自訂信息
 
     if (!$item_id || !$qty) {
         error_log("Skipping invalid item: " . json_encode($item));
@@ -73,11 +74,88 @@ foreach ($items as $item) {
 
     if (!$itemStmt->execute()) {
         error_log("Execute failed for item: item_id=$item_id, qty=$qty — " . $itemStmt->error);
-    } else {
-        error_log("Item saved: order_id=$order_id, item_id=$item_id, qty=$qty");
+        $itemStmt->close();
+        continue;
     }
 
+    $oiid = $itemStmt->insert_id;  // ✅ 新增：獲取order_item_id
+    error_log("Item saved: order_id=$order_id, item_id=$item_id, qty=$qty, oiid=$oiid");
     $itemStmt->close();
+
+    // ✅ 新增：保存自訂詳情到order_item_customizations
+    if ($customizations && is_array($customizations)) {
+        if (!empty($customizations['customization_details'])) {
+            foreach ($customizations['customization_details'] as $custom) {
+                $option_id = intval($custom['option_id'] ?? 0);
+                $option_name = $custom['option_name'] ?? '';
+                $choice_names = '';
+                $text_value = $custom['text_value'] ?? '';
+                $additional_cost = floatval($custom['additional_cost'] ?? 0);
+
+                // 處理selectedChoices陣列
+                if (!empty($custom['selected_choices']) && is_array($custom['selected_choices'])) {
+                    $choice_names = implode(',', $custom['selected_choices']);
+                }
+
+                // 只有當有選擇或文本時才保存
+                if (!empty($choice_names) || !empty($text_value) || $additional_cost > 0) {
+                    $customStmt = $conn->prepare("
+                        INSERT INTO order_item_customizations 
+                        (oid, item_id, oiid, option_id, option_name, choice_names, text_value, additional_cost)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ");
+
+                    if (!$customStmt) {
+                        error_log("Prepare failed for customization: " . $conn->error);
+                        continue;
+                    }
+
+                    $customStmt->bind_param("iiiissd", 
+                        $order_id, $item_id, $oiid, $option_id, 
+                        $option_name, $choice_names, $text_value, $additional_cost
+                    );
+
+                    if (!$customStmt->execute()) {
+                        error_log("Execute failed for customization: " . $customStmt->error);
+                    } else {
+                        error_log("Customization saved: item=$item_id, option=$option_name, choices=$choice_names, cost=$additional_cost");
+                    }
+
+                    $customStmt->close();
+                }
+            }
+        }
+
+        // ✅ 新增：保存特殊要求
+        if (!empty($customizations['extra_notes'])) {
+            $extra_notes = $customizations['extra_notes'];
+            $notesStmt = $conn->prepare("
+                INSERT INTO order_item_customizations 
+                (oid, item_id, oiid, option_id, option_name, text_value)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+
+            if (!$notesStmt) {
+                error_log("Prepare failed for notes: " . $conn->error);
+            } else {
+                $notes_option_id = 999;  // 特殊要求使用特殊ID
+                $notes_option_name = "Special Instructions";
+
+                $notesStmt->bind_param("iiiiss", 
+                    $order_id, $item_id, $oiid, $notes_option_id, 
+                    $notes_option_name, $extra_notes
+                );
+
+                if (!$notesStmt->execute()) {
+                    error_log("Execute failed for notes: " . $notesStmt->error);
+                } else {
+                    error_log("Special instructions saved: item=$item_id, notes=$extra_notes");
+                }
+
+                $notesStmt->close();
+            }
+        }
+    }
 }
 
 // Staff-specific logic for table orders

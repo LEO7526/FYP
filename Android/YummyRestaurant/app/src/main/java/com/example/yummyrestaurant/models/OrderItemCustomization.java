@@ -2,7 +2,9 @@ package com.example.yummyrestaurant.models;
 
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,8 +20,9 @@ public class OrderItemCustomization implements Serializable {
     @SerializedName("option_name")
     private String optionName;
 
+    // ✅ 改變：支持List<String>以簡化序列化
     @SerializedName("selected_choices")
-    private Map<Integer, String> selectedChoices; // choiceId -> choiceName
+    private List<String> selectedChoices;
 
     @SerializedName("text_value")
     private String textValue; // 用於文字備註
@@ -28,13 +31,13 @@ public class OrderItemCustomization implements Serializable {
     private double additionalCost; // 此自訂選項的額外費用
 
     public OrderItemCustomization() {
-        this.selectedChoices = new HashMap<>();
+        this.selectedChoices = new ArrayList<>();
     }
 
     public OrderItemCustomization(int optionId, String optionName) {
         this.optionId = optionId;
         this.optionName = optionName;
-        this.selectedChoices = new HashMap<>();
+        this.selectedChoices = new ArrayList<>();
         this.additionalCost = 0;
     }
 
@@ -45,8 +48,9 @@ public class OrderItemCustomization implements Serializable {
     public String getOptionName() { return optionName; }
     public void setOptionName(String optionName) { this.optionName = optionName; }
 
-    public Map<Integer, String> getSelectedChoices() { return selectedChoices; }
-    public void setSelectedChoices(Map<Integer, String> selectedChoices) {
+    // ✅ 改變：使用List<String>
+    public List<String> getSelectedChoices() { return selectedChoices; }
+    public void setSelectedChoices(List<String> selectedChoices) {
         this.selectedChoices = selectedChoices;
     }
 
@@ -57,13 +61,13 @@ public class OrderItemCustomization implements Serializable {
     public void setAdditionalCost(double additionalCost) { this.additionalCost = additionalCost; }
 
     /**
-     * 添加一個選擇到該自訂選項
+     * 添加一個選擇到該自訂選項（新方法用於List）
      */
-    public void addChoice(int choiceId, String choiceName) {
+    public void addChoice(String choiceName) {
         if (selectedChoices == null) {
-            selectedChoices = new HashMap<>();
+            selectedChoices = new ArrayList<>();
         }
-        selectedChoices.put(choiceId, choiceName);
+        selectedChoices.add(choiceName);
     }
 
     /**
@@ -73,7 +77,7 @@ public class OrderItemCustomization implements Serializable {
         if (textValue != null && !textValue.isEmpty()) {
             return optionName + ": " + textValue;
         } else if (selectedChoices != null && !selectedChoices.isEmpty()) {
-            return optionName + ": " + String.join(", ", selectedChoices.values());
+            return optionName + ": " + String.join(", ", selectedChoices);
         }
         return optionName;
     }

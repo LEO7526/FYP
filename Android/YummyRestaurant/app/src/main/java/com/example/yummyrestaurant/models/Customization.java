@@ -13,6 +13,11 @@ public class Customization {
     private String extraNotes;
     private List<OrderItemCustomization> customizationDetails; // 詳細自訂選項
 
+    // ✅ 新增：無參構造器
+    public Customization() {
+        this.customizationDetails = new ArrayList<>();
+    }
+
     public Customization(String spiceLevel, String extraNotes) {
         this.spiceLevel = spiceLevel;
         this.extraNotes = extraNotes;
@@ -20,7 +25,18 @@ public class Customization {
     }
 
     public String getSpiceLevel() { return spiceLevel; }
+    
+    // ✅ 新增：setter支持
+    public void setSpiceLevel(String spiceLevel) { 
+        this.spiceLevel = spiceLevel; 
+    }
+    
     public String getExtraNotes() { return extraNotes; }
+    
+    // ✅ 新增：setter支持
+    public void setExtraNotes(String extraNotes) { 
+        this.extraNotes = extraNotes; 
+    }
     
     public List<OrderItemCustomization> getCustomizationDetails() { 
         return customizationDetails; 
@@ -53,18 +69,14 @@ public class Customization {
     }
 
     /**
-     * 驗證是否所有必填的自訂選項都已填充
+     * 驗證是否所有自訂選項都已填充
      */
-    public boolean validateCustomizations(List<CustomizationOption> requiredOptions) {
-        if (requiredOptions == null || requiredOptions.isEmpty()) {
-            return true; // 沒有必填項
+    public boolean validateCustomizations(List<CustomizationOption> options) {
+        if (options == null || options.isEmpty()) {
+            return true; // 沒有選項
         }
 
-        for (CustomizationOption option : requiredOptions) {
-            if (!option.isRequired()) {
-                continue; // 跳過非必填項
-            }
-
+        for (CustomizationOption option : options) {
             boolean found = false;
             if (customizationDetails != null) {
                 for (OrderItemCustomization detail : customizationDetails) {

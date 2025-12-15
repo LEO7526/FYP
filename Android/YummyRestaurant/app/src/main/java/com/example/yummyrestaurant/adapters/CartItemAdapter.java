@@ -77,19 +77,39 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
         // Show customization if present
         if (cartItem.getCustomization() != null) {
             StringBuilder details = new StringBuilder();
-            String spice = cartItem.getCustomization().getSpiceLevel();
+            
+            // ✅ 改變：顯示所有customizationDetails，而不只是spiceLevel
+            if (cartItem.getCustomization().getCustomizationDetails() != null && 
+                !cartItem.getCustomization().getCustomizationDetails().isEmpty()) {
+                
+                for (com.example.yummyrestaurant.models.OrderItemCustomization detail : 
+                     cartItem.getCustomization().getCustomizationDetails()) {
+                    
+                    if (detail.getSelectedChoices() != null && !detail.getSelectedChoices().isEmpty()) {
+                        details.append("• ").append(detail.getOptionName())
+                               .append(": ")
+                               .append(String.join(", ", detail.getSelectedChoices()));
+                        
+                        if (detail.getAdditionalCost() > 0) {
+                            details.append(String.format(" (+₹%.2f)", detail.getAdditionalCost()));
+                        }
+                        details.append("\n");
+                    }
+                }
+            }
+            
+            // 特殊要求
             String notes = cartItem.getCustomization().getExtraNotes();
-
-            if (spice != null && !spice.isEmpty()) {
-                details.append("Spice: ").append(spice);
-            }
             if (notes != null && !notes.isEmpty()) {
-                if (details.length() > 0) details.append(" • ");
-                details.append(notes);
+                details.append("• Notes: ").append(notes);
             }
 
-            holder.customization.setText(details.toString());
-            holder.customization.setVisibility(View.VISIBLE);
+            if (details.length() > 0) {
+                holder.customization.setText(details.toString().trim());
+                holder.customization.setVisibility(View.VISIBLE);
+            } else {
+                holder.customization.setVisibility(View.GONE);
+            }
         } else {
             holder.customization.setVisibility(View.GONE);
         }

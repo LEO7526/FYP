@@ -43,7 +43,7 @@ if ($item_id === null) {
 
 // Get customization options for this item
 $stmt = $conn->prepare("
-    SELECT option_id, item_id, option_name, option_type, is_required, max_selections
+    SELECT option_id, item_id, option_name, max_selections, is_required
     FROM item_customization_options
     WHERE item_id = ?
     ORDER BY option_id
@@ -90,9 +90,8 @@ while ($row = $result->fetch_assoc()) {
         "option_id" => intval($row['option_id']),
         "item_id" => intval($row['item_id']),
         "option_name" => $row['option_name'],
-        "option_type" => $row['option_type'],
-        "is_required" => intval($row['is_required']),
         "max_selections" => intval($row['max_selections']),
+        "is_required" => intval($row['is_required']),  // ✅ 新增
         "choices" => $choices
     ];
 }

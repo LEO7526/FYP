@@ -46,14 +46,11 @@ public class CustomizationOptionsResponse implements Serializable {
         @SerializedName("option_name")
         private String option_name;
         
-        @SerializedName("option_type")
-        private String option_type; // single_choice, multi_choice, text_note, quantity
-        
-        @SerializedName("is_required")
-        private int is_required;
-        
         @SerializedName("max_selections")
         private int max_selections;
+        
+        @SerializedName("is_required")
+        private int is_required;  // ✅ 新增：必填項標記
         
         @SerializedName("choices")
         private List<ChoiceItem> choices;
@@ -69,14 +66,11 @@ public class CustomizationOptionsResponse implements Serializable {
         public String getOptionName() { return option_name; }
         public void setOptionName(String name) { this.option_name = name; }
 
-        public String getOptionType() { return option_type; }
-        public void setOptionType(String type) { this.option_type = type; }
-
-        public int isRequired() { return is_required; }
-        public void setRequired(int required) { this.is_required = required; }
-
         public int getMaxSelections() { return max_selections; }
         public void setMaxSelections(int max) { this.max_selections = max; }
+
+        public int isRequired() { return is_required; }  // ✅ 新增getter
+        public void setRequired(int required) { this.is_required = required; }  // ✅ 新增setter
 
         public List<ChoiceItem> getChoices() { return choices; }
         public void setChoices(List<ChoiceItem> choices) { this.choices = choices; }
@@ -85,8 +79,9 @@ public class CustomizationOptionsResponse implements Serializable {
         public String toString() {
             return "CustomizationOptionDetail{" +
                     "option_id=" + option_id +
+                    ", item_id=" + item_id +
                     ", option_name='" + option_name + '\'' +
-                    ", option_type='" + option_type + '\'' +
+                    ", max_selections=" + max_selections +
                     ", is_required=" + is_required +
                     ", choices=" + choices +
                     '}';

@@ -2,6 +2,7 @@ package com.example.yummyrestaurant.api;
 
 import com.example.yummyrestaurant.models.Product;
 import com.example.yummyrestaurant.models.CustomizationOptionsResponse;
+import com.example.yummyrestaurant.models.CouponPointsResponse;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -13,4 +14,7 @@ public interface ApiService {
 
     @GET("get_customization_options.php")
     Call<CustomizationOptionsResponse> getCustomizationOptions(@Query("item_id") int itemId);
+
+    @GET("get_customer_coupon_points.php")
+    Call<CouponPointsResponse> getCouponPoints(@Query("cid") int cid);
 }

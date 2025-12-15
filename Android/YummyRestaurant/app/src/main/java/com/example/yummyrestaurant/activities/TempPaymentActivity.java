@@ -137,36 +137,51 @@ public class TempPaymentActivity extends AppCompatActivity {
             item.put("item_id", menuItem.getId());
             item.put("qty", qty);
 
-            // Add customizations if present
+            // ✅ 改變：使用完整的customizationDetails結構
             if (cartItem.getCustomization() != null) {
                 com.example.yummyrestaurant.models.Customization customization = cartItem.getCustomization();
-                List<Map<String, Object>> customizations = new ArrayList<>();
+                Map<String, Object> customizationMap = new HashMap<>();
+                List<Map<String, Object>> customizationDetails = new ArrayList<>();
 
-                // Spice Level customization
-                String spiceLevel = customization.getSpiceLevel();
-                if (spiceLevel != null && !spiceLevel.isEmpty()) {
-                    Map<String, Object> spiceCustom = new HashMap<>();
-                    spiceCustom.put("option_id", 1);
-                    spiceCustom.put("option_name", "Spice Level");
-                    List<String> choiceNames = new ArrayList<>();
-                    choiceNames.add(spiceLevel);
-                    spiceCustom.put("choice_names", choiceNames);
-                    customizations.add(spiceCustom);
+                // 收集所有customizationDetails
+                if (customization.getCustomizationDetails() != null && 
+                    !customization.getCustomizationDetails().isEmpty()) {
+                    
+                    for (com.example.yummyrestaurant.models.OrderItemCustomization detail : 
+                         customization.getCustomizationDetails()) {
+                        
+                        Map<String, Object> detailMap = new HashMap<>();
+                        detailMap.put("option_id", detail.getOptionId());
+                        detailMap.put("option_name", detail.getOptionName());
+                        
+                        if (detail.getSelectedChoices() != null && !detail.getSelectedChoices().isEmpty()) {
+                            detailMap.put("selected_choices", detail.getSelectedChoices());
+                        }
+                        
+                        if (detail.getTextValue() != null && !detail.getTextValue().isEmpty()) {
+                            detailMap.put("text_value", detail.getTextValue());
+                        }
+                        
+                        detailMap.put("additional_cost", detail.getAdditionalCost());
+                        
+                        customizationDetails.add(detailMap);
+                    }
                 }
 
-                // Special Requests customization (text note)
+                if (!customizationDetails.isEmpty()) {
+                    customizationMap.put("customization_details", customizationDetails);
+                }
+
+                // 添加特殊要求
                 String notes = customization.getExtraNotes();
                 if (notes != null && !notes.isEmpty()) {
-                    Map<String, Object> noteCustom = new HashMap<>();
-                    noteCustom.put("option_id", 2);
-                    noteCustom.put("option_name", "Special Requests");
-                    noteCustom.put("text_value", notes);
-                    customizations.add(noteCustom);
+                    customizationMap.put("extra_notes", notes);
                 }
 
-                if (!customizations.isEmpty()) {
-                    item.put("customizations", customizations);
-                    Log.d(TAG, "Added " + customizations.size() + " customizations to item");
+                if (!customizationMap.isEmpty()) {
+                    item.put("customization", customizationMap);
+                    Log.d(TAG, "Added complete customization structure to item with " + 
+                           customizationDetails.size() + " details");
                 }
             }
 

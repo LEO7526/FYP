@@ -18,17 +18,11 @@ public class CustomizationOption implements Serializable {
     @SerializedName("option_name")
     private String optionName; // 例如："Spice Level", "Side Dish"
 
-    @SerializedName("option_type")
-    private String optionType; // "single_choice", "multi_choice", "quantity", "text_note"
-
-    @SerializedName("is_required")
-    private boolean isRequired; // 是否必填
-
     @SerializedName("choices")
     private List<OptionChoice> choices; // 可選的選項列表
 
     @SerializedName("max_selections")
-    private int maxSelections; // 最多可選數量（用於 multi_choice）
+    private int maxSelections; // 最多可選數量
 
     // Getters and Setters
     public int getOptionId() { return optionId; }
@@ -39,12 +33,6 @@ public class CustomizationOption implements Serializable {
 
     public String getOptionName() { return optionName; }
     public void setOptionName(String optionName) { this.optionName = optionName; }
-
-    public String getOptionType() { return optionType; }
-    public void setOptionType(String optionType) { this.optionType = optionType; }
-
-    public boolean isRequired() { return isRequired; }
-    public void setRequired(boolean required) { isRequired = required; }
 
     public List<OptionChoice> getChoices() { return choices; }
     public void setChoices(List<OptionChoice> choices) { this.choices = choices; }

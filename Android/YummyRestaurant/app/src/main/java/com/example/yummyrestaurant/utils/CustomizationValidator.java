@@ -27,29 +27,25 @@ public class CustomizationValidator {
     }
 
     /**
-     * 驗證所有必填的自訂選項是否已被選擇
-     * @param requiredOptions 必填的自訂選項列表
+     * 驗證所有自訂選項是否已被選擇
+     * @param customizationOptions 自訂選項列表
      * @param selectedCustomizations 使用者已選擇的自訂詳情
      * @return ValidationResult
      */
     public static ValidationResult validateRequiredCustomizations(
-            List<CustomizationOption> requiredOptions,
+            List<CustomizationOption> customizationOptions,
             List<OrderItemCustomization> selectedCustomizations) {
 
-        if (requiredOptions == null || requiredOptions.isEmpty()) {
-            Log.d(TAG, "No required customization options");
+        if (customizationOptions == null || customizationOptions.isEmpty()) {
+            Log.d(TAG, "No customization options");
             return new ValidationResult(true, "");
         }
 
-        // 過濾出必填項
-        for (CustomizationOption option : requiredOptions) {
-            if (!option.isRequired()) {
-                continue; // 跳過非必填項
-            }
-
+        // 驗證所有選項都有選擇
+        for (CustomizationOption option : customizationOptions) {
             boolean hasSelectedThisOption = false;
 
-            // 檢查使用者是否選擇了此必填項
+            // 檢查使用者是否選擇了此選項
             if (selectedCustomizations != null) {
                 for (OrderItemCustomization selected : selectedCustomizations) {
                     if (selected.getOptionId() == option.getOptionId()) {
@@ -72,12 +68,12 @@ public class CustomizationValidator {
 
             if (!hasSelectedThisOption) {
                 String errorMsg = String.format("Please select '%s'", option.getOptionName());
-                Log.w(TAG, "Missing required option: " + option.getOptionName());
+                Log.w(TAG, "Missing option: " + option.getOptionName());
                 return new ValidationResult(false, errorMsg);
             }
         }
 
-        Log.d(TAG, "All required customizations validated successfully");
+        Log.d(TAG, "All customizations validated successfully");
         return new ValidationResult(true, "");
     }
 
@@ -92,33 +88,22 @@ public class CustomizationValidator {
             OrderItemCustomization selected) {
 
         if (selected == null) {
-            if (option.isRequired()) {
-                return new ValidationResult(false, 
-                    String.format("'%s' is required", option.getOptionName()));
-            }
-            return new ValidationResult(true, "");
+            return new ValidationResult(false, 
+                String.format("'%s' is required", option.getOptionName()));
         }
 
         // 檢查多選限制
-        if ("multi_choice".equalsIgnoreCase(option.getOptionType())) {
-            int maxSelections = option.getMaxSelections();
-            if (maxSelections > 0 && selected.getSelectedChoices().size() > maxSelections) {
-                return new ValidationResult(false,
-                    String.format("You can select at most %d item(s) for '%s'",
-                            maxSelections, option.getOptionName()));
-            }
+        int maxSelections = option.getMaxSelections();
+        if (maxSelections > 0 && selected.getSelectedChoices() != null && 
+            selected.getSelectedChoices().size() > maxSelections) {
+            return new ValidationResult(false,
+                String.format("You can select at most %d item(s) for '%s'",
+                        maxSelections, option.getOptionName()));
         }
 
-        // 檢查文字輸入長度（如果是文字選項）
-        if ("text_note".equalsIgnoreCase(option.getOptionType())) {
-            String textValue = selected.getTextValue();
-            if (textValue != null && textValue.length() > 500) {
-                return new ValidationResult(false,
-                    "Note is too long (maximum 500 characters)");
-            }
-        }
-
+        Log.d(TAG, "Option validation passed for: " + option.getOptionName());
         return new ValidationResult(true, "");
+    }        return new ValidationResult(true, "");
     }
 
     /**

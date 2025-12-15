@@ -13,12 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.CouponAdapter;
+import com.example.yummyrestaurant.api.ApiService;
 import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.BirthdayResponse;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.CouponListResponse;
 import com.example.yummyrestaurant.models.CouponPointResponse;
+import com.example.yummyrestaurant.models.CouponPointsResponse;
 import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.RedeemCouponResponse;
 import com.example.yummyrestaurant.utils.RoleManager;
@@ -164,13 +166,13 @@ public class CouponActivity extends BaseCustomerActivity {
     private void fetchCouponPoints(int customerId) {
         Log.d(TAG, "Fetching coupon points for customerId=" + customerId);
 
-        CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.getCouponPoints(customerId).enqueue(new Callback<CouponPointResponse>() {
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+        apiService.getCouponPoints(customerId).enqueue(new Callback<CouponPointsResponse>() {
             @Override
-            public void onResponse(Call<CouponPointResponse> call, Response<CouponPointResponse> response) {
+            public void onResponse(Call<CouponPointsResponse> call, Response<CouponPointsResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    int points = response.body().getPoints();
-                    currentPoints = response.body().getPoints(); // ✅ store here
+                    int points = response.body().getCouponPoints();
+                    currentPoints = points;
                     tvCouponPoints.setText("Points: " + points);
                     adapter.setCurrentPoints(points);
                     Log.d(TAG, "fetchCouponPoints success: points=" + points);
@@ -181,7 +183,7 @@ public class CouponActivity extends BaseCustomerActivity {
             }
 
             @Override
-            public void onFailure(Call<CouponPointResponse> call, Throwable t) {
+            public void onFailure(Call<CouponPointsResponse> call, Throwable t) {
                 Log.e(TAG, "fetchCouponPoints onFailure", t);
                 tvCouponPoints.setText("Error loading points");
             }

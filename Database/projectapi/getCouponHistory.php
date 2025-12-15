@@ -1,16 +1,21 @@
 <?php
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=utf-8');
 
 // Connect to database
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) {
+    http_response_code(500);
     echo json_encode(["success" => false, "error" => "DB connection failed"]);
     exit;
 }
 
 // Validate input
 $cid = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
+$lang = isset($_GET['lang']) ? $conn->real_escape_string($_GET['lang']) : 'en';
+
 if ($cid <= 0) {
+    http_response_code(400);
     echo json_encode(["success" => false, "error" => "Missing or invalid cid"]);
     exit;
 }
@@ -24,12 +29,18 @@ $sql = "SELECT h.delta,
                ct.title AS coupon_title
         FROM coupon_point_history h
         LEFT JOIN coupon_translation ct 
-               ON h.coupon_id = ct.coupon_id AND ct.language_code = 'en'
+               ON h.coupon_id = ct.coupon_id AND ct.language_code = ?
         WHERE h.cid = ?
         ORDER BY h.created_at DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $cid);
+if (!$stmt) {
+    http_response_code(500);
+    echo json_encode(["success" => false, "error" => "Prepare failed: " . $conn->error]);
+    exit;
+}
+
+$stmt->bind_param("si", $lang, $cid);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -45,6 +56,7 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
+http_response_code(200);
 echo json_encode([
     "success" => true,
     "history" => $history

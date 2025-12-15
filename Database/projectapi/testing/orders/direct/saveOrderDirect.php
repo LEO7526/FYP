@@ -147,46 +147,47 @@ try {
         $ocStmt->close();
     }
 
-    // Award points (1 HK$ = 1 point)
+    // Award points to customer (1 HK$ = 1 point) - Update customer.coupon_point column
     $pointsAdded = 0;
-    if ($cid !== 0 && $total_amount > 0) {
-        $pointsToAdd = intdiv($total_amount, 100);
+    if ($cid !== 0 && $cid > 0 && $total_amount > 0) {
+        $pointsToAdd = intdiv($total_amount, 100); // Convert cents to dollars (1 point per dollar)
         if ($pointsToAdd > 0) {
-            $sel = $conn->prepare("SELECT cp_id, points FROM coupon_point WHERE cid=? LIMIT 1");
-            $sel->bind_param("i", $cid);
-            $sel->execute();
-            $sel->bind_result($cp_id_existing, $existing_points);
-            $hasRow = $sel->fetch();
-            $sel->close();
-
-            if ($hasRow && $cp_id_existing) {
-                $newPoints = $existing_points + $pointsToAdd;
-                $upd = $conn->prepare("UPDATE coupon_point SET points=?, updated_at=CURRENT_TIMESTAMP WHERE cp_id=?");
-                $upd->bind_param("ii", $newPoints, $cp_id_existing);
-                $upd->execute();
-                $upd->close();
-
-                $hist = $conn->prepare("INSERT INTO coupon_point_history (cp_id, cid, coupon_id, delta, resulting_points, action, note) VALUES (?, ?, ?, ?, ?, 'earn', ?)");
-                $note = "Order $order_id";
-                $hist->bind_param("iiiiss", $cp_id_existing, $cid, $coupon_id, $pointsToAdd, $newPoints, $note);
-                $hist->execute();
-                $hist->close();
-                $pointsAdded = $pointsToAdd;
-            } else {
-                $ins = $conn->prepare("INSERT INTO coupon_point (cid, points, last_changed_by, reason) VALUES (?, ?, ?, ?)");
-                $reason = "Earned from order $order_id";
-                $ins->bind_param("iiss", $cid, $pointsToAdd, $actor, $reason);
-                $ins->execute();
-                $newCpId = $ins->insert_id;
-                $ins->close();
-
-                $hist = $conn->prepare("INSERT INTO coupon_point_history (cp_id, cid, coupon_id, delta, resulting_points, action, note) VALUES (?, ?, ?, ?, ?, 'earn', ?)");
-                $note = "Order $order_id";
-                $hist->bind_param("iiiiss", $newCpId, $cid, $coupon_id, $pointsToAdd, $pointsToAdd, $note);
-                $hist->execute();
-                $hist->close();
-                $pointsAdded = $pointsToAdd;
+            $pointsStmt = $conn->prepare("UPDATE customer SET coupon_point = coupon_point + ? WHERE cid = ?");
+            if (!$pointsStmt) {
+                throw new Exception("Failed to prepare points update: " . $conn->error);
             }
+            
+            $pointsStmt->bind_param("ii", $pointsToAdd, $cid);
+            if (!$pointsStmt->execute()) {
+                throw new Exception("Failed to add coupon points: " . $pointsStmt->error);
+            }
+            $pointsStmt->close();
+            
+            // Get the new points balance for history
+            $balanceStmt = $conn->prepare("SELECT coupon_point FROM customer WHERE cid = ?");
+            if (!$balanceStmt) {
+                throw new Exception("Failed to prepare balance check: " . $conn->error);
+            }
+            $balanceStmt->bind_param("i", $cid);
+            $balanceStmt->execute();
+            $balanceRow = $balanceStmt->get_result()->fetch_assoc();
+            $balanceStmt->close();
+            $newBalance = $balanceRow ? intval($balanceRow['coupon_point']) : $pointsToAdd;
+            
+            // Insert into coupon_point_history
+            $historyStmt = $conn->prepare("INSERT INTO coupon_point_history (cid, coupon_id, delta, resulting_points, action, note) VALUES (?, ?, ?, ?, 'earn', ?)");
+            if (!$historyStmt) {
+                throw new Exception("Failed to prepare history insert: " . $conn->error);
+            }
+            $note = "Order $order_id";
+            $historyStmt->bind_param("iiiss", $cid, $coupon_id, $pointsToAdd, $newBalance, $note);
+            if (!$historyStmt->execute()) {
+                throw new Exception("Failed to insert history: " . $historyStmt->error);
+            }
+            $historyStmt->close();
+            
+            $pointsAdded = $pointsToAdd;
+            error_log("Added $pointsToAdd points to customer $cid, new balance: $newBalance");
         }
     }
 
