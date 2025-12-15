@@ -22,7 +22,16 @@ if ($row = $result->fetch_assoc()) {
         "points" => (int)$row['points']
     ], JSON_UNESCAPED_UNICODE);
 } else {
-    echo json_encode(["success"=>false,"error"=>"Customer not found"]);
+    // Customer not found in coupon_point table - initialize with 0 points
+    $insertSql = "INSERT INTO coupon_point (cid, points) VALUES ($cid, 0)";
+    if ($conn->query($insertSql)) {
+        echo json_encode([
+            "success" => true,
+            "points" => 0
+        ], JSON_UNESCAPED_UNICODE);
+    } else {
+        echo json_encode(["success"=>false,"error"=>"Failed to initialize customer points"]);
+    }
 }
 
 $conn->close();
