@@ -117,8 +117,12 @@ try {
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         
+        if (!$row) {
+            throw new Exception("Failed to initialize customer points");
+        }
+        
         $cp_id = $row['cp_id'];
-        $current_points = 0;
+        $current_points = intval($row['points']);
     } else {
         $cp_id = $row['cp_id'];
         $current_points = intval($row['points']);
