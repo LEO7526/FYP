@@ -103,7 +103,6 @@ public class CustomizationValidator {
 
         Log.d(TAG, "Option validation passed for: " + option.getOptionName());
         return new ValidationResult(true, "");
-    }        return new ValidationResult(true, "");
     }
 
     /**

@@ -12,6 +12,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.ViewGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -192,7 +193,7 @@ public class CustomizeDishActivity extends AppCompatActivity {
         }
         title.setText(titleText);
         title.setTextSize(16);
-        title.setTextStyle(android.graphics.Typeface.BOLD);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
         if (option.isRequired() == 1) {
             title.setTextColor(android.graphics.Color.RED);  // ✅ 必填項顯示為紅色
         }
@@ -243,7 +244,7 @@ public class CustomizeDishActivity extends AppCompatActivity {
         }
         title.setText(titleText);
         title.setTextSize(16);
-        title.setTextStyle(android.graphics.Typeface.BOLD);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
         if (option.isRequired() == 1) {
             title.setTextColor(android.graphics.Color.RED);  // ✅ 必填項顯示為紅色
         }
@@ -298,9 +299,14 @@ public class CustomizeDishActivity extends AppCompatActivity {
         TextView label = new TextView(this);
         label.setText("Special Instructions");
         label.setTextSize(16);
-        label.setTextStyle(android.graphics.Typeface.BOLD);
+        label.setTypeface(null, android.graphics.Typeface.BOLD);
         label.setPadding(0, 0, 0, 8);
         sectionLayout.addView(label);
+
+        // ✅ 移除已有的父容器（防止重複添加）
+        if (notesEditText.getParent() != null) {
+            ((ViewGroup) notesEditText.getParent()).removeView(notesEditText);
+        }
 
         notesEditText.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -431,18 +437,22 @@ public class CustomizeDishActivity extends AppCompatActivity {
                     choiceName = choiceName.substring(0, choiceName.indexOf(" (+₹"));
                 }
 
+                final String finalChoiceName = choiceName;  // ✅ 用於內部類引用
                 OrderItemCustomization custom = new OrderItemCustomization(optionId, getOptionName(optionId));
-                custom.setSelectedChoices(new ArrayList<String>() {{ add(choiceName); }});
+                custom.setSelectedChoices(new ArrayList<String>() {{ add(finalChoiceName); }});
                 custom.setAdditionalCost(getChoiceCost((Integer) rb.getTag()));
                 customizationDetails.add(custom);
 
                 totalAdditionalCost += custom.getAdditionalCost();
             }
-        }        // 收集CheckBox選擇
+        }
+
+        // 收集CheckBox選擇
         for (Map.Entry<Integer, List<CheckBox>> entry : checkboxGroupMap.entrySet()) {
             int optionId = entry.getKey();
             List<CheckBox> checkboxes = entry.getValue();
             List<String> selectedChoices = new ArrayList<>();
+            double checkboxAdditionalCost = 0;
 
             for (CheckBox cb : checkboxes) {
                 if (cb.isChecked()) {
@@ -451,15 +461,16 @@ public class CustomizeDishActivity extends AppCompatActivity {
                         choiceName = choiceName.substring(0, choiceName.indexOf(" (+₹"));
                     }
                     selectedChoices.add(choiceName);
-                    totalAdditionalCost += getChoiceCost((Integer) cb.getTag());
+                    checkboxAdditionalCost += getChoiceCost((Integer) cb.getTag());
                 }
             }
 
             if (!selectedChoices.isEmpty()) {
                 OrderItemCustomization custom = new OrderItemCustomization(optionId, getOptionName(optionId));
                 custom.setSelectedChoices(selectedChoices);
-                custom.setAdditionalCost(totalAdditionalCost);
+                custom.setAdditionalCost(checkboxAdditionalCost);
                 customizationDetails.add(custom);
+                totalAdditionalCost += checkboxAdditionalCost;
             }
         }
 

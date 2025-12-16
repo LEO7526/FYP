@@ -44,6 +44,18 @@
 
         </ScrollView>
 
+        <!-- Special Instructions / Notes -->
+        <EditText
+            android:id="@+id/notesEditText"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:hint="Special instructions (optional)"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:inputType="textMultiLine"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="8dp" />
+
         <!-- Price Summary Section -->
         <LinearLayout
             android:layout_width="match_parent"
