@@ -15,12 +15,23 @@ public class Order {
     @SerializedName("items")
     private List<OrderItem> items;
 
+    @SerializedName("packages")
+    private List<OrderPackage> packages;
+
     public List<OrderItem> getItems() {
         return items;
     }
 
     public void setItems(List<OrderItem> items) {
         this.items = items;
+    }
+
+    public List<OrderPackage> getPackages() {
+        return packages;
+    }
+
+    public void setPackages(List<OrderPackage> packages) {
+        this.packages = packages;
     }
 
 

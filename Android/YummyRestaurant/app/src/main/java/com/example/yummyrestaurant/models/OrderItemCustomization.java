@@ -24,6 +24,10 @@ public class OrderItemCustomization implements Serializable {
     @SerializedName("selected_choices")
     private List<String> selectedChoices;
 
+    // ✅ 新增：support choice_names from API (comma-separated string)
+    @SerializedName("choice_names")
+    private String choiceNames;
+
     @SerializedName("text_value")
     private String textValue; // 用於文字備註
 
@@ -53,6 +57,10 @@ public class OrderItemCustomization implements Serializable {
     public void setSelectedChoices(List<String> selectedChoices) {
         this.selectedChoices = selectedChoices;
     }
+
+    // ✅ 新增：choiceNames getter/setter for API response
+    public String getChoiceNames() { return choiceNames; }
+    public void setChoiceNames(String choiceNames) { this.choiceNames = choiceNames; }
 
     public String getTextValue() { return textValue; }
     public void setTextValue(String textValue) { this.textValue = textValue; }

@@ -1,6 +1,7 @@
 package com.example.yummyrestaurant.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class OrderItem {
 
@@ -18,6 +19,12 @@ public class OrderItem {
 
     @SerializedName("itemCost")
     private double itemCost;
+
+    @SerializedName("image_url")
+    private String imageUrl;
+
+    @SerializedName("customizations")
+    private List<OrderItemCustomization> customizations;
 
     public OrderItem(int itemId, String name, int quantity, double itemPrice, double itemCost) {
         this.itemId = itemId;
@@ -65,6 +72,22 @@ public class OrderItem {
 
     public void setItemCost(double itemCost) {
         this.itemCost = itemCost;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public List<OrderItemCustomization> getCustomizations() {
+        return customizations;
+    }
+
+    public void setCustomizations(List<OrderItemCustomization> customizations) {
+        this.customizations = customizations;
     }
 
     // Optional: calculate subtotal dynamically

@@ -4,7 +4,9 @@ import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.MenuItem;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,22 +17,41 @@ public final class CartManager {
 
     // Track applied discounts (could be coupon IDs, codes, or types)
     private static final Map<String, Object> appliedDiscounts = new LinkedHashMap<>();
-    private CartManager() {}
+
+    // Track package details: packageId -> {items, price}
+    private static final Map<Integer, Map<String, Object>> packageDetails = new HashMap<>();
+
+    // Track prefill data for reorder: packageId -> list of items
+    private static final Map<Integer, List<MenuItem>> prefillPackageData = new HashMap<>();
+
+    private CartManager() {
+    }
 
     private static final String TAG = "CartDebug";
 
     private static Object stableMenuItemId(Object menuItem) {
         if (menuItem == null) return null;
         try {
-            try { return menuItem.getClass().getMethod("getId").invoke(menuItem); } catch (NoSuchMethodException ignored) {}
-            try { return menuItem.getClass().getMethod("get_id").invoke(menuItem); } catch (NoSuchMethodException ignored) {}
-            try { return menuItem.getClass().getMethod("getUuid").invoke(menuItem); } catch (NoSuchMethodException ignored) {}
-        } catch (Exception ignored) {}
+            try {
+                return menuItem.getClass().getMethod("getId").invoke(menuItem);
+            } catch (NoSuchMethodException ignored) {
+            }
+            try {
+                return menuItem.getClass().getMethod("get_id").invoke(menuItem);
+            } catch (NoSuchMethodException ignored) {
+            }
+            try {
+                return menuItem.getClass().getMethod("getUuid").invoke(menuItem);
+            } catch (NoSuchMethodException ignored) {
+            }
+        } catch (Exception ignored) {
+        }
         try {
             String name = (String) menuItem.getClass().getMethod("getName").invoke(menuItem);
             double price = (double) menuItem.getClass().getMethod("getPrice").invoke(menuItem);
             return (name == null ? "" : name) + "|" + price;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return menuItem.hashCode();
     }
 
@@ -96,7 +117,8 @@ public final class CartManager {
             try {
                 double price = e.getKey().getMenuItem().getPrice();
                 total += price * e.getValue();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return total;
     }
@@ -224,5 +246,43 @@ public final class CartManager {
     public static synchronized void clearDiscounts() {
         appliedDiscounts.clear();
         android.util.Log.d(TAG, "clearDiscounts: all discounts cleared");
+    }
+
+    // ✅ Package management
+    public static synchronized void setPackageDetails(int packageId, List<MenuItem> items, double price) {
+        Map<String, Object> details = new HashMap<>();
+        details.put("items", items);
+        details.put("price", price);
+        packageDetails.put(packageId, details);
+        android.util.Log.d(TAG, "setPackageDetails: packageId=" + packageId + ", itemCount=" + items.size() + ", price=" + price);
+    }
+
+    public static synchronized Map<Integer, Map<String, Object>> getPackageDetails() {
+        return new HashMap<>(packageDetails);
+    }
+
+    public static synchronized void clearPackageDetails() {
+        packageDetails.clear();
+        android.util.Log.d(TAG, "clearPackageDetails: all package details cleared");
+    }
+
+    // ✅ Prefill data for package reorder
+    public static synchronized void setPrefillPackageData(int packageId, List<MenuItem> items) {
+        prefillPackageData.put(packageId, new ArrayList<>(items));
+        android.util.Log.d(TAG, "setPrefillPackageData: packageId=" + packageId + ", itemCount=" + items.size());
+    }
+
+    public static synchronized List<MenuItem> getPrefillPackageData(int packageId) {
+        return prefillPackageData.getOrDefault(packageId, new ArrayList<>());
+    }
+
+    public static synchronized void clearPrefillPackageData(int packageId) {
+        prefillPackageData.remove(packageId);
+        android.util.Log.d(TAG, "clearPrefillPackageData: packageId=" + packageId);
+    }
+
+    public static synchronized void clearAllPrefillData() {
+        prefillPackageData.clear();
+        android.util.Log.d(TAG, "clearAllPrefillData: all prefill data cleared");
     }
 }

@@ -439,7 +439,10 @@ public class CustomizeDishActivity extends AppCompatActivity {
 
                 final String finalChoiceName = choiceName;  // ✅ 用於內部類引用
                 OrderItemCustomization custom = new OrderItemCustomization(optionId, getOptionName(optionId));
-                custom.setSelectedChoices(new ArrayList<String>() {{ add(finalChoiceName); }});
+                // 🔴 FIX: 不要使用雙重括號初始化，改用正常的 ArrayList
+                List<String> choicesList = new ArrayList<>();
+                choicesList.add(finalChoiceName);
+                custom.setSelectedChoices(choicesList);
                 custom.setAdditionalCost(getChoiceCost((Integer) rb.getTag()));
                 customizationDetails.add(custom);
 

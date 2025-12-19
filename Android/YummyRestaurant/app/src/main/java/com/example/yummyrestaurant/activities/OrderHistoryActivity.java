@@ -13,6 +13,8 @@ import com.example.yummyrestaurant.adapters.OrderAdapter;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.models.Order;
+import com.example.yummyrestaurant.models.OrderItem;
+import com.example.yummyrestaurant.models.OrderItemCustomization;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 import java.util.List;
@@ -64,16 +66,40 @@ public class OrderHistoryActivity extends BaseCustomerActivity {
             public void onResponse(Call<List<Order>> call, Response<List<Order>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     orderList = response.body();
+                    
+                    // 📊 詳細日誌：追蹤 API 返回的數據結構
+                    Log.d("OrderHistory", "🔄 API returned " + orderList.size() + " orders");
+                    for (Order order : orderList) {
+                        Log.d("OrderHistory", "  Order #" + order.getOid() + ":");
+                        if (order.getItems() != null) {
+                            Log.d("OrderHistory", "    Items: " + order.getItems().size());
+                            for (OrderItem item : order.getItems()) {
+                                int custCount = (item.getCustomizations() != null) ? item.getCustomizations().size() : 0;
+                                Log.d("OrderHistory", "      - " + item.getName() + " (customizations=" + custCount + ")");
+                                
+                                // 詳細檢查每個 customization
+                                if (item.getCustomizations() != null && item.getCustomizations().size() > 0) {
+                                    for (OrderItemCustomization cust : item.getCustomizations()) {
+                                        Log.d("OrderHistory", "        * " + cust.getOptionName() + "=" + cust.getChoiceNames());
+                                    }
+                                }
+                            }
+                        } else {
+                            Log.d("OrderHistory", "    Items: null");
+                        }
+                    }
+                    
                     orderAdapter = new OrderAdapter(orderList);
                     orderRecyclerView.setAdapter(orderAdapter);
                 } else {
                     Toast.makeText(OrderHistoryActivity.this, "Failed to load order history", Toast.LENGTH_SHORT).show();
+                    Log.e("OrderHistory", "❌ Response not successful: " + (response.code()));
                 }
             }
 
             @Override
             public void onFailure(Call<List<Order>> call, Throwable t) {
-                Log.e("OrderHistory", "Error fetching orders", t);
+                Log.e("OrderHistory", "❌ Error fetching orders", t);
                 Toast.makeText(OrderHistoryActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -136,12 +137,58 @@ public class TempPaymentActivity extends AppCompatActivity {
             Map<String, Object> item = new HashMap<>();
             item.put("item_id", menuItem.getId());
             item.put("qty", qty);
+            item.put("name", menuItem.getName());
+            
+            // ✅ 新增：包含 category 字段，以識別套餐項目
+            if (menuItem.getCategory() != null) {
+                item.put("category", menuItem.getCategory());
+                
+                // ✅ 如果是套餐，還要發送套餐內的菜品
+                if ("PACKAGE".equals(menuItem.getCategory())) {
+                    Map<Integer, Map<String, Object>> packageDetails = CartManager.getPackageDetails();
+                    if (packageDetails != null && packageDetails.containsKey(menuItem.getId())) {
+                        Map<String, Object> pkgDetail = packageDetails.get(menuItem.getId());
+                        @SuppressWarnings("unchecked")
+                        List<com.example.yummyrestaurant.models.MenuItem> packageItems = 
+                            (List<com.example.yummyrestaurant.models.MenuItem>) pkgDetail.get("items");
+                        
+                        if (packageItems != null && !packageItems.isEmpty()) {
+                            List<Map<String, Object>> packageItemsList = new ArrayList<>();
+                            for (com.example.yummyrestaurant.models.MenuItem pkgItem : packageItems) {
+                                Map<String, Object> pkgItemMap = new HashMap<>();
+                                pkgItemMap.put("id", pkgItem.getId());
+                                pkgItemMap.put("name", pkgItem.getName());
+                                pkgItemMap.put("qty", 1);
+                                packageItemsList.add(pkgItemMap);
+                            }
+                            item.put("packageItems", packageItemsList);
+                            Log.d(TAG, "Added " + packageItemsList.size() + " items to package");
+                        }
+                    }
+                }
+            }
 
             // ✅ 改變：使用完整的customizationDetails結構
             if (cartItem.getCustomization() != null) {
                 com.example.yummyrestaurant.models.Customization customization = cartItem.getCustomization();
                 Map<String, Object> customizationMap = new HashMap<>();
                 List<Map<String, Object>> customizationDetails = new ArrayList<>();
+
+                Log.d(TAG, "Processing customization for item: " + menuItem.getName() + 
+                           ", has details: " + (customization.getCustomizationDetails() != null ? 
+                           customization.getCustomizationDetails().size() : 0));
+
+                // 🔴 DIAGNOSTIC: 列印第一個 detail 對象的完整信息
+                if (customization.getCustomizationDetails() != null && 
+                    !customization.getCustomizationDetails().isEmpty()) {
+                    com.example.yummyrestaurant.models.OrderItemCustomization firstDetail = 
+                        customization.getCustomizationDetails().get(0);
+                    Log.d(TAG, "🔍 FIRST DETAIL DEBUG:");
+                    Log.d(TAG, "   Object: " + firstDetail.toString());
+                    Log.d(TAG, "   selectedChoices field: " + firstDetail.getSelectedChoices());
+                    Log.d(TAG, "   selectedChoices class: " + (firstDetail.getSelectedChoices() != null ? firstDetail.getSelectedChoices().getClass().getName() : "null"));
+                    Log.d(TAG, "   choiceNames field: " + firstDetail.getChoiceNames());
+                }
 
                 // 收集所有customizationDetails
                 if (customization.getCustomizationDetails() != null && 
@@ -150,21 +197,62 @@ public class TempPaymentActivity extends AppCompatActivity {
                     for (com.example.yummyrestaurant.models.OrderItemCustomization detail : 
                          customization.getCustomizationDetails()) {
                         
-                        Map<String, Object> detailMap = new HashMap<>();
+                        // 🔴 強制添加 selected_choices - 使用 LinkedHashMap 保證順序且不被過濾
+                        Map<String, Object> detailMap = new java.util.LinkedHashMap<>();
+                        
+                        // 🔴 CRITICAL: 構造選擇列表 - 直接使用字符串而不是 List，避免序列化問題
+                        String selectedChoicesJson = "[]";  // 默認空列表
+                        
+                        // 優先使用 selectedChoices
+                        if (detail.getSelectedChoices() != null && !detail.getSelectedChoices().isEmpty()) {
+                            // 🔴 WORKAROUND: 轉換為新的 ArrayList 以避免匿名類序列化問題
+                            List<String> normalizedList = new ArrayList<>(detail.getSelectedChoices());
+                            selectedChoicesJson = new Gson().toJson(normalizedList);
+                            Log.d(TAG, "  ✅ Using selectedChoices: " + selectedChoicesJson);
+                        } else if (detail.getChoiceNames() != null && !detail.getChoiceNames().isEmpty()) {
+                            // 備用方案：使用 choiceNames (逗號分隔字符串)
+                            List<String> choiceList = Arrays.asList(detail.getChoiceNames().split(",\\s*"));
+                            selectedChoicesJson = new Gson().toJson(choiceList);
+                            Log.d(TAG, "  ✅ Converted choiceNames to selectedChoices: " + selectedChoicesJson);
+                        } else {
+                            Log.d(TAG, "  ⚠️ No selected_choices or choiceNames found! Using empty list");
+                        }
+                        
+                        // 🔴 MANDATORY FIELDS - 使用原始值不通過 Gson
                         detailMap.put("option_id", detail.getOptionId());
                         detailMap.put("option_name", detail.getOptionName());
-                        
-                        if (detail.getSelectedChoices() != null && !detail.getSelectedChoices().isEmpty()) {
-                            detailMap.put("selected_choices", detail.getSelectedChoices());
-                        }
-                        
-                        if (detail.getTextValue() != null && !detail.getTextValue().isEmpty()) {
-                            detailMap.put("text_value", detail.getTextValue());
-                        }
-                        
                         detailMap.put("additional_cost", detail.getAdditionalCost());
                         
-                        customizationDetails.add(detailMap);
+                        // ⚠️ 不添加 selected_choices 到 detailMap，而是在最後的 JSON 中手動添加
+                        if (detail.getTextValue() != null && !detail.getTextValue().isEmpty()) {
+                            detailMap.put("text_value", detail.getTextValue());
+                            Log.d(TAG, "  ✅ Added text_value: " + detail.getTextValue());
+                        }
+                        
+                        Log.d(TAG, "  📝 Detail map keys: " + detailMap.keySet().toString());
+                        
+                        // 🔴 WORKAROUND: 手動構造 JSON 以確保 selected_choices 被正確包含
+                        StringBuilder detailJsonBuilder = new StringBuilder("{");
+                        detailJsonBuilder.append("\"option_id\":").append(detail.getOptionId()).append(",");
+                        detailJsonBuilder.append("\"option_name\":\"").append(detail.getOptionName()).append("\",");
+                        detailJsonBuilder.append("\"selected_choices\":").append(selectedChoicesJson).append(",");
+                        detailJsonBuilder.append("\"additional_cost\":").append(detail.getAdditionalCost());
+                        if (detail.getTextValue() != null && !detail.getTextValue().isEmpty()) {
+                            detailJsonBuilder.append(",\"text_value\":\"").append(detail.getTextValue()).append("\"");
+                        }
+                        detailJsonBuilder.append("}");
+                        
+                        String detailJsonString = detailJsonBuilder.toString();
+                        Log.d(TAG, "  📝 Detail map JSON (手動構造): " + detailJsonString);
+                        
+                        // 驗證 selected_choices 確實在 JSON 中
+                        if (!detailJsonString.contains("\"selected_choices\"")) {
+                            Log.e(TAG, "  🔥 ERROR: selected_choices NOT in JSON! This is a critical bug!");
+                        }
+                        
+                        // 轉換回 Map 以保持兼容性
+                        Map<String, Object> jsonMap = new Gson().fromJson(detailJsonString, Map.class);
+                        customizationDetails.add(jsonMap);
                     }
                 }
 
@@ -176,13 +264,16 @@ public class TempPaymentActivity extends AppCompatActivity {
                 String notes = customization.getExtraNotes();
                 if (notes != null && !notes.isEmpty()) {
                     customizationMap.put("extra_notes", notes);
+                    Log.d(TAG, "  - Added extra notes: " + notes);
                 }
 
                 if (!customizationMap.isEmpty()) {
                     item.put("customization", customizationMap);
-                    Log.d(TAG, "Added complete customization structure to item with " + 
+                    Log.d(TAG, "✅ Added complete customization structure to item with " + 
                            customizationDetails.size() + " details");
                 }
+            } else {
+                Log.d(TAG, "No customization for item: " + menuItem.getName());
             }
 
             items.add(item);
@@ -195,14 +286,88 @@ public class TempPaymentActivity extends AppCompatActivity {
             if (cartItem.getCustomization() != null) {
                 display.put("spice_level", cartItem.getCustomization().getSpiceLevel());
                 display.put("extra_notes", cartItem.getCustomization().getExtraNotes());
+                
+                // ✅ 新增：添加完整的自訂項詳情到顯示
+                if (cartItem.getCustomization().getCustomizationDetails() != null && 
+                    !cartItem.getCustomization().getCustomizationDetails().isEmpty()) {
+                    
+                    List<Map<String, Object>> customDetails = new ArrayList<>();
+                    Log.d(TAG, "Processing " + cartItem.getCustomization().getCustomizationDetails().size() + " customization details");
+                    
+                    for (com.example.yummyrestaurant.models.OrderItemCustomization detail : 
+                         cartItem.getCustomization().getCustomizationDetails()) {
+                        
+                        Log.d(TAG, "Detail: optionId=" + detail.getOptionId() + 
+                                   ", optionName=" + detail.getOptionName() + 
+                                   ", selectedChoices=" + detail.getSelectedChoices() + 
+                                   ", choiceNames=" + detail.getChoiceNames() + 
+                                   ", textValue=" + detail.getTextValue());
+                        
+                        Map<String, Object> detailMap = new HashMap<>();
+                        detailMap.put("option_name", detail.getOptionName());
+                        
+                        // ✅ 改變：使用 getSelectedChoices() 而不是 getChoiceNames()
+                        if (detail.getSelectedChoices() != null && !detail.getSelectedChoices().isEmpty()) {
+                            String joinedChoices = String.join(",", detail.getSelectedChoices());
+                            detailMap.put("choice_names", joinedChoices);
+                            Log.d(TAG, "  ✅ Using selectedChoices: " + joinedChoices);
+                        } else if (detail.getChoiceNames() != null && !detail.getChoiceNames().isEmpty()) {
+                            detailMap.put("choice_names", detail.getChoiceNames());
+                            Log.d(TAG, "  ✅ Using choiceNames: " + detail.getChoiceNames());
+                        } else {
+                            Log.d(TAG, "  ❌ No choices found!");
+                        }
+                        
+                        detailMap.put("text_value", detail.getTextValue() != null ? detail.getTextValue() : "");
+                        customDetails.add(detailMap);
+                    }
+                    display.put("customization_details", customDetails);
+                    Log.d(TAG, "✅ Added " + customDetails.size() + " customization details to display");
+                } else {
+                    Log.d(TAG, "❌ No customization details or empty");
+                }
             }
             itemsForDisplay.add(display);
+            Log.d(TAG, "Display object: " + new Gson().toJson(display));
         }
 
         orderHeader.put("items", items);
         orderHeader.put("total_amount", finalAmount);
         dishJson = new Gson().toJson(itemsForDisplay);
-
+        
+        // 📊 詳細日誌：記錄發送到後端的完整結構
+        Log.d(TAG, "📤 SENDING TO BACKEND:");
+        Log.d(TAG, "   Items count: " + items.size());
+        for (int i = 0; i < items.size(); i++) {
+            Map<String, Object> item = items.get(i);
+            Log.d(TAG, "   Item " + i + ": id=" + item.get("item_id") + 
+                       ", qty=" + item.get("qty") + 
+                       ", name=" + item.get("name") +
+                       ", has_customization=" + (item.containsKey("customization") ? "YES" : "NO"));
+            
+            if (item.containsKey("customization")) {
+                Map<String, Object> customization = (Map<String, Object>) item.get("customization");
+                Log.d(TAG, "      Customization keys: " + customization.keySet().toString());
+                
+                if (customization.containsKey("customization_details")) {
+                    List<?> details = (List<?>) customization.get("customization_details");
+                    Log.d(TAG, "      ✅ customization_details: " + details.size() + " items");
+                    for (int j = 0; j < details.size(); j++) {
+                        Object detail = details.get(j);
+                        Log.d(TAG, "        Detail " + j + ": " + new Gson().toJson(detail));
+                    }
+                } else {
+                    Log.d(TAG, "      ❌ NO customization_details key");
+                }
+            }
+        }
+        
+        // 🔴 CRITICAL: Use Gson with setSerializeNulls() to ensure all fields are included
+        Gson gsonForSerialization = new com.google.gson.GsonBuilder()
+            .serializeNulls()
+            .create();
+        Log.d(TAG, "📦 Complete orderHeader JSON: " + gsonForSerialization.toJson(orderHeader));
+        
         // Call the backend via Retrofit
         OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
         Call<ResponseBody> call = service.saveOrderDirect(orderHeader);

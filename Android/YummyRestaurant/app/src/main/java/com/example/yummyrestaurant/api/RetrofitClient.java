@@ -34,8 +34,10 @@ public class RetrofitClient {
                     .build();
 
             // Create Gson instance with lenient mode to handle malformed JSON
+            // 🔴 CRITICAL: Must include serializeNulls() to ensure all fields are serialized
             Gson gson = new GsonBuilder()
                     .setLenient()
+                    .serializeNulls()
                     .create();
 
             retrofit = new Retrofit.Builder()

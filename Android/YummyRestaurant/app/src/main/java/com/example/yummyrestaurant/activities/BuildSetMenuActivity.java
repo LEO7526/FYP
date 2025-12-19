@@ -1,6 +1,7 @@
 package com.example.yummyrestaurant.activities;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,6 +39,8 @@ public class BuildSetMenuActivity extends AppCompatActivity {
     private Button confirmBtn;
     private final List<SelectableMenuItemAdapter> adapters = new ArrayList<>();
     private SetMenu currentSetMenu;
+    private boolean isReorder = false;
+    private int prefillPackageId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,8 @@ public class BuildSetMenuActivity extends AppCompatActivity {
         confirmBtn = findViewById(R.id.confirmSetMenuBtn);
 
         int packageId = getIntent().getIntExtra("package_id", 1); // default to 1 if not passed
+        isReorder = getIntent().getBooleanExtra("is_reorder", false);
+        prefillPackageId = packageId;
 
         MenuApi menuApi = RetrofitClient.getClient(this).create(MenuApi.class);
         Call<SetMenuResponse> call = menuApi.getSetMenu(packageId, "en");
@@ -128,7 +133,16 @@ public class BuildSetMenuActivity extends AppCompatActivity {
             rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
             rv.setAdapter(adapter);
 
-            // 4. Add to container and keep reference
+            // 4. 應用預填數據（如果是 Reorder）
+            if (isReorder && prefillPackageId > 0) {
+                List<MenuItem> prefillItems = CartManager.getPrefillPackageData(prefillPackageId);
+                if (prefillItems != null && !prefillItems.isEmpty()) {
+                    adapter.preselectItems(prefillItems);
+                    Log.d("BuildSetMenuActivity", "Applied prefill data: " + prefillItems.size() + " items");
+                }
+            }
+
+            // 5. Add to container and keep reference
             packageContainer.addView(rv);
             adapters.add(adapter);
         }
@@ -177,18 +191,34 @@ public class BuildSetMenuActivity extends AppCompatActivity {
                 .setTitle("Confirm Your " + currentSetMenu.getName())
                 .setMessage(summary.toString())
                 .setPositiveButton("Confirm", (dialog, which) -> {
-                    for (MenuItem item : allChosen) {
-                        CartItem cartItem = new CartItem(item, null);
-                        CartManager.addItem(cartItem, 1);
-                    }
+                    // ✅ Add package item to cart (as a special marker item)
+                    // Store package ID and selected items in a custom CartItem
+                    MenuItem packageMarker = new MenuItem();
+                    packageMarker.setId(currentSetMenu.getId());
+                    packageMarker.setName(currentSetMenu.getName());
+                    packageMarker.setPrice(discountedPrice);
+                    packageMarker.setCategory("PACKAGE");
+                    
+                    // Add marker item to cart (qty=1 represents the whole package)
+                    CartItem packageItem = new CartItem(packageMarker, null);
+                    CartManager.addItem(packageItem, 1);
+                    
+                    // Store the package details in CartManager for later use
+                    CartManager.setPackageDetails(currentSetMenu.getId(), allChosen, discountedPrice);
+                    
+                    // 清除預填數據（Reorder 完成）
+                    CartManager.clearPrefillPackageData(currentSetMenu.getId());
 
                     Toast.makeText(
                             BuildSetMenuActivity.this,
-                            currentSetMenu.getName() + " added! You saved $" +
+                            currentSetMenu.getName() + " added! You saved HK$" +
                                     String.format("%.2f", finalTotal - discountedPrice),
                             Toast.LENGTH_LONG
                     ).show();
 
+                    // ✅ Navigate to CartActivity instead of finish
+                    Intent intent = new Intent(BuildSetMenuActivity.this, CartActivity.class);
+                    startActivity(intent);
                     finish();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())

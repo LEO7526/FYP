@@ -16,7 +16,7 @@ if ($packageId <= 0) {
 }
 
 // Fetch package info
-$sql = "SELECT package_id, package_name, num_of_type, discount 
+$sql = "SELECT package_id, package_name, num_of_type, amounts, package_image_url 
         FROM menu_package WHERE package_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $packageId);
@@ -33,7 +33,8 @@ $response = [
     "id" => (int)$package['package_id'],
     "name" => $package['package_name'],
     "num_of_type" => (int)$package['num_of_type'],
-    "discount" => (float)$package['discount'],
+    "price" => (float)$package['amounts'],
+    "image_url" => $package['package_image_url'],
     "types" => []
 ];
 

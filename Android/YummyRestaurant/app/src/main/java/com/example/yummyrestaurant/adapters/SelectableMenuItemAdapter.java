@@ -93,6 +93,33 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         return maxSelection;
     }
 
+    /** Preselect items for reorder (matches by name and price) */
+    public void preselectItems(List<MenuItem> itemsToPreselect) {
+        if (itemsToPreselect == null || itemsToPreselect.isEmpty()) {
+            return;
+        }
+
+        selectedItems.clear();
+        
+        for (MenuItem prefillItem : itemsToPreselect) {
+            for (MenuItem availableItem : items) {
+                // Match by ID, or by name and price as fallback
+                if ((prefillItem.getId() > 0 && prefillItem.getId() == availableItem.getId()) ||
+                    (prefillItem.getName() != null && prefillItem.getName().equals(availableItem.getName()) &&
+                     Math.abs(prefillItem.getPrice() - availableItem.getPrice()) < 0.01)) {
+                    
+                    if (!selectedItems.contains(availableItem) && selectedItems.size() < maxSelection) {
+                        selectedItems.add(availableItem);
+                        Log.d("SelectableAdapter", "Preselected item: " + availableItem.getName());
+                    }
+                    break;
+                }
+            }
+        }
+        
+        notifyDataSetChanged();
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         ImageView image;

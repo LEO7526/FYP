@@ -8,7 +8,7 @@ if ($conn->connect_error) {
 }
 
 // Fetch all packages
-$sql = "SELECT package_id, package_name, num_of_type, discount FROM menu_package";
+$sql = "SELECT package_id, package_name, num_of_type, package_image_url, amounts FROM menu_package";
 $result = $conn->query($sql);
 
 $packages = [];
@@ -18,7 +18,8 @@ if ($result && $result->num_rows > 0) {
             "id" => (int)$row['package_id'],
             "name" => $row['package_name'],
             "num_of_type" => (int)$row['num_of_type'],
-            "discount" => (float)$row['discount']
+            "image_url" => $row['package_image_url'],
+            "price" => (float)$row['amounts']
         ];
     }
 }
