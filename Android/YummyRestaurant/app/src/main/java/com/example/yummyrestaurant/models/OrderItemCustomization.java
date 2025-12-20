@@ -62,6 +62,27 @@ public class OrderItemCustomization implements Serializable {
     public String getChoiceNames() { return choiceNames; }
     public void setChoiceNames(String choiceNames) { this.choiceNames = choiceNames; }
 
+    /**
+     * Get parsed choice names for display purposes
+     * Handles JSON array format from API (e.g., ["Numbing"] or ["Mild","Medium"])
+     * @return Cleaned string ready for display (e.g., "Numbing" or "Mild, Medium")
+     */
+    public String getChoiceNamesDisplay() {
+        if (choiceNames == null || choiceNames.isEmpty()) {
+            return "";
+        }
+        
+        String displayValue = choiceNames;
+        // Remove JSON array brackets if present
+        if (displayValue.startsWith("[") && displayValue.endsWith("]")) {
+            displayValue = displayValue.substring(1, displayValue.length() - 1);
+        }
+        // Remove quotes if present
+        displayValue = displayValue.replaceAll("\"", "");
+        return displayValue;
+    }
+
+
     public String getTextValue() { return textValue; }
     public void setTextValue(String textValue) { this.textValue = textValue; }
 
@@ -87,15 +108,8 @@ public class OrderItemCustomization implements Serializable {
         } else if (selectedChoices != null && !selectedChoices.isEmpty()) {
             return optionName + ": " + String.join(", ", selectedChoices);
         } else if (choiceNames != null && !choiceNames.isEmpty()) {
-            // Handle JSON string from API (e.g., ["Numbing"] or "Numbing")
-            String displayValue = choiceNames;
-            // Remove JSON array brackets if present
-            if (displayValue.startsWith("[") && displayValue.endsWith("]")) {
-                displayValue = displayValue.substring(1, displayValue.length() - 1);
-            }
-            // Remove quotes if present
-            displayValue = displayValue.replaceAll("\"", "");
-            return optionName + ": " + displayValue;
+            // Use the helper method to get cleaned display value
+            return optionName + ": " + getChoiceNamesDisplay();
         }
         return optionName;
     }

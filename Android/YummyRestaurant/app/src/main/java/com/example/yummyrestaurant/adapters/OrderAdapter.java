@@ -121,7 +121,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                             if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
                                 choices = String.join(", ", cust.getSelectedChoices());
                             } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                choices = cust.getChoiceNames();
+                                choices = cust.getChoiceNamesDisplay();
                             }
                             custDisplay = cust.getOptionName() + ": " + choices;
                         }
@@ -136,7 +136,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                             if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
                                 choices = String.join(", ", cust.getSelectedChoices());
                             } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                choices = cust.getChoiceNames();
+                                choices = cust.getChoiceNamesDisplay();
                             }
                             custView.setText("    ├─ " + cust.getOptionName() + ": " + choices);
                         }
@@ -567,9 +567,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                                 custText = "   └─ Special: " + cust.getTextValue();
                                 Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
                             } else {
-                                // 常規自訂選項
-                                custText = "   └─ " + cust.getOptionName() + ": " + cust.getChoiceNames();
-                                Log.d("OrderAdapter", "        Option: " + cust.getOptionName() + " = " + cust.getChoiceNames());
+                                // 常規自訂選項 - 優先使用 selectedChoices，備用 choiceNames
+                                String choices = "";
+                                if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
+                                    choices = String.join(", ", cust.getSelectedChoices());
+                                } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
+                                    choices = cust.getChoiceNamesDisplay();
+                                }
+                                custText = "   └─ " + cust.getOptionName() + ": " + choices;
+                                Log.d("OrderAdapter", "        Option: " + cust.getOptionName() + " = " + choices);
                             }
                             
                             TextView custRow = new TextView(context);
