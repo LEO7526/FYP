@@ -53,9 +53,6 @@ public class CustomizeDishActivity extends AppCompatActivity {
     private EditText notesEditText;
     private Button saveBtn;
     private ProgressBar loadingSpinner;
-    private TextView basePriceText;
-    private TextView addonsCostText;
-    private TextView totalPriceText;
 
     private MenuItem menuItem;
     private int quantity = 1;
@@ -73,9 +70,6 @@ public class CustomizeDishActivity extends AppCompatActivity {
         notesEditText = findViewById(R.id.notesEditText);
         saveBtn = findViewById(R.id.saveCustomizationBtn);
         loadingSpinner = findViewById(R.id.loadingSpinner);
-        basePriceText = findViewById(R.id.basePriceText);
-        addonsCostText = findViewById(R.id.addonsCostText);
-        totalPriceText = findViewById(R.id.totalPriceText);
 
         // Load extras
         menuItem = (MenuItem) getIntent().getSerializableExtra(EXTRA_MENU_ITEM);
@@ -88,7 +82,6 @@ public class CustomizeDishActivity extends AppCompatActivity {
         }
 
         basePrice = menuItem.getPrice();
-        updatePriceDisplay();
 
         saveBtn.setEnabled(false);
         if (loadingSpinner != null) {
@@ -150,7 +143,7 @@ public class CustomizeDishActivity extends AppCompatActivity {
     }
 
     /**
-     * 動態生成UI：為每個選項生成RadioGroup或CheckBox組
+     * 動態生成UI：為每個選項生成RadioGroup或CheckBox組（支持v4.4和v4.5）
      */
     private void setupUI() {
         optionsContainer.removeAllViews();
@@ -158,15 +151,27 @@ public class CustomizeDishActivity extends AppCompatActivity {
         checkboxGroupMap.clear();
 
         for (CustomizationOptionsResponse.CustomizationOptionDetail option : customizationOptions) {
-            if (option.getChoices() == null || option.getChoices().isEmpty()) {
-                Log.w(TAG, "Option " + option.getOptionName() + " has no choices, skipping");
+            // ✅ v4.5：優先使用values，若無則使用choices（向後兼容）
+            List<?> items = null;
+            boolean isValueBased = false;
+            
+            if (option.getValues() != null && !option.getValues().isEmpty()) {
+                items = option.getValues();
+                isValueBased = true;
+            } else if (option.getChoices() != null && !option.getChoices().isEmpty()) {
+                items = option.getChoices();
+                isValueBased = false;
+            }
+            
+            if (items == null || items.isEmpty()) {
+                Log.w(TAG, "Option " + option.getOptionName() + " has no values/choices, skipping");
                 continue;
             }
 
             if (option.getMaxSelections() == 1) {
-                addRadioGroupOption(option);
+                addRadioGroupOption(option, items, isValueBased);
             } else if (option.getMaxSelections() > 1) {
-                addCheckboxGroupOption(option);
+                addCheckboxGroupOption(option, items, isValueBased);
             }
         }
 
@@ -178,9 +183,12 @@ public class CustomizeDishActivity extends AppCompatActivity {
     }
 
     /**
-     * 為單選選項添加RadioGroup
+     * 為單選選項添加RadioGroup（支持v4.4和v4.5）
      */
-    private void addRadioGroupOption(CustomizationOptionsResponse.CustomizationOptionDetail option) {
+    private void addRadioGroupOption(
+            CustomizationOptionsResponse.CustomizationOptionDetail option,
+            List<?> items,
+            boolean isValueBased) {
         LinearLayout groupLayout = new LinearLayout(this);
         groupLayout.setOrientation(LinearLayout.VERTICAL);
         groupLayout.setPadding(0, 16, 0, 16);
@@ -203,14 +211,25 @@ public class CustomizeDishActivity extends AppCompatActivity {
         RadioGroup radioGroup = new RadioGroup(this);
         radioGroup.setOrientation(RadioGroup.VERTICAL);
 
-        for (CustomizationOptionsResponse.ChoiceItem choice : option.getChoices()) {
+        for (Object item : items) {
             RadioButton rb = new RadioButton(this);
-            rb.setTag(choice.getChoiceId());
-            String displayText = choice.getChoiceName();
-            if (choice.getAdditionalCost() > 0) {
-                displayText += String.format(" (+₹%.2f)", choice.getAdditionalCost());
+            
+            if (isValueBased) {
+                // ✅ v4.5：ValueItem
+                CustomizationOptionsResponse.ValueItem value = (CustomizationOptionsResponse.ValueItem) item;
+                rb.setTag(value.getValueId());
+                rb.setText(value.getValueName());
+                // v4.5沒有額外費用
+            } else {
+                // ⚠️ v4.4：ChoiceItem
+                CustomizationOptionsResponse.ChoiceItem choice = (CustomizationOptionsResponse.ChoiceItem) item;
+                rb.setTag(choice.getChoiceId());
+                String displayText = choice.getChoiceName();
+                if (choice.getAdditionalCost() > 0) {
+                    displayText += String.format(" (+₹%.2f)", choice.getAdditionalCost());
+                }
+                rb.setText(displayText);
             }
-            rb.setText(displayText);
 
             rb.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
@@ -229,9 +248,12 @@ public class CustomizeDishActivity extends AppCompatActivity {
     }
 
     /**
-     * 為多選選項添加CheckBox組
+     * 為多選選項添加CheckBox組（支持v4.4和v4.5）
      */
-    private void addCheckboxGroupOption(CustomizationOptionsResponse.CustomizationOptionDetail option) {
+    private void addCheckboxGroupOption(
+            CustomizationOptionsResponse.CustomizationOptionDetail option,
+            List<?> items,
+            boolean isValueBased) {
         LinearLayout groupLayout = new LinearLayout(this);
         groupLayout.setOrientation(LinearLayout.VERTICAL);
         groupLayout.setPadding(0, 16, 0, 16);
@@ -252,14 +274,25 @@ public class CustomizeDishActivity extends AppCompatActivity {
 
         // CheckBox 組
         List<CheckBox> checkboxes = new ArrayList<>();
-        for (CustomizationOptionsResponse.ChoiceItem choice : option.getChoices()) {
+        for (Object item : items) {
             CheckBox cb = new CheckBox(this);
-            cb.setTag(choice.getChoiceId());
-            String displayText = choice.getChoiceName();
-            if (choice.getAdditionalCost() > 0) {
-                displayText += String.format(" (+₹%.2f)", choice.getAdditionalCost());
+            
+            if (isValueBased) {
+                // ✅ v4.5：ValueItem
+                CustomizationOptionsResponse.ValueItem value = (CustomizationOptionsResponse.ValueItem) item;
+                cb.setTag(value.getValueId());
+                cb.setText(value.getValueName());
+                // v4.5沒有額外費用
+            } else {
+                // ⚠️ v4.4：ChoiceItem
+                CustomizationOptionsResponse.ChoiceItem choice = (CustomizationOptionsResponse.ChoiceItem) item;
+                cb.setTag(choice.getChoiceId());
+                String displayText = choice.getChoiceName();
+                if (choice.getAdditionalCost() > 0) {
+                    displayText += String.format(" (+₹%.2f)", choice.getAdditionalCost());
+                }
+                cb.setText(displayText);
             }
-            cb.setText(displayText);
 
             cb.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 int selectedCount = 0;
@@ -345,13 +378,7 @@ public class CustomizeDishActivity extends AppCompatActivity {
             }
         }
 
-        // 更新UI顯示
-        addonsCostText.setText(String.format("+₹%.2f", additionalCost));
-        double totalPrice = basePrice + additionalCost;
-        totalPriceText.setText(String.format("₹%.2f", totalPrice));
-        basePriceText.setText(String.format("₹%.2f", basePrice));
-
-        Log.d(TAG, "Price updated: base=" + basePrice + ", addons=" + additionalCost + ", total=" + totalPrice);
+        Log.d(TAG, "Price updated: base=" + basePrice + ", addons=" + additionalCost);
     }
 
     /**
@@ -380,7 +407,7 @@ public class CustomizeDishActivity extends AppCompatActivity {
     }
 
     /**
-     * 驗證並保存自訂選項到購物車
+     * 驗證並保存自訂選項到購物車（支持v4.4和v4.5）
      */
     private void validateAndSaveCustomization() {
         List<OrderItemCustomization> customizationDetails = new ArrayList<>();
@@ -431,22 +458,26 @@ public class CustomizeDishActivity extends AppCompatActivity {
 
             RadioButton rb = findViewById(checkedId);
             if (rb != null) {
-                String choiceName = rb.getText().toString();
-                // 移除額外費用部分，只保留選項名稱
-                if (choiceName.contains(" (+₹")) {
-                    choiceName = choiceName.substring(0, choiceName.indexOf(" (+₹"));
+                Integer selectedItemId = (Integer) rb.getTag();
+                String selectedItemName = rb.getText().toString();
+                
+                // 移除額外費用部分，只保留選項名稱（用於v4.4兼容性）
+                if (selectedItemName.contains(" (+₹")) {
+                    selectedItemName = selectedItemName.substring(0, selectedItemName.indexOf(" (+₹"));
                 }
 
-                final String finalChoiceName = choiceName;  // ✅ 用於內部類引用
+                // ✅ v4.5：創建基於值ID的OrderItemCustomization
                 OrderItemCustomization custom = new OrderItemCustomization(optionId, getOptionName(optionId));
-                // 🔴 FIX: 不要使用雙重括號初始化，改用正常的 ArrayList
-                List<String> choicesList = new ArrayList<>();
-                choicesList.add(finalChoiceName);
-                custom.setSelectedChoices(choicesList);
-                custom.setAdditionalCost(getChoiceCost((Integer) rb.getTag()));
-                customizationDetails.add(custom);
-
+                custom.setGroupId(getGroupId(optionId));
+                custom.setGroupName(getOptionName(optionId));
+                custom.addValueId(selectedItemId);
+                custom.addValue(selectedItemName);
+                
+                // v4.5沒有額外費用，但保留向後兼容
+                custom.setAdditionalCost(getChoiceCost(selectedItemId));
                 totalAdditionalCost += custom.getAdditionalCost();
+                
+                customizationDetails.add(custom);
             }
         }
 
@@ -454,24 +485,34 @@ public class CustomizeDishActivity extends AppCompatActivity {
         for (Map.Entry<Integer, List<CheckBox>> entry : checkboxGroupMap.entrySet()) {
             int optionId = entry.getKey();
             List<CheckBox> checkboxes = entry.getValue();
-            List<String> selectedChoices = new ArrayList<>();
+            List<Integer> selectedValueIds = new ArrayList<>();
+            List<String> selectedValueNames = new ArrayList<>();
             double checkboxAdditionalCost = 0;
 
             for (CheckBox cb : checkboxes) {
                 if (cb.isChecked()) {
-                    String choiceName = cb.getText().toString();
-                    if (choiceName.contains(" (+₹")) {
-                        choiceName = choiceName.substring(0, choiceName.indexOf(" (+₹"));
+                    Integer valueId = (Integer) cb.getTag();
+                    String valueName = cb.getText().toString();
+                    
+                    if (valueName.contains(" (+₹")) {
+                        valueName = valueName.substring(0, valueName.indexOf(" (+₹"));
                     }
-                    selectedChoices.add(choiceName);
-                    checkboxAdditionalCost += getChoiceCost((Integer) cb.getTag());
+                    
+                    selectedValueIds.add(valueId);
+                    selectedValueNames.add(valueName);
+                    checkboxAdditionalCost += getChoiceCost(valueId);
                 }
             }
 
-            if (!selectedChoices.isEmpty()) {
+            if (!selectedValueIds.isEmpty()) {
+                // ✅ v4.5：創建基於值ID的OrderItemCustomization
                 OrderItemCustomization custom = new OrderItemCustomization(optionId, getOptionName(optionId));
-                custom.setSelectedChoices(selectedChoices);
+                custom.setGroupId(getGroupId(optionId));
+                custom.setGroupName(getOptionName(optionId));
+                custom.setSelectedValueIds(selectedValueIds);
+                custom.setSelectedValues(selectedValueNames);
                 custom.setAdditionalCost(checkboxAdditionalCost);
+                
                 customizationDetails.add(custom);
                 totalAdditionalCost += checkboxAdditionalCost;
             }
@@ -515,11 +556,14 @@ public class CustomizeDishActivity extends AppCompatActivity {
     }
 
     /**
-     * 更新價格顯示（初始化）
+     * ✅ v4.5新增：根據optionId查詢groupId
      */
-    private void updatePriceDisplay() {
-        basePriceText.setText(String.format("₹%.2f", basePrice));
-        addonsCostText.setText("+₹0");
-        totalPriceText.setText(String.format("₹%.2f", basePrice));
+    private int getGroupId(int optionId) {
+        for (CustomizationOptionsResponse.CustomizationOptionDetail option : customizationOptions) {
+            if (option.getOptionId() == optionId) {
+                return option.getGroupId();
+            }
+        }
+        return 0;
     }
 }

@@ -184,47 +184,70 @@ foreach ($items as $item) {
             error_log("   ✅ Found " . count($customizations['customization_details']) . " customization details");
             foreach ($customizations['customization_details'] as $idx => $custom) {
                 error_log("   Processing detail #$idx: " . json_encode($custom));
-                error_log("      Detail type: " . gettype($custom) . ", Keys: " . implode(',', array_keys($custom)));
+                error_log("      Detail type: " . gettype($custom) . ", Keys: " . implode(',', array_keys((array)$custom)));
+                error_log("      ⚠️ Full detail object dump: " . var_export($custom, true));
                 
-                $option_id = intval($custom['option_id'] ?? 0);
-                $option_name = $custom['option_name'] ?? '';
-                $choice_names = '';
-                $text_value = $custom['text_value'] ?? '';
-                $additional_cost = floatval($custom['additional_cost'] ?? 0);
-
-                // 🔴 DEBUG: 檢查 selected_choices 字段
-                error_log("      selected_choices exists: " . (isset($custom['selected_choices']) ? 'YES' : 'NO'));
-                error_log("      selected_choices value: " . (isset($custom['selected_choices']) ? json_encode($custom['selected_choices']) : 'NULL'));
-                error_log("      selected_choices type: " . (isset($custom['selected_choices']) ? gettype($custom['selected_choices']) : 'undefined'));
-
-                // 處理selectedChoices陣列 - 🔴 改進：更詳細的檢查
-                if (isset($custom['selected_choices'])) {
-                    if (is_array($custom['selected_choices']) && !empty($custom['selected_choices'])) {
-                        // ✅ 轉換為 JSON 陣列格式（資料庫需要 JSON）
-                        $choice_names = json_encode($custom['selected_choices']);
-                        error_log("      ✅ Converted selected_choices array to JSON: $choice_names");
-                    } elseif (is_string($custom['selected_choices']) && !empty($custom['selected_choices'])) {
-                        // ✅ 若已是字符串，包裝為 JSON 陣列
-                        $choice_names = json_encode([$custom['selected_choices']]);
-                        error_log("      ✅ Using selected_choices string (wrapped as JSON): $choice_names");
-                    } else {
-                        error_log("      ⚠️ selected_choices exists but is empty or invalid type");
+                // 🔴 CRITICAL: Log all available fields
+                if (is_array($custom)) {
+                    foreach ($custom as $key => $val) {
+                        error_log("         [$key] = " . json_encode($val) . " (type: " . gettype($val) . ")");
                     }
                 }
                 
-                // 也嘗試 choice_names（以防萬一）
-                if (empty($choice_names) && !empty($custom['choice_names'])) {
-                    $choice_names = json_encode(is_array($custom['choice_names']) ? $custom['choice_names'] : [$custom['choice_names']]);
-                    error_log("      Using choice_names directly (as JSON): $choice_names");
+                // ✅ v4.5: 從custom物件提取group_id和selected_value_ids
+                $option_id = intval($custom['option_id'] ?? 0);
+                $group_id = intval($custom['group_id'] ?? 0);
+                $text_value = $custom['text_value'] ?? '';
+                
+                // ✅ v4.5: 使用selected_value_ids（整數陣列）替代selected_choices（字符串）
+                $selected_value_ids = '';
+                $selected_values = '';
+                
+                error_log("      Checking for selected_value_ids...");
+                if (isset($custom['selected_value_ids']) && !empty($custom['selected_value_ids'])) {
+                    error_log("      Found selected_value_ids: " . json_encode($custom['selected_value_ids']));
+                    // 如果已經是陣列，轉換為JSON
+                    if (is_array($custom['selected_value_ids'])) {
+                        $selected_value_ids = json_encode(array_map('intval', $custom['selected_value_ids']));
+                        error_log("      ✅ Converted selected_value_ids array to JSON: $selected_value_ids");
+                    } else {
+                        // 如果是字符串，嘗試解析
+                        $selected_value_ids = json_encode([intval($custom['selected_value_ids'])]);
+                        error_log("      ✅ Using selected_value_ids as JSON: $selected_value_ids");
+                    }
+                }
+                
+                // ✅ 兼容舊版本：如果使用selected_choices，轉換為對應的value_ids
+                error_log("      Checking for selected_choices... (is set: " . (isset($custom['selected_choices']) ? 'YES' : 'NO') . ")");
+                if (empty($selected_value_ids) && isset($custom['selected_choices'])) {
+                    error_log("      Found selected_choices: " . json_encode($custom['selected_choices']));
+                    if (is_array($custom['selected_choices']) && !empty($custom['selected_choices'])) {
+                        // ⚠️ 只保存到selected_values用於顯示，不能保存到selected_value_ids（應該是數字ID）
+                        $selected_values = json_encode($custom['selected_choices']);
+                        error_log("      ⚠️ Using selected_choices (legacy) → selected_values: $selected_values");
+                    }
+                }
+                
+                // selected_values (用於顯示) - 如果還沒有設置
+                error_log("      Checking for selected_values...");
+                if (empty($selected_values) && isset($custom['selected_values']) && !empty($custom['selected_values'])) {
+                    if (is_array($custom['selected_values'])) {
+                        $selected_values = json_encode($custom['selected_values']);
+                    } else {
+                        $selected_values = json_encode([$custom['selected_values']]);
+                    }
+                    error_log("      ✅ Using selected_values: $selected_values");
                 }
 
-                error_log("      Final values: option_id=$option_id, name=$option_name, choices=$choice_names, text=$text_value, cost=$additional_cost");
+                error_log("      Final values: option_id=$option_id, group_id=$group_id, value_ids=$selected_value_ids, values=$selected_values, text=$text_value");
+                error_log("      Condition check: empty(value_ids)=" . (empty($selected_value_ids) ? 'YES' : 'NO') . ", empty(values)=" . (empty($selected_values) ? 'YES' : 'NO') . ", empty(text)=" . (empty($text_value) ? 'YES' : 'NO'));
 
                 // 只有當有選擇或文本時才保存
-                if (!empty($choice_names) || !empty($text_value) || $additional_cost > 0) {
+                if (!empty($selected_value_ids) || !empty($selected_values) || !empty($text_value)) {
+                    // ✅ v4.5: 使用新的schema - group_id和selected_value_ids取代choice_ids/choice_names
                     $customStmt = $conn->prepare("
                         INSERT INTO order_item_customizations 
-                        (oid, item_id, option_id, option_name, choice_names, text_value, additional_cost)
+                        (oid, item_id, option_id, group_id, selected_value_ids, selected_values, text_value)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                     ");
 
@@ -233,20 +256,31 @@ foreach ($items as $item) {
                         continue;
                     }
 
-                    $customStmt->bind_param("iiissdi", 
-                        $order_id, $item_id, $option_id, 
-                        $option_name, $choice_names, $text_value, $additional_cost
+                    // 🔴 Critical: Create fresh variables for bind_param to avoid reference issues
+                    $bind_oid = $order_id;
+                    $bind_item_id = $item_id;
+                    $bind_option_id = $option_id;
+                    $bind_group_id = $group_id;
+                    $bind_value_ids = $selected_value_ids;
+                    $bind_values = $selected_values;
+                    $bind_text = $text_value;
+                    
+                    error_log("      About to bind with: oid=$bind_oid, item=$bind_item_id, opt=$bind_option_id, grp=$bind_group_id, val_ids='$bind_value_ids', vals='$bind_values', txt='$bind_text'");
+                    
+                    $customStmt->bind_param("iiiisss", 
+                        $bind_oid, $bind_item_id, $bind_option_id, $bind_group_id,
+                        $bind_value_ids, $bind_values, $bind_text
                     );
 
                     if ($customStmt->execute()) {
-                        error_log("      ✅ Customization SAVED: item=$item_id, option=$option_name, choices=$choice_names, cost=$additional_cost");
+                        error_log("      ✅ Customization SAVED (v4.5): item=$item_id, group=$group_id, values=$selected_values");
                     } else {
                         error_log("      ❌ Execute failed for customization: " . $customStmt->error);
                     }
 
                     $customStmt->close();
                 } else {
-                    error_log("      ⚠️ Skipped: no choices, text, or cost");
+                    error_log("      ⚠️ Skipped: no values or text");
                 }
             }
         } else {
@@ -261,19 +295,17 @@ foreach ($items as $item) {
             
             $notesStmt = $conn->prepare("
                 INSERT INTO order_item_customizations 
-                (oid, item_id, oiid, option_id, option_name, text_value)
-                VALUES (?, ?, ?, ?, ?, ?)
+                (oid, item_id, option_id, text_value)
+                VALUES (?, ?, ?, ?)
             ");
 
             if (!$notesStmt) {
                 error_log("      ❌ Prepare failed for notes: " . $conn->error);
             } else {
                 $notes_option_id = 999;  // 特殊要求使用特殊ID
-                $notes_option_name = "Special Instructions";
 
-                $notesStmt->bind_param("iiiiss", 
-                    $order_id, $item_id, $oiid, $notes_option_id, 
-                    $notes_option_name, $extra_notes
+                $notesStmt->bind_param("iiis", 
+                    $order_id, $item_id, $notes_option_id, $extra_notes
                 );
 
                 if (!$notesStmt->execute()) {

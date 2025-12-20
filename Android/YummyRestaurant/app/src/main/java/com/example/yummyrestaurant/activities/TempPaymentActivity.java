@@ -221,6 +221,8 @@ public class TempPaymentActivity extends AppCompatActivity {
                         // 🔴 MANDATORY FIELDS - 使用原始值不通過 Gson
                         detailMap.put("option_id", detail.getOptionId());
                         detailMap.put("option_name", detail.getOptionName());
+                        detailMap.put("group_id", detail.getGroupId());
+                        detailMap.put("group_name", detail.getGroupName());
                         detailMap.put("additional_cost", detail.getAdditionalCost());
                         
                         // ⚠️ 不添加 selected_choices 到 detailMap，而是在最後的 JSON 中手動添加
@@ -235,6 +237,8 @@ public class TempPaymentActivity extends AppCompatActivity {
                         StringBuilder detailJsonBuilder = new StringBuilder("{");
                         detailJsonBuilder.append("\"option_id\":").append(detail.getOptionId()).append(",");
                         detailJsonBuilder.append("\"option_name\":\"").append(detail.getOptionName()).append("\",");
+                        detailJsonBuilder.append("\"group_id\":").append(detail.getGroupId()).append(",");
+                        detailJsonBuilder.append("\"group_name\":\"").append(detail.getGroupName()).append("\",");
                         detailJsonBuilder.append("\"selected_choices\":").append(selectedChoicesJson).append(",");
                         detailJsonBuilder.append("\"additional_cost\":").append(detail.getAdditionalCost());
                         if (detail.getTextValue() != null && !detail.getTextValue().isEmpty()) {

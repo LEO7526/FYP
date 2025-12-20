@@ -5,7 +5,8 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 代表菜品自訂選項（例如：辛辣度、配菜選擇等）
+ * 代表菜品自訂選項（v4.5版本 - 基於群組的階層結構）
+ * 例如：辛辣度、配菜選擇等
  */
 public class CustomizationOption implements Serializable {
 
@@ -15,14 +16,25 @@ public class CustomizationOption implements Serializable {
     @SerializedName("item_id")
     private int itemId;
 
-    @SerializedName("option_name")
-    private String optionName; // 例如："Spice Level", "Side Dish"
+    // ✅ v4.5新增：群組ID和群組名稱
+    @SerializedName("group_id")
+    private int groupId;
 
-    @SerializedName("choices")
-    private List<OptionChoice> choices; // 可選的選項列表
+    @SerializedName("group_name")
+    private String groupName; // 例如："Spice Level", "Sugar Level"
+
+    @SerializedName("group_type")
+    private String groupType; // 例如："spice", "sugar", "ice", "milk", "topping", "other"
+
+    // ✅ v4.5：替代choices，使用values（基於value_id而非choice_id）
+    @SerializedName("values")
+    private List<OptionValue> values; // 可選的值列表
 
     @SerializedName("max_selections")
     private int maxSelections; // 最多可選數量
+
+    @SerializedName("is_required")
+    private int isRequired; // 0 = 可選, 1 = 必填
 
     // Getters and Setters
     public int getOptionId() { return optionId; }
@@ -31,41 +43,65 @@ public class CustomizationOption implements Serializable {
     public int getItemId() { return itemId; }
     public void setItemId(int itemId) { this.itemId = itemId; }
 
-    public String getOptionName() { return optionName; }
-    public void setOptionName(String optionName) { this.optionName = optionName; }
+    public int getGroupId() { return groupId; }
+    public void setGroupId(int groupId) { this.groupId = groupId; }
 
-    public List<OptionChoice> getChoices() { return choices; }
-    public void setChoices(List<OptionChoice> choices) { this.choices = choices; }
+    public String getGroupName() { return groupName; }
+    public void setGroupName(String groupName) { this.groupName = groupName; }
+
+    public String getGroupType() { return groupType; }
+    public void setGroupType(String groupType) { this.groupType = groupType; }
+
+    public List<OptionValue> getValues() { return values; }
+    public void setValues(List<OptionValue> values) { this.values = values; }
 
     public int getMaxSelections() { return maxSelections; }
     public void setMaxSelections(int maxSelections) { this.maxSelections = maxSelections; }
 
-    // 內部類：選項的單個選擇
-    public static class OptionChoice implements Serializable {
-        @SerializedName("choice_id")
-        private int choiceId;
+    public int getIsRequired() { return isRequired; }
+    public void setIsRequired(int isRequired) { this.isRequired = isRequired; }
 
-        @SerializedName("choice_name")
-        private String choiceName;
+    /**
+     * ✅ 向後兼容：getOptionName() - 返回groupName
+     * (保持與舊代碼的相容性)
+     */
+    public String getOptionName() {
+        return groupName;
+    }
 
-        @SerializedName("additional_cost")
-        private double additionalCost; // 額外費用（如果有）
+    /**
+     * ✅ 向後兼容：setOptionName() - 設置groupName
+     */
+    public void setOptionName(String optionName) {
+        this.groupName = optionName;
+    }
 
-        public OptionChoice() {}
+    // ✅ v4.5新增：內部類代表單個值（替代OptionChoice）
+    public static class OptionValue implements Serializable {
+        @SerializedName("value_id")
+        private int valueId;
 
-        public OptionChoice(int choiceId, String choiceName, double additionalCost) {
-            this.choiceId = choiceId;
-            this.choiceName = choiceName;
-            this.additionalCost = additionalCost;
+        @SerializedName("value_name")
+        private String valueName;
+
+        @SerializedName("display_order")
+        private int displayOrder;
+
+        public OptionValue() {}
+
+        public OptionValue(int valueId, String valueName, int displayOrder) {
+            this.valueId = valueId;
+            this.valueName = valueName;
+            this.displayOrder = displayOrder;
         }
 
-        public int getChoiceId() { return choiceId; }
-        public void setChoiceId(int choiceId) { this.choiceId = choiceId; }
+        public int getValueId() { return valueId; }
+        public void setValueId(int valueId) { this.valueId = valueId; }
 
-        public String getChoiceName() { return choiceName; }
-        public void setChoiceName(String choiceName) { this.choiceName = choiceName; }
+        public String getValueName() { return valueName; }
+        public void setValueName(String valueName) { this.valueName = valueName; }
 
-        public double getAdditionalCost() { return additionalCost; }
-        public void setAdditionalCost(double additionalCost) { this.additionalCost = additionalCost; }
+        public int getDisplayOrder() { return displayOrder; }
+        public void setDisplayOrder(int displayOrder) { this.displayOrder = displayOrder; }
     }
 }
