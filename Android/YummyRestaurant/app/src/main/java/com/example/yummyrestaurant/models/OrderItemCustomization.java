@@ -185,12 +185,12 @@ public class OrderItemCustomization implements Serializable {
      */
     public String getDisplayText() {
         if (textValue != null && !textValue.isEmpty()) {
-            return optionName + ": " + textValue;
-        } else if (selectedChoices != null && !selectedChoices.isEmpty()) {
-            return optionName + ": " + String.join(", ", selectedChoices);
+            return groupName + ": " + textValue;
+        } else if (selectedValues != null && !selectedValues.isEmpty()) {
+            return groupName + ": " + String.join(", ", selectedValues);
         } else if (choiceNames != null && !choiceNames.isEmpty()) {
             // Use the helper method to get cleaned display value
-            return optionName + ": " + getChoiceNamesDisplay();
+            return groupName + ": " + getChoiceNamesDisplay();
         }
         return groupName;
     }
