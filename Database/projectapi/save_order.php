@@ -207,8 +207,8 @@ foreach ($items as $item) {
                 $text_value = $custom['text_value'] ?? '';
                 
                 // ✅ v4.5: 使用selected_value_ids（整數陣列）替代selected_choices（字符串）
-                $selected_value_ids = '';
-                $selected_values = '';
+                $selected_value_ids = null;
+                $selected_values = null;
                 
                 error_log("      Checking for selected_value_ids...");
                 if (isset($custom['selected_value_ids']) && !empty($custom['selected_value_ids'])) {
@@ -226,7 +226,7 @@ foreach ($items as $item) {
                 
                 // ✅ 兼容舊版本：如果使用selected_choices，轉換為對應的value_ids
                 error_log("      Checking for selected_choices... (is set: " . (isset($custom['selected_choices']) ? 'YES' : 'NO') . ")");
-                if (empty($selected_value_ids) && isset($custom['selected_choices'])) {
+                if ($selected_value_ids === null && isset($custom['selected_choices'])) {
                     error_log("      Found selected_choices: " . json_encode($custom['selected_choices']));
                     if (is_array($custom['selected_choices']) && !empty($custom['selected_choices'])) {
                         // ⚠️ 只保存到selected_values用於顯示，不能保存到selected_value_ids（應該是數字ID）
@@ -237,7 +237,7 @@ foreach ($items as $item) {
                 
                 // selected_values (用於顯示) - 如果還沒有設置
                 error_log("      Checking for selected_values...");
-                if (empty($selected_values) && isset($custom['selected_values']) && !empty($custom['selected_values'])) {
+                if ($selected_values === null && isset($custom['selected_values']) && !empty($custom['selected_values'])) {
                     if (is_array($custom['selected_values'])) {
                         $selected_values = json_encode($custom['selected_values']);
                     } else {
@@ -246,11 +246,11 @@ foreach ($items as $item) {
                     error_log("      ✅ Using selected_values: $selected_values");
                 }
 
-                error_log("      Final values: option_id=$option_id, group_id=$group_id, value_ids=$selected_value_ids, values=$selected_values, text=$text_value");
-                error_log("      Condition check: empty(value_ids)=" . (empty($selected_value_ids) ? 'YES' : 'NO') . ", empty(values)=" . (empty($selected_values) ? 'YES' : 'NO') . ", empty(text)=" . (empty($text_value) ? 'YES' : 'NO'));
+                error_log("      Final values: option_id=$option_id, group_id=$group_id, value_ids=" . ($selected_value_ids ?? 'NULL') . ", values=" . ($selected_values ?? 'NULL') . ", text=$text_value");
+                error_log("      Condition check: is_null(value_ids)=" . ($selected_value_ids === null ? 'YES' : 'NO') . ", is_null(values)=" . ($selected_values === null ? 'YES' : 'NO') . ", empty(text)=" . (empty($text_value) ? 'YES' : 'NO'));
 
                 // 只有當有選擇或文本時才保存
-                if (!empty($selected_value_ids) || !empty($selected_values) || !empty($text_value)) {
+                if ($selected_value_ids !== null || $selected_values !== null || !empty($text_value)) {
                     // ✅ v4.5: 使用新的schema - group_id和selected_value_ids取代choice_ids/choice_names
                     $customStmt = $conn->prepare("
                         INSERT INTO order_item_customizations 
