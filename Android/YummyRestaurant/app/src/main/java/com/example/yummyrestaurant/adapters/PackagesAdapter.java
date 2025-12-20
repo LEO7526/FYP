@@ -3,11 +3,13 @@ package com.example.yummyrestaurant.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.SetMenu;
 
@@ -39,6 +41,16 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         SetMenu setMenu = packages.get(position);
         holder.name.setText(setMenu.getName());
+        
+        // Load package image using Glide
+        if (setMenu.getImageUrl() != null && !setMenu.getImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(setMenu.getImageUrl())
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .into(holder.image);
+        }
+        
         holder.itemView.setOnClickListener(v -> listener.onPackageClick(setMenu));
     }
 
@@ -49,9 +61,11 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;
+        ImageView image;
         ViewHolder(View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.packageName);
+            image = itemView.findViewById(R.id.packageImage);
         }
     }
 }

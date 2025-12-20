@@ -78,17 +78,26 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
         if (cartItem.getCustomization() != null) {
             StringBuilder details = new StringBuilder();
             
-            // ✅ 改變：顯示所有customizationDetails，而不只是spiceLevel
+            // ✅ v4.5支持：顯示所有customizationDetails，支援selectedValueIds和selectedChoices
             if (cartItem.getCustomization().getCustomizationDetails() != null && 
                 !cartItem.getCustomization().getCustomizationDetails().isEmpty()) {
                 
                 for (com.example.yummyrestaurant.models.OrderItemCustomization detail : 
                      cartItem.getCustomization().getCustomizationDetails()) {
                     
-                    if (detail.getSelectedChoices() != null && !detail.getSelectedChoices().isEmpty()) {
-                        details.append("• ").append(detail.getOptionName())
+                    // ✅ v4.5新增：優先使用selectedValues（值名稱）
+                    List<String> displayValues = null;
+                    if (detail.getSelectedValues() != null && !detail.getSelectedValues().isEmpty()) {
+                        displayValues = detail.getSelectedValues();
+                    } else if (detail.getSelectedChoices() != null && !detail.getSelectedChoices().isEmpty()) {
+                        // ⚠️ 向後兼容：使用選擇名稱（v4.4）
+                        displayValues = detail.getSelectedChoices();
+                    }
+                    
+                    if (displayValues != null && !displayValues.isEmpty()) {
+                        details.append("• ").append(detail.getOptionName() != null ? detail.getOptionName() : detail.getGroupName())
                                .append(": ")
-                               .append(String.join(", ", detail.getSelectedChoices()));
+                               .append(String.join(", ", displayValues));
                         
                         if (detail.getAdditionalCost() > 0) {
                             details.append(String.format(" (+₹%.2f)", detail.getAdditionalCost()));

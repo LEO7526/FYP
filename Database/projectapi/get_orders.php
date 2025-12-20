@@ -74,10 +74,10 @@ while ($row = $result->fetch_assoc()) {
         $customSql = "
             SELECT 
                 option_id,
-                option_name,
-                choice_names,
-                text_value,
-                additional_cost
+                group_id,
+                selected_value_ids,
+                selected_values,
+                text_value
             FROM order_item_customizations
             WHERE oid = ? AND item_id = ?
         ";
@@ -89,15 +89,41 @@ while ($row = $result->fetch_assoc()) {
         
         $customizations = [];
         while ($customRow = $customResult->fetch_assoc()) {
+            error_log("DEBUG get_orders: customRow = " . json_encode($customRow));
+            
+            $valueIds = json_decode($customRow['selected_value_ids'] ?? '[]', true);
+            $selectedValues = json_decode($customRow['selected_values'] ?? '[]', true);
+            
+            error_log("DEBUG get_orders: valueIds=" . json_encode($valueIds) . ", selectedValues=" . json_encode($selectedValues));
+            
+            // 🔴 CRITICAL FIX: Ensure selected_value_ids only contains integers
+            // If it contains strings (from legacy data), use selected_values instead
+            $cleanValueIds = [];
+            if (is_array($valueIds)) {
+                foreach ($valueIds as $val) {
+                    if (is_numeric($val)) {
+                        $cleanValueIds[] = (int)$val;
+                    }
+                }
+            }
+            
+            // If we couldn't get valid integer IDs, use an empty array
+            // The selected_values will still show the names for display
+            if (empty($cleanValueIds) && !empty($selectedValues)) {
+                $cleanValueIds = [];  // Empty array but selected_values has the display names
+            }
+            
             $customizations[] = [
                 "option_id" => (int)$customRow['option_id'],
-                "option_name" => $customRow['option_name'],
-                "choice_names" => $customRow['choice_names'],
-                "text_value" => $customRow['text_value'],
-                "additional_cost" => (float)$customRow['additional_cost']
+                "group_id" => (int)$customRow['group_id'],
+                "selected_value_ids" => $cleanValueIds,
+                "selected_values" => $selectedValues,
+                "text_value" => $customRow['text_value']
             ];
         }
         $customStmt->close();
+        
+        error_log("DEBUG get_orders: Found " . count($customizations) . " customizations for item_id=$item_id");
         
         $items[] = [
             "item_id" => $item_id,

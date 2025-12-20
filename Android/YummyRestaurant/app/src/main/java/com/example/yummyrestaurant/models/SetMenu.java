@@ -13,12 +13,16 @@ public class SetMenu {
 
     private double discount;
 
+    @SerializedName("image_url")
+    private String imageUrl;
+
     private List<PackageType> types;
 
     public int getId() { return id; }
     public String getName() { return name; }
     public int getNumOfType() { return numOfType; }
     public double getDiscount() { return discount; }
+    public String getImageUrl() { return imageUrl; }
 
     // Null-safe getter
     public List<PackageType> getTypes() {

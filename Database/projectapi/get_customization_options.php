@@ -1,6 +1,6 @@
 <?php
 /**
- * 取得菜品的自訂選項
+ * 取得菜品的自訂選項（v4.5版本 - 使用群組-值的階層結構）
  * 
  * 請求：GET /get_customization_options.php?item_id=6
  * 回應：
@@ -10,13 +10,14 @@
  *     {
  *       "option_id": 1,
  *       "item_id": 6,
- *       "option_name": "Spice Level",
- *       "option_type": "single_choice",
+ *       "group_id": 1,
+ *       "group_name": "Spice Level",
+ *       "group_type": "spice",
  *       "is_required": 1,
  *       "max_selections": 1,
- *       "choices": [
- *         { "choice_id": 1, "choice_name": "Mild", "additional_cost": 0 },
- *         { "choice_id": 2, "choice_name": "Hot", "additional_cost": 0 }
+ *       "values": [
+ *         { "value_id": 1, "value_name": "Mild", "display_order": 1 },
+ *         { "value_id": 2, "value_name": "Hot", "display_order": 2 }
  *       ]
  *     }
  *   ]
@@ -41,12 +42,21 @@ if ($item_id === null) {
     exit;
 }
 
-// Get customization options for this item
+// ✅ v4.5: 從item_customization_options和customization_option_group獲取選項
+// JOIN以獲取group_id、group_name、group_type
 $stmt = $conn->prepare("
-    SELECT option_id, item_id, option_name, max_selections, is_required
-    FROM item_customization_options
-    WHERE item_id = ?
-    ORDER BY option_id
+    SELECT 
+        ico.option_id,
+        ico.item_id,
+        ico.group_id,
+        cog.group_name,
+        cog.group_type,
+        ico.max_selections,
+        ico.is_required
+    FROM item_customization_options ico
+    JOIN customization_option_group cog ON ico.group_id = cog.group_id
+    WHERE ico.item_id = ?
+    ORDER BY ico.option_id
 ");
 
 if (!$stmt) {
@@ -63,44 +73,43 @@ $result = $stmt->get_result();
 $options = [];
 
 while ($row = $result->fetch_assoc()) {
-    $option_id = $row['option_id'];
+    $group_id = $row['group_id'];
     
-    // Get choices for this option
-    $choiceStmt = $conn->prepare("
-        SELECT choice_id, choice_name, additional_cost
-        FROM customization_option_choices
-        WHERE option_id = ?
-        ORDER BY display_order, choice_id
+    // ✅ 從customization_option_value獲取此group的所有值
+    $valueStmt = $conn->prepare("
+        SELECT value_id, value_name, display_order
+        FROM customization_option_value
+        WHERE group_id = ?
+        ORDER BY display_order ASC, value_id ASC
     ");
-    $choiceStmt->bind_param("i", $option_id);
-    $choiceStmt->execute();
-    $choiceResult = $choiceStmt->get_result();
+    $valueStmt->bind_param("i", $group_id);
+    $valueStmt->execute();
+    $valueResult = $valueStmt->get_result();
     
-    $choices = [];
-    while ($choiceRow = $choiceResult->fetch_assoc()) {
-        $choices[] = [
-            "choice_id" => intval($choiceRow['choice_id']),
-            "choice_name" => $choiceRow['choice_name'],
-            "additional_cost" => floatval($choiceRow['additional_cost'])
+    $values = [];
+    while ($valueRow = $valueResult->fetch_assoc()) {
+        $values[] = [
+            "value_id" => intval($valueRow['value_id']),
+            "value_name" => $valueRow['value_name'],
+            "display_order" => intval($valueRow['display_order'])
         ];
     }
-    $choiceStmt->close();
+    $valueStmt->close();
     
     $options[] = [
         "option_id" => intval($row['option_id']),
         "item_id" => intval($row['item_id']),
-        "option_name" => $row['option_name'],
+        "group_id" => intval($row['group_id']),
+        "group_name" => $row['group_name'],
+        "group_type" => $row['group_type'],
         "max_selections" => intval($row['max_selections']),
-        "is_required" => intval($row['is_required']),  // ✅ 新增
-        "choices" => $choices
+        "is_required" => intval($row['is_required']),
+        "values" => $values
     ];
 }
 
 $stmt->close();
 $conn->close();
 
-echo json_encode([
-    "success" => true,
-    "options" => $options
-]);
+echo json_encode(["success" => true, "options" => $options]);
 ?>
