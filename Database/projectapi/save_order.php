@@ -154,16 +154,23 @@ foreach ($items as $item) {
         continue;
     }
 
+    // ✅ Extract extra_notes if present in customizations
+    $item_note = '';
+    if ($customizations && is_array($customizations) && !empty($customizations['extra_notes'])) {
+        $item_note = $customizations['extra_notes'];
+        error_log("Found extra_notes for item: $item_note");
+    }
+
     $itemStmt = $conn->prepare("
-        INSERT INTO order_items (oid, item_id, qty)
-        VALUES (?, ?, ?)
+        INSERT INTO order_items (oid, item_id, qty, note)
+        VALUES (?, ?, ?, ?)
     ");
     if (!$itemStmt) {
         error_log("Prepare failed for item: " . $conn->error);
         continue;
     }
 
-    $itemStmt->bind_param("iii", $order_id, $item_id, $qty);
+    $itemStmt->bind_param("iiis", $order_id, $item_id, $qty, $item_note);
 
     if (!$itemStmt->execute()) {
         error_log("Execute failed for item: item_id=$item_id, qty=$qty — " . $itemStmt->error);
@@ -256,9 +263,9 @@ foreach ($items as $item) {
                         continue;
                     }
 
-                    $customStmt->bind_param("iiisssd", 
-                        $order_id, $item_id, $option_id, 
-                        $option_name, $choice_names, $text_value, $additional_cost
+                    $customStmt->bind_param("iiiisss", 
+                        $order_id, $item_id, $option_id, $group_id,
+                        $selected_value_ids, $selected_values, $text_value
                     );
 
                     if ($customStmt->execute()) {
@@ -275,36 +282,6 @@ foreach ($items as $item) {
         } else {
             error_log("   ❌ NO customization_details found in customizations object");
             error_log("   Available keys: " . json_encode(array_keys($customizations)));
-        }
-
-        // ✅ 新增：保存特殊要求
-        if (!empty($customizations['extra_notes'])) {
-            $extra_notes = $customizations['extra_notes'];
-            error_log("   📝 Processing extra_notes: $extra_notes");
-            
-            $notesStmt = $conn->prepare("
-                INSERT INTO order_item_customizations 
-                (oid, item_id, option_id, text_value)
-                VALUES (?, ?, ?, ?)
-            ");
-
-            if (!$notesStmt) {
-                error_log("      ❌ Prepare failed for notes: " . $conn->error);
-            } else {
-                $notes_option_id = 999;  // 特殊要求使用特殊ID
-
-                $notesStmt->bind_param("iiis", 
-                    $order_id, $item_id, $notes_option_id, $extra_notes
-                );
-
-                if (!$notesStmt->execute()) {
-                    error_log("Execute failed for notes: " . $notesStmt->error);
-                } else {
-                    error_log("✅ Special instructions SAVED: item=$item_id, notes=$extra_notes");
-                }
-
-                $notesStmt->close();
-            }
         }
     } else {
         error_log("No customizations for item_id=$item_id");
