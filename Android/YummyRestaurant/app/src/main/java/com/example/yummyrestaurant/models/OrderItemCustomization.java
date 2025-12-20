@@ -1,7 +1,11 @@
 package com.example.yummyrestaurant.models;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,14 +76,21 @@ public class OrderItemCustomization implements Serializable {
             return "";
         }
         
-        String displayValue = choiceNames;
-        // Remove JSON array brackets if present
-        if (displayValue.startsWith("[") && displayValue.endsWith("]")) {
-            displayValue = displayValue.substring(1, displayValue.length() - 1);
+        // Try to parse as JSON array first
+        try {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<String>>(){}.getType();
+            List<String> choices = gson.fromJson(choiceNames, listType);
+            if (choices != null && !choices.isEmpty()) {
+                return String.join(", ", choices);
+            }
+        } catch (JsonSyntaxException e) {
+            // Not valid JSON, treat as plain string
+            // Remove any quotes that might be present
+            return choiceNames.replace("\"", "");
         }
-        // Remove quotes if present
-        displayValue = displayValue.replaceAll("\"", "");
-        return displayValue;
+        
+        return choiceNames;
     }
 
 
