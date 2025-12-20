@@ -86,6 +86,16 @@ public class OrderItemCustomization implements Serializable {
             return optionName + ": " + textValue;
         } else if (selectedChoices != null && !selectedChoices.isEmpty()) {
             return optionName + ": " + String.join(", ", selectedChoices);
+        } else if (choiceNames != null && !choiceNames.isEmpty()) {
+            // Handle JSON string from API (e.g., ["Numbing"] or "Numbing")
+            String displayValue = choiceNames;
+            // Remove JSON array brackets if present
+            if (displayValue.startsWith("[") && displayValue.endsWith("]")) {
+                displayValue = displayValue.substring(1, displayValue.length() - 1);
+            }
+            // Remove quotes if present
+            displayValue = displayValue.replaceAll("\"", "");
+            return optionName + ": " + displayValue;
         }
         return optionName;
     }

@@ -233,7 +233,7 @@ foreach ($items as $item) {
                         continue;
                     }
 
-                    $customStmt->bind_param("iiissdi", 
+                    $customStmt->bind_param("iiisssd", 
                         $order_id, $item_id, $option_id, 
                         $option_name, $choice_names, $text_value, $additional_cost
                     );
