@@ -104,9 +104,17 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         return items.size();
     }
 
-    /** Returns the currently selected items */
+    /** Returns the currently selected items (shallow copy for safety) */
     public List<MenuItem> getSelectedItems() {
         return new ArrayList<>(selectedItems);
+    }
+
+    /** 
+     * Returns the currently selected items directly (not a copy)
+     * Use this when you need to preserve object references with customizations
+     */
+    public List<MenuItem> getSelectedItemsDirect() {
+        return selectedItems;
     }
 
     /** Returns how many items must/can be selected (used in validation) */
@@ -151,8 +159,9 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         for (MenuItem item : selectedItems) {
             if (item.getId() == itemId) {
                 item.setCustomizations(customizations);
-                Log.d("SelectableAdapter", "Updated customizations for item: " + item.getName() + 
-                      ", customization count: " + (customizations != null ? customizations.size() : 0));
+                int count = (customizations != null ? customizations.size() : 0);
+                Log.d("SelectableAdapter", String.format("Updated customizations for item: %s, count: %d", 
+                      item.getName(), count));
                 return true;
             }
         }

@@ -196,7 +196,8 @@ public class BuildSetMenuActivity extends AppCompatActivity {
         final List<MenuItem> allChosen = new ArrayList<>();
 
         for (SelectableMenuItemAdapter adapter : adapters) {
-            List<MenuItem> selected = adapter.getSelectedItems();
+            // Use getSelectedItemsDirect() to preserve customizations
+            List<MenuItem> selected = adapter.getSelectedItemsDirect();
             if (selected.size() < adapter.getRequiredCount()) {
                 Toast.makeText(this, "Please complete your selection", Toast.LENGTH_SHORT).show();
                 return;
