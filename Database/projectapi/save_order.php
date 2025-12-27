@@ -123,12 +123,41 @@ foreach ($items as $item) {
                     continue;
                 }
                 
-                // ✅ Prepare customization note for package item
+                // ✅ Prepare customization note for package item with group_name (v4.6)
                 $pkg_item_note = '';
                 if (!empty($packageItem['customizations']) && is_array($packageItem['customizations'])) {
                     error_log("Processing customizations for package item: item_id=$pkg_item_id");
-                    $pkg_item_note = json_encode($packageItem['customizations']);
-                    error_log("Package item customizations JSON: " . $pkg_item_note);
+                    
+                    $pkg_note_customizations = [];
+                    foreach ($packageItem['customizations'] as $custom) {
+                        $group_id = intval($custom['group_id'] ?? 0);
+                        
+                        // Fetch group_name from database
+                        $group_name = '';
+                        if ($group_id > 0) {
+                            $groupStmt = $conn->prepare("SELECT group_name FROM customization_option_group WHERE group_id = ?");
+                            if ($groupStmt) {
+                                $groupStmt->bind_param("i", $group_id);
+                                $groupStmt->execute();
+                                $groupStmt->bind_result($group_name);
+                                $groupStmt->fetch();
+                                $groupStmt->close();
+                            }
+                        }
+                        
+                        // Build customization with group_name
+                        $pkg_note_customizations[] = [
+                            'option_id' => intval($custom['option_id'] ?? 0),
+                            'group_id' => $group_id,
+                            'group_name' => $group_name,
+                            'selected_value_ids' => $custom['selected_value_ids'] ?? [],
+                            'selected_values' => $custom['selected_values'] ?? [],
+                            'text_value' => $custom['text_value'] ?? ''
+                        ];
+                    }
+                    
+                    $pkg_item_note = json_encode($pkg_note_customizations);
+                    error_log("Package item customizations JSON with group_name: " . $pkg_item_note);
                 }
                 
                 // Insert package item into order_items with customizations in note column
@@ -162,11 +191,83 @@ foreach ($items as $item) {
         continue;
     }
 
-    // ✅ Extract extra_notes if present in customizations
+    // ✅ Build customization note for individual items (v4.6)
     $item_note = '';
-    if ($customizations && is_array($customizations) && !empty($customizations['extra_notes'])) {
-        $item_note = $customizations['extra_notes'];
-        error_log("Found extra_notes for item: $item_note");
+    $note_customizations = [];
+    
+    if ($customizations && is_array($customizations)) {
+        error_log("📝 Processing customizations for item_id=$item_id");
+        error_log("   Customizations keys: " . implode(', ', array_keys($customizations)));
+        
+        if (!empty($customizations['customization_details'])) {
+            error_log("   ✅ Found " . count($customizations['customization_details']) . " customization details");
+            
+            foreach ($customizations['customization_details'] as $idx => $custom) {
+                $option_id = intval($custom['option_id'] ?? 0);
+                $group_id = intval($custom['group_id'] ?? 0);
+                $text_value = $custom['text_value'] ?? '';
+                
+                // Fetch group_name from database
+                $group_name = '';
+                if ($group_id > 0) {
+                    $groupStmt = $conn->prepare("SELECT group_name FROM customization_option_group WHERE group_id = ?");
+                    if ($groupStmt) {
+                        $groupStmt->bind_param("i", $group_id);
+                        $groupStmt->execute();
+                        $groupStmt->bind_result($group_name);
+                        $groupStmt->fetch();
+                        $groupStmt->close();
+                        error_log("      Fetched group_name='$group_name' for group_id=$group_id");
+                    }
+                }
+                
+                // Extract selected values
+                $selected_value_ids = [];
+                $selected_values = [];
+                
+                if (isset($custom['selected_value_ids']) && !empty($custom['selected_value_ids'])) {
+                    if (is_array($custom['selected_value_ids'])) {
+                        $selected_value_ids = array_map('intval', $custom['selected_value_ids']);
+                    } else {
+                        $selected_value_ids = [intval($custom['selected_value_ids'])];
+                    }
+                }
+                
+                if (isset($custom['selected_values']) && !empty($custom['selected_values'])) {
+                    if (is_array($custom['selected_values'])) {
+                        $selected_values = $custom['selected_values'];
+                    } else {
+                        $selected_values = [$custom['selected_values']];
+                    }
+                } elseif (isset($custom['selected_choices']) && is_array($custom['selected_choices'])) {
+                    // Legacy support for selected_choices
+                    $selected_values = $custom['selected_choices'];
+                }
+                
+                // Build customization object for note column with group_name
+                if (!empty($selected_value_ids) || !empty($selected_values) || !empty($text_value)) {
+                    $note_customizations[] = [
+                        'option_id' => $option_id,
+                        'group_id' => $group_id,
+                        'group_name' => $group_name,
+                        'selected_value_ids' => $selected_value_ids,
+                        'selected_values' => $selected_values,
+                        'text_value' => $text_value
+                    ];
+                }
+            }
+        }
+        
+        // Add extra_notes if present
+        if (!empty($customizations['extra_notes'])) {
+            error_log("   Found extra_notes: " . $customizations['extra_notes']);
+        }
+    }
+    
+    // Convert customizations to JSON for note column
+    if (!empty($note_customizations)) {
+        $item_note = json_encode($note_customizations);
+        error_log("Built customization note for item_id=$item_id: " . $item_note);
     }
 
     $itemStmt = $conn->prepare("
@@ -186,113 +287,61 @@ foreach ($items as $item) {
         continue;
     }
 
-    $oiid = $itemStmt->insert_id;  // ✅ 新增：獲取order_item_id
-    error_log("✅ Item saved: order_id=$order_id, item_id=$item_id, qty=$qty, oiid=$oiid");
+    $oiid = $itemStmt->insert_id;
+    error_log("✅ Item saved: order_id=$order_id, item_id=$item_id, qty=$qty, note_length=" . strlen($item_note));
     $itemStmt->close();
 
-    // ✅ 新增：保存自訂詳情到order_item_customizations
-    if ($customizations && is_array($customizations)) {
-        error_log("📝 Processing customizations for item_id=$item_id, oiid=$oiid");
-        error_log("   Customizations keys: " . implode(', ', array_keys($customizations)));
-        
-        if (!empty($customizations['customization_details'])) {
-            error_log("   ✅ Found " . count($customizations['customization_details']) . " customization details");
-            foreach ($customizations['customization_details'] as $idx => $custom) {
-                error_log("   Processing detail #$idx: " . json_encode($custom));
-                error_log("      Detail type: " . gettype($custom) . ", Keys: " . implode(',', array_keys((array)$custom)));
-                error_log("      ⚠️ Full detail object dump: " . var_export($custom, true));
-                
-                // 🔴 CRITICAL: Log all available fields
-                if (is_array($custom)) {
-                    foreach ($custom as $key => $val) {
-                        error_log("         [$key] = " . json_encode($val) . " (type: " . gettype($val) . ")");
-                    }
+    // ✅ Also save to order_item_customizations table for backward compatibility
+    if ($customizations && is_array($customizations) && !empty($customizations['customization_details'])) {
+        foreach ($customizations['customization_details'] as $idx => $custom) {
+            $option_id = intval($custom['option_id'] ?? 0);
+            $group_id = intval($custom['group_id'] ?? 0);
+            $text_value = $custom['text_value'] ?? '';
+            
+            $selected_value_ids = null;
+            $selected_values = null;
+            
+            if (isset($custom['selected_value_ids']) && !empty($custom['selected_value_ids'])) {
+                if (is_array($custom['selected_value_ids'])) {
+                    $selected_value_ids = json_encode(array_map('intval', $custom['selected_value_ids']));
+                } else {
+                    $selected_value_ids = json_encode([intval($custom['selected_value_ids'])]);
                 }
-                
-                // ✅ v4.5: 從custom物件提取group_id和selected_value_ids
-                $option_id = intval($custom['option_id'] ?? 0);
-                $group_id = intval($custom['group_id'] ?? 0);
-                $text_value = $custom['text_value'] ?? '';
-                
-                // ✅ v4.5: 使用selected_value_ids（整數陣列）替代selected_choices（字符串）
-                $selected_value_ids = null;
-                $selected_values = null;
-                
-                error_log("      Checking for selected_value_ids...");
-                if (isset($custom['selected_value_ids']) && !empty($custom['selected_value_ids'])) {
-                    error_log("      Found selected_value_ids: " . json_encode($custom['selected_value_ids']));
-                    // 如果已經是陣列，轉換為JSON
-                    if (is_array($custom['selected_value_ids'])) {
-                        $selected_value_ids = json_encode(array_map('intval', $custom['selected_value_ids']));
-                        error_log("      ✅ Converted selected_value_ids array to JSON: $selected_value_ids");
-                    } else {
-                        // 如果是字符串，嘗試解析
-                        $selected_value_ids = json_encode([intval($custom['selected_value_ids'])]);
-                        error_log("      ✅ Using selected_value_ids as JSON: $selected_value_ids");
-                    }
+            }
+            
+            if (isset($custom['selected_values']) && !empty($custom['selected_values'])) {
+                if (is_array($custom['selected_values'])) {
+                    $selected_values = json_encode($custom['selected_values']);
+                } else {
+                    $selected_values = json_encode([$custom['selected_values']]);
                 }
-                
-                // ✅ 兼容舊版本：如果使用selected_choices，轉換為對應的value_ids
-                error_log("      Checking for selected_choices... (is set: " . (isset($custom['selected_choices']) ? 'YES' : 'NO') . ")");
-                if ($selected_value_ids === null && isset($custom['selected_choices'])) {
-                    error_log("      Found selected_choices: " . json_encode($custom['selected_choices']));
-                    if (is_array($custom['selected_choices']) && !empty($custom['selected_choices'])) {
-                        // ⚠️ 只保存到selected_values用於顯示，不能保存到selected_value_ids（應該是數字ID）
-                        $selected_values = json_encode($custom['selected_choices']);
-                        error_log("      ⚠️ Using selected_choices (legacy) → selected_values: $selected_values");
-                    }
-                }
-                
-                // selected_values (用於顯示) - 如果還沒有設置
-                error_log("      Checking for selected_values...");
-                if ($selected_values === null && isset($custom['selected_values']) && !empty($custom['selected_values'])) {
-                    if (is_array($custom['selected_values'])) {
-                        $selected_values = json_encode($custom['selected_values']);
-                    } else {
-                        $selected_values = json_encode([$custom['selected_values']]);
-                    }
-                    error_log("      ✅ Using selected_values: $selected_values");
-                }
+            } elseif (isset($custom['selected_choices']) && is_array($custom['selected_choices']) && !empty($custom['selected_choices'])) {
+                $selected_values = json_encode($custom['selected_choices']);
+            }
 
-                error_log("      Final values: option_id=$option_id, group_id=$group_id, value_ids=" . ($selected_value_ids ?? 'NULL') . ", values=" . ($selected_values ?? 'NULL') . ", text=$text_value");
-                error_log("      Condition check: is_null(value_ids)=" . ($selected_value_ids === null ? 'YES' : 'NO') . ", is_null(values)=" . ($selected_values === null ? 'YES' : 'NO') . ", empty(text)=" . (empty($text_value) ? 'YES' : 'NO'));
+            if ($selected_value_ids !== null || $selected_values !== null || !empty($text_value)) {
+                $customStmt = $conn->prepare("
+                    INSERT INTO order_item_customizations 
+                    (oid, item_id, option_id, group_id, selected_value_ids, selected_values, text_value)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ");
 
-                // 只有當有選擇或文本時才保存
-                if ($selected_value_ids !== null || $selected_values !== null || !empty($text_value)) {
-                    // ✅ v4.5: 使用新的schema - group_id和selected_value_ids取代choice_ids/choice_names
-                    $customStmt = $conn->prepare("
-                        INSERT INTO order_item_customizations 
-                        (oid, item_id, option_id, group_id, selected_value_ids, selected_values, text_value)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    ");
-
-                    if (!$customStmt) {
-                        error_log("      ❌ Prepare failed for customization: " . $conn->error);
-                        continue;
-                    }
-
+                if ($customStmt) {
                     $customStmt->bind_param("iiiisss", 
                         $order_id, $item_id, $option_id, $group_id,
                         $selected_value_ids, $selected_values, $text_value
                     );
 
                     if ($customStmt->execute()) {
-                        error_log("      ✅ Customization SAVED (v4.5): item=$item_id, group=$group_id, values=$selected_values");
+                        error_log("      ✅ Customization SAVED to order_item_customizations: item=$item_id, group=$group_id");
                     } else {
                         error_log("      ❌ Execute failed for customization: " . $customStmt->error);
                     }
 
                     $customStmt->close();
-                } else {
-                    error_log("      ⚠️ Skipped: no values or text");
                 }
             }
-        } else {
-            error_log("   ❌ NO customization_details found in customizations object");
-            error_log("   Available keys: " . json_encode(array_keys($customizations)));
         }
-    } else {
-        error_log("No customizations for item_id=$item_id");
     }
 }
 
