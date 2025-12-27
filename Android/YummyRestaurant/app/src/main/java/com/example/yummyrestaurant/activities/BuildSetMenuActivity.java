@@ -210,7 +210,7 @@ public class BuildSetMenuActivity extends AppCompatActivity {
         double discountRate = currentSetMenu.getDiscount() > 0 ? currentSetMenu.getDiscount() : 1.0;
         final double discountedPrice = finalTotal * discountRate;
 
-        // Build summary string
+        // Build summary string with customization details
         StringBuilder summary = new StringBuilder();
         for (MenuItem item : allChosen) {
             summary.append("• ")
@@ -218,6 +218,13 @@ public class BuildSetMenuActivity extends AppCompatActivity {
                     .append("  $")
                     .append(String.format("%.2f", item.getPrice()))
                     .append("\n");
+            
+            // ✅ Add customization details if present
+            if (item.getCustomizations() != null && !item.getCustomizations().isEmpty()) {
+                for (com.example.yummyrestaurant.models.OrderItemCustomization custom : item.getCustomizations()) {
+                    summary.append("  → ").append(custom.getDisplayText()).append("\n");
+                }
+            }
         }
 
         summary.append("\nOriginal Total: $").append(String.format("%.2f", finalTotal))
