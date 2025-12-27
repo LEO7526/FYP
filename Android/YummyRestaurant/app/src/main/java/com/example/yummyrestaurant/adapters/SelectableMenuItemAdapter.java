@@ -140,6 +140,24 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         notifyDataSetChanged();
     }
 
+    /**
+     * Update customizations for a selected item by ID
+     * @param itemId The ID of the item to update
+     * @param customizations The new customizations to set
+     * @return true if the item was found and updated, false otherwise
+     */
+    public boolean updateItemCustomizations(int itemId, List<com.example.yummyrestaurant.models.OrderItemCustomization> customizations) {
+        for (MenuItem item : selectedItems) {
+            if (item.getId() == itemId) {
+                item.setCustomizations(customizations);
+                Log.d("SelectableAdapter", "Updated customizations for item: " + item.getName() + 
+                      ", customization count: " + (customizations != null ? customizations.size() : 0));
+                return true;
+            }
+        }
+        return false;
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         ImageView image;
