@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.models.OrderItemCustomization;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,7 +147,7 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
      * @param customizations The new customizations to set
      * @return true if the item was found and updated, false otherwise
      */
-    public boolean updateItemCustomizations(int itemId, List<com.example.yummyrestaurant.models.OrderItemCustomization> customizations) {
+    public boolean updateItemCustomizations(int itemId, List<OrderItemCustomization> customizations) {
         for (MenuItem item : selectedItems) {
             if (item.getId() == itemId) {
                 item.setCustomizations(customizations);

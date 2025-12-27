@@ -21,6 +21,7 @@ import com.example.yummyrestaurant.api.MenuApi;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.models.OrderItemCustomization;
 import com.example.yummyrestaurant.models.PackageType;
 import com.example.yummyrestaurant.models.SetMenu;
 import com.example.yummyrestaurant.models.SetMenuResponse;
@@ -225,7 +226,7 @@ public class BuildSetMenuActivity extends AppCompatActivity {
             
             // ✅ Add customization details if present
             if (item.getCustomizations() != null && !item.getCustomizations().isEmpty()) {
-                for (com.example.yummyrestaurant.models.OrderItemCustomization custom : item.getCustomizations()) {
+                for (OrderItemCustomization custom : item.getCustomizations()) {
                     summary.append("  → ").append(custom.getDisplayText()).append("\n");
                 }
             }
