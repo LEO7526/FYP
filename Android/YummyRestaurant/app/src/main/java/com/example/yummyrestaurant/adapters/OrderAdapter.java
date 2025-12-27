@@ -38,6 +38,7 @@ import java.util.Locale;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
 
+    private static final int SPECIAL_OPTION_ID = 999; // Special requests/notes option ID
     private List<Order> orders;
 
     public OrderAdapter(List<Order> orders) {
@@ -112,7 +113,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     Log.d("OrderAdapter", "    Found " + item.getCustomizations().size() + " customizations");
                     for (OrderItemCustomization cust : item.getCustomizations()) {
                         String custDisplay = "";
-                        if (cust.getOptionId() == 999) {
+                        if (cust.getOptionId() == SPECIAL_OPTION_ID) {
                             // 特殊要求
                             custDisplay = "Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
                         } else {
@@ -128,7 +129,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                         Log.d("OrderAdapter", "      - " + custDisplay);
                         
                         TextView custView = new TextView(holder.itemsContainer.getContext());
-                        if (cust.getOptionId() == 999) {
+                        if (cust.getOptionId() == SPECIAL_OPTION_ID) {
                             custView.setText("    └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : ""));
                         } else {
                             // 優先使用 selectedChoices 顯示
@@ -239,7 +240,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                             for (OrderItemCustomization cust : dish.getCustomizations()) {
                                 TextView custView = new TextView(holder.itemsContainer.getContext());
                                 String custText = "";
-                                if (cust.getOptionId() == 999) {
+                                if (cust.getOptionId() == SPECIAL_OPTION_ID) {
                                     custText = "    └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
                                 } else {
                                     String choices = "";
@@ -588,7 +589,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                         Log.d("OrderAdapter", "      Displaying " + item.getCustomizations().size() + " customizations");
                         for (OrderItemCustomization cust : item.getCustomizations()) {
                             String custText = "";
-                            if (cust.getOptionId() == 999) {
+                            if (cust.getOptionId() == SPECIAL_OPTION_ID) {
                                 // 特殊要求
                                 custText = "   └─ Special: " + cust.getTextValue();
                                 Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
@@ -644,7 +645,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                                 Log.d("OrderAdapter", "      Package dish has " + dish.getCustomizations().size() + " customizations");
                                 for (OrderItemCustomization cust : dish.getCustomizations()) {
                                     String custText = "";
-                                    if (cust.getOptionId() == 999) {
+                                    if (cust.getOptionId() == SPECIAL_OPTION_ID) {
                                         custText = "     └─ Special: " + cust.getTextValue();
                                         Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
                                     } else {
