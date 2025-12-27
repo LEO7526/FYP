@@ -41,6 +41,7 @@ public class BuildSetMenuActivity extends AppCompatActivity {
     private SetMenu currentSetMenu;
     private boolean isReorder = false;
     private int prefillPackageId = -1;
+    private static final int CUSTOMIZE_REQUEST_CODE = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +131,16 @@ public class BuildSetMenuActivity extends AppCompatActivity {
                     type.getItems(),
                     type.getOptionalQuantity()
             );
+            
+            // Set customization listener
+            adapter.setOnCustomizeClickListener(item -> {
+                Intent intent = new Intent(BuildSetMenuActivity.this, CustomizeDishActivity.class);
+                intent.putExtra(CustomizeDishActivity.EXTRA_MENU_ITEM, item);
+                intent.putExtra(CustomizeDishActivity.EXTRA_QUANTITY, 1);
+                intent.putExtra("FROM_PACKAGE", true);
+                startActivityForResult(intent, CUSTOMIZE_REQUEST_CODE);
+            });
+            
             rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
             rv.setAdapter(adapter);
 
@@ -149,6 +160,32 @@ public class BuildSetMenuActivity extends AppCompatActivity {
 
         confirmBtn.setOnClickListener(v -> confirmSelection());
     }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == CUSTOMIZE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            MenuItem customizedItem = (MenuItem) data.getSerializableExtra("customized_item");
+            if (customizedItem != null) {
+                // Find and update the item in the adapters with its customizations
+                for (SelectableMenuItemAdapter adapter : adapters) {
+                    List<MenuItem> selectedItems = adapter.getSelectedItems();
+                    for (int i = 0; i < selectedItems.size(); i++) {
+                        MenuItem item = selectedItems.get(i);
+                        if (item.getId() == customizedItem.getId()) {
+                            // Update the item with customizations
+                            item.setCustomizations(customizedItem.getCustomizations());
+                            Log.d("BuildSetMenuActivity", "Updated customizations for item: " + item.getName());
+                            break;
+                        }
+                    }
+                }
+                Toast.makeText(this, "Customization saved", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    
     private void confirmSelection() {
         // Collect all chosen items from each adapter
         final List<MenuItem> allChosen = new ArrayList<>();

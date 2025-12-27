@@ -36,6 +36,10 @@ public class MenuItem implements Serializable {
     @SerializedName("category")
     private String category;
 
+    // Transient field for storing customizations when used in packages
+    // Not serialized to JSON by default
+    private transient List<OrderItemCustomization> customizations;
+
     public MenuItem() {}
 
     @Override
@@ -123,5 +127,13 @@ public class MenuItem implements Serializable {
 
     public Integer getCategoryId() { return categoryId; }
     public void setCategoryId(Integer categoryId) { this.categoryId = categoryId; }
+
+    public List<OrderItemCustomization> getCustomizations() {
+        return customizations;
+    }
+
+    public void setCustomizations(List<OrderItemCustomization> customizations) {
+        this.customizations = customizations;
+    }
 
 }
