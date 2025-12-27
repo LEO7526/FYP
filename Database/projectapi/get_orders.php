@@ -198,7 +198,7 @@ while ($row = $result->fetch_assoc()) {
                 $customizations = [];
                 if (!empty($dishRow['note'])) {
                     $decoded = json_decode($dishRow['note'], true);
-                    if (is_array($decoded)) {
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                         // The note contains customizations as JSON array
                         foreach ($decoded as $cust) {
                             $customizations[] = [
@@ -211,6 +211,8 @@ while ($row = $result->fetch_assoc()) {
                             ];
                         }
                         error_log("Parsed " . count($customizations) . " customizations for package dish item_id=$dish_item_id");
+                    } else {
+                        error_log("Failed to parse customizations JSON for item_id=$dish_item_id: " . json_last_error_msg());
                     }
                 }
                 
