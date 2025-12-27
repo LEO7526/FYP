@@ -172,7 +172,8 @@ while ($row = $result->fetch_assoc()) {
                     oi.item_id,
                     mit.item_name,
                     mi.item_price,
-                    oi.qty
+                    oi.qty,
+                    oi.note
                 FROM order_items oi
                 JOIN menu_item mi ON oi.item_id = mi.item_id
                 JOIN menu_item_translation mit ON mi.item_id = mit.item_id
@@ -191,11 +192,34 @@ while ($row = $result->fetch_assoc()) {
             
             $dishes = [];
             while ($dishRow = $dishResult->fetch_assoc()) {
+                $dish_item_id = (int)$dishRow['item_id'];
+                
+                // Parse customizations from note column
+                $customizations = [];
+                if (!empty($dishRow['note'])) {
+                    $decoded = json_decode($dishRow['note'], true);
+                    if (is_array($decoded)) {
+                        // The note contains customizations as JSON array
+                        foreach ($decoded as $cust) {
+                            $customizations[] = [
+                                "option_id" => (int)($cust['option_id'] ?? 0),
+                                "group_id" => (int)($cust['group_id'] ?? 0),
+                                "group_name" => $cust['group_name'] ?? '',
+                                "selected_value_ids" => $cust['selected_value_ids'] ?? [],
+                                "selected_values" => $cust['selected_values'] ?? [],
+                                "text_value" => $cust['text_value'] ?? ''
+                            ];
+                        }
+                        error_log("Parsed " . count($customizations) . " customizations for package dish item_id=$dish_item_id");
+                    }
+                }
+                
                 $dishes[] = [
-                    "item_id" => (int)$dishRow['item_id'],
+                    "item_id" => $dish_item_id,
                     "name" => $dishRow['item_name'],
                     "price" => (float)$dishRow['item_price'],
-                    "quantity" => (int)$dishRow['qty']
+                    "quantity" => (int)$dishRow['qty'],
+                    "customizations" => $customizations
                 ];
             }
             $dishStmt->close();

@@ -233,6 +233,32 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                         dishView.setPadding(0, 2, 0, 2);
                         dishView.setTextColor(Color.parseColor("#666666"));
                         dishesContainer.addView(dishView);
+                        
+                        // Display customizations for package dish
+                        if (dish.getCustomizations() != null && dish.getCustomizations().size() > 0) {
+                            for (OrderItemCustomization cust : dish.getCustomizations()) {
+                                TextView custView = new TextView(holder.itemsContainer.getContext());
+                                String custText = "";
+                                if (cust.getOptionId() == 999) {
+                                    custText = "    └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
+                                } else {
+                                    String choices = "";
+                                    if (cust.getSelectedValues() != null && !cust.getSelectedValues().isEmpty()) {
+                                        choices = String.join(", ", cust.getSelectedValues());
+                                    } else if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
+                                        choices = String.join(", ", cust.getSelectedChoices());
+                                    } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
+                                        choices = cust.getChoiceNamesDisplay();
+                                    }
+                                    custText = "    └─ " + cust.getGroupName() + ": " + choices;
+                                }
+                                custView.setText(custText);
+                                custView.setTextSize(10);
+                                custView.setPadding(16, 2, 0, 2);
+                                custView.setTextColor(Color.parseColor("#999999"));
+                                dishesContainer.addView(custView);
+                            }
+                        }
                     }
                 }
                 
@@ -612,6 +638,36 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                             dishRow.setTextSize(11);
                             dishRow.setPadding(20, 2, 0, 2);
                             detailsLayout.addView(dishRow);
+                            
+                            // Display customizations for package dish in details
+                            if (dish.getCustomizations() != null && dish.getCustomizations().size() > 0) {
+                                Log.d("OrderAdapter", "      Package dish has " + dish.getCustomizations().size() + " customizations");
+                                for (OrderItemCustomization cust : dish.getCustomizations()) {
+                                    String custText = "";
+                                    if (cust.getOptionId() == 999) {
+                                        custText = "     └─ Special: " + cust.getTextValue();
+                                        Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
+                                    } else {
+                                        String choices = "";
+                                        if (cust.getSelectedValues() != null && !cust.getSelectedValues().isEmpty()) {
+                                            choices = String.join(", ", cust.getSelectedValues());
+                                        } else if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
+                                            choices = String.join(", ", cust.getSelectedChoices());
+                                        } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
+                                            choices = cust.getChoiceNamesDisplay();
+                                        }
+                                        custText = "     └─ " + cust.getGroupName() + ": " + choices;
+                                        Log.d("OrderAdapter", "        Option: " + cust.getGroupName() + " = " + choices);
+                                    }
+                                    
+                                    TextView custRow = new TextView(context);
+                                    custRow.setText(custText);
+                                    custRow.setTextSize(10);
+                                    custRow.setPadding(30, 2, 0, 2);
+                                    custRow.setTextColor(Color.parseColor("#888888"));
+                                    detailsLayout.addView(custRow);
+                                }
+                            }
                         }
                     }
                 }
