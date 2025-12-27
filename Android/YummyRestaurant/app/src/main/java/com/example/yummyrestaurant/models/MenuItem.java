@@ -36,9 +36,10 @@ public class MenuItem implements Serializable {
     @SerializedName("category")
     private String category;
 
-    // Transient field for storing customizations when used in packages
-    // Not serialized to JSON by default
-    private transient List<OrderItemCustomization> customizations;
+    // ✅ FIXED: Removed transient to allow customizations to be serialized when passing between activities
+    // Note: This field is intentionally NOT annotated with @SerializedName so it won't be sent in API requests
+    // unless explicitly converted to the correct format
+    private List<OrderItemCustomization> customizations;
 
     public MenuItem() {}
 
