@@ -171,15 +171,21 @@ public class BuildSetMenuActivity extends AppCompatActivity {
                 Log.d("BuildSetMenuActivity", "Received customized item: " + customizedItem.getName() + 
                       " with " + (customizedItem.getCustomizations() != null ? customizedItem.getCustomizations().size() : 0) + " customizations");
                 
+                boolean updated = false;
                 // Find and update the item in the adapter's internal list with its customizations
                 for (SelectableMenuItemAdapter adapter : adapters) {
                     if (adapter.updateItemCustomizations(customizedItem.getId(), customizedItem.getCustomizations())) {
                         Log.d("BuildSetMenuActivity", "Updated customizations for item: " + customizedItem.getName());
-                        Toast.makeText(this, "Customization saved", Toast.LENGTH_SHORT).show();
-                        return;
+                        updated = true;
+                        break;
                     }
                 }
-                Log.w("BuildSetMenuActivity", "Could not find item to update: " + customizedItem.getName());
+                
+                if (updated) {
+                    Toast.makeText(this, "Customization saved", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.w("BuildSetMenuActivity", "Could not find item to update: " + customizedItem.getName());
+                }
             }
         }
     }
