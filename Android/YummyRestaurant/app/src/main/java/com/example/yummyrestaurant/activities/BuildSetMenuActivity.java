@@ -168,20 +168,18 @@ public class BuildSetMenuActivity extends AppCompatActivity {
         if (requestCode == CUSTOMIZE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             MenuItem customizedItem = (MenuItem) data.getSerializableExtra("customized_item");
             if (customizedItem != null) {
-                // Find and update the item in the adapters with its customizations
+                Log.d("BuildSetMenuActivity", "Received customized item: " + customizedItem.getName() + 
+                      " with " + (customizedItem.getCustomizations() != null ? customizedItem.getCustomizations().size() : 0) + " customizations");
+                
+                // Find and update the item in the adapter's internal list with its customizations
                 for (SelectableMenuItemAdapter adapter : adapters) {
-                    List<MenuItem> selectedItems = adapter.getSelectedItems();
-                    for (int i = 0; i < selectedItems.size(); i++) {
-                        MenuItem item = selectedItems.get(i);
-                        if (item.getId() == customizedItem.getId()) {
-                            // Update the item with customizations
-                            item.setCustomizations(customizedItem.getCustomizations());
-                            Log.d("BuildSetMenuActivity", "Updated customizations for item: " + item.getName());
-                            break;
-                        }
+                    if (adapter.updateItemCustomizations(customizedItem.getId(), customizedItem.getCustomizations())) {
+                        Log.d("BuildSetMenuActivity", "Updated customizations for item: " + customizedItem.getName());
+                        Toast.makeText(this, "Customization saved", Toast.LENGTH_SHORT).show();
+                        return;
                     }
                 }
-                Toast.makeText(this, "Customization saved", Toast.LENGTH_SHORT).show();
+                Log.w("BuildSetMenuActivity", "Could not find item to update: " + customizedItem.getName());
             }
         }
     }
