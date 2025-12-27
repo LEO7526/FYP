@@ -1,6 +1,7 @@
 package com.example.yummyrestaurant.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class OrderPackageDish {
     @SerializedName("item_id")
@@ -14,6 +15,9 @@ public class OrderPackageDish {
 
     @SerializedName("price_modifier")
     private double priceModifier;
+
+    @SerializedName("customizations")
+    private List<OrderItemCustomization> customizations;
 
     public int getItemId() {
         return itemId;
@@ -45,5 +49,13 @@ public class OrderPackageDish {
 
     public void setPriceModifier(double priceModifier) {
         this.priceModifier = priceModifier;
+    }
+
+    public List<OrderItemCustomization> getCustomizations() {
+        return customizations;
+    }
+
+    public void setCustomizations(List<OrderItemCustomization> customizations) {
+        this.customizations = customizations;
     }
 }

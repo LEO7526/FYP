@@ -143,6 +143,65 @@ foreach ($items as $item) {
                 }
                 
                 $pkgItemStmt->close();
+                
+                // ✅ v4.6: Save customizations for package items
+                if (!empty($packageItem['customizations']) && is_array($packageItem['customizations'])) {
+                    error_log("Saving customizations for package item: item_id=$pkg_item_id");
+                    
+                    foreach ($packageItem['customizations'] as $pkg_custom) {
+                        $pkg_option_id = intval($pkg_custom['option_id'] ?? 0);
+                        $pkg_group_id = intval($pkg_custom['group_id'] ?? 0);
+                        $pkg_text_value = $pkg_custom['text_value'] ?? '';
+                        $pkg_selected_value_ids = null;
+                        $pkg_selected_values = null;
+                        
+                        // Process selected value IDs
+                        if (isset($pkg_custom['selected_value_ids']) && !empty($pkg_custom['selected_value_ids'])) {
+                            if (is_array($pkg_custom['selected_value_ids'])) {
+                                $pkg_selected_value_ids = json_encode(array_map('intval', $pkg_custom['selected_value_ids']));
+                            } else {
+                                $pkg_selected_value_ids = json_encode([intval($pkg_custom['selected_value_ids'])]);
+                            }
+                        }
+                        
+                        // Process selected values
+                        if (isset($pkg_custom['selected_values']) && !empty($pkg_custom['selected_values'])) {
+                            if (is_array($pkg_custom['selected_values'])) {
+                                $pkg_selected_values = json_encode($pkg_custom['selected_values']);
+                            } else {
+                                $pkg_selected_values = json_encode([$pkg_custom['selected_values']]);
+                            }
+                        }
+                        
+                        // Save to order_package_item_customizations
+                        if ($pkg_selected_value_ids !== null || $pkg_selected_values !== null || !empty($pkg_text_value)) {
+                            $pkgCustomStmt = $conn->prepare("
+                                INSERT INTO order_package_item_customizations 
+                                (oid, op_id, package_id, item_id, group_id, option_id, selected_value_ids, selected_values, text_value)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ");
+                            
+                            if (!$pkgCustomStmt) {
+                                error_log("Prepare failed for package customization: " . $conn->error);
+                                continue;
+                            }
+                            
+                            $pkgCustomStmt->bind_param("iiiiiisss",
+                                $order_id, $order_package_id, $package_id, $pkg_item_id, 
+                                $pkg_group_id, $pkg_option_id,
+                                $pkg_selected_value_ids, $pkg_selected_values, $pkg_text_value
+                            );
+                            
+                            if ($pkgCustomStmt->execute()) {
+                                error_log("Package item customization SAVED: package_id=$package_id, item_id=$pkg_item_id, group=$pkg_group_id");
+                            } else {
+                                error_log("Execute failed for package customization: " . $pkgCustomStmt->error);
+                            }
+                            
+                            $pkgCustomStmt->close();
+                        }
+                    }
+                }
             }
         }
         
