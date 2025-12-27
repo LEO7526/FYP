@@ -48,6 +48,8 @@ public class CustomizeDishActivity extends AppCompatActivity {
 
     public static final String EXTRA_MENU_ITEM = "menuItem";
     public static final String EXTRA_QUANTITY = "quantity";
+    
+    private boolean isFromPackage = false;
 
     private LinearLayout optionsContainer;
     private EditText notesEditText;
@@ -74,6 +76,7 @@ public class CustomizeDishActivity extends AppCompatActivity {
         // Load extras
         menuItem = (MenuItem) getIntent().getSerializableExtra(EXTRA_MENU_ITEM);
         quantity = getIntent().getIntExtra(EXTRA_QUANTITY, 1);
+        isFromPackage = getIntent().getBooleanExtra("FROM_PACKAGE", false);
 
         if (menuItem == null) {
             Toast.makeText(this, "No dish data provided", Toast.LENGTH_SHORT).show();
@@ -530,17 +533,26 @@ public class CustomizeDishActivity extends AppCompatActivity {
         customization.setExtraNotes(notes);
         customization.setCustomizationDetails(customizationDetails);
 
-        // 添加到購物車
-        CartItem cartItem = new CartItem(menuItem, customization);
-        Integer currentQty = CartManager.getItemQuantity(cartItem);
-        int newQty = (currentQty != null ? currentQty : 0) + quantity;
-        CartManager.updateQuantity(cartItem, newQty);
+        if (isFromPackage) {
+            // Return result to BuildSetMenuActivity instead of adding to cart
+            menuItem.setCustomizations(customizationDetails);
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("customized_item", menuItem);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        } else {
+            // 添加到購物車
+            CartItem cartItem = new CartItem(menuItem, customization);
+            Integer currentQty = CartManager.getItemQuantity(cartItem);
+            int newQty = (currentQty != null ? currentQty : 0) + quantity;
+            CartManager.updateQuantity(cartItem, newQty);
 
-        Toast.makeText(this, quantity + " × " + menuItem.getName() + " added to cart", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, quantity + " × " + menuItem.getName() + " added to cart", Toast.LENGTH_SHORT).show();
 
-        Intent intent = new Intent(this, CartActivity.class);
-        startActivity(intent);
-        finish();
+            Intent intent = new Intent(this, CartActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     /**

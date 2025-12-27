@@ -159,6 +159,36 @@ public class TempPaymentActivity extends AppCompatActivity {
                                 pkgItemMap.put("id", pkgItem.getId());
                                 pkgItemMap.put("name", pkgItem.getName());
                                 pkgItemMap.put("qty", 1);
+                                
+                                // ✅ v4.6: Add customizations for package items
+                                if (pkgItem.getCustomizations() != null && !pkgItem.getCustomizations().isEmpty()) {
+                                    List<Map<String, Object>> customizationsList = new ArrayList<>();
+                                    for (com.example.yummyrestaurant.models.OrderItemCustomization custom : pkgItem.getCustomizations()) {
+                                        Map<String, Object> customMap = new HashMap<>();
+                                        customMap.put("option_id", custom.getOptionId());
+                                        customMap.put("group_id", custom.getGroupId());
+                                        
+                                        // Add selected value IDs
+                                        if (custom.getSelectedValueIds() != null && !custom.getSelectedValueIds().isEmpty()) {
+                                            customMap.put("selected_value_ids", custom.getSelectedValueIds());
+                                        }
+                                        
+                                        // Add selected values (for display)
+                                        if (custom.getSelectedValues() != null && !custom.getSelectedValues().isEmpty()) {
+                                            customMap.put("selected_values", custom.getSelectedValues());
+                                        }
+                                        
+                                        // Add text value if present
+                                        if (custom.getTextValue() != null && !custom.getTextValue().isEmpty()) {
+                                            customMap.put("text_value", custom.getTextValue());
+                                        }
+                                        
+                                        customizationsList.add(customMap);
+                                    }
+                                    pkgItemMap.put("customizations", customizationsList);
+                                    Log.d(TAG, "Added " + customizationsList.size() + " customizations for package item: " + pkgItem.getName());
+                                }
+                                
                                 packageItemsList.add(pkgItemMap);
                             }
                             item.put("packageItems", packageItemsList);

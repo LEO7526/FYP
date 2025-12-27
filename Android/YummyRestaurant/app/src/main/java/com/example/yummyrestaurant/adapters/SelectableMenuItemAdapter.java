@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,10 +24,19 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
     private final List<MenuItem> items;
     private final List<MenuItem> selectedItems = new ArrayList<>();
     private final int maxSelection; // how many items can be selected in this category
+    private OnCustomizeClickListener customizeClickListener;
+
+    public interface OnCustomizeClickListener {
+        void onCustomizeClick(MenuItem item);
+    }
 
     public SelectableMenuItemAdapter(List<MenuItem> items, int maxSelection) {
         this.items = items != null ? items : new ArrayList<>();
         this.maxSelection = maxSelection;
+    }
+
+    public void setOnCustomizeClickListener(OnCustomizeClickListener listener) {
+        this.customizeClickListener = listener;
     }
 
     @NonNull
@@ -58,13 +68,16 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         }
 
         // Highlight if selected
-        if (selectedItems.contains(item)) {
+        boolean isSelected = selectedItems.contains(item);
+        if (isSelected) {
             holder.root.setBackgroundResource(R.drawable.item_selected_background);
+            holder.customizeBtn.setVisibility(View.VISIBLE);
         } else {
             holder.root.setBackgroundColor(Color.TRANSPARENT);
+            holder.customizeBtn.setVisibility(View.GONE);
         }
 
-        // Handle click
+        // Handle item click (selection)
         holder.itemView.setOnClickListener(v -> {
             if (selectedItems.contains(item)) {
                 selectedItems.remove(item);
@@ -74,6 +87,13 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
                     selectedItems.add(item);
                     notifyItemChanged(position);
                 }
+            }
+        });
+
+        // Handle customize button click
+        holder.customizeBtn.setOnClickListener(v -> {
+            if (customizeClickListener != null) {
+                customizeClickListener.onCustomizeClick(item);
             }
         });
     }
@@ -124,12 +144,14 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         TextView name;
         ImageView image;
         View root;
+        Button customizeBtn;
 
         ViewHolder(View itemView) {
             super(itemView);
             root = itemView.findViewById(R.id.itemRoot);
             name = itemView.findViewById(R.id.itemName);
             image = itemView.findViewById(R.id.itemImage);
+            customizeBtn = itemView.findViewById(R.id.btnCustomize);
         }
     }
 }
