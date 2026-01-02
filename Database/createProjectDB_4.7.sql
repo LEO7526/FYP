@@ -290,8 +290,8 @@ INSERT INTO menu_category (category_name) VALUES
 ('Soup'),
 ('Main Courses'),
 ('Dessert'),
-('Staple Foods'),
-('Drink');
+('Drink'),
+('Staple Foods');
 
 CREATE TABLE menu_item (
   item_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -321,7 +321,10 @@ INSERT INTO menu_item (category_id, item_price, image_url, spice_level, is_avail
 (5, 26.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/15.jpg', 0, TRUE),
 (5, 20.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/16.jpg', 0, TRUE),
 (5, 26.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/17.jpg', 0, TRUE),
-(5, 26.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/18.jpg', 0, TRUE);
+(5, 26.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/18.jpg', 0, TRUE),
+(6, 5.00,   'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/19.jpg',0,TRUE),
+(6, 5.00,   'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/20.jpg',0,TRUE),
+(6, 6.00,   'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/21.jpg',0,TRUE);
 
 CREATE TABLE menu_item_translation (
   translation_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -386,7 +389,16 @@ INSERT INTO menu_item_translation (item_id, language_code, item_name, item_descr
 (17, 'zh-TW', '凍奶茶', '經典港式奶茶，冰涼爽口。'),
 (18, 'en', 'Iced Lemon Tea', 'Crisp iced tea with fresh lemon slices.'),
 (18, 'zh-CN', '冻柠茶', '冰镇柠檬茶，清爽解渴。'),
-(18, 'zh-TW', '凍檸茶', '冰鎮檸檬茶，清爽解渴。');
+(18, 'zh-TW', '凍檸茶', '冰鎮檸檬茶，清爽解渴。'),
+(19, 'en', 'Steamed Rice', 'Fluffy steamed rice, perfect as a staple side dish.'),
+(19, 'zh-CN', '米饭', '蓬松的蒸米饭，完美的主食配菜。'),
+(19, 'zh-TW', '米飯', '蓬鬆的蒸米飯，完美的主食配菜。'),
+(20, 'en', 'Noodles', 'Soft and tender wheat noodles.'),
+(20, 'zh-CN', '麵', '软而嫩的小麦面条。'),
+(20, 'zh-TW', '麵', '軟而嫩的小麥麵條。'),
+(21, 'en', 'Potato Starch', 'Smooth and creamy potato starch dish.'),
+(21, 'zh-CN', '薯粉', '光滑细腻的薯粉食品。'),
+(21, 'zh-TW', '薯粉', '光滑細膩的薯粉食品。');
 
 -- =================================================================
 -- TAGS
@@ -451,7 +463,10 @@ INSERT INTO menu_tag (item_id, tag_id) VALUES
 (15, 19), (15, 2), (15, 4),
 (16, 18), (16, 7), (16, 15),
 (17, 20), (17, 4), (17, 15),
-(18, 18), (18, 2), (18, 4);
+(18, 18), (18, 2), (18, 4),
+(19, 22),
+(20, 11), (20, 22),
+(21, 22);
 
 -- =================================================================
 -- ORDERS
@@ -733,9 +748,9 @@ CREATE TABLE package_type (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO package_type (package_id, optional_quantity) VALUES
-(1, 1), (1, 2), (1, 2),
-(2, 2), (2, 1), (2, 3), (2, 4),
-(3, 1), (3, 1);
+(1, 1), (1, 2), (1, 2), (1, 1),
+(2, 2), (2, 1), (2, 3), (2, 4), (2, 1),
+(3, 1), (3, 1), (3, 1);
 
 CREATE TABLE package_type_translation (
   type_translation_id INT NOT NULL AUTO_INCREMENT,
@@ -747,15 +762,15 @@ CREATE TABLE package_type_translation (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO package_type_translation (type_id, type_language_code, type_name) VALUES
-(1, 'en', 'Appetizer'), (2, 'en', 'Main Course'), (3, 'en', 'Drink'),
-(4, 'en', 'Appetizer'), (5, 'en', 'Soup'), (6, 'en', 'Main Course'), (7, 'en', 'Drink'),
-(8, 'en', 'Main Course'), (9, 'en', 'Drink'),
-(1, 'zh-CN', '前菜'), (2, 'zh-CN', '主菜'), (3, 'zh-CN', '饮料'),
-(4, 'zh-CN', '前菜'), (5, 'zh-CN', '汤品'), (6, 'zh-CN', '主菜'), (7, 'zh-CN', '饮料'),
-(8, 'zh-CN', '主菜'), (9, 'zh-CN', '饮料'),
-(1, 'zh-TW', '前菜'), (2, 'zh-TW', '主菜'), (3, 'zh-TW', '飲料'),
-(4, 'zh-TW', '前菜'), (5, 'zh-TW', '湯品'), (6, 'zh-TW', '主菜'), (7, 'zh-TW', '飲料'),
-(8, 'zh-TW', '主菜'), (9, 'zh-TW', '飲料');
+(1, 'en', 'Appetizer'), (2, 'en', 'Main Course'), (3, 'en', 'Drink'), (4, 'en', 'Staple Foods'),
+(5, 'en', 'Appetizer'), (6, 'en', 'Soup'), (7, 'en', 'Main Course'), (8, 'en', 'Drink'), (9, 'en', 'Staple Foods'),
+(10, 'en', 'Main Course'), (11, 'en', 'Drink'), (12, 'en', 'Staple Foods'),
+(1, 'zh-CN', '前菜'), (2, 'zh-CN', '主菜'), (3, 'zh-CN', '饮料'), (4, 'zh-CN', '主食'),
+(5, 'zh-CN', '前菜'), (6, 'zh-CN', '汤品'), (7, 'zh-CN', '主菜'), (8, 'zh-CN', '饮料'), (9, 'zh-CN', '主食'),
+(10, 'zh-CN', '主菜'), (11, 'zh-CN', '饮料'), (12, 'zh-CN', '主食'),
+(1, 'zh-TW', '前菜'), (2, 'zh-TW', '主菜'), (3, 'zh-TW', '飲料'), (4, 'zh-TW', '主食'),
+(5, 'zh-TW', '前菜'), (6, 'zh-TW', '湯品'), (7, 'zh-TW', '主菜'), (8, 'zh-TW', '飲料'), (9, 'zh-TW', '主食'),
+(10, 'zh-TW', '主菜'), (11, 'zh-TW', '飲料'), (12, 'zh-TW', '主食');
 
 CREATE TABLE package_dish (
   package_id INT NOT NULL,
@@ -772,12 +787,15 @@ INSERT INTO package_dish (package_id, type_id, item_id, price_modifier) VALUES
 (1, 1, 1, 0.00), (1, 1, 2, 3.00), (1, 1, 3, 8.00),
 (1, 2, 5, 0.00), (1, 2, 6, 8.00), (1, 2, 7, 6.00), (1, 2, 8, 12.00), (1, 2, 9, 10.00), (1, 2, 10, 7.00),
 (1, 3, 12, 0.00), (1, 3, 13, 2.00), (1, 3, 14, 3.00), (1, 3, 15, 4.00), (1, 3, 16, 2.00), (1, 3, 17, 3.00), (1, 3, 18, 2.00),
-(2, 4, 1, 0.00), (2, 4, 2, 5.00), (2, 4, 3, 12.00),
-(2, 5, 4, 0.00),
-(2, 6, 5, 0.00), (2, 6, 6, 15.00), (2, 6, 7, 12.00), (2, 6, 8, 20.00), (2, 6, 9, 18.00), (2, 6, 10, 14.00),
-(2, 7, 12, 0.00), (2, 7, 13, 3.00), (2, 7, 14, 4.00), (2, 7, 15, 5.00), (2, 7, 16, 3.00), (2, 7, 17, 4.00), (2, 7, 18, 3.00),
-(3, 8, 5, 0.00), (3, 8, 6, 12.00), (3, 8, 7, 10.00), (3, 8, 8, 18.00), (3, 8, 9, 15.00), (3, 8, 10, 12.00),
-(3, 9, 14, 0.00), (3, 9, 16, 3.00), (3, 9, 17, 4.00), (3, 9, 18, 3.00);
+(1, 4, 19, 0.00), (1, 4, 20, 0.00), (1, 4, 21, 0.00),
+(2, 5, 1, 0.00), (2, 5, 2, 5.00), (2, 5, 3, 12.00),
+(2, 6, 4, 0.00),
+(2, 7, 5, 0.00), (2, 7, 6, 15.00), (2, 7, 7, 12.00), (2, 7, 8, 20.00), (2, 7, 9, 18.00), (2, 7, 10, 14.00),
+(2, 8, 12, 0.00), (2, 8, 13, 3.00), (2, 8, 14, 4.00), (2, 8, 15, 5.00), (2, 8, 16, 3.00), (2, 8, 17, 4.00), (2, 8, 18, 3.00),
+(2, 9, 19, 0.00), (2, 9, 20, 0.00), (2, 9, 21, 0.00),
+(3, 10, 5, 0.00), (3, 10, 6, 12.00), (3, 10, 7, 10.00), (3, 10, 8, 18.00), (3, 10, 9, 15.00), (3, 10, 10, 12.00),
+(3, 11, 14, 0.00), (3, 11, 16, 3.00), (3, 11, 17, 4.00), (3, 11, 18, 3.00),
+(3, 12, 19, 0.00), (3, 12, 20, 0.00), (3, 12, 21, 0.00);
 
 DROP TABLE IF EXISTS order_packages;
 CREATE TABLE order_packages (
