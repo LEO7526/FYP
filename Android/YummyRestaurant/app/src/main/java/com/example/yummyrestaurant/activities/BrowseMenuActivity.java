@@ -48,7 +48,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
     private EditText searchBar;
     private String currentLanguage = "en";
     private static boolean login;
-    private Button btnAll, btnAppetizers, btnMainCourses, btnSoup, btnDessert, btnDrink;
+    private Button btnAll, btnAppetizers, btnMainCourses, btnSoup, btnDessert, btnDrink, btnStapleFoods;
     private String selectedCategory = "All Dishes"; // default
 
     private List<ImageView> functionIcons = new ArrayList<>();
@@ -102,6 +102,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         btnSoup = findViewById(R.id.btnSoup);
         btnDessert = findViewById(R.id.btnDessert);
         btnDrink = findViewById(R.id.btnDrink);
+        btnStapleFoods = findViewById(R.id.btnStapleFoods);
 
         // cart views (ensure your layout uses the FrameLayout with cartBadge)
         cartIcon = findViewById(R.id.cartIcon);
@@ -146,6 +147,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
                 selectedCategory = "Dessert";
             } else if (id == R.id.btnDrink) {
                 selectedCategory = "Drink";
+            } else if (id == R.id.btnStapleFoods) {
+                selectedCategory = "Staple Foods";
             }
             applyFilters();
         };
@@ -155,7 +158,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         btnMainCourses.setOnClickListener(listener);
         btnSoup.setOnClickListener(listener);
         btnDessert.setOnClickListener(listener);
-        btnDrink.setOnClickListener(listener); // new
+        btnDrink.setOnClickListener(listener);
+        btnStapleFoods.setOnClickListener(listener);
     }
 
     private void setupNavigationDrawer() {

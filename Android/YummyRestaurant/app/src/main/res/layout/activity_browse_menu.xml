@@ -206,6 +206,21 @@
                     app:strokeWidth="1dp"
                     app:rippleColor="@color/purple_200" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStapleFoods"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:paddingHorizontal="12dp"
+                    android:text="Staple Foods"
+                    android:textSize="12sp"
+                    android:textColor="@color/purple_700"
+                    app:cornerRadius="20dp"
+                    app:strokeColor="@color/purple_700"
+                    app:strokeWidth="1dp"
+                    app:rippleColor="@color/purple_200" />
+
             </LinearLayout>
         </HorizontalScrollView>
 
