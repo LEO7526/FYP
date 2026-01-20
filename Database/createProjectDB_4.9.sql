@@ -530,9 +530,9 @@ INSERT INTO order_coupons (oid, coupon_id, discount_amount) VALUES
 CREATE TABLE IF NOT EXISTS customization_option_group (
   group_id INT NOT NULL AUTO_INCREMENT,
   group_name VARCHAR(255) NOT NULL,
-  group_type ENUM('spice', 'sugar', 'ice', 'milk', 'topping', 'other') NOT NULL,
+  group_type VARCHAR(50) NOT NULL,
   PRIMARY KEY (group_id),
-  UNIQUE KEY (group_name)
+  UNIQUE KEY (group_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS customization_option_value (
