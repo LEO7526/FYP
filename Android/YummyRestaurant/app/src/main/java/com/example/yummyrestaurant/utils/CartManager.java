@@ -24,6 +24,12 @@ public final class CartManager {
     // Track prefill data for reorder: packageId -> list of items
     private static final Map<Integer, List<MenuItem>> prefillPackageData = new HashMap<>();
 
+    // Track order type: dine_in or takeaway
+    private static String orderType = null;
+    
+    // Track table number for dine_in orders
+    private static Integer tableNumber = null;
+
     private CartManager() {
     }
 
@@ -221,8 +227,63 @@ public final class CartManager {
         return false;
     }
 
-    public static String getOrderType() {
-        return "dine_in"; // placeholder
+    /**
+     * Set the order type for this session
+     * @param type One of: "dine_in", "takeaway", "delivery"
+     */
+    public static synchronized void setOrderType(String type) {
+        if (type == null || (!type.equals("dine_in") && !type.equals("takeaway") && !type.equals("delivery"))) {
+            android.util.Log.w(TAG, "setOrderType: Invalid order type: " + type);
+            return;
+        }
+        orderType = type;
+        android.util.Log.d(TAG, "setOrderType: " + type);
+    }
+
+    /**
+     * Get the current order type
+     * @return "dine_in", "takeaway", "delivery", or null if not set
+     */
+    public static synchronized String getOrderType() {
+        return orderType;
+    }
+
+    /**
+     * Check if an order type has been selected
+     * @return true if order type is set
+     */
+    public static synchronized boolean isOrderTypeSelected() {
+        return orderType != null;
+    }
+
+    /**
+     * Set table number for dine_in orders
+     * @param tableNum Table number (e.g., 5, 12)
+     */
+    public static synchronized void setTableNumber(Integer tableNum) {
+        if (orderType != null && !orderType.equals("dine_in")) {
+            android.util.Log.w(TAG, "setTableNumber: Only valid for dine_in orders");
+            return;
+        }
+        tableNumber = tableNum;
+        android.util.Log.d(TAG, "setTableNumber: " + tableNum);
+    }
+
+    /**
+     * Get the table number for dine_in orders
+     * @return Table number or null
+     */
+    public static synchronized Integer getTableNumber() {
+        return tableNumber;
+    }
+
+    /**
+     * Reset all order type related data for a new order session
+     */
+    public static synchronized void resetOrderTypeData() {
+        orderType = null;
+        tableNumber = null;
+        android.util.Log.d(TAG, "resetOrderTypeData: All order type data cleared");
     }
 
     public static synchronized boolean hasOtherDiscountsApplied() {

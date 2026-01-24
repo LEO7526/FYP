@@ -86,6 +86,11 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         setupNavigationDrawer();
         setupBottomFunctionBar();
 
+        // Check if order type is already selected, if not show selection dialog
+        if (!CartManager.isOrderTypeSelected()) {
+            showOrderTypeSelectionDialog();
+        }
+
         // update cart badge on start
         updateCartBadge();
 
@@ -312,5 +317,73 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         } else {
             cartBadge.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Show dialog for user to select order type: Dine In or Takeaway
+     */
+    private void showOrderTypeSelectionDialog() {
+        String[] options = {"Dine In", "Takeaway"};
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Order Type")
+                .setMessage("How would you like to order?")
+                .setIcon(R.drawable.ic_launcher_foreground)
+                .setCancelable(false)
+                .setSingleChoiceItems(options, 0, (dialog, which) -> {
+                    String selectedType = (which == 0) ? "dine_in" : "takeaway";
+                    CartManager.setOrderType(selectedType);
+                    
+                    // If dine_in, optionally show table number input
+                    if (selectedType.equals("dine_in")) {
+                        showTableNumberDialog();
+                    }
+                    
+                    dialog.dismiss();
+                })
+                .setPositiveButton("Confirm", (dialog, which) -> {
+                    // Order type already set in single choice listener
+                    dialog.dismiss();
+                })
+                .show();
+    }
+
+    /**
+     * Show dialog to input table number for dine_in orders
+     */
+    private void showTableNumberDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        android.widget.EditText editText = new android.widget.EditText(this);
+        editText.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        editText.setHint("Enter table number");
+
+        builder.setTitle("Table Number")
+                .setMessage("Please enter your table number")
+                .setView(editText)
+                .setCancelable(false)
+                .setPositiveButton("Confirm", (dialog, which) -> {
+                    String tableNumStr = editText.getText().toString().trim();
+                    if (!tableNumStr.isEmpty()) {
+                        try {
+                            Integer tableNum = Integer.parseInt(tableNumStr);
+                            CartManager.setTableNumber(tableNum);
+                            Toast.makeText(BrowseMenuActivity.this, 
+                                    "Table " + tableNum + " selected", Toast.LENGTH_SHORT).show();
+                        } catch (NumberFormatException e) {
+                            Toast.makeText(BrowseMenuActivity.this, 
+                                    "Invalid table number", Toast.LENGTH_SHORT).show();
+                            showTableNumberDialog(); // retry
+                        }
+                    } else {
+                        Toast.makeText(BrowseMenuActivity.this, 
+                                "Please enter a table number", Toast.LENGTH_SHORT).show();
+                        showTableNumberDialog(); // retry
+                    }
+                    dialog.dismiss();
+                })
+                .setNegativeButton("Skip", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .show();
     }
 }

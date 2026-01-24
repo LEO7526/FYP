@@ -19,6 +19,10 @@ $ostatus = $input['ostatus'] ?? 0;
 $items = $input['items'] ?? [];
 $odate = date('Y-m-d H:i:s'); // Current timestamp
 
+// ✅ Extract order type and table number
+$order_type = $input['order_type'] ?? 'dine_in'; // Default to dine_in
+$table_number = $input['table_number'] ?? null;
+
 // ✅ 確保 cid 是整數
 $cid = intval($cid);
 $ostatus = intval($ostatus);
@@ -29,12 +33,12 @@ if ($cid === null || $cid === 0 || empty($items)) {
     exit;
 }
 
-// Insert into orders table (removed ocost and odeliverdate as they don't exist in your schema)
+// Insert into orders table
 $orderRef = $input['orderRef'] ?? 'order_' . time() . '_' . rand(1000, 9999);
 
 $stmt = $conn->prepare("
-    INSERT INTO orders (odate, cid, ostatus, orderRef)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO orders (odate, cid, ostatus, orderRef, order_type, table_number)
+    VALUES (?, ?, ?, ?, ?, ?)
 ");
 if (!$stmt) {
     error_log("Prepare failed for orders: " . $conn->error);
@@ -42,10 +46,16 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("siis", $odate, $cid, $ostatus, $orderRef);
+$table_num_int = $table_number !== null ? intval($table_number) : null;
+
+$stmt->bind_param("siissi", 
+    $odate, $cid, $ostatus, $orderRef, 
+    $order_type, 
+    $table_num_int
+);
 
 if (!$stmt->execute()) {
-    error_log("Execute failed for orders: odate=$odate, cid=$cid, ostatus=$ostatus, orderRef=$orderRef, error=" . $stmt->error);
+    error_log("Execute failed for orders: odate=$odate, cid=$cid, ostatus=$ostatus, orderRef=$orderRef, order_type=$order_type, table_number=$table_num_int, error=" . $stmt->error);
     echo json_encode(["error" => "Failed to save order header", "details" => $stmt->error]);
     $stmt->close();
     $conn->close();
@@ -53,7 +63,7 @@ if (!$stmt->execute()) {
 }
 
 $order_id = $stmt->insert_id;
-error_log("Order header saved with ID: $order_id");
+error_log("Order header saved with ID: $order_id (type: $order_type, table: $table_num_int)");
 $stmt->close();
 
 // Insert each item into order_items (adjusted for your schema)

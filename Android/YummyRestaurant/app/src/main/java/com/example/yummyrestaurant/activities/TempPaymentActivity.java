@@ -114,6 +114,23 @@ public class TempPaymentActivity extends AppCompatActivity {
         orderHeader.put("ostatus", 1);
         orderHeader.put("odate", System.currentTimeMillis());
         orderHeader.put("orderRef", "temp_order_" + System.currentTimeMillis());
+        
+        // ✅ Add order type from CartManager
+        String orderType = CartManager.getOrderType();
+        if (orderType != null) {
+            orderHeader.put("order_type", orderType);
+            Log.d(TAG, "Added order_type: " + orderType);
+            
+            // Add table number for dine_in orders
+            if ("dine_in".equals(orderType)) {
+                Integer tableNumber = CartManager.getTableNumber();
+                if (tableNumber != null) {
+                    orderHeader.put("table_number", tableNumber);
+                    Log.d(TAG, "Added table_number: " + tableNumber);
+                }
+            }
+        }
+        
         if (isStaff) {
             orderHeader.put("sid", Integer.parseInt(RoleManager.getUserId()));
             orderHeader.put("table_number", RoleManager.getAssignedTable());
