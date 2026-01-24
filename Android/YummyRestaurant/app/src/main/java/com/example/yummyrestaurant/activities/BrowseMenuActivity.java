@@ -75,7 +75,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browse_menu);
 
-        setupBottomFunctionBar ();
+        setupBottomFunctionBar();
 
         login = RoleManager.getUser() != null;
 
@@ -85,16 +85,16 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         setupCategoryButtons();
         setupNavigationDrawer();
         setupBottomFunctionBar();
+        setupOrderTypeButtons();
 
-        // Check if order type is already selected, if not show selection dialog
-        if (!CartManager.isOrderTypeSelected()) {
-            showOrderTypeSelectionDialog();
-        }
-
-        // update cart badge on start
         updateCartBadge();
 
-        loadMenuItemsFromServer();
+        // Only load menu after order type is selected
+        if (!CartManager.isOrderTypeSelected()) {
+            menuRecyclerView.setVisibility(View.GONE);
+        } else {
+            loadMenuItemsFromServer();
+        }
     }
 
     private void initViews() {
@@ -114,9 +114,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         cartBadge = findViewById(R.id.cartBadge);
         BadgeManager.registerBadgeView(cartBadge);
 
-
         setMenuIcon = findViewById(R.id.setMenuIcon);
-
     }
 
     private void setupRecyclerView() {
@@ -320,32 +318,53 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
     }
 
     /**
-     * Show dialog for user to select order type: Dine In or Takeaway
+     * Setup order type selection buttons
      */
-    private void showOrderTypeSelectionDialog() {
-        String[] options = {"Dine In", "Takeaway"};
-        
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select Order Type")
-                .setMessage("How would you like to order?")
-                .setIcon(R.drawable.ic_launcher_foreground)
-                .setCancelable(false)
-                .setSingleChoiceItems(options, 0, (dialog, which) -> {
-                    String selectedType = (which == 0) ? "dine_in" : "takeaway";
-                    CartManager.setOrderType(selectedType);
-                    
-                    // If dine_in, optionally show table number input
-                    if (selectedType.equals("dine_in")) {
-                        showTableNumberDialog();
-                    }
-                    
-                    dialog.dismiss();
-                })
-                .setPositiveButton("Confirm", (dialog, which) -> {
-                    // Order type already set in single choice listener
-                    dialog.dismiss();
-                })
-                .show();
+    private void setupOrderTypeButtons() {
+        Button btnDineIn = findViewById(R.id.btnDineIn);
+        Button btnTakeaway = findViewById(R.id.btnTakeaway);
+
+        btnDineIn.setOnClickListener(v -> {
+            CartManager.setOrderType("dine_in");
+            updateOrderTypeButtons("dine_in");
+            showTableNumberDialog();
+            menuRecyclerView.setVisibility(View.VISIBLE);
+            loadMenuItemsFromServer();
+        });
+
+        btnTakeaway.setOnClickListener(v -> {
+            CartManager.setOrderType("takeaway");
+            updateOrderTypeButtons("takeaway");
+            menuRecyclerView.setVisibility(View.VISIBLE);
+            loadMenuItemsFromServer();
+        });
+
+        // Update UI if already selected
+        String selectedType = CartManager.getOrderType();
+        if (selectedType != null) {
+            updateOrderTypeButtons(selectedType);
+            menuRecyclerView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Update order type button visual state
+     */
+    private void updateOrderTypeButtons(String selectedType) {
+        Button btnDineIn = findViewById(R.id.btnDineIn);
+        Button btnTakeaway = findViewById(R.id.btnTakeaway);
+
+        if ("dine_in".equals(selectedType)) {
+            btnDineIn.setBackgroundColor(getResources().getColor(R.color.purple_700));
+            btnDineIn.setTextColor(getResources().getColor(R.color.white));
+            btnTakeaway.setBackgroundColor(getResources().getColor(R.color.white));
+            btnTakeaway.setTextColor(getResources().getColor(R.color.purple_700));
+        } else {
+            btnTakeaway.setBackgroundColor(getResources().getColor(R.color.purple_700));
+            btnTakeaway.setTextColor(getResources().getColor(R.color.white));
+            btnDineIn.setBackgroundColor(getResources().getColor(R.color.white));
+            btnDineIn.setTextColor(getResources().getColor(R.color.purple_700));
+        }
     }
 
     /**
@@ -372,12 +391,12 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
                         } catch (NumberFormatException e) {
                             Toast.makeText(BrowseMenuActivity.this, 
                                     "Invalid table number", Toast.LENGTH_SHORT).show();
-                            showTableNumberDialog(); // retry
+                            showTableNumberDialog();
                         }
                     } else {
                         Toast.makeText(BrowseMenuActivity.this, 
                                 "Please enter a table number", Toast.LENGTH_SHORT).show();
-                        showTableNumberDialog(); // retry
+                        showTableNumberDialog();
                     }
                     dialog.dismiss();
                 })
