@@ -15,6 +15,7 @@ import com.example.yummyrestaurant.api.MenuApi;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.PackagesResponse;
 import com.example.yummyrestaurant.models.SetMenu;
+import com.example.yummyrestaurant.utils.CartManager;
 
 import java.util.List;
 
@@ -65,6 +66,11 @@ public class PackagesActivity extends AppCompatActivity implements PackagesAdapt
 
     @Override
     public void onPackageClick(SetMenu setMenu) {
+        // Check if order type is selected
+        if (!CartManager.isOrderTypeSelected()) {
+            Toast.makeText(this, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent intent = new Intent(this, BuildSetMenuActivity.class);
         intent.putExtra("package_id", setMenu.getId());
         startActivity(intent);

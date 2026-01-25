@@ -159,7 +159,21 @@ public class BuildSetMenuActivity extends AppCompatActivity {
             adapters.add(adapter);
         }
 
-        confirmBtn.setOnClickListener(v -> confirmSelection());
+        // Only enable confirm button if order type is selected
+        boolean orderTypeSelected = CartManager.isOrderTypeSelected();
+        confirmBtn.setEnabled(orderTypeSelected);
+        if (!orderTypeSelected) {
+            confirmBtn.setAlpha(0.5f);
+        }
+        
+        confirmBtn.setOnClickListener(v -> {
+            // Defensive check: should not happen but safety first
+            if (!CartManager.isOrderTypeSelected()) {
+                Toast.makeText(BuildSetMenuActivity.this, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            confirmSelection();
+        });
     }
     
     @Override

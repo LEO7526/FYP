@@ -285,6 +285,44 @@
             android:padding="16dp"
             android:clipToPadding="false" />
 
+        <!-- Order Type Selection Overlay Hint -->
+        <FrameLayout
+            android:id="@+id/orderTypeHintOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/filterScroll"
+            android:layout_above="@id/bottomFunctionBar"
+            android:background="@color/overlay_semi_transparent"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👆 Select Dine In or Takeaway"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="to start shopping"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center" />
+            </LinearLayout>
+        </FrameLayout>
+
         <!-- Bottom Function Bar -->
         <include
             android:id="@+id/bottomFunctionBar"

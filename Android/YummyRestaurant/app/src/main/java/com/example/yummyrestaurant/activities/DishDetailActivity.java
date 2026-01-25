@@ -139,8 +139,20 @@ public class DishDetailActivity extends BaseCustomerActivity {
                 spiceBar.addView(defaultSegment);
             }
 
-            // Add to Cart button
+            // Add to Cart button - only enable if order type is selected
+            boolean orderTypeSelected = CartManager.isOrderTypeSelected();
+            addToCartBtn.setEnabled(orderTypeSelected);
+            if (!orderTypeSelected) {
+                addToCartBtn.setAlpha(0.5f);
+            }
+            
             addToCartBtn.setOnClickListener(v -> {
+                // Defensive check: should not happen but safety first
+                if (!CartManager.isOrderTypeSelected()) {
+                    Toast.makeText(this, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
                 CartItem cartItem = new CartItem(item, selectedCustomization);
 
                 Integer qtyFromCart = CartManager.getItemQuantity(cartItem);

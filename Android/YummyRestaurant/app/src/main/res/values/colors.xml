@@ -84,5 +84,7 @@
 
     <color name="teal_700">#00796B</color>
 
+    <!-- Overlay colors -->
+    <color name="overlay_semi_transparent">#80000000</color>
 
 </resources>

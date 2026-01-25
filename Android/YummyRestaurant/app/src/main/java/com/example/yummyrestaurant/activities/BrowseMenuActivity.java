@@ -57,6 +57,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
     // New: cart badge views
     private ImageView cartIcon,setMenuIcon;
     private static TextView cartBadge;
+    private android.view.View orderTypeHintOverlay;
 
     public static boolean isLogin() {
         return login;
@@ -89,12 +90,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
 
         updateCartBadge();
 
-        // Only load menu after order type is selected
-        if (!CartManager.isOrderTypeSelected()) {
-            menuRecyclerView.setVisibility(View.GONE);
-        } else {
-            loadMenuItemsFromServer();
-        }
+        // Load menu immediately (always visible)
+        loadMenuItemsFromServer();
     }
 
     private void initViews() {
@@ -115,6 +112,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         BadgeManager.registerBadgeView(cartBadge);
 
         setMenuIcon = findViewById(R.id.setMenuIcon);
+        orderTypeHintOverlay = findViewById(R.id.orderTypeHintOverlay);
     }
 
     private void setupRecyclerView() {
@@ -328,15 +326,17 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
             CartManager.setOrderType("dine_in");
             updateOrderTypeButtons("dine_in");
             showTableNumberDialog();
-            menuRecyclerView.setVisibility(View.VISIBLE);
-            loadMenuItemsFromServer();
+            // Menu already loaded, just update UI state
+            adapter.notifyDataSetChanged();
+            updateOverlayVisibility();
         });
 
         btnTakeaway.setOnClickListener(v -> {
             CartManager.setOrderType("takeaway");
             updateOrderTypeButtons("takeaway");
-            menuRecyclerView.setVisibility(View.VISIBLE);
-            loadMenuItemsFromServer();
+            // Menu already loaded, just update UI state
+            adapter.notifyDataSetChanged();
+            updateOverlayVisibility();
         });
 
         // Update UI if already selected
@@ -345,6 +345,9 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
             updateOrderTypeButtons(selectedType);
             menuRecyclerView.setVisibility(View.VISIBLE);
         }
+        
+        // Show overlay if no order type selected yet
+        updateOverlayVisibility();
     }
 
     /**
@@ -364,6 +367,19 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
             btnTakeaway.setTextColor(getResources().getColor(R.color.white));
             btnDineIn.setBackgroundColor(getResources().getColor(R.color.white));
             btnDineIn.setTextColor(getResources().getColor(R.color.purple_700));
+        }
+    }
+    
+    /**
+     * Update overlay visibility based on order type selection
+     */
+    private void updateOverlayVisibility() {
+        if (orderTypeHintOverlay != null) {
+            if (CartManager.isOrderTypeSelected()) {
+                orderTypeHintOverlay.setVisibility(View.GONE);
+            } else {
+                orderTypeHintOverlay.setVisibility(View.VISIBLE);
+            }
         }
     }
 

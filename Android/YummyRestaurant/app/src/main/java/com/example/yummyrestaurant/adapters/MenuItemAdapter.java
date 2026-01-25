@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +25,7 @@ import com.bumptech.glide.request.target.Target;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.activities.DishDetailActivity;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.CartManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,6 +203,11 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                 .into(holder.dishImage);
 
         holder.itemView.setOnClickListener(v -> {
+            // Check if order type is selected
+            if (!CartManager.isOrderTypeSelected()) {
+                Toast.makeText(context, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(context, DishDetailActivity.class);
             intent.putExtra("menuItem", item);
             context.startActivity(intent);
