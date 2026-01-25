@@ -262,8 +262,9 @@ public class BuildSetMenuActivity extends AppCompatActivity {
                     packageMarker.setName(currentSetMenu.getName());
                     packageMarker.setPrice(discountedPrice);
                     packageMarker.setCategory("PACKAGE");
-                    
-                    // Add marker item to cart (qty=1 represents the whole package)
+                    packageMarker.setImage_url(currentSetMenu.getImageUrl());  // ← 添加此行
+
+// Add marker item to cart (qty=1 represents the whole package)
                     CartItem packageItem = new CartItem(packageMarker, null);
                     CartManager.addItem(packageItem, 1);
                     

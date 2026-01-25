@@ -9,6 +9,7 @@ header('Content-Type: application/json');
 $input = json_decode(file_get_contents('php://input'), true);
 $amount = $input['amount'] ?? 0;
 $cid = $input['cid'] ?? null;
+$paymentMethod = $input['paymentMethod'] ?? 'card'; // Default to card if not specified
 
 // Stripe minimum for HKD is HK$5.00 = 500 cents
 if ($amount < 500) {
@@ -17,24 +18,90 @@ if ($amount < 500) {
     exit;
 }
 
+// Determine payment method types based on user selection
+$paymentMethodTypes = [];
+$requestedMethod = $paymentMethod; // Track original request
+
+error_log("create_payment_intent: paymentMethod = " . $paymentMethod);
+error_log("create_payment_intent: amount = " . $amount);
+
+if ($paymentMethod === 'alipay_hk') {
+    $paymentMethodTypes = ['alipay'];
+    error_log("create_payment_intent: Using Alipay payment method");
+} else {
+    $paymentMethodTypes = ['card'];
+    error_log("create_payment_intent: Using Card payment method");
+}
+
+error_log("create_payment_intent: paymentMethodTypes = " . json_encode($paymentMethodTypes));
+
 try {
+    error_log("create_payment_intent: Attempting to create PaymentIntent with " . json_encode($paymentMethodTypes));
+    
     $intent = \Stripe\PaymentIntent::create([
         'amount' => $amount,
         'currency' => 'hkd',
-        'payment_method_types' => ['card'],
+        'payment_method_types' => $paymentMethodTypes,
         'metadata' => [
             'customer_id' => $cid,
+            'payment_method' => $paymentMethod,
             'description' => 'Yummy Restaurant Order'
         ]
     ]);
 
+    error_log("create_payment_intent: SUCCESS - PaymentIntent created: " . $intent->id);
+    error_log("create_payment_intent: clientSecret = " . $intent->client_secret);
+
     echo json_encode([
         'success' => true,
         'clientSecret' => $intent->client_secret,
-        'paymentIntentId' => $intent->id
+        'paymentIntentId' => $intent->id,
+        'paymentMethodsCreated' => $paymentMethodTypes
     ]);
+} catch (\Stripe\Exception\ApiErrorException $e) {
+    // Handle Stripe API errors
+    error_log("create_payment_intent: Stripe API Error - " . $e->getMessage());
+    error_log("create_payment_intent: Error type: " . get_class($e));
+    
+    // If Alipay fails (not supported), retry with Card
+    if ($paymentMethod === 'alipay_hk' && $e->getHttpStatus() === 400) {
+        error_log("create_payment_intent: Alipay failed (HTTP 400), retrying with Card");
+        
+        try {
+            $fallbackIntent = \Stripe\PaymentIntent::create([
+                'amount' => $amount,
+                'currency' => 'hkd',
+                'payment_method_types' => ['card'],
+                'metadata' => [
+                    'customer_id' => $cid,
+                    'payment_method' => 'card_fallback_from_alipay',
+                    'original_method' => 'alipay_hk',
+                    'description' => 'Yummy Restaurant Order (Alipay fallback)'
+                ]
+            ]);
+            
+            error_log("create_payment_intent: FALLBACK SUCCESS - Card PaymentIntent created: " . $fallbackIntent->id);
+            http_response_code(200); // Return 200 with fallback flag
+            echo json_encode([
+                'success' => true,
+                'clientSecret' => $fallbackIntent->client_secret,
+                'paymentIntentId' => $fallbackIntent->id,
+                'fallback' => true,
+                'fallbackReason' => 'Alipay not available, switched to Card',
+                'paymentMethodsCreated' => ['card']
+            ]);
+        } catch (Exception $fallbackError) {
+            error_log("create_payment_intent: FALLBACK FAILED - " . $fallbackError->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Payment method unavailable: ' . $fallbackError->getMessage()]);
+        }
+    } else {
+        http_response_code($e->getHttpStatus() ?? 500);
+        echo json_encode(['error' => $e->getMessage()]);
+    }
 } catch (Exception $e) {
+    error_log("create_payment_intent: Unexpected error - " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['error' => 'Unexpected error: ' . $e->getMessage()]);
 }
 ?>

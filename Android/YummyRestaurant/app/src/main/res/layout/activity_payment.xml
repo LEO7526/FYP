@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="24dp">
 
     <!-- Total Amount Display -->
@@ -12,25 +13,59 @@
         android:text="Total: HK$5.00"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
-        android:layout_alignParentTop="true" />
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Payment Method Selection -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Payment Method:"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <RadioGroup
+        android:id="@+id/paymentMethodGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/rbCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💳 Credit/Debit Card"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/rbAlipayHK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔐 Alipay HK"
+            android:textSize="14sp" />
+
+    </RadioGroup>
 
     <!-- Pay Button -->
     <Button
         android:id="@+id/payButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
         android:text="Pay Now"
-        android:layout_below="@id/amountText"
-        android:layout_centerHorizontal="true" />
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#FF6F00"
+        android:textColor="@android:color/white" />
 
     <!-- Loading Spinner -->
     <ProgressBar
         android:id="@+id/loadingSpinner"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:visibility="gone" />
 
     <!-- Success Animation -->
@@ -38,7 +73,7 @@
         android:id="@+id/successIcon"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:src="@drawable/ic_check_circle"
         android:visibility="gone" />
-</RelativeLayout>
+</LinearLayout>
