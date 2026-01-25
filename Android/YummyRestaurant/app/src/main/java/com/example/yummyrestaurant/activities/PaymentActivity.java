@@ -1,10 +1,10 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -15,14 +15,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.OrderApiService;
-import com.example.yummyrestaurant.api.PaymentApiService;
-import com.example.yummyrestaurant.api.PaymentUrlResponse;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.gson.Gson;
+import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.Stripe;
+import com.stripe.android.paymentsheet.PaymentSheet;
+import com.stripe.android.paymentsheet.PaymentSheetResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +42,9 @@ public class PaymentActivity extends AppCompatActivity {
 
     private static final String TAG = "PaymentActivity";
 
+    // ✅ 使用实际的 Stripe Publishable Key
+    private static final String STRIPE_PUBLISHABLE_KEY = "pk_test_51S56Q5CEiSaWf7Oej0AHB17WDM62OAAM0EofpWf2TbvweOWZRD0Gm1tnC7i1epO4ACYBCnzRfLZaiSPCyVYMxCRk00nT1aG0qV";
+
     private ProgressBar loadingSpinner;
     private ImageView successIcon;
     private Button payButton;
@@ -49,12 +54,22 @@ public class PaymentActivity extends AppCompatActivity {
     private final List<Map<String, Object>> items = new ArrayList<>();
     private final List<Map<String, Object>> itemsForDisplay = new ArrayList<>();
 
+    private Stripe stripe;
+    private String clientSecret;
+    private String paymentIntentId;
+    private PaymentSheet paymentSheet;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
         Log.d(TAG, "onCreate: PaymentActivity started");
+
+        // Initialize Stripe with publishable key
+        PaymentConfiguration.init(this, STRIPE_PUBLISHABLE_KEY);
+        stripe = new Stripe(this, STRIPE_PUBLISHABLE_KEY);
+        paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);
 
         loadingSpinner = findViewById(R.id.loadingSpinner);
         successIcon = findViewById(R.id.successIcon);
@@ -68,107 +83,130 @@ public class PaymentActivity extends AppCompatActivity {
         payButton.setOnClickListener(v -> {
             Log.d(TAG, "Pay button clicked");
             payButton.setEnabled(false);
-            loadingSpinner.setVisibility(android.view.View.VISIBLE);
-            fetchPayDollarUrl();
+            loadingSpinner.setVisibility(View.VISIBLE);
+            createPaymentIntent();
         });
     }
 
-    private void fetchPayDollarUrl() {
-        Log.d(TAG, "fetchPayDollarUrl: preparing request");
+    /**
+     * Step 1: Create Payment Intent on backend
+     */
+    private void createPaymentIntent() {
+        Log.d(TAG, "createPaymentIntent: preparing request");
+
+        int totalAmount = CartManager.getTotalAmountInCents();
+        String userId = RoleManager.getUserId();
 
         Map<String, Object> data = new HashMap<>();
-        int totalAmount = CartManager.getTotalAmountInCents();
-        String userId = RoleManager.getUserId(); // or however you get the logged-in customer ID
-
         data.put("amount", totalAmount);
-        data.put("cid", Integer.parseInt(userId)); // REQUIRED by PHP
-        data.put("currency", "344"); // or "HKD" depending on backend
-        data.put("payType", "Card");
+        data.put("cid", Integer.parseInt(userId));
+        data.put("currency", "hkd");
 
-        Log.d(TAG, "fetchPayDollarUrl: request body = " + new Gson().toJson(data));
+        Log.d(TAG, "createPaymentIntent: request body = " + new Gson().toJson(data));
 
-        PaymentApiService service = RetrofitClient.getClient(this).create(PaymentApiService.class);
-        Call<PaymentUrlResponse> call = service.getPayDollarUrl(data);
+        OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
+        Call<Map<String, Object>> call = service.createPaymentIntent(data);
 
-        call.enqueue(new Callback<PaymentUrlResponse>() {
+        call.enqueue(new Callback<Map<String, Object>>() {
             @Override
-            public void onResponse(Call<PaymentUrlResponse> call, Response<PaymentUrlResponse> response) {
-                Log.d(TAG, "fetchPayDollarUrl onResponse: success=" + response.isSuccessful() + ", code=" + response.code());
-                loadingSpinner.setVisibility(android.view.View.GONE);
-                payButton.setEnabled(true);
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                Log.d(TAG, "createPaymentIntent onResponse: success=" + response.isSuccessful());
 
                 if (response.isSuccessful() && response.body() != null) {
-                    String paymentUrl = response.body().getPaymentUrl();
-                    Log.i(TAG, "Payment URL received: " + paymentUrl);
-                    redirectToPayDollar(paymentUrl);
+                    Map<String, Object> responseBody = response.body();
+                    clientSecret = (String) responseBody.get("clientSecret");
+                    paymentIntentId = (String) responseBody.get("paymentIntentId");
+
+                    if (clientSecret != null) {
+                        Log.d(TAG, "Client secret received: " + clientSecret.substring(0, 20) + "...");
+                        presentPaymentSheet();
+                    } else {
+                        showError("Failed to retrieve client secret from backend");
+                    }
                 } else {
                     try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "null";
-                        Log.e(TAG, "Failed to get payment URL. Code=" + response.code() + ", errorBody=" + errorBody);
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        Log.e(TAG, "Failed to create payment intent. Code=" + response.code() + ", error=" + errorBody);
+                        showError("Error: " + response.code());
                     } catch (IOException e) {
                         Log.e(TAG, "Error reading errorBody", e);
+                        showError("Network error");
                     }
-                    Toast.makeText(PaymentActivity.this, "Failed to get payment URL", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<PaymentUrlResponse> call, Throwable t) {
-                Log.e(TAG, "fetchPayDollarUrl onFailure: " + t.getMessage(), t);
-                loadingSpinner.setVisibility(android.view.View.GONE);
-                payButton.setEnabled(true);
-                Toast.makeText(PaymentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                Log.e(TAG, "createPaymentIntent onFailure: " + t.getMessage(), t);
+                showError("Error: " + t.getMessage());
             }
         });
     }
 
-    private void redirectToPayDollar(String paymentUrl) {
-        Log.d(TAG, "redirectToPayDollar: opening browser with URL=" + paymentUrl);
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
-        startActivity(browserIntent);
+    /**
+     * Step 2: Present Stripe Payment Sheet
+     */
+    private void presentPaymentSheet() {
+        Log.d(TAG, "presentPaymentSheet: showing payment sheet");
+
+        // Configuration without customer (no saved payment methods needed)
+        PaymentSheet.Configuration configuration = new PaymentSheet.Configuration.Builder("Yummy Restaurant")
+                .allowsDelayedPaymentMethods(true)
+                .build();
+
+        paymentSheet.presentWithPaymentIntent(clientSecret, configuration);
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-
-        Uri data = intent.getData();
-        Log.d(TAG, "onNewIntent: data=" + data);
-
-        if (data != null && data.getQueryParameter("status") != null) {
-            String status = data.getQueryParameter("status");
-            Log.d(TAG, "onNewIntent: payment status=" + status);
-
-            if ("success".equals(status)) {
-                successIcon.setAlpha(0f);
-                successIcon.setVisibility(android.view.View.VISIBLE);
-                successIcon.animate().alpha(1f).setDuration(500).start();
-
-                String userId = RoleManager.getUserId();
-                int amount = CartManager.getTotalAmountInCents();
-                Log.i(TAG, "Payment success. userId=" + userId + ", amount=" + amount);
-                saveOrderToBackend(userId, amount, "PayDollar");
-
-                new Handler().postDelayed(() -> {
-                    Log.d(TAG, "Navigating to OrderConfirmationActivity");
-                    Intent confirmIntent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
-                    confirmIntent.putExtra("customerId", userId);
-                    confirmIntent.putExtra("totalAmount", amount);
-                    confirmIntent.putExtra("itemCount", items.size());
-                    confirmIntent.putExtra("dishJson", dishJson);
-                    startActivity(confirmIntent);
-                    finish();
-                }, 1500);
-
-                CartManager.clearCart();
-            } else {
-                Log.w(TAG, "Payment failed or canceled. status=" + status);
-                Toast.makeText(this, "Payment failed or canceled", Toast.LENGTH_SHORT).show();
-            }
+    /**
+     * Step 3: Handle Payment Sheet Result
+     */
+    private void onPaymentSheetResult(final PaymentSheetResult paymentSheetResult) {
+        if (paymentSheetResult instanceof PaymentSheetResult.Completed) {
+            Log.d(TAG, "Payment successful!");
+            onPaymentSuccess();
+        } else if (paymentSheetResult instanceof PaymentSheetResult.Canceled) {
+            Log.d(TAG, "Payment canceled");
+            showError("Payment cancelled");
+        } else if (paymentSheetResult instanceof PaymentSheetResult.Failed) {
+            Log.e(TAG, "Payment failed");
+            showError("Payment failed");
         }
     }
 
+    /**
+     * Step 4: On Payment Success
+     */
+    private void onPaymentSuccess() {
+        Log.d(TAG, "onPaymentSuccess: payment completed");
+
+        // Show success icon
+        successIcon.setAlpha(0f);
+        successIcon.setVisibility(View.VISIBLE);
+        successIcon.animate().alpha(1f).setDuration(500).start();
+
+        String userId = RoleManager.getUserId();
+        int amount = CartManager.getTotalAmountInCents();
+
+        Log.i(TAG, "Payment success. userId=" + userId + ", amount=" + amount);
+        saveOrderToBackend(userId, amount, paymentIntentId);
+
+        new Handler().postDelayed(() -> {
+            Log.d(TAG, "Navigating to OrderConfirmationActivity");
+            Intent confirmIntent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
+            confirmIntent.putExtra("customerId", userId);
+            confirmIntent.putExtra("totalAmount", amount);
+            confirmIntent.putExtra("itemCount", items.size());
+            confirmIntent.putExtra("dishJson", dishJson);
+            startActivity(confirmIntent);
+            finish();
+        }, 1500);
+
+        CartManager.clearCart();
+    }
+
+    /**
+     * Step 5: Save order to backend after successful payment
+     */
     private void saveOrderToBackend(String userId, int amount, String paymentIntentId) {
         Log.d(TAG, "saveOrderToBackend: userId=" + userId + ", amount=" + amount);
 
@@ -189,7 +227,10 @@ public class PaymentActivity extends AppCompatActivity {
         orderData.put("ostatus", 1);
         orderData.put("table_number", "not chosen");
         orderData.put("sid", "not applicable");
+        orderData.put("payment_method", "stripe");
+        orderData.put("payment_intent_id", paymentIntentId);
 
+        // Build order items
         for (Map.Entry<CartItem, Integer> entry : CartManager.getCartItems().entrySet()) {
             CartItem cartItem = entry.getKey();
             MenuItem menuItem = cartItem.getMenuItem();
@@ -201,41 +242,10 @@ public class PaymentActivity extends AppCompatActivity {
             item.put("item_id", menuItem.getId());
             item.put("qty", quantity);
 
-            // Add customizations if present
             if (cartItem.getCustomization() != null) {
-                com.example.yummyrestaurant.models.Customization customization = cartItem.getCustomization();
                 List<Map<String, Object>> customizations = new ArrayList<>();
-
-                Map<String, Object> customObj = new HashMap<>();
-                customObj.put("option_id", 1);
-                customObj.put("option_name", "Spice Level");
-
-                String spiceLevel = customization.getSpiceLevel();
-                if (spiceLevel != null && !spiceLevel.isEmpty()) {
-                    // Single choice customization
-                    List<String> choiceNames = new ArrayList<>();
-                    choiceNames.add(spiceLevel);
-                    customObj.put("choice_names", choiceNames);
-                }
-
-                String notes = customization.getExtraNotes();
-                if (notes != null && !notes.isEmpty()) {
-                    // Text note customization
-                    Map<String, Object> noteCustom = new HashMap<>();
-                    noteCustom.put("option_id", 2);
-                    noteCustom.put("option_name", "Special Requests");
-                    noteCustom.put("text_value", notes);
-                    customizations.add(noteCustom);
-                }
-
-                if (spiceLevel != null && !spiceLevel.isEmpty()) {
-                    customizations.add(customObj);
-                }
-
-                if (!customizations.isEmpty()) {
-                    item.put("customizations", customizations);
-                    Log.d(TAG, "Added " + customizations.size() + " customizations to item");
-                }
+                // Add customizations here
+                item.put("customizations", customizations);
             }
 
             items.add(item);
@@ -256,7 +266,6 @@ public class PaymentActivity extends AppCompatActivity {
 
         orderData.put("items", items);
         dishJson = new Gson().toJson(itemsForDisplay);
-
         orderData.put("total_amount", amount);
         orderData.put("coupon_id", null);
 
@@ -271,21 +280,25 @@ public class PaymentActivity extends AppCompatActivity {
                     try {
                         String responseText = response.body() != null ? response.body().string() : "";
                         Log.i(TAG, "Order saved successfully. Response: " + responseText);
-                        Toast.makeText(PaymentActivity.this, "Order saved!", Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to read response body", e);
                     }
                 } else {
                     Log.e(TAG, "Failed to save order. Code=" + response.code());
-                    Toast.makeText(PaymentActivity.this, "Failed to save order", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e(TAG, "saveOrderToBackend onFailure: " + t.getMessage(), t);
-                Toast.makeText(PaymentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showError(String message) {
+        loadingSpinner.setVisibility(View.GONE);
+        payButton.setEnabled(true);
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Log.e(TAG, "Error: " + message);
     }
 }

@@ -31,4 +31,8 @@ public interface OrderApiService {
     @POST("save_order.php")
     Call<ResponseBody> saveOrderDirect(@Body Map<String, Object> payload);
 
+    // ✅ NEW: Create Stripe Payment Intent
+    @Headers("Content-Type: application/json")
+    @POST("create_payment_intent.php")
+    Call<Map<String, Object>> createPaymentIntent(@Body Map<String, Object> data);
 }

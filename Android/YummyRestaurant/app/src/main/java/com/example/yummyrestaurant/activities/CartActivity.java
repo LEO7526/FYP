@@ -194,7 +194,7 @@ public class CartActivity extends AppCompatActivity {
             if ((couponQuantities == null || couponQuantities.isEmpty())
                     && (selectedCoupons == null || selectedCoupons.isEmpty())) {
                 Log.d(TAG, "No coupons selected, proceeding without coupon");
-                Intent payIntent = new Intent(this, TempPaymentActivity.class);
+                Intent payIntent = new Intent(this, PaymentActivity.class);
                 payIntent.putExtra("totalAmount", CartManager.getTotalAmountInCents());
                 startActivity(payIntent);
                 return;
@@ -205,7 +205,7 @@ public class CartActivity extends AppCompatActivity {
                     + (selectedCoupons != null ? selectedCoupons.size() : 0)
                     + " coupons: " + finalAmount);
 
-            Intent payIntent = new Intent(this, TempPaymentActivity.class);
+            Intent payIntent = new Intent(this, PaymentActivity.class);
             payIntent.putExtra("subtotalAmount", CartManager.getTotalAmountInCents());
             payIntent.putExtra("totalAmount", finalAmount);
             payIntent.putExtra("couponQuantities", couponQuantities);
