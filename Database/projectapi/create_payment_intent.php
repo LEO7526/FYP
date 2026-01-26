@@ -27,7 +27,7 @@ error_log("create_payment_intent: amount = " . $amount);
 
 if ($paymentMethod === 'alipay_hk' || $paymentMethod === 'alipay') {
     $paymentMethodTypes = ['alipay'];
-    error_log("create_payment_intent: Using Alipay payment method (currency: hkd)");
+    error_log("create_payment_intent: Using Alipay payment method (supports alipay_hk and alipay, currency: hkd)");
 } else {
     $paymentMethodTypes = ['card'];
     error_log("create_payment_intent: Using Card payment method");
