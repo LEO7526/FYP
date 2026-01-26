@@ -50,14 +50,6 @@ try {
         ]
     ];
     
-    // Alipay requires a return_url for redirect-based authentication
-    if ($paymentMethod === 'alipay_hk' || $paymentMethod === 'alipay') {
-        // Return URL where Stripe redirects the customer after authentication
-        // This should be your app's deep link or web URL
-        $intentParams['return_url'] = 'https://your-domain.com/payment-return';
-        error_log("create_payment_intent: Added return_url for Alipay");
-    }
-    
     $intent = \Stripe\PaymentIntent::create($intentParams);
 
     error_log("create_payment_intent: SUCCESS - PaymentIntent created: " . $intent->id);
