@@ -25,9 +25,9 @@ $requestedMethod = $paymentMethod; // Track original request
 error_log("create_payment_intent: paymentMethod = " . $paymentMethod);
 error_log("create_payment_intent: amount = " . $amount);
 
-if ($paymentMethod === 'alipay_hk') {
-    $paymentMethodTypes = ['alipay_hk'];
-    error_log("create_payment_intent: Using Alipay HK payment method (currency: hkd)");
+if ($paymentMethod === 'alipay_hk' || $paymentMethod === 'alipay') {
+    $paymentMethodTypes = ['alipay'];
+    error_log("create_payment_intent: Using Alipay payment method (currency: hkd)");
 } else {
     $paymentMethodTypes = ['card'];
     error_log("create_payment_intent: Using Card payment method");
@@ -38,21 +38,27 @@ error_log("create_payment_intent: paymentMethodTypes = " . json_encode($paymentM
 try {
     error_log("create_payment_intent: Attempting to create PaymentIntent with " . json_encode($paymentMethodTypes));
     
-    $intent = \Stripe\PaymentIntent::create([
+    // Build payment intent parameters
+    $intentParams = [
         'amount' => $amount,
         'currency' => 'hkd',
         'payment_method_types' => $paymentMethodTypes,
-        'billing_details' => [
-            'address' => [
-                'country' => 'HK'
-            ]
-        ],
         'metadata' => [
             'customer_id' => $cid,
             'payment_method' => $paymentMethod,
             'description' => 'Yummy Restaurant Order'
         ]
-    ]);
+    ];
+    
+    // Alipay requires a return_url for redirect-based authentication
+    if ($paymentMethod === 'alipay_hk' || $paymentMethod === 'alipay') {
+        // Return URL where Stripe redirects the customer after authentication
+        // This should be your app's deep link or web URL
+        $intentParams['return_url'] = 'https://your-domain.com/payment-return';
+        error_log("create_payment_intent: Added return_url for Alipay");
+    }
+    
+    $intent = \Stripe\PaymentIntent::create($intentParams);
 
     error_log("create_payment_intent: SUCCESS - PaymentIntent created: " . $intent->id);
     error_log("create_payment_intent: Payment method types returned by Stripe: " . json_encode($intent->payment_method_types));
@@ -83,7 +89,7 @@ try {
     ]));
     
     // If Alipay fails (not supported), retry with Card
-    if ($paymentMethod === 'alipay_hk' && $e->getHttpStatus() === 400) {
+    if (($paymentMethod === 'alipay_hk' || $paymentMethod === 'alipay') && $e->getHttpStatus() === 400) {
         error_log("create_payment_intent: Alipay failed (HTTP 400), retrying with Card");
         
         try {
