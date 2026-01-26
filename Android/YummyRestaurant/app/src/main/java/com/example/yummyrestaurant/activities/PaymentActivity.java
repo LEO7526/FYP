@@ -241,7 +241,8 @@ public class PaymentActivity extends AppCompatActivity {
             Log.d(TAG, "presentPaymentSheet: Creating PaymentSheet configuration");
             Log.d(TAG, "presentPaymentSheet: selectedPaymentMethod before config = " + selectedPaymentMethod);
             
-            // Configuration without customer (no saved payment methods needed)
+            // Configuration for payment sheet
+            // Country is already set in backend via billing_details
             PaymentSheet.Configuration configuration = new PaymentSheet.Configuration.Builder("Yummy Restaurant")
                     .allowsDelayedPaymentMethods(true)
                     .build();

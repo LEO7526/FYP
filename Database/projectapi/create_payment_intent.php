@@ -26,8 +26,8 @@ error_log("create_payment_intent: paymentMethod = " . $paymentMethod);
 error_log("create_payment_intent: amount = " . $amount);
 
 if ($paymentMethod === 'alipay_hk') {
-    $paymentMethodTypes = ['alipay'];
-    error_log("create_payment_intent: Using Alipay payment method");
+    $paymentMethodTypes = ['alipay_hk'];
+    error_log("create_payment_intent: Using Alipay HK payment method (currency: hkd)");
 } else {
     $paymentMethodTypes = ['card'];
     error_log("create_payment_intent: Using Card payment method");
@@ -42,6 +42,11 @@ try {
         'amount' => $amount,
         'currency' => 'hkd',
         'payment_method_types' => $paymentMethodTypes,
+        'billing_details' => [
+            'address' => [
+                'country' => 'HK'
+            ]
+        ],
         'metadata' => [
             'customer_id' => $cid,
             'payment_method' => $paymentMethod,
@@ -50,7 +55,13 @@ try {
     ]);
 
     error_log("create_payment_intent: SUCCESS - PaymentIntent created: " . $intent->id);
+    error_log("create_payment_intent: Payment method types returned by Stripe: " . json_encode($intent->payment_method_types));
     error_log("create_payment_intent: clientSecret = " . $intent->client_secret);
+    
+    // Log the actual payment methods returned by Stripe for debugging
+    if (empty($intent->payment_method_types)) {
+        error_log("create_payment_intent: WARNING - Stripe returned empty payment_method_types. Payment method may not be supported.");
+    }
 
     echo json_encode([
         'success' => true,
@@ -62,6 +73,14 @@ try {
     // Handle Stripe API errors
     error_log("create_payment_intent: Stripe API Error - " . $e->getMessage());
     error_log("create_payment_intent: Error type: " . get_class($e));
+    error_log("create_payment_intent: HTTP Status: " . $e->getHttpStatus());
+    error_log("create_payment_intent: Stripe Error Code: " . $e->getStripeCode());
+    error_log("create_payment_intent: Full error details: " . json_encode([
+        'message' => $e->getMessage(),
+        'code' => $e->getStripeCode(),
+        'http_status' => $e->getHttpStatus(),
+        'type' => get_class($e)
+    ]));
     
     // If Alipay fails (not supported), retry with Card
     if ($paymentMethod === 'alipay_hk' && $e->getHttpStatus() === 400) {
