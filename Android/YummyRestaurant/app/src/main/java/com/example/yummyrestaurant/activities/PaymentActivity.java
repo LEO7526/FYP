@@ -90,6 +90,13 @@ public class PaymentActivity extends AppCompatActivity {
 
         // Setup payment method selection
         rbCard.setChecked(true); // Default to Card
+        
+        // Disable AlipayHK until it's properly configured in Stripe Dashboard
+        // TODO: Re-enable once AlipayHK is activated in Stripe account settings
+        rbAlipayHK.setEnabled(false);
+        rbAlipayHK.setAlpha(0.5f); // Visual indication that it's disabled
+        Log.d(TAG, "onCreate: AlipayHK option disabled (not configured in Stripe)");
+        
         paymentMethodGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbCard) {
                 selectedPaymentMethod = "card";
