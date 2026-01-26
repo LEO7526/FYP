@@ -73,7 +73,7 @@ public class QRScannerActivity extends AppCompatActivity {
      * Verify table ID with backend and proceed if valid
      */
     private void verifyTableAndProceed(int tableId) {
-        TableManager.verifyTable(tableId, new TableManager.TableVerificationCallback() {
+        TableManager.verifyTable(QRScannerActivity.this, tableId, new TableManager.TableVerificationCallback() {
             @Override
             public void onVerificationSuccess(TableManager.TableVerificationResponse response) {
                 Log.d(TAG, "Table verification successful. Table: " + response.table_id + 

@@ -50,11 +50,12 @@ public final class TableManager {
 
     /**
      * Verify table by ID and store the validated information
+     * @param context Application context for API configuration
      * @param tableId The table ID to verify
      * @param callback Callback with verification result
      */
-    public static void verifyTable(int tableId, TableVerificationCallback callback) {
-        TableVerificationApi api = RetrofitClient.getClient(null).create(TableVerificationApi.class);
+    public static void verifyTable(android.content.Context context, int tableId, TableVerificationCallback callback) {
+        TableVerificationApi api = RetrofitClient.getClient(context).create(TableVerificationApi.class);
         
         Call<TableVerificationResponse> call = api.verifyTable(tableId);
         call.enqueue(new Callback<TableVerificationResponse>() {

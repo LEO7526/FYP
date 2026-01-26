@@ -1,53 +1,35 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=utf-8");
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
 
-// Connect to database
-$conn = new mysqli("localhost", "root", "", "ProjectDB");
+$host = 'localhost';
+$user = 'root';
+$pass = '';
+$dbname = 'ProjectDB';
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+
 if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => $conn->connect_error, "valid" => false]);
+    http_response_code(500);
+    echo json_encode(['success' => false, 'valid' => false, 'message' => $conn->connect_error]);
     exit;
 }
 
-// Get table_id from POST or GET
-$table_id = $_POST['table_id'] ?? $_GET['table_id'] ?? null;
+$table_id = isset($_POST['table_id']) ? intval($_POST['table_id']) : (isset($_GET['table_id']) ? intval($_GET['table_id']) : 0);
 
-if (!$table_id) {
-    echo json_encode(["success" => false, "message" => "table_id parameter is required", "valid" => false]);
+if ($table_id <= 0) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'valid' => false, 'message' => 'Invalid table_id']);
     $conn->close();
     exit;
 }
 
-// Validate that table_id is numeric
-if (!is_numeric($table_id)) {
-    echo json_encode(["success" => false, "message" => "Invalid table_id format", "valid" => false]);
-    $conn->close();
-    exit;
-}
-
-$table_id = (int)$table_id;
-
-// Query to verify table exists and check its status
-$sql = "
-    SELECT 
-        sc.tid,
-        sc.capacity,
-        sc.status,
-        CASE 
-            WHEN to.toid IS NOT NULL THEN 'occupied'
-            WHEN sc.status = 1 THEN 'reserved'
-            ELSE 'available'
-        END AS current_status,
-        COALESCE(to.oid, 0) AS active_order
-    FROM seatingChart sc
-    LEFT JOIN table_orders to ON sc.tid = to.table_number AND to.status NOT IN ('paid', 'cancelled')
-    WHERE sc.tid = ?
-    LIMIT 1
-";
-
+$sql = "SELECT tid, capacity, status FROM seatingChart WHERE tid = ? LIMIT 1";
 $stmt = $conn->prepare($sql);
+
 if ($stmt === false) {
-    echo json_encode(["success" => false, "message" => $conn->error, "valid" => false]);
+    http_response_code(500);
+    echo json_encode(['success' => false, 'valid' => false, 'message' => $conn->error]);
     $conn->close();
     exit;
 }
@@ -57,32 +39,64 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    echo json_encode([
-        "success" => true,
-        "valid" => false,
-        "message" => "Table not found",
-        "table_id" => $table_id
-    ]);
+    http_response_code(404);
+    echo json_encode(['success' => true, 'valid' => false, 'message' => 'Table not found', 'table_id' => $table_id]);
     $stmt->close();
     $conn->close();
     exit;
 }
 
 $row = $result->fetch_assoc();
+$tid = intval($row['tid']);
+$capacity = intval($row['capacity']);
+$seating_status = intval($row['status']);
 
-// Check if table is available for ordering
-$is_available = ($row["current_status"] === "available");
+$sqlStatus = "SELECT status FROM table_orders WHERE table_number = ? ORDER BY created_at DESC LIMIT 1";
+$stmtStatus = $conn->prepare($sqlStatus);
 
+if ($stmtStatus === false) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'valid' => false, 'message' => $conn->error]);
+    $conn->close();
+    exit;
+}
+
+$stmtStatus->bind_param("i", $table_id);
+$stmtStatus->execute();
+$resultStatus = $stmtStatus->get_result();
+
+$current_status = 'available';
+$is_available = true;
+
+if ($resultStatus->num_rows > 0) {
+    $statusRow = $resultStatus->fetch_assoc();
+    $order_status = $statusRow['status'];
+    
+    if ($order_status === 'ordering' || $order_status === 'seated' || $order_status === 'ready_to_pay') {
+        $current_status = 'occupied';
+        $is_available = false;
+    } elseif ($order_status === 'reserved') {
+        $current_status = 'reserved';
+        $is_available = false;
+    }
+}
+
+if ($seating_status == 1 && $current_status === 'available') {
+    $current_status = 'reserved';
+    $is_available = false;
+}
+
+http_response_code(200);
 echo json_encode([
-    "success" => true,
-    "valid" => true,
-    "table_id" => (int)$row["tid"],
-    "capacity" => (int)$row["capacity"],
-    "status" => $row["current_status"],
-    "available" => $is_available,
-    "message" => $is_available ? "Table is available" : "Table is not available (" . $row["current_status"] . ")"
+    'success' => true,
+    'valid' => true,
+    'table_id' => $tid,
+    'capacity' => $capacity,
+    'status' => $current_status,
+    'available' => $is_available,
+    'message' => $is_available ? 'Table is available for ordering' : 'Table is not available'
 ]);
 
 $stmt->close();
+$stmtStatus->close();
 $conn->close();
-?>

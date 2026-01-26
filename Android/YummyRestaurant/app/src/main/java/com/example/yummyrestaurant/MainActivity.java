@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import com.example.yummyrestaurant.activities.CustomerHomeActivity;
 import com.example.yummyrestaurant.activities.DashboardActivity;
 import com.example.yummyrestaurant.activities.LoginActivity;
+import com.example.yummyrestaurant.api.ApiConfig;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 🚀 自動偵測環境（模擬器 vs 真實手機）
+        ApiConfig.autoDetectEnvironment(this);
 
         // Check and request POST_NOTIFICATIONS permission (required for Android 13 and above)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
