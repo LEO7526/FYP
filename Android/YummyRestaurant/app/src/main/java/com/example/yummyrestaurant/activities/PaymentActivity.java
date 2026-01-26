@@ -83,23 +83,26 @@ public class PaymentActivity extends AppCompatActivity {
         paymentMethodGroup = findViewById(R.id.paymentMethodGroup);
         rbCard = findViewById(R.id.rbCard);
         rbAlipayHK = findViewById(R.id.rbAlipayHK);
+        // Hide alternative payment method - PaymentSheet only supports card payments
+        rbAlipayHK.setVisibility(View.GONE);
+        // Hide the radio group label if applicable
+        View paymentMethodLabel = findViewById(R.id.paymentMethodLabel);
+        if (paymentMethodLabel != null) {
+            paymentMethodLabel.setVisibility(View.GONE);
+        }
 
         int totalAmount = CartManager.getTotalAmountInCents();
         Log.d(TAG, "onCreate: totalAmount=" + totalAmount);
         amountText.setText(String.format(Locale.getDefault(), "Total: HK$%.2f", totalAmount / 100.0));
 
-        // Setup payment method selection
-        rbCard.setChecked(true); // Default to Card
+        // Setup payment method selection - only card is supported by PaymentSheet
+        selectedPaymentMethod = "card"; // Force card payment
+        rbCard.setChecked(true);
         paymentMethodGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.rbCard) {
-                selectedPaymentMethod = "card";
-                Log.d(TAG, "Payment method selected: Card");
-                Log.i(TAG, ">>> User selected CARD payment method");
-            } else if (checkedId == R.id.rbAlipayHK) {
-                selectedPaymentMethod = "alipay_hk";
-                Log.d(TAG, "Payment method selected: AlipayHK");
-                Log.w(TAG, ">>> User selected ALIPAY_HK payment method (Beta)");
-            }
+            // PaymentSheet only supports card payments
+            selectedPaymentMethod = "card";
+            Log.d(TAG, "Payment method: Card (only supported method)");
+            Log.i(TAG, ">>> User payment method: CARD");
         });
 
         payButton.setOnClickListener(v -> {
@@ -241,10 +244,16 @@ public class PaymentActivity extends AppCompatActivity {
             Log.d(TAG, "presentPaymentSheet: Creating PaymentSheet configuration");
             Log.d(TAG, "presentPaymentSheet: selectedPaymentMethod before config = " + selectedPaymentMethod);
             
-            // Configuration for payment sheet
-            // Country is already set in backend via billing_details
+            // Configuration for payment sheet with HK billing details for Alipay support
             PaymentSheet.Configuration configuration = new PaymentSheet.Configuration.Builder("Yummy Restaurant")
                     .allowsDelayedPaymentMethods(true)
+                    .defaultBillingDetails(
+                            new PaymentSheet.BillingDetails.Builder()
+                                    .address(new PaymentSheet.Address.Builder()
+                                            .country("HK")
+                                            .build())
+                                    .build()
+                    )
                     .build();
 
             Log.d(TAG, "presentPaymentSheet: Configuration created successfully");

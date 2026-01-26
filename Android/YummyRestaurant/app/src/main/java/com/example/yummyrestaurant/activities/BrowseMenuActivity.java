@@ -323,12 +323,13 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
         Button btnTakeaway = findViewById(R.id.btnTakeaway);
 
         btnDineIn.setOnClickListener(v -> {
-            CartManager.setOrderType("dine_in");
-            updateOrderTypeButtons("dine_in");
-            showTableNumberDialog();
-            // Menu already loaded, just update UI state
-            adapter.notifyDataSetChanged();
-            updateOverlayVisibility();
+            // Launch QR Scanner for table selection
+            Toast.makeText(BrowseMenuActivity.this, "Scanning QR code...", Toast.LENGTH_SHORT).show();
+            Intent qrScanIntent = new Intent(BrowseMenuActivity.this, 
+                    com.example.yummyrestaurant.utils.QRScannerActivity.class);
+            startActivity(qrScanIntent);
+            // Note: The QRScannerActivity will set order type and table number, 
+            // then return to this activity
         });
 
         btnTakeaway.setOnClickListener(v -> {
@@ -381,44 +382,5 @@ public class BrowseMenuActivity extends BaseCustomerActivity {
                 orderTypeHintOverlay.setVisibility(View.VISIBLE);
             }
         }
-    }
-
-    /**
-     * Show dialog to input table number for dine_in orders
-     */
-    private void showTableNumberDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        android.widget.EditText editText = new android.widget.EditText(this);
-        editText.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        editText.setHint("Enter table number");
-
-        builder.setTitle("Table Number")
-                .setMessage("Please enter your table number")
-                .setView(editText)
-                .setCancelable(false)
-                .setPositiveButton("Confirm", (dialog, which) -> {
-                    String tableNumStr = editText.getText().toString().trim();
-                    if (!tableNumStr.isEmpty()) {
-                        try {
-                            Integer tableNum = Integer.parseInt(tableNumStr);
-                            CartManager.setTableNumber(tableNum);
-                            Toast.makeText(BrowseMenuActivity.this, 
-                                    "Table " + tableNum + " selected", Toast.LENGTH_SHORT).show();
-                        } catch (NumberFormatException e) {
-                            Toast.makeText(BrowseMenuActivity.this, 
-                                    "Invalid table number", Toast.LENGTH_SHORT).show();
-                            showTableNumberDialog();
-                        }
-                    } else {
-                        Toast.makeText(BrowseMenuActivity.this, 
-                                "Please enter a table number", Toast.LENGTH_SHORT).show();
-                        showTableNumberDialog();
-                    }
-                    dialog.dismiss();
-                })
-                .setNegativeButton("Skip", (dialog, which) -> {
-                    dialog.dismiss();
-                })
-                .show();
     }
 }
