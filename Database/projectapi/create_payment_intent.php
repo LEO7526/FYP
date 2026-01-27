@@ -18,31 +18,20 @@ if ($amount < 500) {
     exit;
 }
 
-// Determine payment method types based on user selection
-$paymentMethodTypes = [];
-$requestedMethod = $paymentMethod; // Track original request
-
 error_log("create_payment_intent: paymentMethod = " . $paymentMethod);
 error_log("create_payment_intent: amount = " . $amount);
 
 // PaymentSheet only supports card payments
-// All other payment methods fall back to card
 $paymentMethodTypes = ['card'];
 error_log("create_payment_intent: Using Card payment method (PaymentSheet only supports card)");
-
-error_log("create_payment_intent: paymentMethodTypes = " . json_encode($paymentMethodTypes));
 
 try {
     error_log("create_payment_intent: Attempting to create PaymentIntent with " . json_encode($paymentMethodTypes));
     
-    // Build payment intent parameters
-    // PaymentSheet only supports card payments
-    $paymentMethods = ['card'];
-    
     $intentParams = [
         'amount' => $amount,
         'currency' => 'hkd',
-        'payment_method_types' => $paymentMethods,
+        'payment_method_types' => $paymentMethodTypes,
         'metadata' => [
             'customer_id' => $cid,
             'payment_method' => $paymentMethod,
@@ -51,7 +40,7 @@ try {
         ]
     ];
     
-    error_log("create_payment_intent: Final payment methods sent to Stripe: " . json_encode($paymentMethods));
+    error_log("create_payment_intent: Final payment methods sent to Stripe: " . json_encode($paymentMethodTypes));
     
     $intent = \Stripe\PaymentIntent::create($intentParams);
 
@@ -64,12 +53,15 @@ try {
         error_log("create_payment_intent: WARNING - Stripe returned empty payment_method_types. Payment method may not be supported.");
     }
 
+    http_response_code(200);
     echo json_encode([
         'success' => true,
         'clientSecret' => $intent->client_secret,
         'paymentIntentId' => $intent->id,
         'paymentMethodsCreated' => $paymentMethodTypes
     ]);
+    exit;
+
 } catch (\Stripe\Exception\ApiErrorException $e) {
     // Handle Stripe API errors
     error_log("create_payment_intent: Stripe API Error - " . $e->getMessage());
@@ -83,23 +75,22 @@ try {
         'type' => get_class($e)
     ]));
     
-    // Card payment failed - return error
     error_log("create_payment_intent: Card payment failed, no fallback available");
     http_response_code(400);
     echo json_encode([
+        'success' => false,
         'error' => 'Payment processing failed. Please try again.',
         'details' => $e->getMessage()
     ]);
     exit;
-                    'payment_method' => 'card_fallback_from_alipay',
-                    'original_method' => 'alipay_hk',
-                    'description' => 'Yummy Restaurant Order (Alipay fallback)'
-                ]
-            ]);
-            
+
 } catch (Exception $e) {
     error_log("create_payment_intent: Unexpected error - " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => 'Unexpected error: ' . $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Unexpected error: ' . $e->getMessage()
+    ]);
+    exit;
 }
 ?>

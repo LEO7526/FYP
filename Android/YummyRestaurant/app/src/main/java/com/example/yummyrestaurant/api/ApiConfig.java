@@ -13,8 +13,8 @@ public class ApiConfig {
 
     // Define your environments here
     public static final String BASE_SIMULATOR_URL = "http://10.0.2.2/newFolder/Database/projectapi/";
-    public static final String BASE_PHONE_URL     = "http://192.168.0.120/newFolder/Database/projectapi/";
-    // 真實 IP: 192.168.0.120 (根據您的網絡自動調整)
+    public static final String BASE_PHONE_URL     = "http://192.168.0.122/newFolder/Database/projectapi/";
+    // 真實 IP: 192.168.0.122 (開發機器 - XAMPP 所在位置)
 
     /**
      * 自動偵測是否為 Android 模擬器
