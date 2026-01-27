@@ -1,78 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".activities.ConfirmBookingActivity">
 
+    <!-- Two-Directional Scrollable Seating Chart Container -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollViewSeatingChart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:fillViewport="true">
+
+        <!-- Horizontal Scroll for left-right navigation -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="horizontal"
+            android:fillViewport="true">
+
+            <!-- Full-Screen Seating Chart View -->
+            <com.example.yummyrestaurant.views.SeatingChartView
+                android:id="@+id/seatingChartView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ffffff" />
+
+        </HorizontalScrollView>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Status Bar Overlay: Title + Legend -->
     <LinearLayout
+        android:id="@+id/statusBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
-        tools:context=".activities.ConfirmBookingActivity">
+        android:background="@android:color/white"
+        android:padding="12dp"
+        android:elevation="4dp">
 
+        <!-- Title -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Confirm Your Booking"
-            android:textSize="28sp"
+            android:text="Select a Table"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginBottom="24dp"/>
+            android:textColor="#1a5f7a"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="1. Select an Available Table:"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewTables"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="24dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2. Enter Your Details:"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"/>
-
-        <EditText
-            android:id="@+id/editTextBookingName"
+        <!-- Legend for table colors -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Your Name"
-            android:inputType="textPersonName"/>
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
 
-        <EditText
-            android:id="@+id/editTextBookingPhone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Your Phone Number"
-            android:inputType="phone"/>
+            <!-- Available -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="12dp">
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="#4CAF50"
+                    android:layout_marginEnd="4dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Available"
+                    android:textSize="11sp" />
+            </LinearLayout>
 
-        <EditText
-            android:id="@+id/editTextBookingPurpose"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Purpose (e.g., Birthday, optional)"
-            android:inputType="text"/>
+            <!-- Occupied -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="12dp">
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="#F44336"
+                    android:layout_marginEnd="4dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Occupied"
+                    android:textSize="11sp" />
+            </LinearLayout>
 
-        <EditText
-            android:id="@+id/editTextBookingRemark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Remark (e.g., Need baby chair, optional)"
-            android:inputType="text"/>
+            <!-- Reserved -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="12dp">
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="#FF9800"
+                    android:layout_marginEnd="4dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reserved"
+                    android:textSize="11sp" />
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/buttonConfirmBooking"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="Confirm Booking"/>
+            <!-- Selected -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="#2196F3"
+                    android:layout_marginEnd="4dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Selected"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
-</ScrollView>
+
+    <!-- Floating Action Button (Confirm) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabConfirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_check"
+        android:contentDescription="Confirm Booking"
+        app:fabSize="normal"
+        android:enabled="false"
+        android:alpha="0.5" />
+
+    <!-- Bottom Sheet Fragment Container -->
+    <FrameLayout
+        android:id="@+id/bottomSheetContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>

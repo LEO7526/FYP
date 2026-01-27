@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:padding="20dp">
+
+    <!-- Drag Handle / Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_marginBottom="16dp">
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:background="#cccccc"
+            android:layout_marginBottom="8dp"
+            android:alpha="0.7" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enter Your Details"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#1a5f7a"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- Selected Table Info (Read-only) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#f0f0f0"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Selected Table:" />
+
+        <TextView
+            android:id="@+id/textViewSelectedTable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Table #--"
+            android:textStyle="bold"
+            android:textColor="#2196F3" />
+
+    </LinearLayout>
+
+    <!-- Name Input -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Full Name"
+        android:textSize="12sp"
+        android:textColor="#666"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/editTextBookingName"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Enter your name"
+        android:inputType="textPersonName"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/edit_text_background" />
+
+    <!-- Phone Input -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phone Number"
+        android:textSize="12sp"
+        android:textColor="#666"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/editTextBookingPhone"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Enter your phone"
+        android:inputType="phone"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/edit_text_background" />
+
+    <!-- Purpose Input -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Booking Purpose (Optional)"
+        android:textSize="12sp"
+        android:textColor="#666"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/editTextBookingPurpose"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="e.g., Birthday, Anniversary"
+        android:inputType="text"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/edit_text_background" />
+
+    <!-- Remark Input -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Special Requests (Optional)"
+        android:textSize="12sp"
+        android:textColor="#666"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/editTextBookingRemark"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:hint="e.g., Need high chair, allergens"
+        android:inputType="textMultiLine"
+        android:gravity="top"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/edit_text_background" />
+
+    <!-- Button Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:spacing="8dp">
+
+        <!-- Cancel Button -->
+        <Button
+            android:id="@+id/buttonCancel"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textSize="14sp"
+            android:background="@android:drawable/btn_default" />
+
+        <!-- Confirm Button -->
+        <Button
+            android:id="@+id/buttonConfirmBooking"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="2"
+            android:text="Confirm Booking"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/rounded_button"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

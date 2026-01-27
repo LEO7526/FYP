@@ -761,10 +761,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     /*
      * Order status codes and their meanings:
      *
-     * 1 - Pending: Order received
-     * 2 - Cancelled: Order was cancelled — used by system to record cancellations.
-     * 3 - Paid: Bill has been settled — used by cashier or POS system to confirm payment.
-     *
+orders
+ostatus 1: Pending 2: Done 3: Paid 4: Cancelled
+* Done means done preparing the food
      * These statuses help the restaurant coordinate order progress across kitchen, service, and billing.
      */
 }
