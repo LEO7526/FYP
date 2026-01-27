@@ -761,11 +761,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     /*
      * Order status codes and their meanings:
      *
-     * 1 - Pending: Order received, not started — used by kitchen staff to track new incoming orders.
-     * 2 - Preparing: Kitchen is actively cooking — used by chefs and staff to manage workflow.
-     * 3 - Delivered: Food has been served — used by waitstaff to confirm completion of service.
-     * 4 - Cancelled: Order was voided — used by staff or system to record cancellations.
-     * 5 - Paid: Bill has been settled — used by cashier or POS system to confirm payment.
+     * 1 - Pending: Order received
+     * 2 - Cancelled: Order was cancelled — used by system to record cancellations.
+     * 3 - Paid: Bill has been settled — used by cashier or POS system to confirm payment.
      *
      * These statuses help the restaurant coordinate order progress across kitchen, service, and billing.
      */
