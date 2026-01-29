@@ -758,6 +758,10 @@ INSERT INTO table_orders (table_number, staff_id) VALUES (3, 2);
 INSERT INTO table_orders (table_number, oid, staff_id) VALUES (4, 1, 3);
 INSERT INTO table_orders (table_number, oid, staff_id) VALUES (5, 2, 4);
 INSERT INTO table_orders (table_number, oid, staff_id) VALUES (6, 2, 5);
+-- New orders mapping (from booking data)
+INSERT INTO table_orders (table_number, oid, staff_id) VALUES (5, 3, 1);
+INSERT INTO table_orders (table_number, oid, staff_id) VALUES (12, 4, 1);
+INSERT INTO table_orders (table_number, oid, staff_id) VALUES (25, 5, 1);
 
 -- =================================================================
 -- PACKAGES
