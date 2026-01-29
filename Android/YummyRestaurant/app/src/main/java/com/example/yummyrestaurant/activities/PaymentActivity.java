@@ -419,7 +419,27 @@ public class PaymentActivity extends AppCompatActivity {
 
         orderData.put("cid", customerId);
         orderData.put("ostatus", 1);
-        orderData.put("table_number", "not chosen");
+        
+        // ✅ Add order_type (dine_in or takeaway)
+        String orderType = CartManager.getOrderType();
+        Log.d(TAG, "saveOrderToBackend: order_type=" + orderType);
+        orderData.put("order_type", orderType);
+        
+        // ✅ Add table_number only for dine_in orders
+        if ("dine_in".equals(orderType)) {
+            Integer tableNumber = CartManager.getTableNumber();
+            if (tableNumber != null && tableNumber > 0) {
+                orderData.put("table_number", tableNumber);
+                Log.d(TAG, "saveOrderToBackend: dine_in order, table_number=" + tableNumber);
+            } else {
+                orderData.put("table_number", null);
+                Log.d(TAG, "saveOrderToBackend: dine_in order but no valid table_number");
+            }
+        } else {
+            orderData.put("table_number", null);
+            Log.d(TAG, "saveOrderToBackend: takeaway order, table_number=null");
+        }
+        
         orderData.put("sid", "not applicable");
         orderData.put("payment_method", "stripe");
         orderData.put("payment_intent_id", paymentIntentId);

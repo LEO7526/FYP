@@ -3,7 +3,10 @@ package com.example.yummyrestaurant.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,10 +18,14 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.CartItemAdapter;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Coupon;
+import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.example.yummyrestaurant.utils.CouponValidator;
 import com.google.gson.Gson;
+import com.bumptech.glide.Glide;
+
+import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,37 +72,30 @@ public class CartActivity extends AppCompatActivity {
                 Toast.makeText(this, "Your cart is empty!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Log.d(TAG, "Launching MyCouponsActivity for coupon selection");
-            Intent couponIntent = new Intent(CartActivity.this, MyCouponsActivity.class);
-            couponIntent.putExtra("fromCart", true);
-
-            try {
-                int custId = Integer.parseInt(RoleManager.getUserId());
-                couponIntent.putExtra("customer_id", custId);
-                Log.d(TAG, "Passing customer_id=" + custId + " to MyCouponsActivity");
-            } catch (Exception e) {
-                Log.w(TAG, "No logged-in user, passing customer_id=0", e);
-                couponIntent.putExtra("customer_id", 0);
-            }
-
-            // Collect and pass each MenuItem id
-            if (cartItems != null && !cartItems.isEmpty()) {
-                ArrayList<Integer> menuItemIds = new ArrayList<>();
+            
+            // Check if this is a takeaway order and if chopsticks are needed
+            String orderType = CartManager.getOrderType();
+            Log.d(TAG, "Current order type: " + orderType);
+            
+            if ("takeaway".equals(orderType)) {
+                Log.d(TAG, "Takeaway order detected - checking for chopsticks");
+                boolean hasChopsticks = false;
                 for (CartItem item : cartItems.keySet()) {
-                    Integer id = item.getMenuItemId();
-                    if (id != null) {
-                        menuItemIds.add(id);
+                    if (item.getMenuItemId() != null && item.getMenuItemId() == 22) {
+                        hasChopsticks = true;
+                        Log.d(TAG, "Chopsticks already in cart");
+                        break;
                     }
                 }
-                couponIntent.putIntegerArrayListExtra("menu_item_ids", menuItemIds);
-                Log.d(TAG, "Passing menu item id=" + menuItemIds + " to MyCouponsActivity");
-
-                // Pass order total (in cents)
-                couponIntent.putExtra("order_total", CartManager.getTotalAmountInCents());
-                Log.d(TAG, "Passing order total=" + CartManager.getTotalAmountInCents() + " to MyCouponsActivity");
+                
+                if (!hasChopsticks) {
+                    Log.d(TAG, "No chopsticks found - showing dialog");
+                    showChopsticksDialog();
+                    return;
+                }
             }
-
-            startActivityForResult(couponIntent, 2001);
+            
+            proceedToCheckout();
         });
 
 
@@ -172,6 +172,124 @@ public class CartActivity extends AppCompatActivity {
         totalCostText.setText(String.format(Locale.getDefault(), "Total: HK$ %.2f", total));
 
         checkoutBtn.setEnabled(!cartItems.isEmpty());
+    }
+
+    /**
+     * Show dialog asking customer if they want to add chopsticks for takeaway orders
+     */
+    private void showChopsticksDialog() {
+        // Create a custom view for the dialog with image and text
+        LinearLayout dialogView = new LinearLayout(this);
+        dialogView.setOrientation(LinearLayout.VERTICAL);
+        dialogView.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+        dialogView.setPadding(20, 20, 20, 20);
+        
+        // Create ImageView for chopsticks image
+        ImageView chopsticksImage = new ImageView(this);
+        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(
+                300,
+                300
+        );
+        imageParams.setMargins(0, 0, 0, 20);
+        imageParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        chopsticksImage.setLayoutParams(imageParams);
+        chopsticksImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        
+        // Load chopsticks image using Glide
+        String chopsticksImageUrl = "https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/22.jpg";
+        Glide.with(this)
+                .load(chopsticksImageUrl)
+                .override(300, 300)
+                .centerCrop()
+                .into(chopsticksImage);
+        Log.d(TAG, "Loading chopsticks image: " + chopsticksImageUrl);
+        
+        // Create TextView for message
+        TextView messageText = new TextView(this);
+        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        textParams.setMargins(0, 10, 0, 10);
+        messageText.setLayoutParams(textParams);
+        messageText.setText("Price: HK$1.00");
+        messageText.setTextSize(14);
+        
+        // Add views to dialog
+        dialogView.addView(chopsticksImage);
+        dialogView.addView(messageText);
+        
+        // Create AlertDialog with custom view
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Wooden Chopsticks?")
+                .setView(dialogView)
+                .setPositiveButton("Yes, add chopsticks", (dialog, which) -> {
+                    Log.d(TAG, "User chose to add chopsticks");
+                    // Create MenuItem for chopsticks with image URL
+                    MenuItem chopsticks = new MenuItem();
+                    chopsticks.setId(22);
+                    chopsticks.setName("Wooden Chopsticks");
+                    chopsticks.setPrice(1.00);
+                    chopsticks.setCategory("Supplies");
+                    chopsticks.setImage_url("https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/22.jpg");
+                    
+                    // Create CartItem with chopsticks MenuItem and null customization
+                    CartItem chopstickItem = new CartItem(chopsticks, null);
+                    CartManager.addItem(chopstickItem, 1);
+                    Log.d(TAG, "Chopsticks added to cart with image URL");
+                    
+                    // Update UI and proceed to checkout
+                    updateCartUI();
+                    proceedToCheckout();
+                })
+                .setNegativeButton("No thanks", (dialog, which) -> {
+                    Log.d(TAG, "User chose not to add chopsticks");
+                    dialog.dismiss();
+                    proceedToCheckout();
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    /**
+     * Proceed to coupon selection and payment
+     */
+    private void proceedToCheckout() {
+        Log.d(TAG, "proceedToCheckout: Launching MyCouponsActivity for coupon selection");
+        Intent couponIntent = new Intent(CartActivity.this, MyCouponsActivity.class);
+        couponIntent.putExtra("fromCart", true);
+
+        try {
+            int custId = Integer.parseInt(RoleManager.getUserId());
+            couponIntent.putExtra("customer_id", custId);
+            Log.d(TAG, "Passing customer_id=" + custId + " to MyCouponsActivity");
+        } catch (Exception e) {
+            Log.w(TAG, "No logged-in user, passing customer_id=0", e);
+            couponIntent.putExtra("customer_id", 0);
+        }
+
+        // Collect and pass each MenuItem id
+        cartItems = CartManager.getCartItems();
+        if (cartItems != null && !cartItems.isEmpty()) {
+            ArrayList<Integer> menuItemIds = new ArrayList<>();
+            for (CartItem item : cartItems.keySet()) {
+                Integer id = item.getMenuItemId();
+                if (id != null) {
+                    menuItemIds.add(id);
+                }
+            }
+            couponIntent.putIntegerArrayListExtra("menu_item_ids", menuItemIds);
+            Log.d(TAG, "Passing menu item id=" + menuItemIds + " to MyCouponsActivity");
+
+            // Pass order total (in cents)
+            couponIntent.putExtra("order_total", CartManager.getTotalAmountInCents());
+            Log.d(TAG, "Passing order total=" + CartManager.getTotalAmountInCents() + " to MyCouponsActivity");
+        }
+
+        startActivityForResult(couponIntent, 2001);
     }
 
     @Override

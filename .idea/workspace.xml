@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4f3e39e0-9404-40c8-987c-90ad4db8567e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Android/YummyRestaurant/app/src/main/java/com/example/yummyrestaurant/api/ApiConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Android/YummyRestaurant/app/src/main/java/com/example/yummyrestaurant/api/ApiConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHANGES_SUMMARY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Database/projectapi/create_payment_intent.php" beforeDir="false" afterPath="$PROJECT_DIR$/Database/projectapi/create_payment_intent.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Database/projectapi/verify_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/Database/projectapi/verify_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEATING_CHART_IMPLEMENTATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TEST_PLAN.md" beforeDir="false" />
-    </list>
+    <list default="true" id="4f3e39e0-9404-40c8-987c-90ad4db8567e" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -75,7 +66,7 @@
       <option name="presentableId" value="Default" />
       <updated>1762146294208</updated>
       <workItem from="1769497651592" duration="641000" />
-      <workItem from="1769499314492" duration="826000" />
+      <workItem from="1769499314492" duration="1198000" />
     </task>
     <servers />
   </component>
