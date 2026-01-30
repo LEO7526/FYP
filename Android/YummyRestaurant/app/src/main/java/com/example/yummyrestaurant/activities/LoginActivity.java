@@ -10,7 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.yummyrestaurant.R;
@@ -29,7 +29,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends ThemeBaseActivity {
 
     private EditText emailEditText, passwordEditText;
     private Button loginButton;

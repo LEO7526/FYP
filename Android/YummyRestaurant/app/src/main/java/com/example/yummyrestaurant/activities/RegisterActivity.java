@@ -6,7 +6,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.yummyrestaurant.R;
 import android.widget.TextView;
 import com.example.yummyrestaurant.api.RegisterApi;
@@ -17,7 +17,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends ThemeBaseActivity {
 
     private EditText nameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
     private Button registerButton;

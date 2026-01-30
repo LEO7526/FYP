@@ -3,19 +3,19 @@ package com.example.yummyrestaurant.activities;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.yummyrestaurant.R;
 import java.util.ArrayList;
 import java.util.List;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.yummyrestaurant.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WishlistActivity extends AppCompatActivity {
+public class WishlistActivity extends ThemeBaseActivity {
     ListView wishlistView;
     ArrayAdapter<String> adapter;
     List<String> wishlistItems = new ArrayList<>();
@@ -34,4 +34,5 @@ public class WishlistActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 }
+
 

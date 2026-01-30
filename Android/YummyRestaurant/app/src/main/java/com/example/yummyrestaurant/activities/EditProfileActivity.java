@@ -25,7 +25,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
@@ -50,7 +50,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class EditProfileActivity extends AppCompatActivity {
+public class EditProfileActivity extends ThemeBaseActivity {
 
     private static final String TAG = "EditProfileActivity";
 

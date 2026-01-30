@@ -6,7 +6,7 @@ import android.util.Log;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.TableGridAdapter;
@@ -20,7 +20,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TableOverviewActivity extends AppCompatActivity {
+public class TableOverviewActivity extends ThemeBaseActivity {
 
     private List<TableOrder> tableOrders;
 

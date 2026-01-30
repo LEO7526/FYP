@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class CartActivity extends AppCompatActivity {
+public class CartActivity extends ThemeBaseActivity {
 
     private static final String TAG = "CartActivity";
 
@@ -336,3 +336,4 @@ public class CartActivity extends AppCompatActivity {
 
 
 }
+

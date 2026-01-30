@@ -8,7 +8,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.ApiConfig;
@@ -35,7 +35,7 @@ import java.util.Locale;
  * Author: YummyRestaurant
  * Version: 1.1 (Enhanced with Layout API)
  */
-public class BookingActivity extends AppCompatActivity {
+public class BookingActivity extends ThemeBaseActivity {
 
     private Button buttonSelectDate, buttonSelectTime, buttonFindTables;
     private EditText editTextNumberOfPeople;
@@ -207,3 +207,4 @@ public class BookingActivity extends AppCompatActivity {
         }).start();
     }
 }
+

@@ -6,7 +6,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.OrderApiService;
@@ -20,7 +20,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TableOrderDetailActivity extends AppCompatActivity {
+public class TableOrderDetailActivity extends ThemeBaseActivity {
 
     private TextView tableTitle;
     private TextView totalCostText;

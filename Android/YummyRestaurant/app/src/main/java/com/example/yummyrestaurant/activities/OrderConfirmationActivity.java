@@ -6,7 +6,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.Coupon;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class OrderConfirmationActivity extends AppCompatActivity {
+public class OrderConfirmationActivity extends ThemeBaseActivity {
 
     private static final String TAG = "OrderConfirmationActivity";
 
@@ -209,3 +209,4 @@ public class OrderConfirmationActivity extends AppCompatActivity {
         }
     }
 }
+

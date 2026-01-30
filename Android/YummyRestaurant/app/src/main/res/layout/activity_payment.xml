@@ -47,6 +47,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🔐 Alipay HK"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioButton
+            android:id="@+id/rbCash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💰 Pay by Cash at Front Desk"
             android:textSize="14sp" />
 
     </RadioGroup>

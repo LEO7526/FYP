@@ -17,7 +17,8 @@ if ($conn->connect_error) {
 $cid = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
 $language = $_GET['lang'] ?? 'en'; // default to English
 
-// Fetch order headers
+// ✅ FIX: Include ALL orders (including unpaid cash orders with ostatus=2)
+// Removed any status filters - display all orders regardless of payment status
 $sql = "
     SELECT 
         o.oid,
@@ -30,7 +31,7 @@ $sql = "
     LEFT JOIN customer c ON o.cid = c.cid
     LEFT JOIN table_orders t ON o.oid = t.oid
     LEFT JOIN staff s ON t.staff_id = s.sid
-    WHERE o.cid = ?
+    WHERE o.cid = ? AND o.ostatus != 4
     ORDER BY o.odate DESC
 ";
 

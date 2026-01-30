@@ -11,8 +11,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
@@ -40,7 +38,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PaymentActivity extends AppCompatActivity {
+public class PaymentActivity extends ThemeBaseActivity {
 
     private static final String TAG = "PaymentActivity";
 
@@ -52,7 +50,7 @@ public class PaymentActivity extends AppCompatActivity {
     private Button payButton;
     private TextView amountText;
     private RadioGroup paymentMethodGroup;
-    private RadioButton rbCard, rbAlipayHK;
+    private RadioButton rbCard, rbAlipayHK, rbCash;
 
     private String dishJson;
     private final List<Map<String, Object>> items = new ArrayList<>();
@@ -83,39 +81,135 @@ public class PaymentActivity extends AppCompatActivity {
         paymentMethodGroup = findViewById(R.id.paymentMethodGroup);
         rbCard = findViewById(R.id.rbCard);
         rbAlipayHK = findViewById(R.id.rbAlipayHK);
+        rbCash = findViewById(R.id.rbCash);
+        
         // Hide alternative payment method - PaymentSheet only supports card payments
         rbAlipayHK.setVisibility(View.GONE);
         // Hide the radio group label if applicable
         View paymentMethodLabel = findViewById(R.id.paymentMethodLabel);
         if (paymentMethodLabel != null) {
-            paymentMethodLabel.setVisibility(View.GONE);
+            paymentMethodLabel.setVisibility(View.VISIBLE);
         }
 
         int totalAmount = CartManager.getTotalAmountInCents();
         Log.d(TAG, "onCreate: totalAmount=" + totalAmount);
         amountText.setText(String.format(Locale.getDefault(), "Total: HK$%.2f", totalAmount / 100.0));
 
-        // Setup payment method selection - only card is supported by PaymentSheet
-        selectedPaymentMethod = "card"; // Force card payment
+        // ✅ Apply theme colors based on user role
+        applyThemeColors();
+
+        // Setup payment method selection - card or cash
+        selectedPaymentMethod = "card"; // Default to card payment
         rbCard.setChecked(true);
         paymentMethodGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            // PaymentSheet only supports card payments
-            selectedPaymentMethod = "card";
-            Log.d(TAG, "Payment method: Card (only supported method)");
-            Log.i(TAG, ">>> User payment method: CARD");
+            if (checkedId == R.id.rbCard) {
+                selectedPaymentMethod = "card";
+                Log.d(TAG, "Payment method: Card");
+                Log.i(TAG, ">>> User payment method: CARD");
+            } else if (checkedId == R.id.rbCash) {
+                selectedPaymentMethod = "cash";
+                Log.d(TAG, "Payment method: Cash at Front Desk");
+                Log.i(TAG, ">>> User payment method: CASH");
+            } else {
+                selectedPaymentMethod = "card";
+                Log.d(TAG, "Payment method: Card (default)");
+            }
         });
 
         payButton.setOnClickListener(v -> {
             Log.d(TAG, "Pay button clicked with method: " + selectedPaymentMethod);
             Log.i(TAG, ">>> PAY BUTTON CLICKED | Method: " + selectedPaymentMethod);
-            payButton.setEnabled(false);
-            loadingSpinner.setVisibility(View.VISIBLE);
-            createPaymentIntent();
+            
+            if ("cash".equals(selectedPaymentMethod)) {
+                // Direct cash payment - no Stripe involved
+                onCashPaymentSelected();
+            } else {
+                // Card payment - use Stripe
+                payButton.setEnabled(false);
+                loadingSpinner.setVisibility(View.VISIBLE);
+                createPaymentIntent();
+            }
         });
     }
 
     /**
-     * Step 1: Create Payment Intent on backend
+     * Apply theme colors based on user role
+     * Orange for customers, Blue for staff
+     */
+    private void applyThemeColors() {
+        boolean isStaff = RoleManager.isStaff();
+        int themeColor;
+        String theme;
+
+        if (isStaff) {
+            // Blue theme for staff
+            themeColor = android.graphics.Color.parseColor("#1976D2"); // Material Blue
+            theme = "STAFF (Blue)";
+            Log.d(TAG, "applyThemeColors: Applied BLUE theme for staff");
+        } else {
+            // Orange theme for customers
+            themeColor = android.graphics.Color.parseColor("#FF6F00"); // Orange
+            theme = "CUSTOMER (Orange)";
+            Log.d(TAG, "applyThemeColors: Applied ORANGE theme for customers");
+        }
+
+        // Apply to Pay button
+        payButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(themeColor));
+
+        // Apply to amount text
+        amountText.setTextColor(themeColor);
+
+        // Apply to payment method label
+        View paymentMethodLabel = findViewById(R.id.paymentMethodLabel);
+        if (paymentMethodLabel instanceof TextView) {
+            ((TextView) paymentMethodLabel).setTextColor(themeColor);
+        }
+
+        Log.i(TAG, ">>> Theme Applied: " + theme);
+    }
+
+    /**
+     * Handle cash payment at front desk
+     */
+    private void onCashPaymentSelected() {
+        Log.d(TAG, "onCashPaymentSelected: Processing cash payment");
+        Log.i(TAG, ">>> CASH PAYMENT SELECTED");
+        
+        String userId = RoleManager.getUserId();
+        int amount = CartManager.getTotalAmountInCents();
+        
+        Log.i(TAG, "Cash payment. userId=" + userId + ", amount=" + amount);
+        Log.d(TAG, "onCashPaymentSelected: Saving order to backend");
+        
+        // Generate a fake payment intent ID for cash orders
+        paymentIntentId = "cash_" + System.currentTimeMillis();
+        
+        // Save order with cash payment method and ostatus=2 (Done, pending payment)
+        saveOrderToBackend(userId, amount, paymentIntentId);
+        
+        // Show success icon
+        successIcon.setAlpha(0f);
+        successIcon.setVisibility(View.VISIBLE);
+        successIcon.animate().alpha(1f).setDuration(500).start();
+        
+        new Handler().postDelayed(() -> {
+            Log.d(TAG, "Navigating to OrderConfirmationActivity");
+            Log.i(TAG, ">>> REDIRECTING: Moving to OrderConfirmationActivity");
+            Intent confirmIntent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
+            confirmIntent.putExtra("customerId", userId);
+            confirmIntent.putExtra("totalAmount", amount);
+            confirmIntent.putExtra("itemCount", items.size());
+            confirmIntent.putExtra("dishJson", dishJson);
+            confirmIntent.putExtra("paymentMethod", "cash");
+            startActivity(confirmIntent);
+            finish();
+        }, 1500);
+        
+        CartManager.clearCart();
+    }
+
+    /**
+     * Step 1: Create Payment Intent on backend (for card payments only)
      */
     private void createPaymentIntent() {
         Log.d(TAG, "createPaymentIntent: preparing request");
@@ -418,7 +512,12 @@ public class PaymentActivity extends AppCompatActivity {
         }
 
         orderData.put("cid", customerId);
-        orderData.put("ostatus", 1);
+        
+        // ✅ Set ostatus based on payment method
+        // ostatus: 1=Pending, 2=Done (unpaid), 3=Paid, 4=Cancelled
+        int ostatus = ("cash".equals(selectedPaymentMethod)) ? 2 : 3; // 2 for cash (pending payment), 3 for card (paid)
+        orderData.put("ostatus", ostatus);
+        Log.d(TAG, "saveOrderToBackend: ostatus=" + ostatus + " (payment_method=" + selectedPaymentMethod + ")");
         
         // ✅ Add order_type (dine_in or takeaway)
         String orderType = CartManager.getOrderType();
@@ -441,8 +540,16 @@ public class PaymentActivity extends AppCompatActivity {
         }
         
         orderData.put("sid", "not applicable");
-        orderData.put("payment_method", "stripe");
-        orderData.put("payment_intent_id", paymentIntentId);
+        orderData.put("payment_method", selectedPaymentMethod);
+        
+        // ✅ Only set payment_intent_id for card payments
+        if ("card".equals(selectedPaymentMethod)) {
+            orderData.put("payment_intent_id", paymentIntentId);
+            Log.d(TAG, "saveOrderToBackend: card payment, payment_intent_id=" + paymentIntentId);
+        } else if ("cash".equals(selectedPaymentMethod)) {
+            orderData.put("payment_intent_id", "cash_" + System.currentTimeMillis());
+            Log.d(TAG, "saveOrderToBackend: cash payment, generated pseudo payment_intent_id");
+        }
         
         Log.d(TAG, "saveOrderToBackend: order data setup complete");
 
@@ -459,9 +566,24 @@ public class PaymentActivity extends AppCompatActivity {
             item.put("qty", quantity);
 
             if (cartItem.getCustomization() != null) {
-                List<Map<String, Object>> customizations = new ArrayList<>();
-                // Add customizations here
-                item.put("customizations", customizations);
+                Map<String, Object> customization = new HashMap<>();
+                
+                // Add customization details
+                List<Map<String, Object>> customizationDetails = new ArrayList<>();
+                if (cartItem.getCustomization().getCustomizationDetails() != null) {
+                    for (com.example.yummyrestaurant.models.OrderItemCustomization detail : cartItem.getCustomization().getCustomizationDetails()) {
+                        Map<String, Object> customizationDetail = new HashMap<>();
+                        customizationDetail.put("option_id", detail.getOptionId());
+                        customizationDetail.put("group_id", detail.getGroupId());
+                        customizationDetail.put("selected_value_ids", detail.getSelectedValueIds());
+                        customizationDetail.put("selected_values", detail.getSelectedChoices());
+                        customizationDetail.put("text_value", detail.getTextValue());
+                        customizationDetails.add(customizationDetail);
+                    }
+                }
+                customization.put("customization_details", customizationDetails);
+                customization.put("extra_notes", cartItem.getCustomization().getExtraNotes());
+                item.put("customization", customization);
             }
 
             items.add(item);

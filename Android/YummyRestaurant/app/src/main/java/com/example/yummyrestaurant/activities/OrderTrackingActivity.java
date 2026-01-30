@@ -2,7 +2,7 @@ package com.example.yummyrestaurant.activities;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.R;
 
@@ -11,7 +11,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 
 
-public class OrderTrackingActivity extends AppCompatActivity {
+public class OrderTrackingActivity extends ThemeBaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,3 +26,4 @@ public class OrderTrackingActivity extends AppCompatActivity {
     }
 
 }
+

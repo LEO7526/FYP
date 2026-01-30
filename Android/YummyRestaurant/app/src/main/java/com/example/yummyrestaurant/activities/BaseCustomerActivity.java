@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.LoginBottomSheetFragment;
 import com.example.yummyrestaurant.R;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class BaseCustomerActivity extends AppCompatActivity {
+public abstract class BaseCustomerActivity extends ThemeBaseActivity {
 
     protected List<ImageView> functionIcons = new ArrayList<>();
     protected Map<ImageView, String> iconBaseNames = new HashMap<>();
@@ -86,7 +86,7 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
      * Other activities require login. Optionally passes pending cart extras.
      */
     protected void navigateProtected(int iconId,
-                                     Class<? extends AppCompatActivity> target,
+                                     Class<? extends ThemeBaseActivity> target,
                                      MenuItem pendingItem,
                                      int pendingQuantity,
                                      String pendingSpice,
@@ -112,7 +112,7 @@ public abstract class BaseCustomerActivity extends AppCompatActivity {
      * Actually starts the target Activity and passes along the selected icon ID.
      */
     private void launchScreen(int iconId,
-                              Class<? extends AppCompatActivity> cls,
+                              Class<? extends ThemeBaseActivity> cls,
                               MenuItem pendingItem,
                               int pendingQuantity,
                               String pendingSpice,

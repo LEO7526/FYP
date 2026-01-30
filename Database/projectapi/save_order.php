@@ -23,6 +23,18 @@ $odate = date('Y-m-d H:i:s'); // Current timestamp
 $order_type = $input['order_type'] ?? 'dine_in'; // Default to dine_in
 $table_number = $input['table_number'] ?? null;
 
+// ✅ Extract payment method (card or cash)
+$payment_method = $input['payment_method'] ?? 'card';
+$payment_intent_id = $input['payment_intent_id'] ?? null;
+
+// ✅ Validate ostatus based on payment method
+// ostatus: 1=Pending, 2=Done (unpaid cash orders), 3=Paid (card orders), 4=Cancelled
+if (empty($ostatus) || $ostatus < 1 || $ostatus > 4) {
+    // Auto-determine ostatus based on payment method if not provided
+    $ostatus = ("cash" === $payment_method) ? 2 : 3;
+    error_log("Auto-determined ostatus=$ostatus based on payment_method=$payment_method");
+}
+
 // ✅ 確保 cid 是整數
 $cid = intval($cid);
 $ostatus = intval($ostatus);
@@ -63,7 +75,7 @@ if (!$stmt->execute()) {
 }
 
 $order_id = $stmt->insert_id;
-error_log("Order header saved with ID: $order_id (type: $order_type, table: $table_num_int)");
+error_log("✅ Order header saved with ID: $order_id (type: $order_type, table: $table_num_int, ostatus: $ostatus)");
 $stmt->close();
 
 // Insert each item into order_items (adjusted for your schema)
