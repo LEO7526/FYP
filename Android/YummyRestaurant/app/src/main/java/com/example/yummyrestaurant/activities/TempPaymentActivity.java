@@ -10,7 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.CouponApiService;
@@ -37,7 +37,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TempPaymentActivity extends AppCompatActivity {
+public class TempPaymentActivity extends ThemeBaseActivity {
 
     private static final String TAG = "TempPaymentActivity";
 

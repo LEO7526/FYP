@@ -7,10 +7,10 @@ import android.nfc.Tag;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.yummyrestaurant.R;
 
-public class CheckInAndOutActivity extends AppCompatActivity {
+public class CheckInAndOutActivity extends ThemeBaseActivity {
 
     private NfcAdapter nfcAdapter;
     private PendingIntent pendingIntent;
@@ -78,3 +78,4 @@ public class CheckInAndOutActivity extends AppCompatActivity {
         return sb.toString();
     }
 }
+

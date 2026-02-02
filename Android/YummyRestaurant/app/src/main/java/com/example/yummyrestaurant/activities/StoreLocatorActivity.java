@@ -2,7 +2,6 @@ package com.example.yummyrestaurant.activities;
 
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.fragment.app.FragmentActivity;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
@@ -13,7 +12,7 @@ import org.osmdroid.api.IMapController;
 
 import com.example.yummyrestaurant.R;
 
-public class StoreLocatorActivity extends FragmentActivity {
+public class StoreLocatorActivity extends ThemeBaseActivity {
 
     private MapView mapView;
     private IMapController mapController;

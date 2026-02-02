@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.ViewGroup;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.ApiService;
@@ -42,7 +42,7 @@ import retrofit2.Response;
  * - 支持多個自訂選項分組
  * - 驗證必填項和多選上限
  */
-public class CustomizeDishActivity extends AppCompatActivity {
+public class CustomizeDishActivity extends ThemeBaseActivity {
 
     private static final String TAG = "CustomizeDishActivity";
 
@@ -579,3 +579,4 @@ public class CustomizeDishActivity extends AppCompatActivity {
         return 0;
     }
 }
+

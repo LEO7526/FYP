@@ -7,12 +7,12 @@ import android.os.Bundle;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.database.DatabaseHelper;
 import com.example.yummyrestaurant.utils.RoleManager;
 
-public class ReviewActivity extends AppCompatActivity {
+public class ReviewActivity extends ThemeBaseActivity {
 
     // UI Components
     private RatingBar ratingBar;
@@ -68,3 +68,4 @@ public class ReviewActivity extends AppCompatActivity {
         db.close();
     }
 }
+

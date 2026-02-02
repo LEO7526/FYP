@@ -9,7 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.ApiConfig;
@@ -45,7 +45,7 @@ import java.util.List;
  * Author: YummyRestaurant
  * Version: 3.0 (Bottom Sheet + FAB Design)
  */
-public class ConfirmBookingActivity extends AppCompatActivity implements SeatingChartView.OnTableSelectedListener {
+public class ConfirmBookingActivity extends ThemeBaseActivity implements SeatingChartView.OnTableSelectedListener {
 
     private SeatingChartView seatingChartView;
     private FloatingActionButton fabConfirm;
@@ -357,3 +357,4 @@ public class ConfirmBookingActivity extends AppCompatActivity implements Seating
         }).start();
     }
 }
+
