@@ -1,0 +1,67 @@
+/* 整體背景與字體 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff8f0; /* 淺橙背景 */
+    color: #333;
+    margin: 0;
+    padding: 40px;
+}
+
+/* 容器 */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #f39c12;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 標題 */
+h2 {
+    color: #e67e22;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* 優惠券選項 */
+label {
+    display: block;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #f39c12;
+    border-radius: 6px;
+    background: #fffaf3;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+label:hover {
+    background: #fde3bd;
+}
+input[type="radio"] {
+    margin-right: 8px;
+}
+
+/* 按鈕樣式 */
+button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #e67e22; /* 橙色主色 */
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+button:hover {
+    background: #d35400; /* 深橙色 hover 效果 */
+}
+
+/* 沒有優惠券提示 */
+p {
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+}
