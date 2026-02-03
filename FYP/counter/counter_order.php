@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../conn.php';
+require_once __DIR__ . '/conn.php';
 
 // Handle order status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_POST['oid'])) {
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
         card.id = 'order-' + order.oid;
 
         // Status text mapping
-        const statusText = {1: 'Pending', 2: 'Done', 3: 'Paid', 4: 'Cancelled'};
+        const statusText = {0:'ahsvhas',1: 'Pending', 2: 'Done', 3: 'Paid', 4: 'Cancelled'};
 
         // Order type styling
         const orderTypeText = order.order_type === 'dine_in' ? 'Dine-in' : 'Takeaway';
@@ -195,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
         formData.append('oid', oid);
         formData.append('action', action);
 
-        fetch('kitchen_orders.php', {
+        fetch('counter_order.php', {
             method: 'POST',
             body: formData
         })
