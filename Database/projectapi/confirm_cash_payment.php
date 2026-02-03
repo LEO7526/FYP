@@ -44,12 +44,12 @@ $cid = intval($orderRow['cid']);
 $ostatus = intval($orderRow['ostatus']);
 $orderStmt->close();
 
-// Only allow confirmation for unpaid cash orders (ostatus = 2)
-if ($ostatus !== 2) {
+// Verify order is in Pending status (1) - payment already confirmed
+if ($ostatus !== 1) {
     http_response_code(400);
     echo json_encode([
         "success" => false,
-        "message" => "This order cannot be confirmed. Current status: $ostatus (only status 2 'unpaid cash' can be confirmed)"
+        "message" => "This order cannot be confirmed. Current status: $ostatus (only status 1 'Pending' can be confirmed)"
     ]);
     exit;
 }
@@ -82,17 +82,9 @@ $couponPointsToAdd = $totalAmount;
 $conn->begin_transaction();
 
 try {
-    // Update order status to '1' (completed) or to a 'paid cash' status
-    $updateStmt = $conn->prepare("UPDATE orders SET ostatus = 1 WHERE oid = ?");
-    if (!$updateStmt) {
-        throw new Exception("Failed to prepare update statement: " . $conn->error);
-    }
-    
-    $updateStmt->bind_param("i", $oid);
-    if (!$updateStmt->execute()) {
-        throw new Exception("Failed to update order status: " . $updateStmt->error);
-    }
-    $updateStmt->close();
+    // Note: Order is already at ostatus=1 (Pending) since payment was confirmed
+    // This endpoint just records the coupon points for the payment
+    // No status change needed - kitchen will see it in the Pending (1) queue
     
     // Add coupon points to customer
     $pointsStmt = $conn->prepare("UPDATE customer SET coupon_point = coupon_point + ? WHERE cid = ?");

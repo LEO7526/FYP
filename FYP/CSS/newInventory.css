@@ -387,3 +387,17 @@ h1 {
         height: 36px;
     }
 }
+.low-stock {
+    color: #e74c3c !important;
+    font-weight: bold !important;
+}
+
+.material-quantity.low-stock {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.current-info .value .low-stock {
+    color: #e74c3c;
+    font-weight: bold;
+}

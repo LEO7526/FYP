@@ -68,7 +68,8 @@ $couponPointsToAdd = $totalAmount; // Can change to $totalAmount / 10 for differ
 $conn->begin_transaction();
 
 try {
-    // Update order status to '1' (completed)
+    // Update order status to '1' (Pending - waiting for kitchen to prepare)
+    // Payment is confirmed, now order goes to kitchen queue
     $updateStmt = $conn->prepare("UPDATE orders SET ostatus = 1 WHERE orderRef = ?");
     if (!$updateStmt) {
         throw new Exception("Failed to prepare update statement: " . $conn->error);

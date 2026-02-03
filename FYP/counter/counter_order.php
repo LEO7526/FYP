@@ -1,41 +1,25 @@
 <?php
-require_once __DIR__ . '/../conn.php';
+require_once __DIR__ . '/conn.php';
 
 // Handle order status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_POST['oid'])) {
     $oid = intval($_POST['oid']);
     $action = $_POST['action'];
-    $new_status = null;
 
     // Set new status based on action
-    // Status mapping: 0=Cash, 1=Pending (card), 2=Done, 3=Paid, 4=Cancelled
+    // Status mapping: 1=Pending, 2=Done, 3=Paid, 4=Cancelled
     if ($action === 'done') {
-        $new_status = 2; // Update to Done (2)
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Invalid action']);
-        exit;
-    }
-
-    if ($new_status === null) {
-        echo json_encode(['success' => false, 'message' => 'Status not set']);
-        exit;
+        $new_status = 1; // Update from Pending (1) to Done (2)
     }
 
     // Update order status in database
     $stmt = $conn->prepare("UPDATE orders SET ostatus = ? WHERE oid = ?");
-    if (!$stmt) {
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
-        error_log("Prepare failed: " . $conn->error);
-        exit;
-    }
-
     $stmt->bind_param("ii", $new_status, $oid);
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Order marked as Done']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to update order status: ' . $stmt->error]);
-        error_log("Execute failed for oid=$oid: " . $stmt->error);
+        echo json_encode(['success' => false, 'message' => 'Failed to update order status']);
     }
     $stmt->close();
     exit;
@@ -70,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
 
     // Function to load orders from server
     function loadOrders() {
-        fetch('get_orders.php')
+        fetch('counter_getOrder.php')
             .then(response => response.json())
             .then(data => {
                 const container = document.getElementById('orders-container');
@@ -114,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
         card.id = 'order-' + order.oid;
 
         // Status text mapping
-        const statusText = {1: 'Pending', 2: 'Done', 3: 'Paid', 4: 'Cancelled'};
+        const statusText = {0:'ahsvhas',1: 'Pending', 2: 'Done', 3: 'Paid', 4: 'Cancelled'};
 
         // Order type styling
         const orderTypeText = order.order_type === 'dine_in' ? 'Dine-in' : 'Takeaway';
@@ -193,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
 
                 <div class="action-buttons">
                     <button class="btn btn-done" onclick="updateOrderStatus(${order.oid}, 'done')">
-                        <i class="fas fa-check"></i> Mark as Done
+                        <i class="fas fa-check"></i> Mark as Paid
                     </button>
                 </div>
             `;
@@ -211,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
         formData.append('oid', oid);
         formData.append('action', action);
 
-        fetch('kitchen_orders.php', {
+        fetch('counter_order.php', {
             method: 'POST',
             body: formData
         })

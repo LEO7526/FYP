@@ -493,7 +493,7 @@ CREATE TABLE orders (
   oid INT NOT NULL AUTO_INCREMENT,
   odate DATETIME NOT NULL,
   cid INT NOT NULL,
-  ostatus INT NOT NULL DEFAULT 1 COMMENT '1=Pending, 2=Done/Unpaid, 3=Paid, 4=Cancelled',
+  ostatus INT NOT NULL DEFAULT 1 COMMENT '1=Pending, 2=Done, 3=Cancelled',
   note TEXT DEFAULT NULL,
   orderRef VARCHAR(100) NOT NULL UNIQUE,
   coupon_id INT NULL,

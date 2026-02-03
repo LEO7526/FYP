@@ -253,13 +253,16 @@ if ($result) {
                 <p>No materials found. <a href="addInventory.php">Add new materials</a></p>
             </div>
         <?php else: ?>
-            <?php foreach ($materials as $material): ?>
+            <?php foreach ($materials as $material):
+                $isLowStock = floatval($material['mqty']) < floatval($material['reorderLevel']);
+                $quantityClass = $isLowStock ? 'material-quantity low-stock' : 'material-quantity';
+                ?>
                 <div class="material-item">
                     <div class="material-info">
                         <div class="material-name"><?php echo htmlspecialchars($material['mname']); ?></div>
                         <div class="material-details">
                             <span class="material-category"><?php echo htmlspecialchars($material['category_name']); ?></span>
-                            <span>Current: <span class="material-quantity"><?php echo $material['mqty']; ?> <?php echo $material['unit']; ?></span></span>
+                            <span>Current: <span class="<?php echo $quantityClass; ?>"><?php echo $material['mqty']; ?> <?php echo $material['unit']; ?></span></span>
                             <span>Reorder Level: <?php echo $material['reorderLevel']; ?> <?php echo $material['unit']; ?></span>
                         </div>
                     </div>
@@ -271,7 +274,10 @@ if ($result) {
         <?php endif; ?>
     </div>
 
-    <?php if ($selected_material): ?>
+    <?php if ($selected_material):
+        $isSelectedLowStock = floatval($selected_material['mqty']) < floatval($selected_material['reorderLevel']);
+        $selectedQuantityClass = $isSelectedLowStock ? 'low-stock' : '';
+        ?>
         <div class="selected-material">
             <h3>Selected Material: <?php echo htmlspecialchars($selected_material['mname']); ?></h3>
 
@@ -282,7 +288,11 @@ if ($result) {
                 </div>
                 <div class="info-item">
                     <div class="label">Current Quantity</div>
-                    <div class="value"><?php echo $selected_material['mqty']; ?> <?php echo $selected_material['unit']; ?></div>
+                    <div class="value">
+                        <span class="<?php echo $selectedQuantityClass; ?>">
+                            <?php echo $selected_material['mqty']; ?> <?php echo $selected_material['unit']; ?>
+                        </span>
+                    </div>
                 </div>
                 <div class="info-item">
                     <div class="label">Reorder Level</div>
