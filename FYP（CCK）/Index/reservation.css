@@ -1,0 +1,164 @@
+.reservation-section {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.reservation-section h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.reservation-form label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+    text-align: left;
+}
+
+.reservation-form input,
+.reservation-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.reservation-form button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.reservation-form button:hover {
+    background-color: #0056b3;
+}
+
+.seat-map {
+    display: none;
+    margin-top: 20px;
+}
+.seat-map.visible {
+    display: block;
+}
+
+.tables {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.table {
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+    background-color: #f8f8f8;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.table input[type="radio"] {
+    display: none;
+}
+
+.table.available:hover {
+    border-color: #007BFF;
+    background-color: #e6f0ff;
+}
+
+.table.booked {
+    background-color: #ddd;
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.table.window {
+    border-color: #28a745;
+}
+
+.table span {
+    display: block;
+    margin-top: 5px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.action-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.table-map {
+    display: grid;
+    grid-template-columns: repeat(5, 80px); /* 假設餐廳有5列 */
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.table {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.table.available {
+    background-color: #c8f7c5; /* 綠色：可選 */
+}
+
+.table.unavailable {
+    background-color: #f7c5c5; /* 紅色：不可選 */
+    cursor: not-allowed;
+}
+
+.table.selected {
+    background-color: #5dade2; /* 藍色：已選 */
+    color: #fff;
+}
+
+.table-map {
+    display: grid;
+    grid-template-columns: repeat(5, 80px);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.table {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.table.available { background-color: #c8f7c5; }
+.table.unavailable { background-color: #f7c5c5; cursor: not-allowed; }
+.table.selected { background-color: #5dade2; color: #fff; }
