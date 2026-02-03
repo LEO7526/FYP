@@ -16,8 +16,8 @@ if (!$orderRef) {
     exit;
 }
 
-// Update order status to '2' (failed)
-$stmt = $conn->prepare("UPDATE orders SET ostatus = 2 WHERE orderRef = ?");
+// Update order status to '3' (Cancelled due to payment failure)
+$stmt = $conn->prepare("UPDATE orders SET ostatus = 3 WHERE orderRef = ?");
 $stmt->bind_param("s", $orderRef);
 
 if ($stmt->execute()) {

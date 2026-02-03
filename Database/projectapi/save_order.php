@@ -27,17 +27,15 @@ $table_number = $input['table_number'] ?? null;
 $payment_method = $input['payment_method'] ?? 'card';
 $payment_intent_id = $input['payment_intent_id'] ?? null;
 
-// ✅ Respect Android-provided ostatus values (0 or 1)
-// Only auto-set ostatus if it's invalid
-// ostatus from Android: 0=cash payment, 1=card payment
-if ($ostatus === null || $ostatus === '' || $ostatus < 0 || $ostatus > 1) {
-    // Auto-determine ostatus based on order type if not provided or invalid
-    if ("dine_in" === $order_type) {
-        $ostatus = 1;
-    } else {
-        $ostatus = ("cash" === $payment_method) ? 2 : 3;
-    }
-    error_log("Auto-determined ostatus=$ostatus based on order_type=$order_type, payment_method=$payment_method");
+// ✅ Respect Android-provided ostatus value
+// ostatus from Android: 1=Pending (payment confirmed, waiting for kitchen)
+// Only validate, don't auto-set since payment is already confirmed on Android side
+if ($ostatus === null || $ostatus === '' || $ostatus !== 1) {
+    // Default to 1 (Pending) if not provided
+    $ostatus = 1;
+    error_log("Using default ostatus=1 (Pending, waiting for kitchen preparation)");
+} else {
+    error_log("Using Android-provided ostatus=1 (Pending, waiting for kitchen preparation)");
 }
 
 // ✅ 確保 cid 是整數

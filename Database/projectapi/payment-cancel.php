@@ -16,7 +16,7 @@ if (!$orderRef) {
     exit;
 }
 
-// Update order status to '3' (canceled)
+// Update order status to '3' (Cancelled)
 $stmt = $conn->prepare("UPDATE orders SET ostatus = 3 WHERE orderRef = ?");
 $stmt->bind_param("s", $orderRef);
 
