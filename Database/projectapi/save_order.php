@@ -399,6 +399,87 @@ if ($sid && $table_number) {
     $tableStmt->close();
 }
 
+// ✅ Handle coupon points for card payments (ostatus = 3)
+if ($ostatus == 3) {
+    // Calculate total order amount for coupon points
+    $amountStmt = $conn->prepare("
+        SELECT COALESCE(SUM(mi.item_price * oi.qty), 0) as total
+        FROM order_items oi
+        JOIN menu_item mi ON oi.item_id = mi.item_id
+        WHERE oi.oid = ?
+    ");
+    
+    if ($amountStmt) {
+        $amountStmt->bind_param("i", $order_id);
+        $amountStmt->execute();
+        $amountResult = $amountStmt->get_result();
+        $amountRow = $amountResult->fetch_assoc();
+        $totalAmount = intval($amountRow['total']);
+        $amountStmt->close();
+        
+        // Calculate coupon points: HK$1 = 1 point
+        $couponPointsToAdd = $totalAmount;
+        
+        if ($couponPointsToAdd > 0) {
+            error_log("Card payment detected. Adding $couponPointsToAdd coupon points to cid=$cid for order_id=$order_id");
+            
+            // Start transaction for coupon point update
+            $conn->begin_transaction();
+            
+            try {
+                // Add coupon points to customer
+                $pointsStmt = $conn->prepare("UPDATE customer SET coupon_point = coupon_point + ? WHERE cid = ?");
+                if (!$pointsStmt) {
+                    throw new Exception("Failed to prepare points update: " . $conn->error);
+                }
+                
+                $pointsStmt->bind_param("ii", $couponPointsToAdd, $cid);
+                if (!$pointsStmt->execute()) {
+                    throw new Exception("Failed to add coupon points: " . $pointsStmt->error);
+                }
+                $pointsStmt->close();
+                
+                // Get the new coupon point balance
+                $balanceStmt = $conn->prepare("SELECT coupon_point FROM customer WHERE cid = ?");
+                if (!$balanceStmt) {
+                    throw new Exception("Failed to prepare balance query: " . $conn->error);
+                }
+                
+                $balanceStmt->bind_param("i", $cid);
+                $balanceStmt->execute();
+                $balanceResult = $balanceStmt->get_result();
+                $balanceRow = $balanceResult->fetch_assoc();
+                $newBalance = $balanceRow['coupon_point'];
+                $balanceStmt->close();
+                
+                // Insert into coupon_point_history for tracking
+                $note = "Payment for order #" . $order_id . " (Amount: HK$" . $totalAmount . ")";
+                $historyStmt = $conn->prepare("INSERT INTO coupon_point_history (cid, coupon_id, delta, resulting_points, action, note) VALUES (?, NULL, ?, ?, 'earn', ?)");
+                if (!$historyStmt) {
+                    throw new Exception("Failed to prepare history insert: " . $conn->error);
+                }
+                
+                $historyStmt->bind_param("iiis", $cid, $couponPointsToAdd, $newBalance, $note);
+                if (!$historyStmt->execute()) {
+                    throw new Exception("Failed to insert history: " . $historyStmt->error);
+                }
+                $historyStmt->close();
+                
+                // Commit transaction
+                $conn->commit();
+                error_log("✅ Coupon points added successfully: cid=$cid, points=$couponPointsToAdd, new_balance=$newBalance");
+                
+            } catch (Exception $e) {
+                $conn->rollback();
+                error_log("❌ Error adding coupon points: " . $e->getMessage());
+            }
+        }
+    }
+} else if ($ostatus == 2) {
+    // Cash payment - no coupon points added yet
+    error_log("Cash payment detected (ostatus=2). Coupon points will be added after staff confirms payment.");
+}
+
 // Final response
 $response = ["success" => true, "order_id" => $order_id];
 if ($table_order_id !== null) {

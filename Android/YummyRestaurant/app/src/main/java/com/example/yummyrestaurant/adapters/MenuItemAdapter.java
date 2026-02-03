@@ -43,7 +43,12 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
     public void setMenuItems(List<MenuItem> menuItems) {
         fullList.clear();
-        fullList.addAll(menuItems);
+        // Filter out wooden chopsticks (item_id = 22) from fullList
+        for (MenuItem item : menuItems) {
+            if (item.getId() != 22) { // Exclude wooden chopsticks
+                fullList.add(item);
+            }
+        }
         filter("All Dishes"); // default to show all
     }
 
@@ -58,6 +63,11 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         }
 
         for (MenuItem item : fullList) {
+            // Skip wooden chopsticks (item_id = 22)
+            if (item.getId() == 22) {
+                continue;
+            }
+            
             String itemCategory = item.getCategory() != null
                     ? item.getCategory().trim().toLowerCase()
                     : "";
@@ -78,10 +88,19 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         filteredList.clear();
 
         if (query == null || query.trim().isEmpty()) {
-            filteredList.addAll(fullList);
+            // Exclude wooden chopsticks (item_id = 22) from filtered list
+            for (MenuItem item : fullList) {
+                if (item.getId() != 22) {
+                    filteredList.add(item);
+                }
+            }
         } else {
             String lowerQuery = query.toLowerCase();
             for (MenuItem item : fullList) {
+                // Skip wooden chopsticks (item_id = 22)
+                if (item.getId() == 22) {
+                    continue;
+                }
                 String name = item.getName() != null ? item.getName().toLowerCase() : "";
                 if (name.contains(lowerQuery)) {
                     filteredList.add(item);
@@ -96,10 +115,19 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         filteredList.clear();
 
         if (query == null || query.trim().isEmpty()) {
-            filteredList.addAll(fullList);
+            // Exclude wooden chopsticks (item_id = 22) from filtered list
+            for (MenuItem item : fullList) {
+                if (item.getId() != 22) {
+                    filteredList.add(item);
+                }
+            }
         } else {
             String lowerQuery = query.toLowerCase();
             for (MenuItem item : fullList) {
+                // Skip wooden chopsticks (item_id = 22)
+                if (item.getId() == 22) {
+                    continue;
+                }
                 if (item.getName() != null && item.getName().toLowerCase().contains(lowerQuery)) {
                     filteredList.add(item);
                 }
