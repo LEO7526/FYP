@@ -1,0 +1,17 @@
+
+
+INSERT INTO `orders` (`odate`, `cid`, `ostatus`, `orderRef`, `inventory_processed`) VALUES (NOW(), 2, 1, CONCAT('rt_today_b_', FLOOR(RAND() * 10000)), FALSE);
+SET @t_ord_b = LAST_INSERT_ID();
+INSERT INTO `order_items` (`oid`, `item_id`, `qty`) VALUES (@t_ord_b, 3, 2);
+
+INSERT INTO `orders` (`odate`, `cid`, `ostatus`, `orderRef`, `inventory_processed`) VALUES (NOW(), 3, 1, CONCAT('rt_today_c_', FLOOR(RAND() * 10000)), FALSE);
+SET @t_ord_c = LAST_INSERT_ID();
+INSERT INTO `order_items` (`oid`, `item_id`, `qty`) VALUES (@t_ord_c, 1, 5);
+
+INSERT INTO `orders` (`odate`, `cid`, `ostatus`, `orderRef`, `inventory_processed`) VALUES (NOW(), 4, 1, CONCAT('rt_today_d_', FLOOR(RAND() * 10000)), FALSE);
+SET @t_ord_d = LAST_INSERT_ID();
+INSERT INTO `order_items` (`oid`, `item_id`, `qty`) VALUES (@t_ord_d, 6, 2), (@t_ord_d, 3, 2);
+
+INSERT INTO `orders` (`odate`, `cid`, `ostatus`, `orderRef`, `inventory_processed`) VALUES (NOW(), 5, 1, CONCAT('rt_today_e_', FLOOR(RAND() * 10000)), FALSE);
+SET @t_ord_e = LAST_INSERT_ID();
+INSERT INTO `order_items` (`oid`, `item_id`, `qty`) VALUES (@t_ord_e, 6, 1);

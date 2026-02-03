@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/white">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Material"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text"
+        android:layout_marginBottom="24dp"/>
+
+    <EditText
+        android:id="@+id/materialName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Material Name (e.g. Beef)"
+        android:background="@drawable/edit_text_background"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <EditText
+            android:id="@+id/materialStock"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Current Stock"
+            android:inputType="number"
+            android:background="@drawable/edit_text_background"
+            android:padding="12dp"
+            android:layout_marginEnd="8dp"/>
+
+        <Spinner
+            android:id="@+id/unitSpinner"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/edit_text_background" />
+        <!-- Spinner items 可以在 Java 設定: kg, g, pcs, L -->
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/materialCost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Cost per unit ($)"
+        android:inputType="numberDecimal"
+        android:background="@drawable/edit_text_background"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btnSaveMaterial"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Add to Inventory"
+        android:backgroundTint="@color/colorPrimary"/>
+
+</LinearLayout>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.yummyrestaurant">
+
+    <!-- 網路權限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.YummyRestaurantStaff"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+
+        <!-- 1. 登入頁 (啟動頁) -->
+        <activity
+            android:name=".activities.StaffLoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 2. 訂單主頁 -->
+        <activity android:name=".activities.StaffOrdersActivity" />
+
+        <!-- 3. 選桌頁面 -->
+        <activity android:name=".activities.TableSelectionActivity" />
+
+        <!-- 4. 新增菜色 -->
+        <activity android:name=".activities.CreateDishActivity" />
+
+        <!-- 5. 新增原料 -->
+        <activity android:name=".activities.CreateMaterialActivity" />
+        <activity android:name=".activities.CreateCouponActivity" />
+        <activity android:name=".inventory.InventoryActivity" />
+        <activity android:name=".inventory.HistoryActivity" />
+    </application>
+
+</manifest>

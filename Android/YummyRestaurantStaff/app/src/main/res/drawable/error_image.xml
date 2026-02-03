@@ -1,0 +1,26 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Gradient background for error -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#B00020"
+                android:endColor="#FF4444"
+                android:angle="270" />
+            <stroke
+                android:width="3dp"
+                android:color="#B00020" />
+            <corners android:radius="4dp" />
+            <padding
+                android:left="8dp"
+                android:top="8dp"
+                android:right="8dp"
+                android:bottom="8dp" />
+        </shape>
+    </item>
+
+    <!-- Centered warning icon -->
+    <item
+        android:drawable="@drawable/outline_error_24"
+        android:gravity="center" />
+</layer-list>

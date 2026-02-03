@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App 名稱 (主程式名稱) -->
+    <string name="app_name">Yummy Restaurant Staff</string>
+
+    <!-- 餐廳名稱 -->
+    <string name="merchant_name">Yummy Restaurant</string>
+
+    <!-- 庫存系統專用標題 (我幫你加的，方便辨識) -->
+    <string name="title_inventory">Inventory Manager</string>
+
+    <!-- 其他通用文字 -->
+    <string name="loading">Loading...</string>
+    <string name="error_network">Network Error</string>
+</resources>

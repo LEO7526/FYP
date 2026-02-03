@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_orders"
+        android:title="Kitchen / Orders" />
+    <item
+        android:id="@+id/nav_tables"
+        android:title="Table Booking" />
+    <item
+        android:id="@+id/nav_create_dish"
+        android:title="Create Dish" />
+
+
+    <item
+        android:id="@+id/nav_inventory_system"
+        android:title="📦 Inventory Management" />
+
+    <item
+        android:id="@+id/nav_create_coupon"
+        android:title="Create Coupon" />
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Logout" />
+</menu>
