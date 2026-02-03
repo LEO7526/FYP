@@ -515,7 +515,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         
         // ✅ Set ostatus based on payment method
         // ostatus: 1=Pending, 2=Done (unpaid), 3=Paid, 4=Cancelled
-        int ostatus = ("cash".equals(selectedPaymentMethod)) ? 2 : 3; // 2 for cash (pending payment), 3 for card (paid)
+        int ostatus = ("cash".equals(selectedPaymentMethod)) ? 0 : 1; // 2 for cash (pending payment), 3 for card (paid)
         orderData.put("ostatus", ostatus);
         Log.d(TAG, "saveOrderToBackend: ostatus=" + ostatus + " (payment_method=" + selectedPaymentMethod + ")");
         

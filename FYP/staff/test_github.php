@@ -1,5 +1,5 @@
 <?php
-$token = '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';
+$token = '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';
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/LEO7526/FYP/contents/Image');

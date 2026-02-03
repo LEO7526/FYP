@@ -181,7 +181,7 @@ include '../conn.php'; //
                     echo "<td>" . $currentStock . " " . $unit . "</td>";
                     echo "<td>" . $reorderLevel . " " . $unit . "</td>";
                     echo "<td><span class='stock-alert {$statusClass}'>{$status}</span></td>";
-                    echo "<td><a href='Inventory.php?material_id=" . $row['mid'] . "' class='btn-view'>Reorder</a></td>";
+                    echo "<td><a href='newInventory.php?material_id=" . $row['mid'] . "' class='btn-view'>Reorder</a></td>";
                     echo "</tr>";
                 }
             } else {

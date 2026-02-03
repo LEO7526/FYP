@@ -4,7 +4,69 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4f3e39e0-9404-40c8-987c-90ad4db8567e" name="Changes" comment="" />
+    <list default="true" id="4f3e39e0-9404-40c8-987c-90ad4db8567e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.idea/AndroidProjectSystem.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.idea/deploymentTargetSelector.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.idea/migrations.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/.idea/runConfigurations.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/proguard-rules.pro" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/androidTest/java/com/example/bookingpage/ExampleInstrumentedTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/AndroidManifest.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/java/com/example/bookingpage/BookingActivity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/java/com/example/bookingpage/ConfirmBookingActivity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/java/com/example/bookingpage/Table.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/java/com/example/bookingpage/TableAdapter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/java/com/example/bookingpage/activity_booking.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/drawable/ic_launcher_background.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/drawable/ic_launcher_foreground.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/drawable/table_item_background.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/layout/activity_booking.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/layout/activity_confirm_booking.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/layout/list_item_table.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-hdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-mdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/values-night/themes.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/values/colors.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/values/strings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/values/themes.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/xml/backup_rules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/main/res/xml/data_extraction_rules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/app/src/test/java/com/example/bookingpage/ExampleUnitTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/gradle.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/gradle/libs.versions.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/BookingPage/settings.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/YummyRestaurant/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Android/YummyRestaurant/.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android/YummyRestaurant/app/src/main/java/com/example/yummyrestaurant/activities/PaymentActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/Android/YummyRestaurant/app/src/main/java/com/example/yummyrestaurant/activities/PaymentActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Database/projectapi/save_order.php" beforeDir="false" afterPath="$PROJECT_DIR$/Database/projectapi/save_order.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FYP/kitchen/kitchen_orders.php" beforeDir="false" afterPath="$PROJECT_DIR$/FYP/kitchen/kitchen_orders.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FYP/staff/save_dishesImage.php" beforeDir="false" afterPath="$PROJECT_DIR$/FYP/staff/save_dishesImage.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FYP/staff/save_packageImage.php" beforeDir="false" afterPath="$PROJECT_DIR$/FYP/staff/save_packageImage.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FYP/staff/staffIndex.php" beforeDir="false" afterPath="$PROJECT_DIR$/FYP/staff/staffIndex.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FYP/staff/test_github.php" beforeDir="false" afterPath="$PROJECT_DIR$/FYP/staff/test_github.php" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,28 +90,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/xampp/htdocs/newFolder&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/xampp/htdocs/newFolder/FYP/counter",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\xampp\htdocs\newFolder\FYP\counter" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -67,6 +134,7 @@
       <updated>1762146294208</updated>
       <workItem from="1769497651592" duration="641000" />
       <workItem from="1769499314492" duration="1198000" />
+      <workItem from="1770088096743" duration="4933000" />
     </task>
     <servers />
   </component>

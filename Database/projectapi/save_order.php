@@ -27,12 +27,17 @@ $table_number = $input['table_number'] ?? null;
 $payment_method = $input['payment_method'] ?? 'card';
 $payment_intent_id = $input['payment_intent_id'] ?? null;
 
-// ✅ Validate ostatus based on payment method
-// ostatus: 1=Pending, 2=Done (unpaid cash orders), 3=Paid (card orders), 4=Cancelled
-if (empty($ostatus) || $ostatus < 1 || $ostatus > 4) {
-    // Auto-determine ostatus based on payment method if not provided
-    $ostatus = ("cash" === $payment_method) ? 2 : 3;
-    error_log("Auto-determined ostatus=$ostatus based on payment_method=$payment_method");
+// ✅ Respect Android-provided ostatus values (0 or 1)
+// Only auto-set ostatus if it's invalid
+// ostatus from Android: 0=cash payment, 1=card payment
+if ($ostatus === null || $ostatus === '' || $ostatus < 0 || $ostatus > 1) {
+    // Auto-determine ostatus based on order type if not provided or invalid
+    if ("dine_in" === $order_type) {
+        $ostatus = 1;
+    } else {
+        $ostatus = ("cash" === $payment_method) ? 2 : 3;
+    }
+    error_log("Auto-determined ostatus=$ostatus based on order_type=$order_type, payment_method=$payment_method");
 }
 
 // ✅ 確保 cid 是整數
