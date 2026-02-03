@@ -1,0 +1,6 @@
+coupon
+drink
+general
+package
+spicy
+staff
