@@ -17,6 +17,10 @@
             android:id="@+id/nav_cash_payment"
             android:icon="@drawable/ic_coupon"
             android:title="💰 Cash Payment Management" />
+        <item
+            android:id="@+id/nav_takeaway_cash"
+            android:icon="@drawable/ic_coupon"
+            android:title="📦 Takeaway Cash Orders" />
     </group>
 
     <item android:title="📝 Content Management">

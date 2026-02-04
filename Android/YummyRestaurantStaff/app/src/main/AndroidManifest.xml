@@ -37,9 +37,22 @@
 
         <!-- 5. 新增原料 -->
         <activity android:name=".activities.CreateMaterialActivity" />
+        
+        <!-- 6. 新增優惠券 -->
         <activity android:name=".activities.CreateCouponActivity" />
+        
+        <!-- 7. 庫存管理 -->
         <activity android:name=".inventory.InventoryActivity" />
         <activity android:name=".inventory.HistoryActivity" />
+        
+        <!-- 8. 現金付款管理 -->
+        <activity android:name=".activities.CashPaymentManagementActivity" />
+        
+        <!-- 9. 外帶現金付款管理 -->
+        <activity android:name=".activities.TakeawayCashPaymentActivity" />
+        
+        <!-- 10. 主要活動（自動導向） -->
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

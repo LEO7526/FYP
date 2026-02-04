@@ -11,7 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
@@ -19,9 +19,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.yummyrestaurant.R;
-import com.example.yummyrestaurant.adapters.CashPaymentTableAdapter;
+import com.example.yummyrestaurant.adapters.TakeawayCashOrderAdapter;
 import com.example.yummyrestaurant.api.ApiConstants;
-import com.example.yummyrestaurant.models.CashPaymentTable;
+import com.example.yummyrestaurant.models.TakeawayCashOrder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,27 +31,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Activity for staff to manage cash payments at front desk
- * Shows tables with pending cash payments and allows staff to confirm payment
+ * Activity for staff to manage cash payments for takeaway orders
+ * Shows takeaway orders with pending cash payments (ostatus=0) and allows staff to confirm payment
  */
-public class CashPaymentManagementActivity extends ThemeBaseActivity {
-    private static final String TAG = "CashPaymentMgmt";
+public class TakeawayCashPaymentActivity extends androidx.appcompat.app.AppCompatActivity {
+    private static final String TAG = "TakeawayCashPayment";
     
     private RecyclerView recyclerView;
-    private CashPaymentTableAdapter adapter;
-    private List<CashPaymentTable> tableList;
+    private TakeawayCashOrderAdapter adapter;
+    private List<TakeawayCashOrder> orderList;
     private ProgressBar progressBar;
     private TextView emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cash_payment_management);
+        setContentView(R.layout.activity_takeaway_cash_payment);
 
-        Log.d(TAG, "onCreate: Initializing Cash Payment Management");
+        Log.d(TAG, "onCreate: Initializing Takeaway Cash Payment Management");
         
         initializeUI();
-        fetchCashPaymentTables();
+        fetchTakeawayCashOrders();
     }
 
     private void initializeUI() {
@@ -64,30 +64,30 @@ public class CashPaymentManagementActivity extends ThemeBaseActivity {
         emptyView = findViewById(R.id.textViewEmpty);
 
         // Setup RecyclerView
-        tableList = new ArrayList<>();
-        recyclerView = findViewById(R.id.recyclerViewCashPaymentTables);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        orderList = new ArrayList<>();
+        recyclerView = findViewById(R.id.recyclerViewTakeawayOrders);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new CashPaymentTableAdapter(this, tableList, this::onTableClicked);
-        recyclerView.setAdapter(adapter);
+        // For now, create a simple adapter
+        // adapter = new TakeawayCashOrderAdapter(this, orderList, this::onOrderClicked);
+        // recyclerView.setAdapter(adapter);
         
         Log.d(TAG, "initializeUI: UI components initialized");
     }
 
     /**
-     * Fetch tables with pending cash payments
+     * Fetch takeaway orders with pending cash payments (ostatus=0)
      */
-    private void fetchCashPaymentTables() {
-        Log.d(TAG, "fetchCashPaymentTables: Loading tables with pending cash payments");
+    private void fetchTakeawayCashOrders() {
+        Log.d(TAG, "fetchTakeawayCashOrders: Loading takeaway orders with pending cash payments");
         showLoading(true);
         
-        String url = ApiConstants.BASE_URL + "get_cash_payment_tables.php";
-        Log.d(TAG, "API URL: " + url);
+        String url = ApiConstants.BASE_URL + "get_takeaway_cash_orders.php";
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
                     Log.d(TAG, "API Response: " + response);
-                    parseTablesResponse(response);
+                    parseOrdersResponse(response);
                     showLoading(false);
                 },
                 error -> {
@@ -101,39 +101,41 @@ public class CashPaymentManagementActivity extends ThemeBaseActivity {
         Volley.newRequestQueue(this).add(request);
     }
 
-    private void parseTablesResponse(String response) {
+    private void parseOrdersResponse(String response) {
         try {
             JSONObject jsonObject = new JSONObject(response);
             
             if (jsonObject.getString("status").equals("success")) {
                 JSONArray dataArray = jsonObject.getJSONArray("data");
-                tableList.clear();
+                orderList.clear();
                 
                 for (int i = 0; i < dataArray.length(); i++) {
-                    JSONObject tableObj = dataArray.getJSONObject(i);
+                    JSONObject orderObj = dataArray.getJSONObject(i);
                     
-                    CashPaymentTable table = new CashPaymentTable(
-                        tableObj.getInt("table_number"),
-                        tableObj.getInt("oid"),
-                        tableObj.getString("customer_name"),
-                        tableObj.getString("order_time"),
-                        tableObj.getDouble("total_amount"),
-                        tableObj.getString("items_summary")
+                    TakeawayCashOrder order = new TakeawayCashOrder(
+                        orderObj.getInt("oid"),
+                        orderObj.getString("orderRef"),
+                        orderObj.getString("customer_name"),
+                        orderObj.getString("order_time"),
+                        orderObj.getDouble("total_amount"),
+                        orderObj.getString("items_summary")
                     );
                     
-                    tableList.add(table);
-                    Log.d(TAG, "Added table: " + table.getTableNumber() + " with amount: " + table.getTotalAmount());
+                    orderList.add(order);
+                    Log.d(TAG, "Added order: " + order.getOrderRef() + " with amount: " + order.getTotalAmount());
                 }
                 
-                adapter.notifyDataSetChanged();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
                 
-                if (tableList.isEmpty()) {
+                if (orderList.isEmpty()) {
                     showEmptyState(true);
                 } else {
                     showEmptyState(false);
                 }
                 
-                Log.d(TAG, "fetchCashPaymentTables: Loaded " + tableList.size() + " tables");
+                Log.d(TAG, "fetchTakeawayCashOrders: Loaded " + orderList.size() + " orders");
             } else {
                 String message = jsonObject.optString("message", "Unknown error");
                 Log.w(TAG, "API Error: " + message);
@@ -148,51 +150,39 @@ public class CashPaymentManagementActivity extends ThemeBaseActivity {
     }
 
     /**
-     * Handle table click - show payment confirmation dialog
+     * Handle order click - show payment confirmation dialog
      */
-    public void onTableClicked(CashPaymentTable table) {
-        Log.d(TAG, "onTableClicked: Table " + table.getTableNumber() + " clicked");
-        showPaymentConfirmationDialog(table);
+    public void onOrderClicked(TakeawayCashOrder order) {
+        Log.d(TAG, "onOrderClicked: Order " + order.getOrderRef() + " clicked");
+        showPaymentConfirmationDialog(order);
     }
 
     /**
-     * Show payment confirmation dialog for pending cash payments
+     * Show payment confirmation dialog for pending takeaway cash payments
      */
-    private void showPaymentConfirmationDialog(CashPaymentTable table) {
+    private void showPaymentConfirmationDialog(TakeawayCashOrder order) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_cash_payment_confirmation, null);
-        builder.setView(view);
         
-        TextView tvTableNumber = view.findViewById(R.id.textTableNumber);
-        TextView tvCustomerName = view.findViewById(R.id.textCustomerName);
-        TextView tvTotalAmount = view.findViewById(R.id.textTotalAmount);
-        TextView tvItemsSummary = view.findViewById(R.id.textItemsSummary);
-        Button btnConfirmPayment = view.findViewById(R.id.btnConfirmPayment);
-        Button btnCancel = view.findViewById(R.id.btnCancel);
+        builder.setTitle("Confirm Cash Payment");
+        builder.setMessage("Order: " + order.getOrderRef() + "\n" +
+                          "Customer: " + order.getCustomerName() + "\n" +
+                          "Amount: HK$" + String.format("%.2f", order.getTotalAmount()) + "\n\n" +
+                          order.getItemsSummary());
 
-        tvTableNumber.setText("Table: " + table.getTableNumber());
-        tvCustomerName.setText("Customer: " + table.getCustomerName());
-        tvTotalAmount.setText(String.format("Amount: HK$%.2f", table.getTotalAmount()));
-        tvItemsSummary.setText(table.getItemsSummary());
-
-        AlertDialog dialog = builder.create();
-
-        btnConfirmPayment.setOnClickListener(v -> {
-            Log.d(TAG, "Confirming front desk cash payment for table " + table.getTableNumber());
-            processCashPayment(table.getOrderId());
-            dialog.dismiss();
+        builder.setPositiveButton("Confirm Payment", (dialog, which) -> {
+            Log.d(TAG, "Confirming takeaway cash payment for order " + order.getOrderRef());
+            processTakeawayCashPayment(order.getOrderId());
         });
 
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        dialog.show();
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 
     /**
-     * Process cash payment - update order status to confirmed
+     * Process takeaway cash payment - update order status to confirmed
      */
-    private void processCashPayment(int orderId) {
-        Log.d(TAG, "processCashPayment: Processing payment for order " + orderId);
+    private void processTakeawayCashPayment(int orderId) {
+        Log.d(TAG, "processTakeawayCashPayment: Processing payment for order " + orderId);
         showLoading(true);
         
         String url = ApiConstants.BASE_URL + "process_cash_payment.php";
@@ -226,11 +216,11 @@ public class CashPaymentManagementActivity extends ThemeBaseActivity {
     private void handlePaymentResponse(JSONObject response) {
         try {
             if (response.getBoolean("success")) {
-                Toast.makeText(this, "Front desk cash payment confirmed! Order has entered preparation stage.", Toast.LENGTH_LONG).show();
-                // Refresh the table list
-                fetchCashPaymentTables();
+                Toast.makeText(this, "Takeaway cash payment confirmed! Order ready for preparation.", Toast.LENGTH_LONG).show();
+                // Refresh the order list
+                fetchTakeawayCashOrders();
             } else {
-                String message = response.optString("message", "Front desk payment confirmation failed, please try again");
+                String message = response.optString("message", "Payment confirmation failed, please try again");
                 Toast.makeText(this, "Confirmation failed: " + message, Toast.LENGTH_SHORT).show();
             }
         } catch (JSONException e) {
@@ -240,19 +230,27 @@ public class CashPaymentManagementActivity extends ThemeBaseActivity {
     }
 
     private void showLoading(boolean show) {
-        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
+        if (progressBar != null) {
+            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+        if (recyclerView != null) {
+            recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 
     private void showEmptyState(boolean show) {
-        emptyView.setVisibility(show ? View.VISIBLE : View.GONE);
-        recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
+        if (emptyView != null) {
+            emptyView.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+        if (recyclerView != null) {
+            recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         // Refresh data when activity resumes
-        fetchCashPaymentTables();
+        fetchTakeawayCashOrders();
     }
 }

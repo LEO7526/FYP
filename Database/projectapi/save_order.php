@@ -27,15 +27,16 @@ $table_number = $input['table_number'] ?? null;
 $payment_method = $input['payment_method'] ?? 'card';
 $payment_intent_id = $input['payment_intent_id'] ?? null;
 
-// ✅ Respect Android-provided ostatus value
-// ostatus from Android: 1=Pending (payment confirmed, waiting for kitchen)
-// Only validate, don't auto-set since payment is already confirmed on Android side
-if ($ostatus === null || $ostatus === '' || $ostatus !== 1) {
-    // Default to 1 (Pending) if not provided
+// ✅ Use Android-provided ostatus value
+// ostatus from Android: 0=Awaiting Cash Payment, 1=Pending (ready for kitchen)
+// Respect the exact value sent from Android
+error_log("Received ostatus from Android: $ostatus");
+if ($ostatus === null || $ostatus === '') {
+    // Default to 1 (Pending) only if not provided
     $ostatus = 1;
-    error_log("Using default ostatus=1 (Pending, waiting for kitchen preparation)");
+    error_log("Using default ostatus=1 (no value provided)");
 } else {
-    error_log("Using Android-provided ostatus=1 (Pending, waiting for kitchen preparation)");
+    error_log("Using Android-provided ostatus=$ostatus");
 }
 
 // ✅ 確保 cid 是整數
@@ -52,8 +53,8 @@ if ($cid === null || $cid === 0 || empty($items)) {
 $orderRef = $input['orderRef'] ?? 'order_' . time() . '_' . rand(1000, 9999);
 
 $stmt = $conn->prepare("
-    INSERT INTO orders (odate, cid, ostatus, orderRef, order_type, table_number)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO orders (odate, cid, ostatus, orderRef, order_type, table_number, payment_method, payment_intent_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ");
 if (!$stmt) {
     error_log("Prepare failed for orders: " . $conn->error);
@@ -63,14 +64,16 @@ if (!$stmt) {
 
 $table_num_int = $table_number !== null ? intval($table_number) : null;
 
-$stmt->bind_param("siissi", 
+$stmt->bind_param("siississ", 
     $odate, $cid, $ostatus, $orderRef, 
     $order_type, 
-    $table_num_int
+    $table_num_int,
+    $payment_method,
+    $payment_intent_id
 );
 
 if (!$stmt->execute()) {
-    error_log("Execute failed for orders: odate=$odate, cid=$cid, ostatus=$ostatus, orderRef=$orderRef, order_type=$order_type, table_number=$table_num_int, error=" . $stmt->error);
+    error_log("Execute failed for orders: odate=$odate, cid=$cid, ostatus=$ostatus, orderRef=$orderRef, order_type=$order_type, table_number=$table_num_int, payment_method=$payment_method, payment_intent_id=$payment_intent_id, error=" . $stmt->error);
     echo json_encode(["error" => "Failed to save order header", "details" => $stmt->error]);
     $stmt->close();
     $conn->close();
@@ -78,7 +81,7 @@ if (!$stmt->execute()) {
 }
 
 $order_id = $stmt->insert_id;
-error_log("✅ Order header saved with ID: $order_id (type: $order_type, table: $table_num_int, ostatus: $ostatus)");
+error_log("✅ Order header saved with ID: $order_id (type: $order_type, table: $table_num_int, ostatus: $ostatus, payment_method: $payment_method, payment_intent_id: $payment_intent_id)");
 $stmt->close();
 
 // Insert each item into order_items (adjusted for your schema)

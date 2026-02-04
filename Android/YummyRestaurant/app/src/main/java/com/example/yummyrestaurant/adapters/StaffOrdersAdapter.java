@@ -35,11 +35,13 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
     public StaffOrdersAdapter(Context context, List<StaffOrder> orderList) {
         this.context = context;
         this.orderList = orderList;
+        android.util.Log.d("KitchenAdapter", "StaffOrdersAdapter created with " + orderList.size() + " orders");
     }
 
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        android.util.Log.d("KitchenAdapter", "Creating new ViewHolder");
         View view = LayoutInflater.from(context).inflate(R.layout.item_staff_order_card, parent, false);
         return new OrderViewHolder(view);
     }
@@ -47,6 +49,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         StaffOrder order = orderList.get(position);
+        android.util.Log.d("KitchenAdapter", "Binding order at position " + position + " - OID: " + order.getOid() + ", Status: " + order.getStatus());
 
         // 如果是外帶，桌號顯示為 "Takeaway" (紅色)，否則顯示桌號
         if (order.getType().equals("takeaway")) {
@@ -176,6 +179,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
 
     @Override
     public int getItemCount() {
+        android.util.Log.d("KitchenAdapter", "getItemCount called - returning: " + orderList.size());
         return orderList.size();
     }
 

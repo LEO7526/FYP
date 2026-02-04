@@ -493,7 +493,7 @@ CREATE TABLE orders (
   oid INT NOT NULL AUTO_INCREMENT,
   odate DATETIME NOT NULL,
   cid INT NOT NULL,
-  ostatus INT NOT NULL DEFAULT 1 COMMENT '1=Pending, 2=Done, 3=Cancelled',
+  ostatus INT NOT NULL DEFAULT 1 COMMENT '0=Awaiting Cash Payment, 1=Pending, 2=Done, 3=Cancelled',
   note TEXT DEFAULT NULL,
   orderRef VARCHAR(100) NOT NULL UNIQUE,
   coupon_id INT NULL,
@@ -940,5 +940,8 @@ CREATE TABLE recipe_materials (
 INSERT INTO recipe_materials (item_id, mid, quantity) VALUES
 (3, 2, 200), (3, 3, 20), (3, 4, 10),
 (6, 7, 150), (6, 6, 50), (6, 3, 15);
+
+
+
 
 COMMIT;

@@ -346,6 +346,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         int backgroundColor;
         
         switch (status) {
+            case 0:
+                statusText = "Awaiting Cash Payment";
+                backgroundColor = Color.parseColor("#FF5722"); // 橘紅色 - 需要注意
+                break;
             case 1:
                 statusText = "Pending";
                 backgroundColor = Color.parseColor("#FFC107"); // 黃色
@@ -728,6 +732,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     private String getStatusText(int status) {
         switch (status) {
+            case 0: return "Awaiting Cash Payment";
             case 1: return "Pending";
             case 2: return "Preparing";
             case 3: return "Delivered";
@@ -762,7 +767,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
      * Order status codes and their meanings:
      *
 orders
-ostatus 1: Pending 2: Done 3: Paid 4: Cancelled
+ostatus 0: Awaiting Cash Payment 1: Pending 2: Done 3: Paid 4: Cancelled
+* Awaiting Cash Payment means customer chose cash payment and needs front desk confirmation
 * Done means done preparing the food
      * These statuses help the restaurant coordinate order progress across kitchen, service, and billing.
      */

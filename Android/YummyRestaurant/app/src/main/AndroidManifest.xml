@@ -170,6 +170,11 @@
             android:label="現金支付管理"
             android:parentActivityName=".activities.StaffOrdersActivity" />
         <activity
+            android:name=".activities.TakeawayCashPaymentActivity"
+            android:exported="false"
+            android:label="外賣現金支付"
+            android:parentActivityName=".activities.StaffOrdersActivity" />
+        <activity
             android:name=".activities.CreateDishActivity"
             android:exported="false" />
         <activity

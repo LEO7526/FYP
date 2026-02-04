@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/white">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💰 Confirm Takeaway Cash Payment"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="#333"
+        android:gravity="center"
+        android:background="#FFE5DB"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Order Reference -->
+    <TextView
+        android:id="@+id/textOrderRef"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Order: order_20260204_001"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#333"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Customer Name -->
+    <TextView
+        android:id="@+id/textCustomerName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Customer: John Doe"
+        android:textSize="14sp"
+        android:textColor="#666"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Total Amount -->
+    <TextView
+        android:id="@+id/textTotalAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Amount: HK$88.00"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#4CAF50"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Items Summary -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Items:"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:textColor="#333"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/textItemsSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chicken Rice x2, Beef Noodles x1"
+        android:textSize="14sp"
+        android:textColor="#333"
+        android:background="#F5F5F5"
+        android:padding="8dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Confirmation Message -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Confirm that cash payment has been received for this takeaway order?\n\nAfter confirmation, the order will proceed to kitchen preparation stage."
+        android:textSize="14sp"
+        android:textColor="#666"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textColor="#666"
+            android:background="@drawable/button_outline"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnConfirmPayment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="💰 Confirm Cash Received"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_primary"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

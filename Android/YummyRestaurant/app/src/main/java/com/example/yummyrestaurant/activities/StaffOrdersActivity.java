@@ -54,12 +54,16 @@ public class StaffOrdersActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_staff_orders);
+        
+        android.util.Log.d("KitchenOrders", "StaffOrdersActivity onCreate started");
 
         session = new SessionManager(this);
 
         // 初始化 List
         allOrderList = new ArrayList<>();
         displayOrderList = new ArrayList<>();
+        
+        android.util.Log.d("KitchenOrders", "Order lists initialized");
 
         // 1. 設定 RecyclerView
         recyclerView = findViewById(R.id.ordersRecyclerView);
@@ -67,16 +71,19 @@ public class StaffOrdersActivity extends AppCompatActivity {
 
         adapter = new StaffOrdersAdapter(this, displayOrderList);
         recyclerView.setAdapter(adapter);
+        
+        android.util.Log.d("KitchenOrders", "RecyclerView and adapter set up");
 
         // 2. 設定 TabLayout
         tabLayout = findViewById(R.id.orderTabs);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                // Tab 0 = New (Status 1)
-                // Tab 1 = Cooking (Status 2)
-                // Tab 2 = Served (Status 3)
-                filterOrders(tab.getPosition() + 1);
+                int position = tab.getPosition();
+                android.util.Log.d("KitchenOrders", "Tab selected: position " + position + " (filter will use " + (position + 1) + ")");
+                // Tab 0 = New, Tab 1 = Making (both show ostatus=1)
+                // Tab 2 = Delivered (shows ostatus=2)
+                filterOrders(position + 1);
             }
 
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
@@ -127,8 +134,11 @@ public class StaffOrdersActivity extends AppCompatActivity {
 
     // 從 API 抓取訂單 (支援新的 Order Type)
     private void fetchOrders() {
+        android.util.Log.d("KitchenOrders", "Fetching orders from: " + ApiConstants.GET_ORDERS);
+        
         StringRequest request = new StringRequest(Request.Method.GET, ApiConstants.GET_ORDERS,
                 response -> {
+                    android.util.Log.d("KitchenOrders", "API Response: " + response);
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         if (jsonObject.getString("status").equals("success")) {
@@ -146,8 +156,14 @@ public class StaffOrdersActivity extends AppCompatActivity {
                                         obj.getString("summary"),
                                         obj.optString("type", "dine_in") // 新增 type
                                 );
+                                
+                                // Debug logging
+                                android.util.Log.d("KitchenOrders", "Loaded order - OID: " + order.getOid() + ", Status: " + order.getStatus() + ", Summary: " + order.getSummary());
+                                
                                 allOrderList.add(order);
                             }
+                            
+                            android.util.Log.d("KitchenOrders", "Total orders loaded: " + allOrderList.size());
 
                             // 更新 Tab 數字
                             updateTabCounts();
@@ -161,38 +177,77 @@ public class StaffOrdersActivity extends AppCompatActivity {
                         Toast.makeText(this, "Data Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 },
-                error -> Toast.makeText(this, "Network Error", Toast.LENGTH_SHORT).show()
+                error -> {
+                    android.util.Log.e("KitchenOrders", "Network error: " + error.toString());
+                    if (error.getMessage() != null) {
+                        android.util.Log.e("KitchenOrders", "Error message: " + error.getMessage());
+                    }
+                    Toast.makeText(this, "Network Error: " + (error.getMessage() != null ? error.getMessage() : "Unknown network error"), Toast.LENGTH_SHORT).show();
+                }
         );
 
         Volley.newRequestQueue(this).add(request);
     }
 
     // 篩選訂單
-    private void filterOrders(int status) {
+    private void filterOrders(int tabPosition) {
+        android.util.Log.d("KitchenOrders", "Filtering orders for tab position: " + tabPosition);
+        android.util.Log.d("KitchenOrders", "Total orders to filter: " + allOrderList.size());
+        
         displayOrderList.clear();
+        int filteredCount = 0;
+        
         for (StaffOrder order : allOrderList) {
-            if (order.getStatus() == status) {
+            android.util.Log.d("KitchenOrders", "Checking order OID: " + order.getOid() + ", Status: " + order.getStatus());
+            
+            // Tab 1 (New) 和 Tab 2 (Making) 都顯示 ostatus = 1
+            // Tab 3 (Delivered) 顯示 ostatus = 2
+            if ((tabPosition == 1 || tabPosition == 2) && order.getStatus() == 1) {
                 displayOrderList.add(order);
+                filteredCount++;
+                android.util.Log.d("KitchenOrders", "Added to New/Making tab - OID: " + order.getOid());
+            } else if (tabPosition == 3 && order.getStatus() == 2) {
+                displayOrderList.add(order);
+                filteredCount++;
+                android.util.Log.d("KitchenOrders", "Added to Delivered tab - OID: " + order.getOid());
             }
         }
+        
+        android.util.Log.d("KitchenOrders", "Filtered orders count: " + filteredCount + " for tab: " + tabPosition);
         adapter.notifyDataSetChanged();
     }
 
     // 更新 Tab 數字
     private void updateTabCounts() {
+        android.util.Log.d("KitchenOrders", "Updating tab counts for " + allOrderList.size() + " orders");
+        
         int countNew = 0;
-        int countCooking = 0;
-        int countServed = 0;
+        int countMaking = 0;
+        int countDelivered = 0;
 
         for (StaffOrder order : allOrderList) {
-            if (order.getStatus() == 1) countNew++;
-            else if (order.getStatus() == 2) countCooking++;
-            else if (order.getStatus() == 3) countServed++;
+            android.util.Log.d("KitchenOrders", "Counting order OID: " + order.getOid() + ", Status: " + order.getStatus());
+            
+            // New 和 Making 都計算 ostatus = 1 的訂單
+            if (order.getStatus() == 1) {
+                countNew++;
+                countMaking++;
+                android.util.Log.d("KitchenOrders", "Counted for New/Making tabs");
+            }
+            // Delivered 計算 ostatus = 2 的訂單
+            else if (order.getStatus() == 2) {
+                countDelivered++;
+                android.util.Log.d("KitchenOrders", "Counted for Delivered tab");
+            }
         }
+        
+        android.util.Log.d("KitchenOrders", "Final counts - New: " + countNew + ", Making: " + countMaking + ", Delivered: " + countDelivered);
 
         if (tabLayout.getTabAt(0) != null) tabLayout.getTabAt(0).setText("New (" + countNew + ")");
-        if (tabLayout.getTabAt(1) != null) tabLayout.getTabAt(1).setText("Cooking (" + countCooking + ")");
-        if (tabLayout.getTabAt(2) != null) tabLayout.getTabAt(2).setText("Delivered (" + countServed + ")");
+        if (tabLayout.getTabAt(1) != null) tabLayout.getTabAt(1).setText("Making (" + countMaking + ")");
+        if (tabLayout.getTabAt(2) != null) tabLayout.getTabAt(2).setText("Delivered (" + countDelivered + ")");
+        
+        android.util.Log.d("KitchenOrders", "Tab titles updated");
     }
 
     // 選單邏輯
@@ -208,6 +263,9 @@ public class StaffOrdersActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.nav_cash_payment) {
             startActivity(new Intent(StaffOrdersActivity.this, CashPaymentManagementActivity.class));
+            return true;
+        } else if (id == R.id.nav_takeaway_cash) {
+            startActivity(new Intent(StaffOrdersActivity.this, TakeawayCashPaymentActivity.class));
             return true;
         } else if (id == R.id.nav_create_dish) {
             startActivity(new Intent(StaffOrdersActivity.this, CreateDishActivity.class));

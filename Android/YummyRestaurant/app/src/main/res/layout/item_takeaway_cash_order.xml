@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Order Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/textOrderRef"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Order #12345"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#333" />
+
+            <TextView
+                android:id="@+id/textTotalAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HK$88.00"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#4CAF50"
+                android:background="#E8F5E8"
+                android:padding="6dp"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+
+        <!-- Customer Info -->
+        <TextView
+            android:id="@+id/textCustomerName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Customer: John Doe"
+            android:textSize="14sp"
+            android:textColor="#666"
+            android:layout_marginTop="4dp" />
+
+        <!-- Order Time -->
+        <TextView
+            android:id="@+id/textOrderTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2026-02-04 16:30:50"
+            android:textSize="12sp"
+            android:textColor="#999"
+            android:layout_marginTop="2dp" />
+
+        <!-- Items Summary -->
+        <TextView
+            android:id="@+id/textItemsSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chicken Rice x2, Beef Noodles x1"
+            android:textSize="14sp"
+            android:textColor="#333"
+            android:layout_marginTop="8dp"
+            android:background="#F5F5F5"
+            android:padding="8dp" />
+
+        <!-- Cash Payment Warning -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="💰 CASH PAYMENT REQUIRED"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:textColor="#FF5722"
+            android:gravity="center"
+            android:background="#FFE5DB"
+            android:padding="6dp"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -64,9 +64,8 @@ public class StaffOrdersActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                // Tab 0 = New (Status 1)
-                // Tab 1 = Cooking (Status 2)
-                // Tab 2 = Served (Status 3)
+                // Tab 0 = New, Tab 1 = Making (both show ostatus=1)
+                // Tab 2 = Delivered (shows ostatus=2)
                 filterOrders(tab.getPosition() + 1);
             }
 
@@ -105,8 +104,14 @@ public class StaffOrdersActivity extends AppCompatActivity {
                                         obj.getString("summary"),
                                         obj.optString("type", "dine_in") // 新增 type
                                 );
+                                
+                                // Debug logging
+                                android.util.Log.d("KitchenOrders", "Loaded order - OID: " + order.getOid() + ", Status: " + order.getStatus() + ", Summary: " + order.getSummary());
+                                
                                 allOrderList.add(order);
                             }
+                            
+                            android.util.Log.d("KitchenOrders", "Total orders loaded: " + allOrderList.size());
 
                             // 更新 Tab 數字
                             updateTabCounts();
@@ -127,31 +132,54 @@ public class StaffOrdersActivity extends AppCompatActivity {
     }
 
     // 篩選訂單
-    private void filterOrders(int status) {
+    private void filterOrders(int tabPosition) {
+        android.util.Log.d("KitchenOrders", "Filtering orders for tab position: " + tabPosition);
+        android.util.Log.d("KitchenOrders", "Total orders to filter: " + allOrderList.size());
+        
         displayOrderList.clear();
+        int filteredCount = 0;
+        
         for (Order order : allOrderList) {
-            if (order.getStatus() == status) {
+            android.util.Log.d("KitchenOrders", "Checking order OID: " + order.getOid() + ", Status: " + order.getStatus());
+            
+            // Tab 1 (New) 和 Tab 2 (Making) 都顯示 ostatus = 1
+            // Tab 3 (Delivered) 顯示 ostatus = 2
+            if ((tabPosition == 1 || tabPosition == 2) && order.getStatus() == 1) {
                 displayOrderList.add(order);
+                filteredCount++;
+                android.util.Log.d("KitchenOrders", "Added to New/Making tab - OID: " + order.getOid());
+            } else if (tabPosition == 3 && order.getStatus() == 2) {
+                displayOrderList.add(order);
+                filteredCount++;
+                android.util.Log.d("KitchenOrders", "Added to Delivered tab - OID: " + order.getOid());
             }
         }
+        
+        android.util.Log.d("KitchenOrders", "Filtered orders count: " + filteredCount + " for tab: " + tabPosition);
         adapter.notifyDataSetChanged();
     }
 
     // 更新 Tab 數字
     private void updateTabCounts() {
         int countNew = 0;
-        int countCooking = 0;
-        int countServed = 0;
+        int countMaking = 0;
+        int countDelivered = 0;
 
         for (Order order : allOrderList) {
-            if (order.getStatus() == 1) countNew++;
-            else if (order.getStatus() == 2) countCooking++;
-            else if (order.getStatus() == 3) countServed++;
+            // New 和 Making 都計算 ostatus = 1 的訂單
+            if (order.getStatus() == 1) {
+                countNew++;
+                countMaking++;
+            }
+            // Delivered 計算 ostatus = 2 的訂單
+            else if (order.getStatus() == 2) {
+                countDelivered++;
+            }
         }
 
         if (tabLayout.getTabAt(0) != null) tabLayout.getTabAt(0).setText("New (" + countNew + ")");
-        if (tabLayout.getTabAt(1) != null) tabLayout.getTabAt(1).setText("Cooking (" + countCooking + ")");
-        if (tabLayout.getTabAt(2) != null) tabLayout.getTabAt(2).setText("Delivered (" + countServed + ")");
+        if (tabLayout.getTabAt(1) != null) tabLayout.getTabAt(1).setText("Making (" + countMaking + ")");
+        if (tabLayout.getTabAt(2) != null) tabLayout.getTabAt(2).setText("Delivered (" + countDelivered + ")");
     }
 
     // 選單邏輯

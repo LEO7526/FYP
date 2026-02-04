@@ -58,30 +58,47 @@ public class TableSelectionActivity extends AppCompatActivity {
 
     private void fetchTableStatus() {
         String url = ApiConstants.BASE_URL + "get_table_status.php";
+        
+        android.util.Log.d("TableSelection", "Fetching table status from: " + url);
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
+                    android.util.Log.d("TableSelection", "API Response: " + response);
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         if (jsonObject.getString("status").equals("success")) {
                             JSONArray data = jsonObject.getJSONArray("data");
                             tableList.clear();
 
+                            android.util.Log.d("TableSelection", "Number of tables received: " + data.length());
+
                             for (int i = 0; i < data.length(); i++) {
                                 JSONObject obj = data.getJSONObject(i);
-                                tableList.add(new StaffTable(
+                                StaffTable table = new StaffTable(
                                         obj.getInt("id"),
                                         obj.getInt("status"),
                                         obj.getString("status_text")
-                                ));
+                                );
+                                tableList.add(table);
+                                android.util.Log.d("TableSelection", "Added table - ID: " + table.getId() + ", Status: " + table.getStatus() + ", Text: " + table.getStatusText());
                             }
                             adapter.notifyDataSetChanged();
+                            android.util.Log.d("TableSelection", "Table list updated with " + tableList.size() + " tables");
+                        } else {
+                            String errorMessage = jsonObject.optString("message", "Unknown error");
+                            android.util.Log.e("TableSelection", "API Error: " + errorMessage);
+                            Toast.makeText(this, "Error: " + errorMessage, Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
+                        android.util.Log.e("TableSelection", "JSON parsing error", e);
+                        Toast.makeText(this, "Data parsing error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         e.printStackTrace();
                     }
                 },
-                error -> Toast.makeText(this, "Network Error", Toast.LENGTH_SHORT).show()
+                error -> {
+                    android.util.Log.e("TableSelection", "Network error", error);
+                    Toast.makeText(this, "Network Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
         );
 
         Volley.newRequestQueue(this).add(request);
