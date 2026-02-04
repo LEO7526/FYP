@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- Top Bar -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="16dp"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_back"
+            android:layout_centerVertical="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Table"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_centerInParent="true"
+            android:textColor="@color/black"/>
+    </RelativeLayout>
+
+    <!-- 狀態圖例 (Legend) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="#FAFAFA"
+        android:layout_marginTop="1dp">
+
+        <View android:layout_width="12dp" android:layout_height="12dp" android:background="#E0E0E0"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Available" android:layout_marginStart="4dp" android:layout_marginEnd="16dp"/>
+
+        <View android:layout_width="12dp" android:layout_height="12dp" android:background="#FBC02D"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Booked" android:layout_marginStart="4dp" android:layout_marginEnd="16dp"/>
+
+        <View android:layout_width="12dp" android:layout_height="12dp" android:background="#D32F2F"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Occupied" android:layout_marginStart="4dp"/>
+    </LinearLayout>
+
+    <!-- 桌位列表 Grid (這是舊版本最關鍵的部分) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tablesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:clipToPadding="false"/>
+
+</LinearLayout>

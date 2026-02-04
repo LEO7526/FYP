@@ -184,7 +184,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         // Generate a fake payment intent ID for cash orders
         paymentIntentId = "cash_" + System.currentTimeMillis();
         
-        // Save order with cash payment method and ostatus=2 (Done, pending payment)
+        // Save order with cash payment method and ostatus=0 (pending front desk confirmation)
         saveOrderToBackend(userId, amount, paymentIntentId);
         
         // Show success icon
@@ -513,10 +513,17 @@ public class PaymentActivity extends ThemeBaseActivity {
 
         orderData.put("cid", customerId);
         
-        // ✅ Set ostatus to 1 (Pending/Waiting for Kitchen)
-        // Both cash and card payments are confirmed before order is sent
-        // ostatus: 1=Pending (waiting for kitchen), 2=Done (kitchen prepared), 4=Cancelled
-        int ostatus = 1; // Payment already confirmed, now waiting for kitchen
+        // ✅ Set ostatus based on payment method
+        // Cash payment: ostatus=0 (pending front desk confirmation)
+        // Card payment: ostatus=1 (confirmed, ready for kitchen)
+        int ostatus;
+        if ("cash".equals(selectedPaymentMethod)) {
+            ostatus = 0; // Pending front desk cash confirmation
+            Log.d(TAG, "saveOrderToBackend: cash payment, ostatus=0 (pending confirmation)");
+        } else {
+            ostatus = 1; // Card payment already confirmed, ready for kitchen
+            Log.d(TAG, "saveOrderToBackend: card payment, ostatus=1 (confirmed)");
+        }
         orderData.put("ostatus", ostatus);
         Log.d(TAG, "saveOrderToBackend: ostatus=" + ostatus + " (payment_method=" + selectedPaymentMethod + ")");
         

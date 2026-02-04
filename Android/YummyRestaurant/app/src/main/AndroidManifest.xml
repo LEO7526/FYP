@@ -156,6 +156,35 @@
         <activity
             android:name=".activities.LoginActivity"
             android:exported="false" />
+        
+        <!-- Staff Activities -->
+        <activity
+            android:name=".activities.StaffOrdersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.TableSelectionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.CashPaymentManagementActivity"
+            android:exported="false"
+            android:label="現金支付管理"
+            android:parentActivityName=".activities.StaffOrdersActivity" />
+        <activity
+            android:name=".activities.CreateDishActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.CreateCouponActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.CreateMaterialActivity"
+            android:exported="false" />
+        <activity
+            android:name=".inventory.InventoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".inventory.HistoryActivity"
+            android:exported="false" />
+        
         <activity
             android:name=".MainActivity"
             android:exported="true" >

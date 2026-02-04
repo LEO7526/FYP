@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 頭部：桌號 + 時間 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/tableNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Table 05"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
+            <TextView
+                android:id="@+id/orderTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="12:30 PM"
+                android:textColor="#757575"
+                android:textSize="14sp"
+                android:layout_marginStart="12dp"/>
+
+            <!-- 狀態標籤 (只顯示文字顏色，不做按鈕) -->
+            <TextView
+                android:id="@+id/orderStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:background="@drawable/badge_circle_red_scalable"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 訂單摘要 -->
+        <TextView
+            android:id="@+id/orderSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Loading items..."
+            android:textSize="16sp"
+            android:textColor="#424242"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 底部按鈕：只保留查看詳情 -->
+        <Button
+            android:id="@+id/btnViewDetails"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Full Details"
+            android:textColor="@color/black"
+            app:strokeColor="#757575"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

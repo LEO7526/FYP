@@ -1,5 +1,12 @@
 <resources>
+    <string name="app_name">Yummy Restaurant</string>
     <string name="merchant_name">Yummy Restaurant</string>
+    
+    <!-- Staff App Strings -->
+    <string name="title_inventory">Inventory Manager</string>
+    <string name="loading">Loading...</string>
+    <string name="error_network">Network Error</string>
+    
     <string-array name="roles_array">
         <item>Staff</item>
         <item>Customer</item>

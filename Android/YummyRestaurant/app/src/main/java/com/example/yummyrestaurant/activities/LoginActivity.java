@@ -23,6 +23,7 @@ import com.example.yummyrestaurant.models.Customization;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
+import com.example.yummyrestaurant.activities.StaffOrdersActivity;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,6 +39,9 @@ public class LoginActivity extends ThemeBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Initialize RoleManager
+        RoleManager.init(this);
 
         SharedPreferences prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
         boolean darkMode = prefs.getBoolean("enable_dark_mode", false);
@@ -128,6 +132,15 @@ public class LoginActivity extends ThemeBaseActivity {
     private void handleLoginSuccess(LoginResponse loginResponse, String email) {
         Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
 
+        // Initialize RoleManager first
+        RoleManager.init(this);
+        
+        android.util.Log.d("LoginActivity", "=== LOGIN SUCCESS ===");
+        android.util.Log.d("LoginActivity", "Email: " + email);
+        android.util.Log.d("LoginActivity", "Response Role: " + loginResponse.getRole());
+        android.util.Log.d("LoginActivity", "Response UserName: " + loginResponse.getUserName());
+        android.util.Log.d("LoginActivity", "Response UserId: " + loginResponse.getUserId());
+
         // Save user info
         RoleManager.setUserEmail(email);
         RoleManager.setUserRole(loginResponse.getRole());
@@ -135,6 +148,12 @@ public class LoginActivity extends ThemeBaseActivity {
         RoleManager.setUserId(loginResponse.getUserId());
         RoleManager.setUserTel(loginResponse.getUserTel());
         RoleManager.setUserImageUrl(loginResponse.getUserImageUrl());
+        
+        // Verify the data was saved
+        android.util.Log.d("LoginActivity", "=== VERIFICATION AFTER SAVE ===");
+        android.util.Log.d("LoginActivity", "Saved Role: " + RoleManager.getUserRole());
+        android.util.Log.d("LoginActivity", "Saved Name: " + RoleManager.getUserName());
+        android.util.Log.d("LoginActivity", "Is Staff: " + RoleManager.isStaff());
 
         // Restore pending cart item if present
         Intent data = getIntent();
@@ -184,8 +203,21 @@ public class LoginActivity extends ThemeBaseActivity {
         // set login to true
         BrowseMenuActivity.setLogin(true);
 
-        // Redirect to home activity
-        Intent intent = new Intent(LoginActivity.this, BrowseMenuActivity.class);
+        // Redirect based on user role
+        String userRole = RoleManager.getUserRole();
+        Intent intent;
+        
+        android.util.Log.d("LoginActivity", "=== NAVIGATION DECISION ===");
+        android.util.Log.d("LoginActivity", "Final Role Check: " + userRole);
+        
+        if ("staff".equals(userRole)) {
+            android.util.Log.d("LoginActivity", "🍳 Redirecting STAFF to StaffOrdersActivity");
+            intent = new Intent(LoginActivity.this, StaffOrdersActivity.class);
+        } else {
+            android.util.Log.d("LoginActivity", "🛒 Redirecting CUSTOMER to BrowseMenuActivity");
+            intent = new Intent(LoginActivity.this, BrowseMenuActivity.class);
+        }
+        
         // Optionally clear back stack so user cannot go back to login
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

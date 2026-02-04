@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- 標題 -->
+        <TextView
+            android:id="@+id/detailTableTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Table Details"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- 客人名稱 (Customer) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
+                android:text="Customer:"
+                android:textStyle="bold"
+                android:textColor="#555555"/>
+            <TextView
+                android:id="@+id/detailCustomer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading..."
+                android:textColor="#000000"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+        <!-- 時間或人數 (Time/Pax) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+            <TextView
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
+                android:text="Time/Pax:"
+                android:textStyle="bold"
+                android:textColor="#555555"/>
+            <TextView
+                android:id="@+id/detailTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading..."
+                android:textColor="#000000"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+        <!-- 分隔線 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 訂單內容摘要 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Order Items / Note:"
+            android:textStyle="bold"
+            android:textColor="#555555"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/detailItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="..."
+            android:minHeight="80dp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="#333333"
+            android:textSize="15sp"/>
+
+        <!-- 關閉按鈕 -->
+        <Button
+            android:id="@+id/btnCloseDetail"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="Close"
+            android:backgroundTint="#7C4DFF"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</ScrollView>

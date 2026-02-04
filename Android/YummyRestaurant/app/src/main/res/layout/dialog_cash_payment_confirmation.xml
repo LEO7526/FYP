@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/textTableNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Table: 12"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#333333" />
+
+    <TextView
+        android:id="@+id/textCustomerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Customer: Mr. Zhang"
+        android:textSize="16sp"
+        android:textColor="#666666" />
+
+    <TextView
+        android:id="@+id/textTotalAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Amount: HK$180.00"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FF9800" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Order Details:"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#333333" />
+
+    <TextView
+        android:id="@+id/textItemsSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="牛肉麵 x2, 可樂 x1"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:background="#F5F5F5"
+        android:padding="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Confirm that cash payment has been received at the front desk?\n\nAfter confirmation, the order will proceed to kitchen preparation stage."
+        android:textSize="14sp"
+        android:textColor="#333333"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Cancel"
+            android:textColor="#666666"
+            android:background="?android:attr/selectableItemBackground" />
+
+        <Button
+            android:id="@+id/btnConfirmPayment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Confirm Payment Received"
+            android:textColor="@android:color/white"
+            android:background="#4CAF50" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FAFAFA">
+
+    <!-- 頂部標題 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="16dp"
+        android:elevation="4dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coupon Management"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
+    <!-- 主分頁 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabIndicatorColor="@color/colorPrimary"
+        app:tabSelectedTextColor="@color/colorPrimary">
+        <com.google.android.material.tabs.TabItem android:text="Create New"/>
+        <com.google.android.material.tabs.TabItem android:text="View List"/>
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- 內容容器 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Tab 1: Create Form -->
+        <ScrollView
+            android:id="@+id/viewCreate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- 1. 基本資訊 -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Basic Info" style="@style/SectionTitle"/>
+
+                <EditText
+                    android:id="@+id/etPoints"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Points Required (e.g. 100)"
+                    android:inputType="number"
+                    style="@style/InputStyle"/>
+
+                <TextView
+                    android:id="@+id/tvExpiryDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Select Expiry Date"
+                    android:padding="12dp"
+                    android:background="@drawable/edit_text_background"
+                    android:layout_marginBottom="12dp"/>
+
+                <!-- 2. 折扣設定 -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Discount Type" style="@style/SectionTitle"/>
+                <RadioGroup
+                    android:id="@+id/rgDiscountType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rbPercent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Percent" android:checked="true"/>
+                    <RadioButton android:id="@+id/rbCash" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cash"/>
+                    <RadioButton android:id="@+id/rbFree" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Free Item"/>
+                </RadioGroup>
+
+                <EditText
+                    android:id="@+id/etDiscountValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Value (e.g. 10)"
+                    android:inputType="numberDecimal"
+                    style="@style/InputStyle"/>
+
+                <!-- 3. 適用範圍 -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Applicable To" style="@style/SectionTitle"/>
+                <RadioGroup
+                    android:id="@+id/rgAppliesTo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <RadioButton android:id="@+id/rbWhole" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Whole Order" android:checked="true"/>
+                    <RadioButton android:id="@+id/rbCategory" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Specific Category"/>
+                    <RadioButton android:id="@+id/rbItem" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Specific Item"/>
+                    <RadioButton android:id="@+id/rbPackage" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Specific Package"/>
+                </RadioGroup>
+
+                <Button
+                    android:id="@+id/btnSelectScope"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Select Items"
+                    android:visibility="gone"/>
+                <TextView
+                    android:id="@+id/tvSelectedScope"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="None selected"
+                    android:textSize="12sp"
+                    android:textColor="#666"
+                    android:visibility="gone"
+                    android:layout_marginBottom="12dp"/>
+
+                <!-- 4. 規則 -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Rules" style="@style/SectionTitle"/>
+                <CheckBox android:id="@+id/cbMinSpend" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Minimum Spend"/>
+                <EditText android:id="@+id/etMinSpend" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Amount" android:visibility="gone" style="@style/InputStyle"/>
+
+                <CheckBox android:id="@+id/cbMaxDiscount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Max Discount"/>
+                <EditText android:id="@+id/etMaxDiscount" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Amount" android:visibility="gone" style="@style/InputStyle"/>
+
+                <CheckBox android:id="@+id/cbLimit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Usage Limit Per Customer"/>
+                <EditText android:id="@+id/etLimit" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Limit" android:visibility="gone" style="@style/InputStyle"/>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <CheckBox android:id="@+id/cbDineIn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Dine-in" android:checked="true"/>
+                    <CheckBox android:id="@+id/cbTakeaway" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Takeaway" android:checked="true"/>
+                    <CheckBox android:id="@+id/cbDelivery" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Delivery"/>
+                </LinearLayout>
+
+                <CheckBox android:id="@+id/cbCombine" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Combinable with others"/>
+                <CheckBox android:id="@+id/cbBirthday" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Birthday Only"/>
+
+                <!-- 5. 多語言 (卡片式) -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Coupon Details (Multi-Language)" style="@style/SectionTitle" android:layout_marginTop="24dp"/>
+
+                <!-- English -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    app:contentPadding="12dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="English" android:textStyle="bold" android:textColor="#1976D2" android:layout_marginBottom="8dp"/>
+                        <EditText android:id="@+id/etTitleEn" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Title" style="@style/InputStyle" android:layout_marginBottom="8dp"/>
+                        <EditText android:id="@+id/etDescEn" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Description" style="@style/InputStyle" android:layout_marginBottom="0dp"/>
+                        <EditText android:id="@+id/etTermEn" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Terms (Optional)" style="@style/InputStyle" android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Traditional -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    app:contentPadding="12dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="繁體中文" android:textStyle="bold" android:textColor="#00796B" android:layout_marginBottom="8dp"/>
+                        <EditText android:id="@+id/etTitleTw" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="標題" style="@style/InputStyle" android:layout_marginBottom="8dp"/>
+                        <EditText android:id="@+id/etDescTw" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="描述" style="@style/InputStyle" android:layout_marginBottom="0dp"/>
+                        <EditText android:id="@+id/etTermTw" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="條款 (選填)" style="@style/InputStyle" android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Simplified -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    app:contentPadding="12dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="简体中文" android:textStyle="bold" android:textColor="#E64A19" android:layout_marginBottom="8dp"/>
+                        <EditText android:id="@+id/etTitleCn" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="标题" style="@style/InputStyle" android:layout_marginBottom="8dp"/>
+                        <EditText android:id="@+id/etDescCn" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="描述" style="@style/InputStyle" android:layout_marginBottom="0dp"/>
+                        <EditText android:id="@+id/etTermCn" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="条款 (选填)" style="@style/InputStyle" android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <Button
+                    android:id="@+id/btnSubmit"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="Create Coupon"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="50dp"/>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Tab 2: List View -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCouponList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:padding="8dp"
+            android:clipToPadding="false"/>
+
+    </FrameLayout>
+</LinearLayout>

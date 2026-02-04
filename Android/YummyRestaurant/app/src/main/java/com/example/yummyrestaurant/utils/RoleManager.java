@@ -1,5 +1,7 @@
 package com.example.yummyrestaurant.utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.example.yummyrestaurant.models.User;
@@ -8,26 +10,60 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class RoleManager {
+    private static final String TAG = "RoleManager";
+    private static final String PREF_NAME = "RoleManagerPrefs";
+    
+    // SharedPreferences keys
+    private static final String KEY_USER_ID = "userId";
+    private static final String KEY_USER_EMAIL = "userEmail";
+    private static final String KEY_USER_ROLE = "userRole";
+    private static final String KEY_USER_NAME = "userName";
+    private static final String KEY_USER_TEL = "userTel";
+    private static final String KEY_USER_IMAGE_URL = "userImageUrl";
+    private static final String KEY_USER_BIRTHDAY = "userBirthday";
+    private static final String KEY_ASSIGNED_TABLE_NUMBER = "assignedTableNumber";
+    
+    private static Context context;
+    
+    // Initialize RoleManager with context
+    public static void init(Context ctx) {
+        context = ctx.getApplicationContext();
+    }
+    
+    private static SharedPreferences getPrefs() {
+        if (context == null) {
+            Log.e(TAG, "RoleManager not initialized! Call RoleManager.init(context) first");
+            return null;
+        }
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    }
 
     public static User getUser() {
+        String userId = getUserId();
+        String userEmail = getUserEmail();
+        String userName = getUserName();
+        String userTel = getUserTel();
+        
         if (userId == null || userEmail == null || userName == null || userTel == null) {
             return null; // Not logged in or incomplete data
         }
         return new User(userId, userName, userEmail, userTel);
     }
 
-
-    private static String userBirthday; // format: "MM-DD"
-
     public static String getUserBirthday() {
-        return userBirthday;
+        SharedPreferences prefs = getPrefs();
+        return prefs != null ? prefs.getString(KEY_USER_BIRTHDAY, null) : null;
     }
 
     public static void setUserBirthday(String birthday) {
-        userBirthday = birthday; // store as MM-DD
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            prefs.edit().putString(KEY_USER_BIRTHDAY, birthday).apply();
+        }
     }
 
     public static boolean isTodayUserBirthday() {
+        String userBirthday = getUserBirthday();
         if (userBirthday == null || userBirthday.isEmpty()) return false;
 
         try {
@@ -46,129 +82,135 @@ public class RoleManager {
             return false;
         }
     }
-    private static final String TAG = "RoleManager";
-
-    private static String userId;
-    private static String userEmail;
-    private static String userRole;
-    private static String userName;
-    private static String userTel;
-    private static Integer assignedTableNumber; // For staff use
-    private static String userImageUrl;
 
     public static String getUserId() {
+        SharedPreferences prefs = getPrefs();
+        String userId = prefs != null ? prefs.getString(KEY_USER_ID, null) : null;
         Log.d(TAG, "getUserId: " + userId);
         return userId;
     }
 
     public static void setUserId(String userId) {
         Log.d(TAG, "setUserId: " + userId);
-        RoleManager.userId = userId;
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            prefs.edit().putString(KEY_USER_ID, userId).apply();
+        }
     }
 
     public static String getUserEmail() {
+        SharedPreferences prefs = getPrefs();
+        String userEmail = prefs != null ? prefs.getString(KEY_USER_EMAIL, null) : null;
         Log.d(TAG, "getUserEmail: " + userEmail);
         return userEmail;
     }
 
     public static void setUserEmail(String userEmail) {
         Log.d(TAG, "setUserEmail: " + userEmail);
-        RoleManager.userEmail = userEmail;
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            prefs.edit().putString(KEY_USER_EMAIL, userEmail).apply();
+        }
     }
 
     public static String getUserRole() {
+        SharedPreferences prefs = getPrefs();
+        String userRole = prefs != null ? prefs.getString(KEY_USER_ROLE, null) : null;
         Log.d(TAG, "getUserRole: " + userRole);
         return userRole;
     }
 
     public static void setUserRole(String userRole) {
         Log.d(TAG, "setUserRole: " + userRole);
-        RoleManager.userRole = userRole;
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            prefs.edit().putString(KEY_USER_ROLE, userRole).apply();
+        }
     }
 
     public static String getUserName() {
+        SharedPreferences prefs = getPrefs();
+        String userName = prefs != null ? prefs.getString(KEY_USER_NAME, null) : null;
         Log.d(TAG, "getUserName: " + userName);
         return userName;
     }
 
     public static void setUserName(String userName) {
         Log.d(TAG, "setUserName: " + userName);
-        RoleManager.userName = userName;
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            prefs.edit().putString(KEY_USER_NAME, userName).apply();
+        }
     }
 
     public static String getUserTel() {
+        SharedPreferences prefs = getPrefs();
+        String userTel = prefs != null ? prefs.getString(KEY_USER_TEL, null) : null;
         Log.d(TAG, "getUserTel: " + userTel);
         return userTel;
     }
 
     public static void setUserTel(String userTel) {
         Log.d(TAG, "setUserTel: " + userTel);
-        RoleManager.userTel = userTel;
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            prefs.edit().putString(KEY_USER_TEL, userTel).apply();
+        }
+    }
+
+    public static String getUserImageUrl() {
+        SharedPreferences prefs = getPrefs();
+        return prefs != null ? prefs.getString(KEY_USER_IMAGE_URL, null) : null;
+    }
+
+    public static void setUserImageUrl(String userImageUrl) {
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            prefs.edit().putString(KEY_USER_IMAGE_URL, userImageUrl).apply();
+        }
+    }
+
+    public static Integer getAssignedTableNumber() {
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null && prefs.contains(KEY_ASSIGNED_TABLE_NUMBER)) {
+            return prefs.getInt(KEY_ASSIGNED_TABLE_NUMBER, -1);
+        }
+        return null;
+    }
+
+    public static void setAssignedTableNumber(Integer tableNumber) {
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            if (tableNumber != null) {
+                prefs.edit().putInt(KEY_ASSIGNED_TABLE_NUMBER, tableNumber).apply();
+            } else {
+                prefs.edit().remove(KEY_ASSIGNED_TABLE_NUMBER).apply();
+            }
+        }
+    }
+
+    // Legacy method for compatibility
+    public static void setAssignedTable(int tableNumber) {
+        setAssignedTableNumber(tableNumber);
+    }
+
+    // Legacy method for compatibility
+    public static Integer getAssignedTable() {
+        return getAssignedTableNumber();
+    }
+
+    public static boolean isStaff() {
+        String role = getUserRole();
+        boolean result = "staff".equalsIgnoreCase(role);
+        Log.d(TAG, "isStaff: " + result + " (role: " + role + ")");
+        return result;
     }
 
     public static void clearUserData() {
         Log.d(TAG, "clearUserData: Resetting all user fields");
-        userId = null;
-        userEmail = null;
-        userRole = null;
-        userName = null;
-        userTel = null;
-        assignedTableNumber = null;
-        userImageUrl = null;
-        userBirthday = null;
-    }
-
-    public static boolean isStaff() {
-        boolean result = "staff".equalsIgnoreCase(userRole);
-        Log.d(TAG, "isStaff: " + result);
-        return result;
-    }
-
-    public static void setAssignedTable(int tableNumber) {
-        Log.d(TAG, "setAssignedTable: " + tableNumber);
-        RoleManager.assignedTableNumber = tableNumber;
-    }
-
-    public static Integer getAssignedTable() {
-        Log.d(TAG, "getAssignedTable: " + assignedTableNumber);
-        return assignedTableNumber;
-    }
-
-    public static boolean hasAssignedTable() {
-        boolean result = assignedTableNumber != null;
-        Log.d(TAG, "hasAssignedTable: " + result);
-        return result;
-    }
-
-    public static String getUserImageUrl() {
-        // Return the stored URL as-is, don't concatenate again
-        return userImageUrl;
-    }
-
-    public static void setUserImageUrl(String imagePathOrFileName) {
-        if (imagePathOrFileName == null || imagePathOrFileName.isEmpty()) {
-            userImageUrl = null;
-            return;
+        SharedPreferences prefs = getPrefs();
+        if (prefs != null) {
+            prefs.edit().clear().apply();
         }
-
-        // ✅ If it's a full GitHub URL, store it directly
-        if (imagePathOrFileName.startsWith("http://") || imagePathOrFileName.startsWith("https://")) {
-            userImageUrl = imagePathOrFileName;
-        }
-        // ✅ If it's a raw filename, prepend local folder
-        else if (!imagePathOrFileName.contains("Image/Profile_image")) {
-            if ("staff".equals(userRole)) {
-                userImageUrl = "../Image/Profile_image/Staff/" + imagePathOrFileName;
-            } else {
-                userImageUrl = "../Image/Profile_image/Customer/" + imagePathOrFileName;
-            }
-        }
-        // ✅ Already a relative path
-        else {
-            userImageUrl = imagePathOrFileName;
-        }
-
-        Log.d(TAG, "setUserImageUrl: stored=" + userImageUrl);
     }
-
 }

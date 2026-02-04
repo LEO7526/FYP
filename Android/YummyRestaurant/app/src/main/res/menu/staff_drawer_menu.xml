@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <!-- 🍳 廚房管理 -->
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_orders"
+            android:icon="@drawable/ic_kitchen"
+            android:title="🍳 Kitchen Orders" />
+        <item
+            android:id="@+id/nav_tables"
+            android:icon="@drawable/ic_table"
+            android:title="🪑 Table Management" />
+        <item
+            android:id="@+id/nav_cash_payment"
+            android:icon="@drawable/ic_coupon"
+            android:title="💰 Cash Payment Management" />
+    </group>
+
+    <item android:title="📝 Content Management">
+        <menu>
+            <item
+                android:id="@+id/nav_create_dish"
+                android:icon="@drawable/ic_add_dish"
+                android:title="🍜 Create Dish" />
+            <item
+                android:id="@+id/nav_create_material"
+                android:icon="@drawable/ic_add_material"
+                android:title="🥬 Create Material" />
+            <item
+                android:id="@+id/nav_create_coupon"
+                android:icon="@drawable/ic_coupon"
+                android:title="🎫 Create Coupon" />
+        </menu>
+    </item>
+
+    <item android:title="📦 Inventory System">
+        <menu>
+            <item
+                android:id="@+id/nav_inventory_system"
+                android:icon="@drawable/ic_inventory"
+                android:title="📦 Inventory Management" />
+            <item
+                android:id="@+id/nav_inventory_history"
+                android:icon="@drawable/ic_history"
+                android:title="📊 Inventory History" />
+        </menu>
+    </item>
+
+    <item android:title="🔧 System">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_logout"
+                android:title="🚪 Logout" />
+        </menu>
+    </item>
+
+</menu>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 🍳 廚房管理 -->
+    <group android:id="@+id/kitchen_group">
+        <item
+            android:id="@+id/nav_orders"
+            android:title="🍳 Kitchen / Orders"
+            android:icon="@drawable/ic_kitchen" />
+        <item
+            android:id="@+id/nav_tables"
+            android:title="🪑 Table Management"
+            android:icon="@drawable/ic_table" />
+    </group>
+    
+    <!-- 📝 內容管理 -->
+    <group android:id="@+id/content_group">
+        <item
+            android:id="@+id/nav_create_dish"
+            android:title="🍜 Create Dish"
+            android:icon="@drawable/ic_add_dish" />
+        <item
+            android:id="@+id/nav_create_material" 
+            android:title="🥬 Create Material"
+            android:icon="@drawable/ic_add_material" />
+        <item
+            android:id="@+id/nav_create_coupon"
+            android:title="🎫 Create Coupon"
+            android:icon="@drawable/ic_coupon" />
+    </group>
+
+    <!-- 📦 庫存系統 -->
+    <group android:id="@+id/inventory_group">
+        <item
+            android:id="@+id/nav_inventory_system"
+            android:title="📦 Inventory Management"
+            android:icon="@drawable/ic_inventory" />
+        <item
+            android:id="@+id/nav_inventory_history"
+            android:title="📊 Inventory History"
+            android:icon="@drawable/ic_history" />
+    </group>
+    
+    <!-- 🚪 系統 -->
+    <group android:id="@+id/system_group">
+        <item
+            android:id="@+id/nav_logout"
+            android:title="🚪 Logout"
+            android:icon="@drawable/ic_logout" />
+    </group>
+</menu>

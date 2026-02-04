@@ -73,6 +73,31 @@ dependencies {
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    // ============================================
+    // Staff App Dependencies
+    // ============================================
+    
+    // Volley for staff API calls
+    implementation("com.android.volley:volley:1.2.1")
+    
+    // SwipeRefreshLayout for pull-to-refresh functionality
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    // CameraX for QR Code scanning in inventory system
+    implementation("androidx.camera:camera-core:1.3.1")
+    implementation("androidx.camera:camera-camera2:1.3.1")
+    implementation("androidx.camera:camera-lifecycle:1.3.1")
+    implementation("androidx.camera:camera-view:1.3.1")
+
+    // ML Kit for barcode scanning
+    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+
+    // ViewPager2 for inventory tabs
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+
+    // Background tasks for inventory system
+    implementation("androidx.work:work-runtime:2.9.0")
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

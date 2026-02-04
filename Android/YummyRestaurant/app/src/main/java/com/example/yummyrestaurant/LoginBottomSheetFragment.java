@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.activities.BrowseMenuActivity;
 import com.example.yummyrestaurant.activities.RegisterActivity;
+import com.example.yummyrestaurant.activities.StaffOrdersActivity;
 import com.example.yummyrestaurant.api.LoginCustomerApi;
 import com.example.yummyrestaurant.api.LoginStaffApi;
 import com.example.yummyrestaurant.api.LoginResponse;
@@ -217,9 +218,25 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         // set login to true
         BrowseMenuActivity.setLogin(true);
 
-        // Notify parent activity
-        if (loginListener != null) {
-            loginListener.onLoginResult(true);
+        // 🔥 ADD ROLE-BASED NAVIGATION LOGIC
+        String userRole = RoleManager.getUserRole();
+        android.util.Log.d("YummyApp", "=== BOTTOM SHEET NAVIGATION ===");
+        android.util.Log.d("YummyApp", "User role: " + userRole);
+        
+        if ("staff".equals(userRole)) {
+            android.util.Log.d("YummyApp", "🍳 STAFF DETECTED! Redirecting to StaffOrdersActivity");
+            Intent intent = new Intent(getActivity(), StaffOrdersActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            if (getActivity() != null) {
+                getActivity().finish();
+            }
+        } else {
+            android.util.Log.d("YummyApp", "👤 CUSTOMER DETECTED! Using normal flow");
+            // Notify parent activity for customer flow
+            if (loginListener != null) {
+                loginListener.onLoginResult(true);
+            }
         }
 
         dismiss();

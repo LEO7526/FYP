@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import com.example.yummyrestaurant.activities.CustomerHomeActivity;
 import com.example.yummyrestaurant.activities.DashboardActivity;
 import com.example.yummyrestaurant.activities.LoginActivity;
+import com.example.yummyrestaurant.activities.StaffOrdersActivity;
 import com.example.yummyrestaurant.api.ApiConfig;
 import com.example.yummyrestaurant.utils.RoleManager;
 
@@ -24,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Initialize RoleManager
+        RoleManager.init(this);
 
         // 🚀 自動偵測環境（模擬器 vs 真實手機）
         ApiConfig.autoDetectEnvironment(this);
@@ -44,20 +48,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleUserLogin() {
+        // Initialize RoleManager first
+        RoleManager.init(this);
+        
         // Retrieve user role from RoleManager (assumes it's saved during login)
         String userRole = RoleManager.getUserRole();
+        String userName = RoleManager.getUserName();
+        String userId = RoleManager.getUserId();
+        
+        android.util.Log.d("MainActivity", "=== LOGIN CHECK ===");
+        android.util.Log.d("MainActivity", "User Role: " + userRole);
+        android.util.Log.d("MainActivity", "User Name: " + userName);
+        android.util.Log.d("MainActivity", "User ID: " + userId);
+        android.util.Log.d("MainActivity", "Is Staff: " + RoleManager.isStaff());
 
         if (userRole != null) {
+            android.util.Log.d("MainActivity", "User is logged in, checking role...");
             if ("staff".equals(userRole)) {
-                // If user is staff, navigate to DashboardActivity
-                startActivity(new Intent(MainActivity.this, DashboardActivity.class));
+                android.util.Log.d("MainActivity", "🎯 STAFF DETECTED! Navigating to StaffOrdersActivity");
+                // If user is staff, navigate to StaffOrdersActivity
+                startActivity(new Intent(MainActivity.this, StaffOrdersActivity.class));
             } else {
-                // If user is not staff, navigate to ProductListActivity
+                android.util.Log.d("MainActivity", "Customer detected, navigating to CustomerHomeActivity");
+                // If user is not staff, navigate to CustomerHomeActivity
                 startActivity(new Intent(MainActivity.this, CustomerHomeActivity.class));
             }
             // Close MainActivity to prevent returning to it
             finish();
         } else {
+            android.util.Log.d("MainActivity", "No user logged in, defaulting to customer interface");
             // If user is not logged in, assume it is a customer
             startActivity(new Intent(this, CustomerHomeActivity.class));
             // Close MainActivity to prevent returning to it

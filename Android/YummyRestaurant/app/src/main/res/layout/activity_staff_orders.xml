@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:openDrawer="start">
+
+    <!-- Main Content -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F5F5F5">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:theme="@style/Theme.AppCompat.Light">
+
+            <!-- Top Bar (模仿顧客端的風格) -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <!-- Hamburger Menu Button -->
+                <ImageView
+                    android:id="@+id/hamburger_menu"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_menu"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    app:tint="@color/primary_text"
+                    android:contentDescription="Menu" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kitchen / Orders"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_text"
+                    android:layout_centerInParent="true"/>
+
+                <!-- Staff Info or Notification -->
+                <ImageView
+                    android:id="@+id/staffSettingsIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_notifications"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    app:tint="@color/primary_text"/>
+            </RelativeLayout>
+
+            <!-- Tabs 標籤頁 (新訂單/製作中/完成) -->
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/orderTabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabIndicatorColor="@color/colorPrimary"
+                app:tabSelectedTextColor="@color/colorPrimary"
+                app:tabTextColor="@color/hint_text">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="New (5)" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cooking" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Delivered" />
+
+            </com.google.android.material.tabs.TabLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- 訂單列表 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/ordersRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:padding="8dp"
+            android:clipToPadding="false"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_staff"
+        app:menu="@menu/staff_drawer_menu" />
+
+</androidx.drawerlayout.widget.DrawerLayout>
