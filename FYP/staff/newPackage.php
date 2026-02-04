@@ -204,23 +204,53 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
     `;
 
         typesContainer.appendChild(typeDiv);
+
+        const optionalQuantityInput = typeDiv.querySelector('input[name*="optional_quantity"]');
+        optionalQuantityInput.addEventListener('change', function() {
+            const dishesList = typeDiv.querySelector('.dishes-list');
+            if (dishesList && dishesList.querySelectorAll('.selected-dish-item').length > 0) {
+                const listId = dishesList.id;
+                const match = listId.match(/dishes-list-(\d+)/);
+                if (match) {
+                    const index = parseInt(match[1]);
+                    updateTypePriceModifiers(index);
+                }
+            }
+        });
     }
 
     function removeType(button) {
         const typeSection = button.closest('.type-section');
         typeSection.remove();
-        // Re-index remaining types
-        const types = document.querySelectorAll('.type-section');
-        types.forEach((type, index) => {
-            // Update the optional quantity group label if needed
-            const optionalLabel = type.querySelector('.optional-quantity-group label');
-            if (optionalLabel) {
-                optionalLabel.textContent = 'Optional Quantity:';
-            }
-        });
+
+        reindexTypes();
         updatePresetPrice();
     }
+    function reindexTypes() {
+        const typeSections = document.querySelectorAll('.type-section');
 
+        typeSections.forEach((typeSection, newIndex) => {
+            const inputs = typeSection.querySelectorAll('input');
+            inputs.forEach(input => {
+                const oldName = input.name;
+                const match = oldName.match(/types\[(\d+)\]\[(\w+)\]/);
+                if (match) {
+                    const fieldName = match[2];
+                    input.name = `types[${newIndex}][${fieldName}]`;
+                }
+            });
+
+            const addDishBtn = typeSection.querySelector('.btn-add-dish');
+            if (addDishBtn) {
+                addDishBtn.setAttribute('onclick', `openDishModal(${newIndex})`);
+            }
+
+            const dishesList = typeSection.querySelector('.dishes-list');
+            if (dishesList) {
+                dishesList.id = `dishes-list-${newIndex}`;
+            }
+        });
+    }
     // Modal functionality
     let currentModalTypeIndex = null;
 
@@ -318,50 +348,56 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
 
         if (dishItems.length === 0) return;
 
-        // Find the minimum price in this type
-        let minPrice = Infinity;
-        dishItems.forEach(dishItem => {
-            const price = parseFloat(dishItem.getAttribute('data-item-price'));
-            if (price < minPrice) {
-                minPrice = price;
-            }
+        const typeSection = dishesList.closest('.type-section');
+        const optionalQuantityInput = typeSection.querySelector('input[name*="optional_quantity"]');
+        let optionalQuantity = parseInt(optionalQuantityInput.value) || 1;
+
+        if (optionalQuantity > dishItems.length) {
+            optionalQuantity = dishItems.length;
+        }
+
+        const dishData = Array.from(dishItems).map(dishItem => {
+            return {
+                element: dishItem,
+                price: parseFloat(dishItem.getAttribute('data-item-price')),
+                id: dishItem.getAttribute('data-item-id')
+            };
         });
 
-        // Update price modifiers for all dishes
-        dishItems.forEach(dishItem => {
-            const price = parseFloat(dishItem.getAttribute('data-item-price'));
-            const priceInput = dishItem.querySelector('.price-modifier-input');
+        dishData.sort((a, b) => a.price - b.price);
 
-            // Check if this dish has the minimum price
-            if (price === minPrice) {
-                // All dishes with minimum price: set to 0 and lock
+        let basePrice = 0;
+        if (dishData.length > 0) {
+            if (optionalQuantity <= dishData.length) {
+                basePrice = dishData[optionalQuantity - 1].price;
+            } else {
+                basePrice = dishData[dishData.length - 1].price;
+            }
+        }
+
+        dishData.forEach((dish, index) => {
+            const priceInput = dish.element.querySelector('.price-modifier-input');
+
+            if (index < optionalQuantity) {
                 priceInput.value = 0;
                 priceInput.readOnly = true;
                 priceInput.style.backgroundColor = '#f0f0f0';
             } else {
-                // Other dishes: set to price difference and allow editing
-                const priceDifference = price - minPrice;
+                const priceDifference = dish.price - basePrice;
                 priceInput.value = priceDifference.toFixed(2);
                 priceInput.readOnly = false;
                 priceInput.style.backgroundColor = '';
 
-                // Add event listener to update preset price when user modifies price
                 priceInput.oninput = updatePresetPrice;
             }
         });
 
-        // Sort by price: lowest price on the left
-        const sortedDishes = Array.from(dishItems).sort((a, b) => {
-            const priceA = parseFloat(a.getAttribute('data-item-price'));
-            const priceB = parseFloat(b.getAttribute('data-item-price'));
-            return priceA - priceB;
-        });
+        const sortedDishes = dishData.sort((a, b) => a.price - b.price);
 
-        // Clear and re-add in sorted order
         while (dishesList.firstChild) {
             dishesList.removeChild(dishesList.firstChild);
         }
-        sortedDishes.forEach(dish => dishesList.appendChild(dish));
+        sortedDishes.forEach(dish => dishesList.appendChild(dish.element));
     }
 
     function removeDish(button) {
@@ -371,7 +407,6 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
 
         dishItem.remove();
 
-        // Update price modifiers for this type
         updateTypePriceModifiers(typeIndex);
         updatePresetPrice();
     }
@@ -387,23 +422,23 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
             const dishItems = dishesList.querySelectorAll('.selected-dish-item');
             if (dishItems.length === 0) return;
 
-            // Find the lowest price dish in this type
-            let minPrice = Infinity;
-            dishItems.forEach(dishItem => {
-                const price = parseFloat(dishItem.getAttribute('data-item-price'));
-                if (price < minPrice) {
-                    minPrice = price;
-                }
-            });
+            const optionalQuantityInput = typeSection.querySelector('input[name*="optional_quantity"]');
+            let optionalQuantity = parseInt(optionalQuantityInput.value) || 1;
 
-            totalPrice += minPrice;
+            if (optionalQuantity > dishItems.length) {
+                optionalQuantity = dishItems.length;
+            }
+
+            const prices = Array.from(dishItems).map(dishItem => {
+                return parseFloat(dishItem.getAttribute('data-item-price'));
+            }).sort((a, b) => a - b);
+
+            for (let i = 0; i < optionalQuantity; i++) {
+                totalPrice += prices[i];
+            }
         });
 
-        // Update preset price display
         document.getElementById('presetPriceDisplay').textContent = totalPrice.toFixed(2);
-
-        // Note: Amount (HKD) field is not automatically updated
-        // to allow manual control of the final package price
     }
 
     // Close modal when clicking X
@@ -448,11 +483,11 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
         const types = [];
 
         // Collect type data
-        document.querySelectorAll('.type-section').forEach((typeSection, index) => {
-            const nameEnInput = typeSection.querySelector(`input[name="types[${index}][name_en]"]`);
-            const nameZhCnInput = typeSection.querySelector(`input[name="types[${index}][name_zh_cn]"]`);
-            const nameZhTwInput = typeSection.querySelector(`input[name="types[${index}][name_zh_tw]"]`);
-            const optionalQuantityInput = typeSection.querySelector(`input[name="types[${index}][optional_quantity]"]`);
+        document.querySelectorAll('.type-section').forEach((typeSection) => {
+            const nameEnInput = typeSection.querySelector('input[name*="name_en"]');
+            const nameZhCnInput = typeSection.querySelector('input[name*="name_zh_cn"]');
+            const nameZhTwInput = typeSection.querySelector('input[name*="name_zh_tw"]');
+            const optionalQuantityInput = typeSection.querySelector('input[name*="optional_quantity"]');
 
             // Check if inputs exist (in case of dynamic removal)
             if (!nameEnInput || !nameZhCnInput || !nameZhTwInput || !optionalQuantityInput) return;
@@ -477,6 +512,7 @@ while ($row = mysqli_fetch_assoc($menuResult)) {
                     price_modifier: priceModifier
                 });
             });
+
 
             types.push(typeData);
         });
