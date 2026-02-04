@@ -1,0 +1,28 @@
+-- =================================================================
+-- 新增5種材料
+-- =================================================================
+
+START TRANSACTION;
+
+-- 新增5種材料
+-- 材料1: 辣椒粉 (Chili Powder) - 庫存低於重新訂購水平
+-- 材料2: 大蒜 (Garlic) - 庫存正常
+-- 材料3: 生薑 (Ginger) - 庫存低於重新訂購水平
+-- 材料4: 醬油 (Soy Sauce) - 庫存正常
+-- 材料5: 米醋 (Rice Vinegar) - 庫存正常
+
+INSERT INTO materials (mname, category_id, unit, mqty, reorderLevel) VALUES
+('Chili Powder', 3, 'grams', 80.00, 100.00),      -- 庫存80g，低於重新訂購水平100g
+('Garlic', 1, 'grams', 800.00, 300.00),           -- 庫存800g，高於重新訂購水平300g
+('Ginger', 1, 'grams', 60.00, 150.00),            -- 庫存60g，低於重新訂購水平150g
+('Soy Sauce', 3, 'ml', 1200.00, 500.00),          -- 庫存1200ml，高於重新訂購水平500ml
+('Rice Vinegar', 3, 'ml', 900.00, 400.00);        -- 庫存900ml，高於重新訂購水平400ml
+
+-- 新增材料分類（如果需要）
+-- 檢查是否已有這些分類，如果沒有則插入
+INSERT IGNORE INTO materials_category (category_name) VALUES
+('Spice'),
+('Vegetable'),
+('Sauce');
+
+COMMIT;
