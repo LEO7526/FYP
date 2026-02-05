@@ -976,7 +976,288 @@ INSERT INTO recipe_materials (item_id, mid, quantity) VALUES
 (21, 17, 50);                               -- Potato Starch
 -- Note: Wooden Chopsticks (item_id: 22) has no recipe - directly purchased
 
+INSERT INTO customer (cname, cpassword, ctel, caddr, company, cemail, cbirthday, crole, cimageurl, coupon_point) VALUES
+('David Chan', 'password123', 91234567, '30 Canton Road, Tsim Sha Tsui, Kowloon, Hong Kong', 'Eastern Trading Company', 'david.chan@example.com', '05-18', 'customer', NULL, 0),
+('Mary Li', 'meiling2025', 92345678, '12/F, Tower 1, Times Square, Causeway Bay, Hong Kong', 'MayLin Design Studio', 'mary.li@example.com', '08-22', 'customer', NULL, 0),
+('John Zhang', 'zhangwq789', 93456789, '88 Des Voeux Road Central, Central, Hong Kong', 'StrongTech Solutions', 'john.zhang@example.com', '11-05', 'customer', NULL, 0),
+('Sarah Wang', 'xiaowen888', 94567890, '200 Hennessy Road, Wan Chai, Hong Kong', 'Creative Culture Media', 'sarah.wang@example.com', '02-14', 'customer', NULL, 0),
+('Kevin Liu', 'liujiahui66', 95678901, '55 Hoi Yuen Road, Kwun Tong, Hong Kong', 'Kevin Logistics Ltd.', 'kevin.liu@example.com', '09-30', 'customer', NULL, 0),
+('Michael Wong', 'wongchiwai99', 96789012, 'Shop 238, New Town Plaza Phase 1, Sha Tin, Hong Kong', 'Michael Engineering Consultants', 'michael.wong@example.com', '12-25', 'customer', NULL, 0),
+('Susan Lam', 'lamsauman77', 97890123, '398 Castle Peak Road, Tsuen Wan, Hong Kong', 'Susan Fashion Boutique', 'susan.lam@example.com', '07-08', 'customer', NULL, 0);
 
+INSERT INTO materials (mname, category_id, unit, mqty, reorderLevel) VALUES
+('Chili Powder', 3, 'grams', 80.00, 100.00),      -- 庫存80g，低於重新訂購水平100g
+('Garlic', 1, 'grams', 800.00, 300.00),           -- 庫存800g，高於重新訂購水平300g
+('Ginger', 1, 'grams', 60.00, 150.00),            -- 庫存60g，低於重新訂購水平150g
+('Soy Sauce', 3, 'ml', 1200.00, 500.00),          -- 庫存1200ml，高於重新訂購水平500ml
+('Rice Vinegar', 3, 'ml', 900.00, 400.00);        -- 庫存900ml，高於重新訂購水平400ml
+
+-- 新增材料分類（如果需要）
+-- 檢查是否已有這些分類，如果沒有則插入
+INSERT IGNORE INTO materials_category (category_name) VALUES
+('Spice'),
+('Vegetable'),
+('Sauce');
+
+-- 新增5份Appetizers (category_id=1)
+INSERT INTO menu_item (category_id, item_price, image_url, spice_level, is_available) VALUES
+(1, 32.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/23.jpg', 2, TRUE),
+(1, 30.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/24.jpg', 1, TRUE),
+(1, 35.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/25.jpg', 3, TRUE),
+(1, 28.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/26.jpg', 0, TRUE),
+(1, 34.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/27.jpg', 2, TRUE);
+
+-- 新增3份Soup (category_id=2)
+INSERT INTO menu_item (category_id, item_price, image_url, spice_level, is_available) VALUES
+(2, 52.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/28.jpg', 1, TRUE),
+(2, 56.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/29.jpg', 2, TRUE),
+(2, 48.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/30.jpg', 0, TRUE);
+
+-- 新增3份Dessert (category_id=4)
+INSERT INTO menu_item (category_id, item_price, image_url, spice_level, is_available) VALUES
+(4, 25.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/31.jpg', 0, TRUE),
+(4, 28.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/32.jpg', 0, TRUE),
+(4, 30.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/33.jpg', 0, TRUE);
+
+-- 新增5份Main Courses (category_id=3)
+INSERT INTO menu_item (category_id, item_price, image_url, spice_level, is_available) VALUES
+(3, 98.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/34.jpg', 4, TRUE),
+(3, 85.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/35.jpg', 3, TRUE),
+(3, 92.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/36.jpg', 5, TRUE),
+(3, 78.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/37.jpg', 2, TRUE),
+(3, 88.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/38.jpg', 3, TRUE);
+
+-- 新增3份Drink (category_id=5)
+INSERT INTO menu_item (category_id, item_price, image_url, spice_level, is_available) VALUES
+(5, 28.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/39.jpg', 0, TRUE),
+(5, 24.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/40.jpg', 0, TRUE),
+(5, 30.00, 'https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/41.jpg', 0, TRUE);
+
+-- =================================================================
+-- 新增菜餚的多語言翻譯
+-- =================================================================
+
+-- 開胃菜 (Appetizers) 翻譯
+-- Item 23
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(23, 'en', 'Crispy Lotus Root', 'Thinly sliced lotus root, deep-fried to perfection with a hint of sesame oil.'),
+(23, 'zh-CN', '香脆藕片', '薄切藕片，炸至金黄酥脆，带有芝麻油香气。'),
+(23, 'zh-TW', '香脆藕片', '薄切藕片，炸至金黃酥脆，帶有芝麻油香氣。');
+
+-- Item 24
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(24, 'en', 'Spicy Jellyfish', 'Marinated jellyfish with chili oil and sesame, crispy and refreshing.'),
+(24, 'zh-CN', '麻辣海蜇', '用辣油和芝麻腌制的海蜇，爽脆开胃。'),
+(24, 'zh-TW', '麻辣海蜇', '用辣油和芝麻醃製的海蜇，爽脆開胃。');
+
+-- Item 25
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(25, 'en', 'Garlic Edamame', 'Fresh edamame pods tossed in garlic butter and sea salt.'),
+(25, 'zh-CN', '蒜香毛豆', '新鲜毛豆拌入蒜香黄油和海盐，香气扑鼻。'),
+(25, 'zh-TW', '蒜香毛豆', '新鮮毛豆拌入蒜香奶油和海鹽，香氣撲鼻。');
+
+-- Item 26
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(26, 'en', 'Vegetable Spring Rolls', 'Crispy spring rolls filled with fresh vegetables and glass noodles.'),
+(26, 'zh-CN', '蔬菜春卷', '外皮酥脆，内馅是新鲜蔬菜和粉丝。'),
+(26, 'zh-TW', '蔬菜春捲', '外皮酥脆，內餡是新鮮蔬菜和粉絲。');
+
+-- Item 27
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(27, 'en', 'Sichuan Peanuts', 'Spicy peanuts stir-fried with Sichuan peppercorns and chili flakes.'),
+(27, 'zh-CN', '四川辣花生', '用四川花椒和辣椒片炒制的辣味花生。'),
+(27, 'zh-TW', '四川辣花生', '用四川花椒和辣椒片炒製的辣味花生。');
+
+-- 湯品 (Soup) 翻譯
+-- Item 28
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(28, 'en', 'Hot & Sour Soup', 'Classic Sichuan hot and sour soup with tofu, mushrooms, and bamboo shoots.'),
+(28, 'zh-CN', '酸辣汤', '经典的四川酸辣汤，内有豆腐、蘑菇和竹笋。'),
+(28, 'zh-TW', '酸辣湯', '經典的四川酸辣湯，內有豆腐、蘑菇和竹筍。');
+
+-- Item 29
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(29, 'en', 'Winter Melon Soup', 'Light and clear winter melon soup with goji berries and chicken broth.'),
+(29, 'zh-CN', '冬瓜汤', '清淡的冬瓜汤，加入枸杞和鸡汤。'),
+(29, 'zh-TW', '冬瓜湯', '清淡的冬瓜湯，加入枸杞和雞湯。');
+
+-- Item 30
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(30, 'en', 'Corn and Crab Meat Soup', 'Creamy corn soup with fresh crab meat and egg white.'),
+(30, 'zh-CN', '玉米蟹肉汤', '奶油玉米汤加入新鲜蟹肉和蛋白。'),
+(30, 'zh-TW', '玉米蟹肉湯', '奶油玉米湯加入新鮮蟹肉和蛋白。');
+
+-- 甜品 (Dessert) 翻譯
+-- Item 31
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(31, 'en', 'Mango Pudding', 'Fresh mango pudding topped with condensed milk and mango chunks.'),
+(31, 'zh-CN', '芒果布丁', '新鲜芒果布丁，淋上炼乳和芒果块。'),
+(31, 'zh-TW', '芒果布丁', '新鮮芒果布丁，淋上煉乳和芒果塊。');
+
+-- Item 32
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(32, 'en', 'Sesame Balls', 'Deep-fried glutinous rice balls filled with sweet red bean paste.'),
+(32, 'zh-CN', '芝麻球', '油炸糯米球，内馅是甜红豆沙。'),
+(32, 'zh-TW', '芝麻球', '油炸糯米球，內餡是甜紅豆沙。');
+
+-- Item 33
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(33, 'en', 'Egg Tart', 'Classic Hong Kong-style egg tarts with flaky pastry.'),
+(33, 'zh-CN', '蛋挞', '经典港式蛋挞，外皮酥脆。'),
+(33, 'zh-TW', '蛋撻', '經典港式蛋撻，外皮酥脆。');
+
+-- 主菜 (Main Courses) 翻譯
+-- Item 34
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(34, 'en', 'Kung Pao Chicken', 'Diced chicken stir-fried with peanuts, chili, and Sichuan peppercorns.'),
+(34, 'zh-CN', '宫保鸡丁', '鸡肉丁炒花生、辣椒和四川花椒。'),
+(34, 'zh-TW', '宮保雞丁', '雞肉丁炒花生、辣椒和四川花椒。');
+
+-- Item 35
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(35, 'en', 'Sweet & Sour Pork', 'Crispy pork pieces in tangy sweet and sour sauce with pineapple.'),
+(35, 'zh-CN', '糖醋里脊', '酥脆的猪肉块裹上酸甜酱汁，配菠萝。'),
+(35, 'zh-TW', '糖醋里脊', '酥脆的豬肉塊裹上酸甜醬汁，配鳳梨。');
+
+-- Item 36
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(36, 'en', 'Sichuan Dry Pot with Seafood', 'Assorted seafood cooked in a spicy dry pot with vegetables.'),
+(36, 'zh-CN', '四川海鲜干锅', '多种海鲜与蔬菜在麻辣干锅中烹制。'),
+(36, 'zh-TW', '四川海鮮乾鍋', '多種海鮮與蔬菜在麻辣乾鍋中烹製。');
+
+-- Item 37
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(37, 'en', 'Braised Pork Belly', 'Pork belly braised in soy sauce and spices until tender.'),
+(37, 'zh-CN', '红烧肉', '五花肉用酱油和香料炖煮至软嫩。'),
+(37, 'zh-TW', '紅燒肉', '五花肉用醬油和香料燉煮至軟嫩。');
+
+-- Item 38
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(38, 'en', 'Lemon Chicken', 'Crispy chicken with lemon sauce, sweet and tangy.'),
+(38, 'zh-CN', '柠檬鸡', '酥脆鸡肉配柠檬酱，酸甜可口。'),
+(38, 'zh-TW', '檸檬雞', '酥脆雞肉配檸檬醬，酸甜可口。');
+
+-- 飲料 (Drink) 翻譯
+-- Item 39
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(39, 'en', 'Iced Honey Lemon', 'Refreshing iced drink with honey and fresh lemon slices.'),
+(39, 'zh-CN', '冰蜂蜜柠檬', '蜂蜜和新鲜柠檬片制成的冰镇饮品。'),
+(39, 'zh-TW', '冰蜂蜜檸檬', '蜂蜜和新鮮檸檬片製成的冰鎮飲品。');
+
+-- Item 40
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(40, 'en', 'Peach Oolong Tea', 'Oolong tea infused with peach flavor, served hot or cold.'),
+(40, 'zh-CN', '蜜桃乌龙茶', '带有蜜桃香气的乌龙茶，可热可冰。'),
+(40, 'zh-TW', '蜜桃烏龍茶', '帶有蜜桃香氣的烏龍茶，可熱可冰。');
+
+-- Item 41
+INSERT INTO menu_item_translation (item_id, language_code, item_name, item_description) VALUES
+(41, 'en', 'Coconut Milkshake', 'Creamy coconut milkshake topped with shredded coconut.'),
+(41, 'zh-CN', '椰奶昔', '浓郁的椰奶奶昔，撒上椰丝。'),
+(41, 'zh-TW', '椰奶昔', '濃郁的椰奶奶昔，撒上椰絲。');
+
+-- =================================================================
+-- 新增菜餚的標籤
+-- =================================================================
+
+-- 首先檢查是否已有這些標籤，若無則插入
+INSERT IGNORE INTO tag (tag_name, tag_category, tag_bg_color) VALUES
+('vegetarian', 'Dietary', '#4CAF50'),
+('refreshing', 'Characteristic', '#2196F3'),
+('chicken', 'Protein', '#FFC107'),
+('spicy', 'Flavor', '#F44336'),
+('sour', 'Flavor', '#FF9800'),
+('numbing', 'Flavor', '#9C27B0'),
+('pork', 'Protein', '#FF5722'),
+('classic', 'Characteristic', '#00BCD4'),
+('sweet', 'Flavor', '#FFEB3B'),
+('glutinous', 'Type', '#607D8B'),
+('lemon', 'Flavor', '#FFEB3B'),
+('fish', 'Protein', '#3F51B5'),
+('tofu', 'Protein', '#009688'),
+('beef', 'Protein', '#E91E63'),
+('streetfood', 'Type', '#795548'),
+('stirfry', 'Cooking Method', '#8BC34A'),
+('traditional', 'Characteristic', '#607D8B'),
+('cold', 'Temperature', '#03A9F4'),
+('milk', 'Ingredient', '#795548'),
+('soda', 'Type', '#03A9F4'),
+('noodles', 'Type', '#673AB7'),
+('grape', 'Flavor', '#9C27B0');
+
+-- 為新增菜餚添加標籤
+-- 注意：這裡使用SELECT語句來獲取標籤ID，確保引用正確
+INSERT INTO menu_tag (item_id, tag_id) 
+SELECT item_id, t.tag_id 
+FROM (
+    -- Appetizers
+    SELECT 23 AS item_id, 'vegetarian' AS tag_name
+    UNION ALL SELECT 23, 'refreshing'
+    UNION ALL SELECT 24, 'spicy'
+    UNION ALL SELECT 24, 'refreshing'
+    UNION ALL SELECT 25, 'vegetarian'
+    UNION ALL SELECT 25, 'refreshing'
+    UNION ALL SELECT 26, 'vegetarian'
+    UNION ALL SELECT 27, 'spicy'
+    
+    -- Soups
+    UNION ALL SELECT 28, 'spicy'
+    UNION ALL SELECT 28, 'sour'
+    UNION ALL SELECT 29, 'vegetarian'
+    UNION ALL SELECT 29, 'refreshing'
+    UNION ALL SELECT 30, 'refreshing'
+    
+    -- Desserts
+    UNION ALL SELECT 31, 'sweet'
+    UNION ALL SELECT 32, 'sweet'
+    UNION ALL SELECT 32, 'glutinous'
+    UNION ALL SELECT 33, 'sweet'
+    UNION ALL SELECT 33, 'classic'
+    
+    -- Main Courses
+    UNION ALL SELECT 34, 'chicken'
+    UNION ALL SELECT 34, 'spicy'
+    UNION ALL SELECT 34, 'classic'
+    UNION ALL SELECT 35, 'pork'
+    UNION ALL SELECT 35, 'sweet'
+    UNION ALL SELECT 35, 'sour'
+    UNION ALL SELECT 36, 'spicy'
+    UNION ALL SELECT 36, 'numbing'
+    UNION ALL SELECT 37, 'pork'
+    UNION ALL SELECT 37, 'classic'
+    UNION ALL SELECT 38, 'chicken'
+    UNION ALL SELECT 38, 'sour'
+    
+    -- Drinks
+    UNION ALL SELECT 39, 'sweet'
+    UNION ALL SELECT 39, 'refreshing'
+    UNION ALL SELECT 40, 'refreshing'
+    UNION ALL SELECT 41, 'sweet'
+) AS item_tags
+JOIN tag t ON item_tags.tag_name = t.tag_name;
+
+-- =================================================================
+-- 新增菜餚的自定義選項
+-- =================================================================
+
+-- 為新菜餚添加自定義選項
+INSERT INTO item_customization_options (item_id, group_id, max_selections, is_required) VALUES
+-- Appetizers (23-27): Spice Level
+(23, 1, 1, 0), (24, 1, 1, 0), (25, 1, 1, 0), (26, 1, 1, 0), (27, 1, 1, 0),
+
+-- Soups (28-30): Spice Level
+(28, 1, 1, 0), (29, 1, 1, 0), (30, 1, 1, 0),
+
+-- Main Courses (34-38): Spice Level
+(34, 1, 1, 0), (35, 1, 1, 0), (36, 1, 1, 0), (37, 1, 1, 0), (38, 1, 1, 0),
+
+-- Desserts (31-33): Toppings
+(31, 5, 2, 0), (32, 5, 2, 0), (33, 5, 2, 0),
+
+-- Drinks (39-41): Sugar Level + Ice Level
+(39, 2, 1, 0), (39, 3, 1, 0),
+(40, 2, 1, 0), (40, 3, 1, 0),
+(41, 2, 1, 0), (41, 3, 1, 0);
 
 
 COMMIT;

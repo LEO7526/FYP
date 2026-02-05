@@ -10,6 +10,15 @@
     <option name="highlightLevel" value="WARNING" />
     <option name="transferred" value="true" />
   </component>
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/FYP CCK/vendor/composer" />
+      <path value="$PROJECT_DIR$/FYP CCK/vendor/stripe/stripe-php" />
+      <path value="$PROJECT_DIR$/FYP CCK/vendor/stripe/stripe-php 2" />
+      <path value="$PROJECT_DIR$/Database/projectapi/stripe-demo/vendor/composer" />
+      <path value="$PROJECT_DIR$/Database/projectapi/stripe-demo/vendor/stripe/stripe-php" />
+    </include_path>
+  </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.0">
     <option name="suggestChangeDefaultLanguageLevel" value="false" />
   </component>

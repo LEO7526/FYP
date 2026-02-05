@@ -2,7 +2,7 @@
 session_start();
 require __DIR__ . '/../vendor/autoload.php'; // Stripe SDK
 
-\Stripe\Stripe::setApiKey("sk_test_51SwY8w8PP5awDROKq5rfpj5DUtA8vSchsPOUTZNBJZ7pbHSCfCJg2AVBTEn1oqlRAImddRFHb1OQf6VFufAVT1O000NWHTvRjY"); // 換成你的 Stripe 測試 Secret Key
+\Stripe\Stripe::setApiKey("sk_test_51S56Q5CEiSaWf7OeDUguzBcEbvJdjYZCYYfWjx4Ctu1iQPLcusx9YpFtXJahOYZftMTh3DBFtCW0NhxpqP8SIS9000ylQ4xZat"); // 換成你的 Stripe 測試 Secret Key
 
 $totalPrice = $_SESSION['total_price'] ?? 0;
 $amount = intval($totalPrice * 100); // Stripe 金額單位是分
@@ -53,7 +53,7 @@ $clientSecret = $paymentIntent->client_secret;
 </form>
 
 <script>
-    const stripe = Stripe("pk_test_51SwY8w8PP5awDROKDdi4e3BRNXxqNWMFmhjOfocxocN8n6ug2WpSuBkJYWvUWgm0FiVRvhyCEJRiSLXUM9UDpI9h001KN32oil");
+    const stripe = Stripe("pk_test_51S56Q5CEiSaWf7Oej0AHB17WDM62OAAM0EofpWf2TbvweOWZRD0Gm1tnC7i1epO4ACYBCnzRfLZaiSPCyVYMxCRk00nT1aG0qV");
 
     const elements = stripe.elements({
         style: {
