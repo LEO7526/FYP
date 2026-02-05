@@ -19,6 +19,9 @@ import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Customization;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.MaterialAvailabilityChecker;
+
+import org.json.JSONArray;
 
 import java.util.Arrays;
 import java.util.List;
@@ -162,15 +165,43 @@ public class DishDetailActivity extends BaseCustomerActivity {
                 String pendingNotes = (selectedCustomization != null) ? selectedCustomization.getExtraNotes() : null;
 
                 if (BrowseMenuActivity.isLogin()) {
-                    // Update cart immediately
-                    CartManager.updateQuantity(cartItem, currentQty + quantity[0]);
+                    // Check material availability before adding to cart
+                    MaterialAvailabilityChecker.checkAdditionalQuantity(this, cartItem, quantity[0], 
+                        new MaterialAvailabilityChecker.MaterialCheckCallback() {
+                            @Override
+                            public void onCheckComplete(boolean allAvailable, String message, JSONArray materialDetails) {
+                                if (allAvailable) {
+                                    // Materials are sufficient, add to cart
+                                    CartManager.updateQuantity(cartItem, currentQty + quantity[0]);
 
-                    String customizationText = (pendingSpice != null) ? " (" + pendingSpice + ")" : "";
-                    Toast.makeText(
-                            this,
-                            quantity[0] + " × " + item.getName() + customizationText,
-                            Toast.LENGTH_SHORT
-                    ).show();
+                                    String customizationText = (pendingSpice != null) ? " (" + pendingSpice + ")" : "";
+                                    Toast.makeText(
+                                            DishDetailActivity.this,
+                                            quantity[0] + " × " + item.getName() + customizationText,
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+                                } else {
+                                    // Insufficient materials, show detailed message
+                                    String detailedMessage = MaterialAvailabilityChecker.formatInsufficientMaterialsMessage(materialDetails);
+                                    Toast.makeText(
+                                            DishDetailActivity.this,
+                                            "Cannot add to cart:\n" + detailedMessage,
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+                            }
+
+                            @Override
+                            public void onCheckError(String error) {
+                                // On error, allow adding to cart but warn user
+                                CartManager.updateQuantity(cartItem, currentQty + quantity[0]);
+                                Toast.makeText(
+                                        DishDetailActivity.this,
+                                        "Added to cart (unable to verify ingredients: " + error + ")",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        });
                 } else {
                     // Defer cart action until after login
                     navigateProtected(

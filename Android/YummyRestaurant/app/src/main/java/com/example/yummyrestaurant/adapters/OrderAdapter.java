@@ -72,211 +72,116 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         // 計數項目和計算總額
         int totalItemCount = 0;
         
+        // 🔥 NEW: Create overview mode - limit display to 3 items max
+        final int MAX_OVERVIEW_ITEMS = 3;
+        int displayedItemCount = 0;
+        
         // 顯示常規菜品（如果沒有套餐）
         if (items != null && (packages == null || packages.isEmpty())) {
             Log.d("OrderAdapter", "Processing " + items.size() + " regular items (no packages)");
-            for (OrderItem item : items) {
+            
+            // Overview display: show limited items + "X more items" if needed
+            for (int i = 0; i < items.size() && displayedItemCount < MAX_OVERVIEW_ITEMS; i++) {
+                OrderItem item = items.get(i);
                 totalItemCount += item.getQuantity();
                 total += item.getItemPrice() * item.getQuantity();
                 
-                // 詳細的項目日誌，包含完整的自訂項檢查
-                List<OrderItemCustomization> customizations = item.getCustomizations();
-                int custCount = (customizations != null) ? customizations.size() : 0;
-                Log.d("OrderAdapter", "  Item: " + item.getName() + 
-                           " qty=" + item.getQuantity() + 
-                           " price=" + item.getItemPrice() + 
-                           " customizations=" + custCount);
-                
-                // 詳細檢查 customizations 對象
-                if (customizations != null) {
-                    Log.d("OrderAdapter", "    Customizations object: NOT NULL, size=" + customizations.size());
-                    if (customizations.size() > 0) {
-                        for (OrderItemCustomization cust : customizations) {
-                            Log.d("OrderAdapter", "      ✅ Found cust: " + cust.getOptionName() + "=" + cust.getChoiceNames());
-                        }
-                    } else {
-                        Log.d("OrderAdapter", "    ⚠️ Customizations list is EMPTY");
-                    }
+                // Check if this is a package
+                if (item.isPackage()) {
+                    // Display package with expand icon
+                    LinearLayout packageContainer = createPackageOverview(holder.itemsContainer.getContext(), item);
+                    holder.itemsContainer.addView(packageContainer);
                 } else {
-                    Log.d("OrderAdapter", "    ⚠️ Customizations object is NULL");
+                    // Regular item
+                    TextView itemView = new TextView(holder.itemsContainer.getContext());
+                    itemView.setText("• " + item.getName() + " x" + item.getQuantity());
+                    itemView.setTextSize(12);
+                    itemView.setPadding(8, 4, 8, 4);
+                    itemView.setTextColor(Color.parseColor("#424242"));
+                    holder.itemsContainer.addView(itemView);
                 }
                 
-                TextView itemView = new TextView(holder.itemsContainer.getContext());
-                itemView.setText("• " + item.getName() + " x" + item.getQuantity());
-                itemView.setTextSize(12);
-                itemView.setPadding(8, 4, 8, 4);
-                itemView.setTextColor(Color.parseColor("#424242"));
-                holder.itemsContainer.addView(itemView);
-                
-                // ✅ 新增：在列表中也顯示自訂項摘要
-                if (item.getCustomizations() != null && item.getCustomizations().size() > 0) {
-                    Log.d("OrderAdapter", "    Found " + item.getCustomizations().size() + " customizations");
-                    for (OrderItemCustomization cust : item.getCustomizations()) {
-                        String custDisplay = "";
-                        if (cust.getOptionId() == SPECIAL_OPTION_ID) {
-                            // 特殊要求
-                            custDisplay = "Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
-                        } else {
-                            // 常規自訂項 - 優先使用 selectedChoices，備用 choiceNames
-                            String choices = "";
-                            if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                choices = String.join(", ", cust.getSelectedChoices());
-                            } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                choices = cust.getChoiceNamesDisplay();
-                            }
-                            custDisplay = cust.getOptionName() + ": " + choices;
-                        }
-                        Log.d("OrderAdapter", "      - " + custDisplay);
-                        
-                        TextView custView = new TextView(holder.itemsContainer.getContext());
-                        if (cust.getOptionId() == SPECIAL_OPTION_ID) {
-                            custView.setText("    └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : ""));
-                        } else {
-                            // 優先使用 selectedChoices 顯示
-                            String choices = "";
-                            if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                choices = String.join(", ", cust.getSelectedChoices());
-                            } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                choices = cust.getChoiceNamesDisplay();
-                            }
-                            custView.setText("    ├─ " + cust.getOptionName() + ": " + choices);
-                        }
-                        custView.setTextSize(11);
-                        custView.setPadding(16, 2, 8, 2);
-                        custView.setTextColor(Color.parseColor("#888888"));
-                        holder.itemsContainer.addView(custView);
-                    }
-                }
+                displayedItemCount++;
             }
-        } else if (items != null) {
-            // 有套餐的情況，跳過顯示 items（已在套餐詳情中）
-            Log.d("OrderAdapter", "Skipping " + items.size() + " items display - order has packages");
-        }
-
-        // 顯示套餐
-        if (packages != null && packages.size() > 0) {
-            Log.d("OrderAdapter", "Displaying " + packages.size() + " packages");
-            for (OrderPackage pkg : packages) {
-                totalItemCount++;
-                total += pkg.getPackageCost();
+            
+            // Count remaining items for total calculation
+            for (int i = MAX_OVERVIEW_ITEMS; i < items.size(); i++) {
+                OrderItem item = items.get(i);
+                totalItemCount += item.getQuantity();
+                total += item.getItemPrice() * item.getQuantity();
+            }
+            
+            // Add "X more items" if there are hidden items
+            if (items.size() > MAX_OVERVIEW_ITEMS) {
+                TextView moreItemsView = new TextView(holder.itemsContainer.getContext());
+                int hiddenCount = items.size() - MAX_OVERVIEW_ITEMS;
+                moreItemsView.setText("... and " + hiddenCount + " more item" + (hiddenCount > 1 ? "s" : ""));
+                moreItemsView.setTextSize(11);
+                moreItemsView.setPadding(8, 4, 8, 4);
+                moreItemsView.setTextColor(Color.parseColor("#888888"));
+                moreItemsView.setTypeface(null, android.graphics.Typeface.ITALIC);
                 
-                // 創建套餐容器
-                LinearLayout packageContainer = new LinearLayout(holder.itemsContainer.getContext());
-                packageContainer.setOrientation(LinearLayout.VERTICAL);
-                packageContainer.setLayoutParams(new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                packageContainer.setPadding(8, 8, 8, 8);
-                packageContainer.setBackgroundColor(Color.parseColor("#F5F5F5"));
-                
-                // 套餐標題行
-                LinearLayout packageHeader = new LinearLayout(holder.itemsContainer.getContext());
-                packageHeader.setOrientation(LinearLayout.HORIZONTAL);
-                packageHeader.setLayoutParams(new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                packageHeader.setGravity(android.view.Gravity.CENTER_VERTICAL);
-                
-                // 套餐圖標
-                TextView packageIcon = new TextView(holder.itemsContainer.getContext());
-                packageIcon.setText("");
-                packageIcon.setTextSize(16);
-                LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-                iconParams.rightMargin = 8;
-                packageIcon.setLayoutParams(iconParams);
-                packageHeader.addView(packageIcon);
-                
-                // 套餐名稱和數量
-                TextView packageInfo = new TextView(holder.itemsContainer.getContext());
-                packageInfo.setText(pkg.getPackageName() + " × " + pkg.getQuantity());
-                packageInfo.setTextSize(13);
-                packageInfo.setTypeface(null, android.graphics.Typeface.BOLD);
-                packageInfo.setTextColor(Color.parseColor("#212121"));
-                LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
-                        0,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        1.0f);
-                packageInfo.setLayoutParams(infoParams);
-                packageHeader.addView(packageInfo);
-                
-                // 套餐價格
-                TextView packagePrice = new TextView(holder.itemsContainer.getContext());
-                packagePrice.setText("$" + String.format("%.2f", pkg.getPackageCost()));
-                packagePrice.setTextSize(13);
-                packagePrice.setTypeface(null, android.graphics.Typeface.BOLD);
-                packagePrice.setTextColor(Color.parseColor("#FF6F00"));
-                LinearLayout.LayoutParams priceParams = new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-                priceParams.leftMargin = 8;
-                packagePrice.setLayoutParams(priceParams);
-                packageHeader.addView(packagePrice);
-                
-                packageContainer.addView(packageHeader);
-                
-                // 菜品列表（初始隱藏）
-                LinearLayout dishesContainer = new LinearLayout(holder.itemsContainer.getContext());
-                dishesContainer.setOrientation(LinearLayout.VERTICAL);
-                dishesContainer.setLayoutParams(new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                dishesContainer.setPadding(24, 8, 8, 8);
-                dishesContainer.setVisibility(View.GONE);
-                
-                // 添加菜品
-                if (pkg.getDishes() != null) {
-                    for (OrderPackageDish dish : pkg.getDishes()) {
-                        TextView dishView = new TextView(holder.itemsContainer.getContext());
-                        dishView.setText("• " + dish.getName());
-                        dishView.setTextSize(11);
-                        dishView.setPadding(0, 2, 0, 2);
-                        dishView.setTextColor(Color.parseColor("#666666"));
-                        dishesContainer.addView(dishView);
-                        
-                        // Display customizations for package dish
-                        if (dish.getCustomizations() != null && dish.getCustomizations().size() > 0) {
-                            for (OrderItemCustomization cust : dish.getCustomizations()) {
-                                TextView custView = new TextView(holder.itemsContainer.getContext());
-                                String custText = "";
-                                if (cust.getOptionId() == SPECIAL_OPTION_ID) {
-                                    custText = "    └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
-                                } else {
-                                    String choices = "";
-                                    if (cust.getSelectedValues() != null && !cust.getSelectedValues().isEmpty()) {
-                                        choices = String.join(", ", cust.getSelectedValues());
-                                    } else if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                        choices = String.join(", ", cust.getSelectedChoices());
-                                    } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                        choices = cust.getChoiceNamesDisplay();
-                                    }
-                                    custText = "    └─ " + cust.getGroupName() + ": " + choices;
-                                }
-                                custView.setText(custText);
-                                custView.setTextSize(10);
-                                custView.setPadding(16, 2, 0, 2);
-                                custView.setTextColor(Color.parseColor("#999999"));
-                                dishesContainer.addView(custView);
-                            }
-                        }
-                    }
-                }
-                
-                packageContainer.addView(dishesContainer);
-                
-                // 套餐頭部點擊事件
-                packageHeader.setOnClickListener(v -> {
-                    if (dishesContainer.getVisibility() == View.GONE) {
-                        dishesContainer.setVisibility(View.VISIBLE);
-                        packageIcon.setText("▼");
-                    } else {
-                        dishesContainer.setVisibility(View.GONE);
-                        packageIcon.setText("");
-                    }
+                // Click to expand
+                moreItemsView.setOnClickListener(v -> {
+                    // Remove overview and show all items
+                    holder.itemsContainer.removeAllViews();
+                    displayAllItems(holder, items, order);
                 });
                 
-                holder.itemsContainer.addView(packageContainer);
+                holder.itemsContainer.addView(moreItemsView);
+            }
+        } else if (items != null) {
+            // Process items (may include packages)
+            Log.d("OrderAdapter", "Processing items with potential packages");
+            
+            for (int i = 0; i < items.size() && displayedItemCount < MAX_OVERVIEW_ITEMS; i++) {
+                OrderItem item = items.get(i);
+                totalItemCount += item.getQuantity();
+                total += item.getItemPrice() * item.getQuantity();
+                
+                // Check if this is a package
+                if (item.isPackage()) {
+                    // Display package with expand icon
+                    LinearLayout packageContainer = createPackageOverview(holder.itemsContainer.getContext(), item);
+                    holder.itemsContainer.addView(packageContainer);
+                } else {
+                    // Regular item
+                    TextView itemView = new TextView(holder.itemsContainer.getContext());
+                    itemView.setText("• " + item.getName() + " x" + item.getQuantity());
+                    itemView.setTextSize(12);
+                    itemView.setPadding(8, 4, 8, 4);
+                    itemView.setTextColor(Color.parseColor("#424242"));
+                    holder.itemsContainer.addView(itemView);
+                }
+                
+                displayedItemCount++;
+            }
+            
+            // Count remaining items for total calculation
+            for (int i = MAX_OVERVIEW_ITEMS; i < items.size(); i++) {
+                OrderItem item = items.get(i);
+                totalItemCount += item.getQuantity();
+                total += item.getItemPrice() * item.getQuantity();
+            }
+            
+            // Add "X more items" if there are hidden items
+            if (items.size() > MAX_OVERVIEW_ITEMS) {
+                TextView moreItemsView = new TextView(holder.itemsContainer.getContext());
+                int hiddenCount = items.size() - MAX_OVERVIEW_ITEMS;
+                moreItemsView.setText("... and " + hiddenCount + " more item" + (hiddenCount > 1 ? "s" : ""));
+                moreItemsView.setTextSize(11);
+                moreItemsView.setPadding(8, 4, 8, 4);
+                moreItemsView.setTextColor(Color.parseColor("#888888"));
+                moreItemsView.setTypeface(null, android.graphics.Typeface.ITALIC);
+                
+                // Click to expand
+                moreItemsView.setOnClickListener(v -> {
+                    // Remove overview and show all items
+                    holder.itemsContainer.removeAllViews();
+                    displayAllItems(holder, items, order);
+                });
+                
+                holder.itemsContainer.addView(moreItemsView);
             }
         }
 
@@ -575,103 +480,143 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     
                     Log.d("OrderAdapter", "    Item: " + item.getName() + 
                                " qty=" + item.getQuantity() + 
+                               " isPackage=" + item.isPackage() +
                                " customizations=" + (item.getCustomizations() != null ? item.getCustomizations().size() : 0));
                     
-                    String itemText = "• " + item.getName() + 
-                                    " × " + item.getQuantity() + 
-                                    "  HK$" + String.format("%.2f", item.getItemPrice()) +
-                                    " = HK$" + String.format("%.2f", itemCost);
-                    
-                    TextView itemRow = new TextView(context);
-                    itemRow.setText(itemText);
-                    itemRow.setTextSize(12);
-                    itemRow.setPadding(0, 5, 0, 5);
-                    detailsLayout.addView(itemRow);
-                    
-                    // 顯示自訂項
-                    if (item.getCustomizations() != null && item.getCustomizations().size() > 0) {
-                        Log.d("OrderAdapter", "      Displaying " + item.getCustomizations().size() + " customizations");
-                        for (OrderItemCustomization cust : item.getCustomizations()) {
-                            String custText = "";
-                            if (cust.getOptionId() == SPECIAL_OPTION_ID) {
-                                // 特殊要求
-                                custText = "   └─ Special: " + cust.getTextValue();
-                                Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
-                            } else {
-                                // 常規自訂選項 - 優先使用 selectedChoices，備用 choiceNames
-                                String choices = "";
-                                if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                    choices = String.join(", ", cust.getSelectedChoices());
-                                } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                    choices = cust.getChoiceNamesDisplay();
-                                }
-                                custText = "   └─ " + cust.getOptionName() + ": " + choices;
-                                Log.d("OrderAdapter", "        Option: " + cust.getOptionName() + " = " + choices);
-                            }
-                            
-                            TextView custRow = new TextView(context);
-                            custRow.setText(custText);
-                            custRow.setTextSize(11);
-                            custRow.setPadding(0, 2, 0, 2);
-                            custRow.setTextColor(Color.parseColor("#666666"));
-                            detailsLayout.addView(custRow);
-                        }
-                    }
-                }
-            } else if (order.getPackages() != null && order.getPackages().size() > 0) {
-                // 添加套餐
-                for (OrderPackage pkg : order.getPackages()) {
-                    itemsTotal += pkg.getPackageCost();
-                    
-                    String pkgText = " " + pkg.getPackageName() +
-                                   " × " + pkg.getQuantity() + 
-                                   " = HK$" + String.format("%.2f", pkg.getPackageCost());
-                    
-                    TextView pkgRow = new TextView(context);
-                    pkgRow.setText(pkgText);
-                    pkgRow.setTypeface(null, android.graphics.Typeface.BOLD);
-                    pkgRow.setTextSize(12);
-                    pkgRow.setPadding(0, 5, 0, 5);
-                    detailsLayout.addView(pkgRow);
-                    
-                    // 添加菜品
-                    if (pkg.getDishes() != null) {
-                        for (OrderPackageDish dish : pkg.getDishes()) {
-                            String dishText = "  ├─ " + dish.getName();
-                            TextView dishRow = new TextView(context);
-                            dishRow.setText(dishText);
-                            dishRow.setTextSize(11);
-                            dishRow.setPadding(20, 2, 0, 2);
-                            detailsLayout.addView(dishRow);
-                            
-                            // Display customizations for package dish in details
-                            if (dish.getCustomizations() != null && dish.getCustomizations().size() > 0) {
-                                Log.d("OrderAdapter", "      Package dish has " + dish.getCustomizations().size() + " customizations");
-                                for (OrderItemCustomization cust : dish.getCustomizations()) {
-                                    String custText = "";
-                                    if (cust.getOptionId() == SPECIAL_OPTION_ID) {
-                                        custText = "     └─ Special: " + cust.getTextValue();
-                                        Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
-                                    } else {
-                                        String choices = "";
-                                        if (cust.getSelectedValues() != null && !cust.getSelectedValues().isEmpty()) {
-                                            choices = String.join(", ", cust.getSelectedValues());
-                                        } else if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                            choices = String.join(", ", cust.getSelectedChoices());
-                                        } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                            choices = cust.getChoiceNamesDisplay();
+                    // Check if this is a package
+                    if (item.isPackage()) {
+                        // 📦 Package display with expand functionality
+                        LinearLayout packageContainer = new LinearLayout(context);
+                        packageContainer.setOrientation(LinearLayout.VERTICAL);
+                        packageContainer.setPadding(8, 8, 8, 8);
+                        packageContainer.setBackgroundColor(Color.parseColor("#F0F8FF"));
+                        
+                        // Package header with expand icon
+                        LinearLayout packageHeader = new LinearLayout(context);
+                        packageHeader.setOrientation(LinearLayout.HORIZONTAL);
+                        packageHeader.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                        
+                        TextView expandIcon = new TextView(context);
+                        expandIcon.setText("▶");
+                        expandIcon.setTextSize(14);
+                        expandIcon.setTypeface(null, android.graphics.Typeface.BOLD);
+                        expandIcon.setTextColor(Color.parseColor("#2196F3"));
+                        expandIcon.setPadding(0, 0, 8, 0);
+                        packageHeader.addView(expandIcon);
+                        
+                        TextView packageInfo = new TextView(context);
+                        String packageText = "📦 " + item.getName() + 
+                                           " × " + item.getQuantity() + 
+                                           "  HK$" + String.format("%.2f", item.getItemPrice()) +
+                                           " = HK$" + String.format("%.2f", itemCost);
+                        packageInfo.setText(packageText);
+                        packageInfo.setTextSize(12);
+                        packageInfo.setTypeface(null, android.graphics.Typeface.BOLD);
+                        packageInfo.setPadding(0, 5, 0, 5);
+                        packageHeader.addView(packageInfo);
+                        
+                        packageContainer.addView(packageHeader);
+                        
+                        // Package items container (initially hidden)
+                        LinearLayout packageItemsContainer = new LinearLayout(context);
+                        packageItemsContainer.setOrientation(LinearLayout.VERTICAL);
+                        packageItemsContainer.setPadding(20, 8, 0, 8);
+                        packageItemsContainer.setVisibility(View.GONE);
+                        
+                        // Add package items
+                        if (item.getPackageItems() != null) {
+                            Log.d("OrderAdapter", "      Package contains " + item.getPackageItems().size() + " items");
+                            for (OrderItem packageItem : item.getPackageItems()) {
+                                TextView packageItemView = new TextView(context);
+                                packageItemView.setText("  • " + packageItem.getName());
+                                packageItemView.setTextSize(11);
+                                packageItemView.setPadding(0, 2, 0, 2);
+                                packageItemView.setTextColor(Color.parseColor("#666666"));
+                                packageItemsContainer.addView(packageItemView);
+                                
+                                // Display customizations for package items
+                                if (packageItem.getCustomizations() != null && packageItem.getCustomizations().size() > 0) {
+                                    for (OrderItemCustomization cust : packageItem.getCustomizations()) {
+                                        String custText = "";
+                                        if (cust.getOptionId() == SPECIAL_OPTION_ID) {
+                                            custText = "      └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
+                                        } else {
+                                            String choices = "";
+                                            if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
+                                                choices = String.join(", ", cust.getSelectedChoices());
+                                            } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
+                                                choices = cust.getChoiceNamesDisplay();
+                                            }
+                                            custText = "      └─ " + cust.getOptionName() + ": " + choices;
                                         }
-                                        custText = "     └─ " + cust.getGroupName() + ": " + choices;
-                                        Log.d("OrderAdapter", "        Option: " + cust.getGroupName() + " = " + choices);
+                                        TextView custRow = new TextView(context);
+                                        custRow.setText(custText);
+                                        custRow.setTextSize(10);
+                                        custRow.setPadding(16, 2, 0, 2);
+                                        custRow.setTextColor(Color.parseColor("#999999"));
+                                        packageItemsContainer.addView(custRow);
                                     }
-                                    
-                                    TextView custRow = new TextView(context);
-                                    custRow.setText(custText);
-                                    custRow.setTextSize(10);
-                                    custRow.setPadding(30, 2, 0, 2);
-                                    custRow.setTextColor(Color.parseColor("#888888"));
-                                    detailsLayout.addView(custRow);
                                 }
+                            }
+                        }
+                        
+                        packageContainer.addView(packageItemsContainer);
+                        
+                        // Package header click event
+                        packageHeader.setOnClickListener(v -> {
+                            if (packageItemsContainer.getVisibility() == View.GONE) {
+                                packageItemsContainer.setVisibility(View.VISIBLE);
+                                expandIcon.setText("▼");
+                                Log.d("OrderAdapter", "📦 Package expanded in details dialog");
+                            } else {
+                                packageItemsContainer.setVisibility(View.GONE);
+                                expandIcon.setText("▶");
+                                Log.d("OrderAdapter", "📦 Package collapsed in details dialog");
+                            }
+                        });
+                        
+                        detailsLayout.addView(packageContainer);
+                        
+                    } else {
+                        // Regular item display
+                        String itemText = "• " + item.getName() + 
+                                        " × " + item.getQuantity() + 
+                                        "  HK$" + String.format("%.2f", item.getItemPrice()) +
+                                        " = HK$" + String.format("%.2f", itemCost);
+                        
+                        TextView itemRow = new TextView(context);
+                        itemRow.setText(itemText);
+                        itemRow.setTextSize(12);
+                        itemRow.setPadding(0, 5, 0, 5);
+                        detailsLayout.addView(itemRow);
+                        
+                        // 顯示自訂項
+                        if (item.getCustomizations() != null && item.getCustomizations().size() > 0) {
+                            Log.d("OrderAdapter", "      Displaying " + item.getCustomizations().size() + " customizations");
+                            for (OrderItemCustomization cust : item.getCustomizations()) {
+                                String custText = "";
+                                if (cust.getOptionId() == SPECIAL_OPTION_ID) {
+                                    // 特殊要求
+                                    custText = "   └─ Special: " + cust.getTextValue();
+                                    Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
+                                } else {
+                                    // 常規自訂選項 - 優先使用 selectedChoices，備用 choiceNames
+                                    String choices = "";
+                                    if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
+                                        choices = String.join(", ", cust.getSelectedChoices());
+                                    } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
+                                        choices = cust.getChoiceNamesDisplay();
+                                    }
+                                    custText = "   └─ " + cust.getOptionName() + ": " + choices;
+                                    Log.d("OrderAdapter", "        Option: " + cust.getOptionName() + " = " + choices);
+                                }
+                                
+                                TextView custRow = new TextView(context);
+                                custRow.setText(custText);
+                                custRow.setTextSize(11);
+                                custRow.setPadding(0, 2, 0, 2);
+                                custRow.setTextColor(Color.parseColor("#666666"));
+                                detailsLayout.addView(custRow);
                             }
                         }
                     }
@@ -742,6 +687,175 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         }
     }
 
+    // 🔥 NEW: Create package overview display
+    private LinearLayout createPackageOverview(Context context, OrderItem packageItem) {
+        LinearLayout packageContainer = new LinearLayout(context);
+        packageContainer.setOrientation(LinearLayout.VERTICAL);
+        packageContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        packageContainer.setPadding(8, 8, 8, 8);
+        packageContainer.setBackgroundColor(Color.parseColor("#F5F5F5"));
+        
+        // Package header
+        LinearLayout packageHeader = new LinearLayout(context);
+        packageHeader.setOrientation(LinearLayout.HORIZONTAL);
+        packageHeader.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        packageHeader.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        
+        // Package expand icon
+        TextView expandIcon = new TextView(context);
+        expandIcon.setText("▶");
+        expandIcon.setTextSize(12);
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        iconParams.rightMargin = 8;
+        expandIcon.setLayoutParams(iconParams);
+        packageHeader.addView(expandIcon);
+        
+        // Package name and quantity
+        TextView packageInfo = new TextView(context);
+        packageInfo.setText("📦 " + packageItem.getName() + " × " + packageItem.getQuantity());
+        packageInfo.setTextSize(12);
+        packageInfo.setTypeface(null, android.graphics.Typeface.BOLD);
+        packageInfo.setTextColor(Color.parseColor("#212121"));
+        LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1.0f);
+        packageInfo.setLayoutParams(infoParams);
+        packageHeader.addView(packageInfo);
+        
+        packageContainer.addView(packageHeader);
+        
+        // Package items container (initially hidden)
+        LinearLayout itemsContainer = new LinearLayout(context);
+        itemsContainer.setOrientation(LinearLayout.VERTICAL);
+        itemsContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        itemsContainer.setPadding(24, 8, 8, 8);
+        itemsContainer.setVisibility(View.GONE);
+        
+        // Add package items
+        if (packageItem.getPackageItems() != null) {
+            for (OrderItem item : packageItem.getPackageItems()) {
+                TextView itemView = new TextView(context);
+                itemView.setText("  • " + item.getName());
+                itemView.setTextSize(11);
+                itemView.setPadding(0, 2, 0, 2);
+                itemView.setTextColor(Color.parseColor("#666666"));
+                itemsContainer.addView(itemView);
+                
+                // Display customizations
+                if (item.getCustomizations() != null && item.getCustomizations().size() > 0) {
+                    for (OrderItemCustomization cust : item.getCustomizations()) {
+                        TextView custView = new TextView(context);
+                        String custText = "";
+                        if (cust.getOptionId() == SPECIAL_OPTION_ID) {
+                            custText = "      └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
+                        } else {
+                            String choices = "";
+                            if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
+                                choices = String.join(", ", cust.getSelectedChoices());
+                            } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
+                                choices = cust.getChoiceNamesDisplay();
+                            }
+                            custText = "      └─ " + cust.getOptionName() + ": " + choices;
+                        }
+                        custView.setText(custText);
+                        custView.setTextSize(10);
+                        custView.setPadding(16, 2, 0, 2);
+                        custView.setTextColor(Color.parseColor("#999999"));
+                        itemsContainer.addView(custView);
+                    }
+                }
+            }
+        }
+        
+        packageContainer.addView(itemsContainer);
+        
+        // Package header click event
+        packageHeader.setOnClickListener(v -> {
+            if (itemsContainer.getVisibility() == View.GONE) {
+                itemsContainer.setVisibility(View.VISIBLE);
+                expandIcon.setText("▼");
+            } else {
+                itemsContainer.setVisibility(View.GONE);
+                expandIcon.setText("▶");
+            }
+        });
+        
+        return packageContainer;
+    }
+
+    // 🔥 NEW: Display all items (expanded view)
+    private void displayAllItems(OrderViewHolder holder, List<OrderItem> items, Order order) {
+        Log.d("OrderAdapter", "🔍 Displaying ALL " + items.size() + " items (expanded view)");
+        
+        for (OrderItem item : items) {
+            if (item.isPackage()) {
+                // Display package with all details
+                LinearLayout packageContainer = createPackageOverview(holder.itemsContainer.getContext(), item);
+                holder.itemsContainer.addView(packageContainer);
+                
+                // Auto-expand package in full view
+                LinearLayout itemsContainer = (LinearLayout) packageContainer.getChildAt(1);
+                TextView expandIcon = (TextView) ((LinearLayout) packageContainer.getChildAt(0)).getChildAt(0);
+                itemsContainer.setVisibility(View.VISIBLE);
+                expandIcon.setText("▼");
+            } else {
+                // Regular item with full details
+                TextView itemView = new TextView(holder.itemsContainer.getContext());
+                itemView.setText("• " + item.getName() + " x" + item.getQuantity());
+                itemView.setTextSize(12);
+                itemView.setPadding(8, 4, 8, 4);
+                itemView.setTextColor(Color.parseColor("#424242"));
+                holder.itemsContainer.addView(itemView);
+                
+                // Show all customizations
+                if (item.getCustomizations() != null && item.getCustomizations().size() > 0) {
+                    for (OrderItemCustomization cust : item.getCustomizations()) {
+                        TextView custView = new TextView(holder.itemsContainer.getContext());
+                        if (cust.getOptionId() == SPECIAL_OPTION_ID) {
+                            custView.setText("    └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : ""));
+                        } else {
+                            String choices = "";
+                            if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
+                                choices = String.join(", ", cust.getSelectedChoices());
+                            } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
+                                choices = cust.getChoiceNamesDisplay();
+                            }
+                            custView.setText("    ├─ " + cust.getOptionName() + ": " + choices);
+                        }
+                        custView.setTextSize(11);
+                        custView.setPadding(16, 2, 8, 2);
+                        custView.setTextColor(Color.parseColor("#888888"));
+                        holder.itemsContainer.addView(custView);
+                    }
+                }
+            }
+        }
+        
+        // Add "collapse" option
+        TextView collapseView = new TextView(holder.itemsContainer.getContext());
+        collapseView.setText("▲ Show less");
+        collapseView.setTextSize(11);
+        collapseView.setPadding(8, 8, 8, 4);
+        collapseView.setTextColor(Color.parseColor("#2196F3"));
+        collapseView.setTypeface(null, android.graphics.Typeface.BOLD);
+        
+        collapseView.setOnClickListener(v -> {
+            // Refresh the view to show overview mode again
+            notifyDataSetChanged();
+        });
+        
+        holder.itemsContainer.addView(collapseView);
+    }
+
     static class OrderViewHolder extends RecyclerView.ViewHolder {
         TextView orderId, itemCount, totalAmount, timeAgo, statusBadge;
         LinearLayout itemsContainer;
@@ -761,7 +875,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             detailsBtn = itemView.findViewById(R.id.detailsBtn);
         }
     }
-
 
     /*
      * Order status codes and their meanings:

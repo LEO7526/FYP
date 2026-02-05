@@ -33,6 +33,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.os.Handler;
+import android.os.Looper;
 
 public class StaffOrdersActivity extends AppCompatActivity {
 
@@ -49,6 +51,11 @@ public class StaffOrdersActivity extends AppCompatActivity {
     // Navigation Drawer
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    
+    // Auto-refresh mechanism
+    private Handler refreshHandler;
+    private Runnable refreshRunnable;
+    private static final long REFRESH_INTERVAL = 5000; // 5 seconds
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,10 +87,9 @@ public class StaffOrdersActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
-                android.util.Log.d("KitchenOrders", "Tab selected: position " + position + " (filter will use " + (position + 1) + ")");
-                // Tab 0 = New, Tab 1 = Making (both show ostatus=1)
-                // Tab 2 = Delivered (shows ostatus=2)
-                filterOrders(position + 1);
+                android.util.Log.d("KitchenOrders", "Tab selected: position " + position);
+                // Tab 0 = Making (ostatus=1), Tab 1 = Delivered (ostatus=2)
+                filterOrders(position);
             }
 
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
@@ -93,10 +99,26 @@ public class StaffOrdersActivity extends AppCompatActivity {
         // 3. 載入資料
         fetchOrders();
 
-        // 4. 設定導航抽屜
+        // 4. 設定自動刷新機制
+        setupAutoRefresh();
+
+        // 5. 設定導航抽屜
         setupNavigationDrawer();
 
         Toast.makeText(this, "Logged in as: " + session.getStaffName(), Toast.LENGTH_SHORT).show();
+    }
+    
+    private void setupAutoRefresh() {
+        refreshHandler = new Handler(Looper.getMainLooper());
+        refreshRunnable = new Runnable() {
+            @Override
+            public void run() {
+                android.util.Log.d("KitchenOrders", "Auto-refresh: Fetching orders");
+                fetchOrders();
+                refreshHandler.postDelayed(this, REFRESH_INTERVAL);
+            }
+        };
+        android.util.Log.d("KitchenOrders", "Auto-refresh mechanism set up with " + REFRESH_INTERVAL + "ms interval");
     }
     
     private void setupNavigationDrawer() {
@@ -170,7 +192,7 @@ public class StaffOrdersActivity extends AppCompatActivity {
 
                             // 刷新顯示
                             int currentTabPosition = tabLayout.getSelectedTabPosition();
-                            filterOrders(currentTabPosition + 1);
+                            filterOrders(currentTabPosition);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -200,13 +222,13 @@ public class StaffOrdersActivity extends AppCompatActivity {
         for (StaffOrder order : allOrderList) {
             android.util.Log.d("KitchenOrders", "Checking order OID: " + order.getOid() + ", Status: " + order.getStatus());
             
-            // Tab 1 (New) 和 Tab 2 (Making) 都顯示 ostatus = 1
-            // Tab 3 (Delivered) 顯示 ostatus = 2
-            if ((tabPosition == 1 || tabPosition == 2) && order.getStatus() == 1) {
+            // Tab 0 (Making) 顯示 ostatus = 1 - orders ready to start making
+            // Tab 1 (Delivered) 顯示 ostatus = 2 - completed orders
+            if (tabPosition == 0 && order.getStatus() == 1) {
                 displayOrderList.add(order);
                 filteredCount++;
-                android.util.Log.d("KitchenOrders", "Added to New/Making tab - OID: " + order.getOid());
-            } else if (tabPosition == 3 && order.getStatus() == 2) {
+                android.util.Log.d("KitchenOrders", "Added to Making tab - OID: " + order.getOid());
+            } else if (tabPosition == 1 && order.getStatus() == 2) {
                 displayOrderList.add(order);
                 filteredCount++;
                 android.util.Log.d("KitchenOrders", "Added to Delivered tab - OID: " + order.getOid());
@@ -295,6 +317,28 @@ public class StaffOrdersActivity extends AppCompatActivity {
         session.logout();
         startActivity(new Intent(this, LoginActivity.class));
         finish();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        android.util.Log.d("KitchenOrders", "onResume: Refreshing orders and starting auto-refresh");
+        // Refresh orders when activity becomes visible (e.g., returning from another screen)
+        fetchOrders();
+        // Start auto-refresh
+        if (refreshHandler != null && refreshRunnable != null) {
+            refreshHandler.postDelayed(refreshRunnable, REFRESH_INTERVAL);
+        }
+    }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        android.util.Log.d("KitchenOrders", "onPause: Stopping auto-refresh");
+        // Stop auto-refresh when activity is not visible
+        if (refreshHandler != null && refreshRunnable != null) {
+            refreshHandler.removeCallbacks(refreshRunnable);
+        }
     }
     
     @Override

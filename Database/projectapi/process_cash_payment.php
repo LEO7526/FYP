@@ -63,7 +63,7 @@ try {
             note = CONCAT(
                 IFNULL(note, ''), 
                 CASE WHEN note IS NOT NULL AND note != '' THEN '\n' ELSE '' END,
-                '現金支付已確認 - 員工ID: ', ?, ' 時間: ', NOW()
+                'Cash payment confirmed - Staff ID: ', ?, ' Time: ', NOW()
             )
         WHERE oid = ?
     ");

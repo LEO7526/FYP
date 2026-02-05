@@ -22,6 +22,9 @@ import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.example.yummyrestaurant.utils.CouponValidator;
+import com.example.yummyrestaurant.utils.MaterialAvailabilityChecker;
+
+import org.json.JSONArray;
 import com.google.gson.Gson;
 import com.bumptech.glide.Glide;
 
@@ -33,7 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class CartActivity extends ThemeBaseActivity {
+public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.CartUpdateListener {
 
     private static final String TAG = "CartActivity";
 
@@ -61,6 +64,7 @@ public class CartActivity extends ThemeBaseActivity {
 
         // Initialize adapter and expose it
         activeAdapter = new CartItemAdapter(this, CartManager.getCartItems());
+        activeAdapter.setCartUpdateListener(this);
         cartRecyclerView.setAdapter(activeAdapter);
 
         updateCartUI();
@@ -95,7 +99,31 @@ public class CartActivity extends ThemeBaseActivity {
                 }
             }
             
-            proceedToCheckout();
+            // Check material availability before proceeding to checkout
+            MaterialAvailabilityChecker.checkCartMaterialAvailability(this, 
+                new MaterialAvailabilityChecker.MaterialCheckCallback() {
+                    @Override
+                    public void onCheckComplete(boolean allAvailable, String message, JSONArray materialDetails) {
+                        if (allAvailable) {
+                            // All materials available, proceed to checkout
+                            proceedToCheckout();
+                        } else {
+                            // Show detailed insufficient materials dialog
+                            showInsufficientMaterialsDialog(materialDetails);
+                        }
+                    }
+
+                    @Override
+                    public void onCheckError(String error) {
+                        // On error, show warning but allow checkout
+                        AlertDialog.Builder builder = new AlertDialog.Builder(CartActivity.this);
+                        builder.setTitle("Material Check Warning")
+                               .setMessage("Unable to verify ingredient availability: " + error + "\n\nDo you want to proceed anyway?")
+                               .setPositiveButton("Proceed", (dialog, which) -> proceedToCheckout())
+                               .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                               .show();
+                    }
+                });
         });
 
 
@@ -172,6 +200,12 @@ public class CartActivity extends ThemeBaseActivity {
         totalCostText.setText(String.format(Locale.getDefault(), "Total: HK$ %.2f", total));
 
         checkoutBtn.setEnabled(!cartItems.isEmpty());
+    }
+
+    @Override
+    public void onCartUpdated() {
+        Log.d(TAG, "onCartUpdated: Cart items changed, refreshing UI");
+        updateCartUI();
     }
 
     /**
@@ -330,6 +364,20 @@ public class CartActivity extends ThemeBaseActivity {
             payIntent.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
             startActivity(payIntent);
         }
+    }
+
+    /**
+     * Show dialog with detailed information about insufficient materials
+     */
+    private void showInsufficientMaterialsDialog(JSONArray materialDetails) {
+        String detailedMessage = MaterialAvailabilityChecker.formatInsufficientMaterialsMessage(materialDetails);
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Insufficient Ingredients")
+               .setMessage("Sorry, we don't have enough ingredients to fulfill your order:\n\n" + detailedMessage + 
+                          "\n\nPlease remove some items from your cart or contact our staff.")
+               .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+               .show();
     }
 
 

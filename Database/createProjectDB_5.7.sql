@@ -895,7 +895,9 @@ INSERT INTO materials_category (category_name) VALUES
 ('Meat'),
 ('Condiment'),
 ('Grain'),
-('Protein');
+('Protein'),
+('Beverage'),
+('Other');
 
 CREATE TABLE materials (
   mid INT NOT NULL AUTO_INCREMENT,
@@ -915,7 +917,17 @@ INSERT INTO materials (mname, category_id, unit, mqty, reorderLevel) VALUES
 ('Chili Oil', 3, 'ml', 500.00, 150.00),           
 ('Rice', 4, 'grams', 10000.00, 2000.00),          
 ('Beef', 2, 'grams', 1500.00, 400.00),            
-('Tofu', 5, 'grams', 800.00, 250.00);             
+('Tofu', 5, 'grams', 800.00, 250.00),
+('Eggplant', 1, 'grams', 2000.00, 500.00),
+('Glutinous Rice', 4, 'grams', 3000.00, 800.00),
+('Lemon', 1, 'grams', 1500.00, 400.00),
+('7-Up', 6, 'ml', 5000.00, 1000.00),
+('Red Beans', 1, 'grams', 2500.00, 600.00),
+('Milk', 6, 'ml', 3000.00, 800.00),
+('Tea Leaves', 1, 'grams', 1000.00, 300.00),
+('Grapes', 1, 'grams', 2000.00, 500.00),
+('Noodles', 4, 'grams', 5000.00, 1200.00),
+('Potato Starch', 4, 'grams', 1500.00, 400.00);             
 
 CREATE TABLE consumption_history (
   log_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -938,8 +950,31 @@ CREATE TABLE recipe_materials (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO recipe_materials (item_id, mid, quantity) VALUES
+-- Existing recipes
 (3, 2, 200), (3, 3, 20), (3, 4, 10),
-(6, 7, 150), (6, 6, 50), (6, 3, 15);
+(6, 7, 150), (6, 6, 50), (6, 3, 15),
+-- Added material requirements for missing items
+(1, 2, 120), (1, 3, 10),
+(2, 2, 150), (2, 3, 15), (2, 5, 300),
+(4, 6, 200), (4, 3, 25), (4, 5, 250),
+(5, 2, 250), (5, 6, 100), (5, 3, 30), (5, 4, 15),
+-- Additional recipes for previously missing items
+(7, 2, 100), (7, 3, 20),                    -- Dan Dan Noodles
+(8, 2, 180), (8, 3, 15),                    -- Twice-Cooked Pork
+(9, 6, 200),                                -- Boiled Beef in Chili Broth
+(10, 8, 300), (10, 3, 20), (10, 4, 10),     -- Fish-Fragrant Eggplant
+(11, 9, 200), (11, 3, 10),                  -- Sichuan Glutinous Rice Cake
+(12, 11, 250), (12, 10, 30),                -- Salty Lemon 7-Up
+(13, 12, 100), (13, 13, 150),               -- Red Bean Ice
+(14, 13, 200), (14, 14, 5),                 -- Hot Milk Tea
+(15, 15, 80), (15, 14, 8),                  -- Grape Oolong Tea
+(16, 10, 40), (16, 14, 6),                  -- Hot Lemon Tea
+(17, 13, 180), (17, 14, 5),                 -- Iced Milk Tea
+(18, 10, 35), (18, 14, 6),                  -- Iced Lemon Tea
+(19, 5, 150),                               -- Steamed Rice
+(20, 16, 120),                              -- Noodles
+(21, 17, 50);                               -- Potato Starch
+-- Note: Wooden Chopsticks (item_id: 22) has no recipe - directly purchased
 
 
 

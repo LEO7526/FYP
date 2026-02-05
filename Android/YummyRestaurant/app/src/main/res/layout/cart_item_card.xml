@@ -54,22 +54,78 @@
             android:maxLines="2"
             android:ellipsize="end" />
 
-        <TextView
-            android:id="@+id/cartItemQuantity"
-            android:layout_width="wrap_content"
+        <!-- Quantity Controls and Price Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="x1"
-            android:textSize="14sp"
-            android:textColor="@android:color/holo_blue_dark"
-            android:layout_marginTop="4dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
 
-        <TextView
-            android:id="@+id/cartItemPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="$ 28.00"
-            android:textSize="14sp"
-            android:textColor="@android:color/holo_orange_dark"
-            android:layout_marginTop="2dp" />
+            <!-- Quantity Controls -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/quantity_control_background">
+
+                <ImageButton
+                    android:id="@+id/btnDecreaseQuantity"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_minus"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Decrease quantity" />
+
+                <TextView
+                    android:id="@+id/cartItemQuantity"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:text="1"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:gravity="center" />
+
+                <ImageButton
+                    android:id="@+id/btnIncreaseQuantity"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@android:drawable/ic_input_add"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Increase quantity" />
+
+            </LinearLayout>
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- Price -->
+            <TextView
+                android:id="@+id/cartItemPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$ 28.00"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_orange_dark" />
+
+        </LinearLayout>
     </LinearLayout>
+
+    <!-- Delete Button -->
+    <ImageButton
+        android:id="@+id/btnDeleteItem"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@android:drawable/ic_menu_delete"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:contentDescription="Remove item from cart" />
+
 </LinearLayout>

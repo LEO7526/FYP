@@ -67,74 +67,195 @@ while ($row = $result->fetch_assoc()) {
 
     $items = [];
     while ($itemRow = $itemResult->fetch_assoc()) {
+        $item_id = (int)$itemRow['item_id'];
         $itemPrice = (float)$itemRow['item_price'];
         $quantity = (int)$itemRow['quantity'];
-        $item_id = (int)$itemRow['item_id'];
+        $imagUrl = $itemRow['image_url'];
         
-        // Fetch customizations for this item
-        $customSql = "
-            SELECT 
-                option_id,
-                group_id,
-                selected_value_ids,
-                selected_values,
-                text_value
-            FROM order_item_customizations
-            WHERE oid = ? AND item_id = ?
-        ";
+        // Check if this item_id corresponds to a package
+        $package_check_sql = "SELECT package_id FROM menu_package WHERE package_id = ?";
+        $package_stmt = $conn->prepare($package_check_sql);
+        $package_stmt->bind_param("i", $item_id);
+        $package_stmt->execute();
+        $package_result = $package_stmt->get_result();
         
-        $customStmt = $conn->prepare($customSql);
-        $customStmt->bind_param("ii", $oid, $item_id);
-        $customStmt->execute();
-        $customResult = $customStmt->get_result();
-        
-        $customizations = [];
-        while ($customRow = $customResult->fetch_assoc()) {
-            error_log("DEBUG get_orders: customRow = " . json_encode($customRow));
+        if ($package_result->num_rows > 0) {
+            // This is a package - first add the package itself
+            // Get package name
+            $package_name_sql = "SELECT package_name FROM menu_package WHERE package_id = ?";
+            $package_name_stmt = $conn->prepare($package_name_sql);
+            $package_name_stmt->bind_param("i", $item_id);
+            $package_name_stmt->execute();
+            $package_name_result = $package_name_stmt->get_result();
+            $package_name = "Package #" . $item_id;
+            if ($package_name_result->num_rows > 0) {
+                $package_row = $package_name_result->fetch_assoc();
+                $package_name = $package_row['package_name'];
+            }
+            $package_name_stmt->close();
             
-            $valueIds = json_decode($customRow['selected_value_ids'] ?? '[]', true);
-            $selectedValues = json_decode($customRow['selected_values'] ?? '[]', true);
+            // Get all items in the package for expansion
+            $package_items_sql = "
+                SELECT 
+                    pd.item_id,
+                    mi.item_price,
+                    mit.item_name,
+                    mi.image_url,
+                    pd.price_modifier
+                FROM package_dish pd
+                JOIN menu_item_translation mit ON pd.item_id = mit.item_id
+                JOIN menu_item mi ON pd.item_id = mi.item_id
+                WHERE pd.package_id = ? AND mit.language_code = ?
+                ORDER BY pd.item_id
+            ";
             
-            error_log("DEBUG get_orders: valueIds=" . json_encode($valueIds) . ", selectedValues=" . json_encode($selectedValues));
+            $package_items_stmt = $conn->prepare($package_items_sql);
+            $package_items_stmt->bind_param("is", $item_id, $language);
+            $package_items_stmt->execute();
+            $package_items_result = $package_items_stmt->get_result();
             
-            // 🔴 CRITICAL FIX: Ensure selected_value_ids only contains integers
-            // If it contains strings (from legacy data), use selected_values instead
-            $cleanValueIds = [];
-            if (is_array($valueIds)) {
-                foreach ($valueIds as $val) {
-                    if (is_numeric($val)) {
-                        $cleanValueIds[] = (int)$val;
+            $package_items = [];
+            while ($package_item = $package_items_result->fetch_assoc()) {
+                $package_item_id = (int)$package_item['item_id'];
+                $package_item_price = (float)$package_item['item_price'];
+                
+                // Fetch customizations for this package item (if any)
+                $customSql = "
+                    SELECT 
+                        option_id,
+                        group_id,
+                        selected_value_ids,
+                        selected_values,
+                        text_value
+                    FROM order_item_customizations
+                    WHERE oid = ? AND item_id = ?
+                ";
+                
+                $customStmt = $conn->prepare($customSql);
+                $customStmt->bind_param("ii", $oid, $package_item_id);
+                $customStmt->execute();
+                $customResult = $customStmt->get_result();
+                
+                $customizations = [];
+                while ($customRow = $customResult->fetch_assoc()) {
+                    // Process customizations (same logic as before)
+                    $valueIds = json_decode($customRow['selected_value_ids'] ?? '[]', true);
+                    $selectedValues = json_decode($customRow['selected_values'] ?? '[]', true);
+                    
+                    $fixedValueIds = [];
+                    if (is_array($valueIds)) {
+                        foreach ($valueIds as $valueId) {
+                            if (is_numeric($valueId)) {
+                                $fixedValueIds[] = (int)$valueId;
+                            }
+                        }
+                    }
+                    
+                    $customizations[] = [
+                        'option_id' => (int)$customRow['option_id'],
+                        'group_id' => (int)$customRow['group_id'],
+                        'selected_value_ids' => $fixedValueIds,
+                        'selected_values' => is_array($selectedValues) ? $selectedValues : [],
+                        'text_value' => $customRow['text_value']
+                    ];
+                }
+                
+                $package_items[] = [
+                    "item_id" => $package_item_id,
+                    "name" => $package_item['item_name'],
+                    "quantity" => $quantity,
+                    "itemPrice" => $package_item_price,
+                    "image_url" => $package_item['image_url'],
+                    "customizations" => $customizations,
+                    "isPackageItem" => true,
+                    "parentPackageId" => $item_id
+                ];
+            }
+            
+            // Add package as main item with nested items
+            $items[] = [
+                "item_id" => $item_id,
+                "name" => $package_name,
+                "quantity" => $quantity,
+                "itemPrice" => $itemPrice,
+                "itemCost" => $itemPrice * $quantity,
+                "image_url" => $imagUrl,
+                "customizations" => [],
+                "isPackage" => true,
+                "packageId" => $item_id,
+                "packageItems" => $package_items
+            ];
+            
+            $package_items_stmt->close();
+        } else {
+            // This is a regular individual item
+            $customSql = "
+                SELECT 
+                    option_id,
+                    group_id,
+                    selected_value_ids,
+                    selected_values,
+                    text_value
+                FROM order_item_customizations
+                WHERE oid = ? AND item_id = ?
+            ";
+            
+            $customStmt = $conn->prepare($customSql);
+            $customStmt->bind_param("ii", $oid, $item_id);
+            $customStmt->execute();
+            $customResult = $customStmt->get_result();
+            
+            $customizations = [];
+            while ($customRow = $customResult->fetch_assoc()) {
+                error_log("DEBUG get_orders: customRow = " . json_encode($customRow));
+                
+                $valueIds = json_decode($customRow['selected_value_ids'] ?? '[]', true);
+                $selectedValues = json_decode($customRow['selected_values'] ?? '[]', true);
+                
+                error_log("DEBUG get_orders: valueIds=" . json_encode($valueIds) . ", selectedValues=" . json_encode($selectedValues));
+            
+                // 🔴 CRITICAL FIX: Ensure selected_value_ids only contains integers
+                // If it contains strings (from legacy data), use selected_values instead
+                $cleanValueIds = [];
+                if (is_array($valueIds)) {
+                    foreach ($valueIds as $val) {
+                        if (is_numeric($val)) {
+                            $cleanValueIds[] = (int)$val;
+                        }
                     }
                 }
+                
+                // If we couldn't get valid integer IDs, use an empty array
+                // The selected_values will still show the names for display
+                if (empty($cleanValueIds) && !empty($selectedValues)) {
+                    $cleanValueIds = [];  // Empty array but selected_values has the display names
+                }
+                
+                $customizations[] = [
+                    "option_id" => (int)$customRow['option_id'],
+                    "group_id" => (int)$customRow['group_id'],
+                    "selected_value_ids" => $cleanValueIds,
+                    "selected_values" => $selectedValues,
+                    "text_value" => $customRow['text_value']
+                ];
             }
+            $customStmt->close();
             
-            // If we couldn't get valid integer IDs, use an empty array
-            // The selected_values will still show the names for display
-            if (empty($cleanValueIds) && !empty($selectedValues)) {
-                $cleanValueIds = [];  // Empty array but selected_values has the display names
-            }
+            error_log("DEBUG get_orders: Found " . count($customizations) . " customizations for item_id=$item_id");
             
-            $customizations[] = [
-                "option_id" => (int)$customRow['option_id'],
-                "group_id" => (int)$customRow['group_id'],
-                "selected_value_ids" => $cleanValueIds,
-                "selected_values" => $selectedValues,
-                "text_value" => $customRow['text_value']
+            $items[] = [
+                "item_id" => $item_id,
+                "name" => $itemRow['item_name'],
+                "quantity" => $quantity,
+                "itemPrice" => $itemPrice,
+                "itemCost" => $itemPrice * $quantity,
+                "image_url" => $imagUrl,
+                "customizations" => $customizations,
+                "isFromPackage" => false
             ];
         }
-        $customStmt->close();
         
-        error_log("DEBUG get_orders: Found " . count($customizations) . " customizations for item_id=$item_id");
-        
-        $items[] = [
-            "item_id" => $item_id,
-            "name" => $itemRow['item_name'],
-            "quantity" => $quantity,
-            "itemPrice" => $itemPrice,
-            "itemCost" => $itemPrice * $quantity,
-            "image_url" => $itemRow['image_url'],
-            "customizations" => $customizations
-        ];
+        $package_stmt->close();
     }
 
     $order['items'] = $items;

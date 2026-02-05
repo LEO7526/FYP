@@ -61,9 +61,14 @@ public class OrderHistoryActivity extends BaseCustomerActivity {
         OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
         Call<List<Order>> call = service.getOrdersByCustomer(cid); // 👈 Updated method
 
+        Log.d("OrderHistory", "🚀 Making API call to get orders for customer: " + cid);
+        Log.d("OrderHistory", "🚀 API URL will be: " + call.request().url().toString());
+
         call.enqueue(new Callback<List<Order>>() {
             @Override
             public void onResponse(Call<List<Order>> call, Response<List<Order>> response) {
+                Log.d("OrderHistory", "📡 API Response received. Status: " + response.code());
+                Log.d("OrderHistory", "📡 Response URL: " + call.request().url().toString());
                 if (response.isSuccessful() && response.body() != null) {
                     orderList = response.body();
                     
@@ -93,7 +98,14 @@ public class OrderHistoryActivity extends BaseCustomerActivity {
                     orderRecyclerView.setAdapter(orderAdapter);
                 } else {
                     Toast.makeText(OrderHistoryActivity.this, "Failed to load order history", Toast.LENGTH_SHORT).show();
-                    Log.e("OrderHistory", "❌ Response not successful: " + (response.code()));
+                    Log.e("OrderHistory", "❌ Response not successful: " + response.code());
+                    if (response.errorBody() != null) {
+                        try {
+                            Log.e("OrderHistory", "❌ Error body: " + response.errorBody().string());
+                        } catch (Exception e) {
+                            Log.e("OrderHistory", "❌ Could not read error body", e);
+                        }
+                    }
                 }
             }
 
