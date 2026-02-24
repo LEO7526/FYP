@@ -1,17 +1,17 @@
 <?php
 /**
  * Get Available Tables with Seating Chart Layout
- * Returns full seating chart with coordinates and real-time occupancy status
+ * Returns full seating chart with real-time occupancy status
  * 
  * URL: GET /projectapi/get_available_tables_layout.php?date=2024-01-15&time=18:30&pnum=4
  * 
  * Response includes:
- * - All tables with coordinates and status (available/occupied/reserved)
- * - Layout dimensions
+ * - All tables with status (available/occupied/reserved)
+ * - Layout metadata
  * - Occupied tables from table_orders real-time data
  * 
  * Author: System
- * Version: 1.0
+ * Version: 1.1
  */
 
 header("Access-Control-Allow-Origin: *");
@@ -54,6 +54,9 @@ if ($pnum <= 2) {
 } else {
     $requiredCapacity = 8;
 }
+
+// Business rule: parties of 3 or less cannot book 8-person tables
+$disallowEightPersonTable = ($pnum <= 3);
 
 // Calculate booking time window (±2 hours)
 $startTime = date('H:i:s', strtotime($time . ' -2 hours'));
@@ -106,14 +109,12 @@ try {
     }
     $stmt_occupied->close();
     
-    // Get all tables with coordinates
+    // Get all tables
     $sql_all_tables = "
         SELECT 
             tid,
             capacity,
-            status,
-            x_position,
-            y_position
+            status
         FROM seatingChart
         ORDER BY tid ASC
     ";
@@ -149,16 +150,16 @@ try {
             'id' => $tid,
             'capacity' => $capacity,
             'status' => $table_status,
-            'x' => (float)$row['x_position'],
-            'y' => (float)$row['y_position'],
             'is_available' => $is_available,
-            'suitable_for_booking' => $is_available && $capacity >= $requiredCapacity
+            'suitable_for_booking' => $is_available
+                && $capacity >= $requiredCapacity
+                && !($disallowEightPersonTable && $capacity >= 8)
         ];
         
         $tables[] = $table_data;
         
         // Collect available tables for the specified guest count
-        if ($is_available && $capacity >= $requiredCapacity) {
+        if ($is_available && $capacity >= $requiredCapacity && !($disallowEightPersonTable && $capacity >= 8)) {
             $available_tables[] = $table_data;
         }
     }

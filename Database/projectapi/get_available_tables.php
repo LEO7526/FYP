@@ -12,7 +12,7 @@ if ($conn->connect_error) {
 // --- 2. Get Input Parameters ---
 $date = $_GET['date'] ?? '';
 $time = $_GET['time'] ?? '';
-$pnum = $_GET['pnum'] ?? 0;
+$pnum = isset($_GET['pnum']) ? (int)$_GET['pnum'] : 0;
 
 if (empty($date) || empty($time) || $pnum <= 0) {
     http_response_code(400);
@@ -36,17 +36,32 @@ while ($row = $result_booked->fetch_assoc()) {
 $stmt_booked->close();
 
 
+// Capacity rule for filtering
+$requiredCapacity = 2;
+if ($pnum <= 2) {
+    $requiredCapacity = 2;
+} elseif ($pnum <= 4) {
+    $requiredCapacity = 4;
+} else {
+    $requiredCapacity = 8;
+}
+
+$disallowEightPersonTable = ($pnum <= 3);
+
 $sql_available = "SELECT tid, capacity FROM seatingChart WHERE capacity >= ?";
+$params = [$requiredCapacity];
+$types = "i";
+
+if ($disallowEightPersonTable) {
+    $sql_available .= " AND capacity < 8";
+}
+
 if (count($booked_tids) > 0) {
   
     $placeholders = implode(',', array_fill(0, count($booked_tids), '?'));
     $sql_available .= " AND tid NOT IN ($placeholders)";
-    $types = "i" . str_repeat('i', count($booked_tids));
-    $params = array_merge([$pnum], $booked_tids);
-} else {
-    // No booked tables
-    $types = "i";
-    $params = [$pnum];
+    $types .= str_repeat('i', count($booked_tids));
+    $params = array_merge($params, $booked_tids);
 }
 
 $stmt_available = $conn->prepare($sql_available);

@@ -59,6 +59,11 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (!ensureCustomerLoggedIn()) {
+            return;
+        }
+
         setContentView(R.layout.activity_confirm_booking);
 
         // Initialize views
@@ -84,6 +89,26 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
         if (savedInstanceState != null) {
             restoreStateAfterRotation(savedInstanceState);
         }
+    }
+
+    private boolean ensureCustomerLoggedIn() {
+        RoleManager.init(this);
+        String userId = RoleManager.getUserId();
+        String role = RoleManager.getUserRole();
+
+        boolean isCustomerLoggedIn = userId != null
+                && !userId.trim().isEmpty()
+                && role != null
+                && "customer".equalsIgnoreCase(role);
+
+        if (!isCustomerLoggedIn) {
+            Toast.makeText(this, "Please login as customer before booking a table.", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return false;
+        }
+
+        return true;
     }
 
     /**

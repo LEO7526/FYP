@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.ApiConfig;
+import com.example.yummyrestaurant.utils.RoleManager;
 
 import org.json.JSONObject;
 
@@ -44,6 +45,11 @@ public class BookingActivity extends ThemeBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (!ensureCustomerLoggedIn()) {
+            return;
+        }
+
         setContentView(R.layout.activity_booking);
 
         buttonSelectDate = findViewById(R.id.buttonSelectDate);
@@ -64,6 +70,26 @@ public class BookingActivity extends ThemeBaseActivity {
         buttonSelectDate.setOnClickListener(v -> showDatePicker());
         buttonSelectTime.setOnClickListener(v -> showTimePicker());
         buttonFindTables.setOnClickListener(v -> findTables());
+    }
+
+    private boolean ensureCustomerLoggedIn() {
+        RoleManager.init(this);
+        String userId = RoleManager.getUserId();
+        String role = RoleManager.getUserRole();
+
+        boolean isCustomerLoggedIn = userId != null
+                && !userId.trim().isEmpty()
+                && role != null
+                && "customer".equalsIgnoreCase(role);
+
+        if (!isCustomerLoggedIn) {
+            Toast.makeText(this, "Please login as customer before booking a table.", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -155,16 +181,19 @@ public class BookingActivity extends ThemeBaseActivity {
                     boolean success = jsonResponse.optBoolean("success", false);
                     
                     if (success) {
-                        // Extract available tables array
-                        String tablesJsonArray = jsonResponse.optJSONArray("tables").toString();
-                        
-                        if (tablesJsonArray.equals("[]") || jsonResponse.optInt("total_available", 0) == 0) {
+                        int totalAvailable = jsonResponse.optInt("total_available", 0);
+
+                        if (totalAvailable == 0) {
                             runOnUiThread(() -> 
                                 Toast.makeText(BookingActivity.this, 
                                     "No available tables found for the selected criteria.", 
                                     Toast.LENGTH_LONG).show()
                             );
                         } else {
+                            // Send all tables to selection screen
+                            // (available + occupied + reserved + too-small)
+                            String tablesJsonArray = jsonResponse.optJSONArray("tables").toString();
+
                             // Proceed to confirm booking activity
                             runOnUiThread(() -> {
                                 Intent intent = new Intent(BookingActivity.this, ConfirmBookingActivity.class);

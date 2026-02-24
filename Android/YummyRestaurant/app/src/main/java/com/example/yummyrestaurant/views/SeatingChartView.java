@@ -51,6 +51,11 @@ public class SeatingChartView extends View {
 
     private static final Map<Integer, TableLayout> FLOOR_LAYOUT = new HashMap<>();
 
+    private static final float FLOOR_MIN_X = 14f;
+    private static final float FLOOR_MAX_X = 76f;
+    private static final float FLOOR_MIN_Y = 16f;
+    private static final float FLOOR_MAX_Y = 70f;
+
     static {
         FLOOR_LAYOUT.put(36, new TableLayout(14f, 16f, TableShape.RECT));
         FLOOR_LAYOUT.put(35, new TableLayout(14f, 26f, TableShape.RECT));
@@ -240,7 +245,7 @@ public class SeatingChartView extends View {
 
         RectF chartArea = new RectF(
             getWidth() * 0.06f,
-            getHeight() * 0.05f,
+            getHeight() * 0.15f,
             getWidth() * 0.94f,
             getHeight() * 0.86f
         );
@@ -267,8 +272,16 @@ public class SeatingChartView extends View {
             return;
         }
 
-        float cx = chartArea.left + (chartArea.width() * layout.xPercent / 100f);
-        float cy = chartArea.top + (chartArea.height() * layout.yPercent / 100f);
+        float contentLeft = chartArea.left + (chartArea.width() * 0.10f);
+        float contentRight = chartArea.right - (chartArea.width() * 0.10f);
+        float contentTop = chartArea.top + (chartArea.height() * 0.10f);
+        float contentBottom = chartArea.bottom - (chartArea.height() * 0.18f);
+
+        float normalizedX = (layout.xPercent - FLOOR_MIN_X) / (FLOOR_MAX_X - FLOOR_MIN_X);
+        float normalizedY = (layout.yPercent - FLOOR_MIN_Y) / (FLOOR_MAX_Y - FLOOR_MIN_Y);
+
+        float cx = contentLeft + ((contentRight - contentLeft) * normalizedX);
+        float cy = contentTop + ((contentBottom - contentTop) * normalizedY);
 
         float base = Math.min(chartArea.width(), chartArea.height());
         float rectWidth = base * 0.12f;
@@ -349,28 +362,53 @@ public class SeatingChartView extends View {
     }
 
     private void drawFloorPlanReference(Canvas canvas, RectF chartArea) {
-        canvas.drawRect(chartArea, guidePaint);
+        float doorGapTop = chartArea.bottom - (chartArea.height() * 0.14f);
+        float doorGapBottom = chartArea.bottom - (chartArea.height() * 0.04f);
+        float rightWallX = chartArea.right;
+
+        // Outer boundary with right-side door opening
+        canvas.drawLine(chartArea.left, chartArea.top, rightWallX, chartArea.top, guidePaint);
+        canvas.drawLine(chartArea.left, chartArea.top, chartArea.left, chartArea.bottom, guidePaint);
+        canvas.drawLine(chartArea.left, chartArea.bottom, rightWallX, chartArea.bottom, guidePaint);
+        canvas.drawLine(rightWallX, chartArea.top, rightWallX, doorGapTop, guidePaint);
+        canvas.drawLine(rightWallX, doorGapBottom, rightWallX, chartArea.bottom, guidePaint);
 
         float leftWallX = chartArea.left + chartArea.width() * 0.04f;
         canvas.drawLine(leftWallX, chartArea.top, leftWallX, chartArea.bottom, guidePaint);
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
         canvas.drawText("Wall", chartArea.left - (28f * displayDensity), chartArea.top + (24f * displayDensity), guideTextPaint);
-
-        guideTextPaint.setTextAlign(Paint.Align.RIGHT);
-        canvas.drawText("Window", chartArea.right + (30f * displayDensity), chartArea.top + (24f * displayDensity), guideTextPaint);
+        // Wall marker line (left side)
+        canvas.drawLine(chartArea.left - (10f * displayDensity), chartArea.top + (18f * displayDensity), leftWallX - (2f * displayDensity), chartArea.top + (18f * displayDensity), guidePaint);
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("Door", chartArea.right - (8f * displayDensity), chartArea.bottom + (26f * displayDensity), guideTextPaint);
-        canvas.drawText("Counter", chartArea.right - (88f * displayDensity), chartArea.bottom + (58f * displayDensity), guideTextPaint);
+        canvas.drawText("Window", rightWallX + (18f * displayDensity), chartArea.top + (22f * displayDensity), guideTextPaint);
+        // Window marker line (right upper wall)
+        float windowMarkerY = chartArea.top + (18f * displayDensity);
+        canvas.drawLine(rightWallX + (4f * displayDensity), windowMarkerY, rightWallX + (16f * displayDensity), windowMarkerY, guidePaint);
+
+        guideTextPaint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("Door", rightWallX - (58f * displayDensity), doorGapTop + (18f * displayDensity), guideTextPaint);
 
         RectF counterRect = new RectF(
-            chartArea.right - (120f * displayDensity),
+            chartArea.right - (150f * displayDensity),
             chartArea.bottom + (10f * displayDensity),
-            chartArea.right - (50f * displayDensity),
-            chartArea.bottom + (44f * displayDensity)
+            chartArea.right - (74f * displayDensity),
+            chartArea.bottom + (15f * displayDensity)
         );
         canvas.drawRect(counterRect, guidePaint);
+
+        guideTextPaint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("Counter", counterRect.centerX(), counterRect.centerY() + (4f * displayDensity), guideTextPaint);
+
+        // Door opening symbol: longer diagonal stroke connected to lower wall
+        canvas.drawLine(
+            rightWallX,
+            chartArea.bottom -(20f*displayDensity),
+            rightWallX - (24f * displayDensity),
+            chartArea.bottom - (20f * displayDensity),
+            guidePaint
+        );
     }
 
     /**

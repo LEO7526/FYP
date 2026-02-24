@@ -28,6 +28,31 @@ if (empty($bkcname) || empty($bktel) || $tid <= 0 || empty($bdate) || empty($bti
     exit();
 }
 
+// Validate selected table and enforce booking rules
+$checkTableSql = "SELECT capacity FROM seatingChart WHERE tid = ? LIMIT 1";
+$checkStmt = $conn->prepare($checkTableSql);
+$checkStmt->bind_param("i", $tid);
+$checkStmt->execute();
+$checkResult = $checkStmt->get_result();
+
+if ($checkResult->num_rows === 0) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Invalid table selected."]);
+    $checkStmt->close();
+    exit();
+}
+
+$tableRow = $checkResult->fetch_assoc();
+$tableCapacity = (int)$tableRow['capacity'];
+$checkStmt->close();
+
+// Business rule: parties of 3 or less cannot book 8-person tables
+if ($pnum <= 3 && $tableCapacity >= 8) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "For 3 or fewer guests, 8-person tables cannot be booked."]);
+    exit();
+}
+
 
 $sql = "INSERT INTO booking (cid, bkcname, bktel, tid, bdate, btime, pnum, purpose, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
