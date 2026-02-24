@@ -377,15 +377,21 @@ public class SeatingChartView extends View {
         canvas.drawLine(leftWallX, chartArea.top, leftWallX, chartArea.bottom, guidePaint);
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("Wall", chartArea.left - (28f * displayDensity), chartArea.top + (24f * displayDensity), guideTextPaint);
+        canvas.drawText("Wall", chartArea.left , chartArea.top-(36f  * displayDensity), guideTextPaint);
         // Wall marker line (left side)
-        canvas.drawLine(chartArea.left - (10f * displayDensity), chartArea.top + (18f * displayDensity), leftWallX - (2f * displayDensity), chartArea.top + (18f * displayDensity), guidePaint);
+        canvas.drawLine(chartArea.left + (9f * displayDensity), chartArea.top , chartArea.left + (9f * displayDensity), chartArea.top - (32f * displayDensity), guidePaint);
+
+
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("Window", rightWallX + (18f * displayDensity), chartArea.top + (22f * displayDensity), guideTextPaint);
+        canvas.drawText("Window", rightWallX - (18f * displayDensity), chartArea.top - (20f * displayDensity), guideTextPaint);
         // Window marker line (right upper wall)
         float windowMarkerY = chartArea.top + (18f * displayDensity);
         canvas.drawLine(rightWallX + (4f * displayDensity), windowMarkerY, rightWallX + (16f * displayDensity), windowMarkerY, guidePaint);
+        float windowMarkerX = chartArea.top - (18f * displayDensity);
+        canvas.drawLine(rightWallX - (16f * displayDensity) ,chartArea.top , rightWallX - (16f * displayDensity), windowMarkerX, guidePaint);
+        canvas.drawLine(rightWallX + (16f * displayDensity) ,windowMarkerY , rightWallX + (16f * displayDensity), windowMarkerX, guidePaint);
+
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
         canvas.drawText("Door", rightWallX - (58f * displayDensity), doorGapTop + (18f * displayDensity), guideTextPaint);
@@ -394,7 +400,7 @@ public class SeatingChartView extends View {
             chartArea.right - (150f * displayDensity),
             chartArea.bottom + (10f * displayDensity),
             chartArea.right - (74f * displayDensity),
-            chartArea.bottom + (15f * displayDensity)
+            chartArea.bottom + (55f * displayDensity)
         );
         canvas.drawRect(counterRect, guidePaint);
 
@@ -404,9 +410,9 @@ public class SeatingChartView extends View {
         // Door opening symbol: longer diagonal stroke connected to lower wall
         canvas.drawLine(
             rightWallX,
-            chartArea.bottom -(20f*displayDensity),
+            chartArea.bottom -(24f*displayDensity),
             rightWallX - (24f * displayDensity),
-            chartArea.bottom - (20f * displayDensity),
+            chartArea.bottom - (42f * displayDensity),
             guidePaint
         );
     }
