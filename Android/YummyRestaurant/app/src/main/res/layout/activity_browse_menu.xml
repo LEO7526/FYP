@@ -29,17 +29,6 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true" />
 
-            <!-- Set Menu icon (new) -->
-            <ImageView
-                android:id="@+id/setMenuIcon"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ic_set_menu"
-                android:contentDescription="Set Menu"
-                android:layout_toStartOf="@id/cartIconContainer"
-                android:layout_marginEnd="16dp"
-                android:layout_centerVertical="true" />
-
             <!-- FrameLayout container around cart icon -->
             <FrameLayout
                 android:id="@+id/cartIconContainer"
@@ -87,23 +76,12 @@
                 android:layout_centerInParent="true" />
         </RelativeLayout>
 
-        <!-- Search Bar -->
-        <EditText
-            android:id="@+id/searchBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Search menu..."
-            android:layout_below="@id/topBar"
-            android:layout_margin="16dp"
-            android:background="@drawable/search_bar_bg"
-            android:padding="12dp" />
-
         <!-- Order Type Selection Container -->
         <LinearLayout
             android:id="@+id/orderTypeContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/searchBar"
+            android:layout_below="@id/topBar"
             android:orientation="horizontal"
             android:gravity="center"
             android:padding="16dp"
@@ -141,131 +119,137 @@
 
         </LinearLayout>
 
-        <!-- Filter Buttons (scrollable row) -->
-        <HorizontalScrollView
-            android:id="@+id/filterScroll"
+        <!-- Menu/Package Tabs -->
+        <FrameLayout
+            android:id="@+id/tabContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/orderTypeContainer"
-            android:fillViewport="true"
-            android:scrollbars="none">
+            android:background="@color/white">
 
             <LinearLayout
-                android:id="@+id/filterContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAll"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="8dp"
-                    android:paddingHorizontal="12dp"
-                    android:text="All Dishes"
-                    android:textSize="12sp"
+                <Button
+                    android:id="@+id/btnMenuTab"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Menu"
+                    android:textSize="14sp"
                     android:textColor="@color/purple_700"
-                    app:cornerRadius="20dp"
-                    app:strokeColor="@color/purple_700"
-                    app:strokeWidth="1dp"
-                    app:rippleColor="@color/purple_200" />
+                    android:background="@color/transparent"
+                    style="?attr/buttonBarButtonStyle"
+                    android:textStyle="bold" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAppetizers"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="8dp"
-                    android:paddingHorizontal="12dp"
-                    android:text="Appetizers"
-                    android:textSize="12sp"
-                    android:textColor="@color/purple_700"
-                    app:cornerRadius="20dp"
-                    app:strokeColor="@color/purple_700"
-                    app:strokeWidth="1dp"
-                    app:rippleColor="@color/purple_200" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnMainCourses"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="8dp"
-                    android:paddingHorizontal="12dp"
-                    android:text="Main Courses"
-                    android:textSize="12sp"
-                    android:textColor="@color/purple_700"
-                    app:cornerRadius="20dp"
-                    app:strokeColor="@color/purple_700"
-                    app:strokeWidth="1dp"
-                    app:rippleColor="@color/purple_200" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSoup"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="8dp"
-                    android:paddingHorizontal="12dp"
-                    android:text="Soup"
-                    android:textSize="12sp"
-                    android:textColor="@color/purple_700"
-                    app:cornerRadius="20dp"
-                    app:strokeColor="@color/purple_700"
-                    app:strokeWidth="1dp"
-                    app:rippleColor="@color/purple_200" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnDessert"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="8dp"
-                    android:paddingHorizontal="12dp"
-                    android:text="Dessert"
-                    android:textSize="12sp"
-                    android:textColor="@color/purple_700"
-                    app:cornerRadius="20dp"
-                    app:strokeColor="@color/purple_700"
-                    app:strokeWidth="1dp"
-                    app:rippleColor="@color/purple_200" />
-
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnDrink"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="8dp"
-                    android:paddingHorizontal="12dp"
-                    android:text="Drink"
-                    android:textSize="12sp"
-                    android:textColor="@color/purple_700"
-                    app:cornerRadius="20dp"
-                    app:strokeColor="@color/purple_700"
-                    app:strokeWidth="1dp"
-                    app:rippleColor="@color/purple_200" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnStapleFoods"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="8dp"
-                    android:paddingHorizontal="12dp"
-                    android:text="Staple Foods"
-                    android:textSize="12sp"
-                    android:textColor="@color/purple_700"
-                    app:cornerRadius="20dp"
-                    app:strokeColor="@color/purple_700"
-                    app:strokeWidth="1dp"
-                    app:rippleColor="@color/purple_200" />
-
+                <Button
+                    android:id="@+id/btnPackageTab"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Package"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_text"
+                    android:background="@color/transparent"
+                    style="?attr/buttonBarButtonStyle" />
             </LinearLayout>
-        </HorizontalScrollView>
+
+            <!-- Underline indicator positioned at bottom -->
+            <View
+                android:id="@+id/tabUnderline"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_gravity="bottom"
+                android:background="@color/purple_700" />
+        </FrameLayout>
+
+        <!-- Search Bar (Menu only) -->
+        <EditText
+            android:id="@+id/searchBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Search menu..."
+            android:layout_below="@id/tabContainer"
+            android:layout_margin="16dp"
+            android:background="@drawable/search_bar_bg"
+            android:padding="12dp"
+            android:visibility="visible" />
+
+        <!-- Menu Container (Two-panel layout) -->
+        <LinearLayout
+            android:id="@+id/menuContentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/searchBar"
+            android:layout_above="@id/bottomFunctionBar"
+            android:orientation="horizontal"
+            android:visibility="visible">
+
+            <!-- Left Panel: Menu Categories -->
+            <ScrollView
+                android:id="@+id/menuCategoryScroll"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:background="@color/light_gray"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/menuCategoryList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp" />
+            </ScrollView>
+
+            <!-- Right Panel: Menu Items -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/menuRecyclerView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.7"
+                android:padding="16dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+        <!-- Package Container (Two-panel layout) -->
+        <LinearLayout
+            android:id="@+id/packageContentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/tabContainer"
+            android:layout_above="@id/bottomFunctionBar"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <!-- Left Panel: Package Categories -->
+            <ScrollView
+                android:id="@+id/packageCategoryScroll"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:background="@color/light_gray"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/packageCategoryList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp" />
+            </ScrollView>
+
+            <!-- Right Panel: Package Items -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/packageRecyclerView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.7"
+                android:padding="16dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
 
         <!-- Loading Spinner -->
         <ProgressBar
@@ -275,22 +259,12 @@
             android:layout_centerInParent="true"
             android:visibility="gone" />
 
-        <!-- Menu List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/menuRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/filterScroll"
-            android:layout_above="@id/bottomFunctionBar"
-            android:padding="16dp"
-            android:clipToPadding="false" />
-
         <!-- Order Type Selection Overlay Hint -->
         <FrameLayout
             android:id="@+id/orderTypeHintOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/filterScroll"
+            android:layout_below="@id/tabContainer"
             android:layout_above="@id/bottomFunctionBar"
             android:background="@color/overlay_semi_transparent"
             android:visibility="gone">

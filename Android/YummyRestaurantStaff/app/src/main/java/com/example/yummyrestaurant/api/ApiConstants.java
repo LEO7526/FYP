@@ -2,7 +2,7 @@ package com.example.yummyrestaurant.api;
 
 public class ApiConstants {
     // 你的 IP (模擬器 10.0.2.2，實機請用電腦 IP)
-    public static final String BASE_URL = "http://10.0.2.2/androidstaff_api/";
+    public static final String BASE_URL = "http://10.106.131.126/androidstaff_api/";
 
     public static final String LOGIN = BASE_URL + "staff_login.php";
     public static final String GET_ORDERS = BASE_URL + "get_all_orders.php";

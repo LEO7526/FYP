@@ -34,6 +34,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     private Context context;
     private List<MenuItem> fullList;
     private List<MenuItem> filteredList;
+    private String selectedCategory = "All Dishes"; // Track selected category
 
     public MenuItemAdapter(Context context, List<MenuItem> menuItems) {
         this.context = context;
@@ -49,7 +50,62 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                 fullList.add(item);
             }
         }
+        sortByCategory();
         filter("All Dishes"); // default to show all
+    }
+
+    // Sort items by category to group them together
+    private void sortByCategory() {
+        String[] categoryOrder = {"Appetizers", "Soup", "Main Courses", "Dessert", "Drink", "Staple Foods"};
+        fullList.sort((item1, item2) -> {
+            String cat1 = item1.getCategory() != null ? item1.getCategory().trim() : "";
+            String cat2 = item2.getCategory() != null ? item2.getCategory().trim() : "";
+            
+            int index1 = -1, index2 = -1;
+            for (int i = 0; i < categoryOrder.length; i++) {
+                if (cat1.equalsIgnoreCase(categoryOrder[i])) index1 = i;
+                if (cat2.equalsIgnoreCase(categoryOrder[i])) index2 = i;
+            }
+            
+            if (index1 == -1) index1 = categoryOrder.length;
+            if (index2 == -1) index2 = categoryOrder.length;
+            
+            return Integer.compare(index1, index2);
+        });
+    }
+
+    // Show all items without filtering (for category navigation)
+    public void showAllItems() {
+        filteredList.clear();
+        for (MenuItem item : fullList) {
+            if (item.getId() != 22) {
+                filteredList.add(item);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    // Get the position of the first item in a specific category
+    public int getPositionForCategory(String category) {
+        String searchCategory = category.trim().toLowerCase();
+        
+        for (int i = 0; i < filteredList.size(); i++) {
+            MenuItem item = filteredList.get(i);
+            String itemCategory = item.getCategory() != null 
+                    ? item.getCategory().trim().toLowerCase() 
+                    : "";
+            
+            if (itemCategory.equals(searchCategory)) {
+                return i;
+            }
+        }
+        return 0; // Return first position if category not found
+    }
+
+    // Set the currently selected category for UI highlighting
+    public void setSelectedCategory(String category) {
+        this.selectedCategory = category;
+        notifyDataSetChanged();
     }
 
     // simplified filter: only by category
@@ -153,6 +209,25 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         holder.dishDescription.setText(item.getDescription() != null ? item.getDescription() : "");
         holder.dishPrice.setText(String.format("$ %.2f", item.getPrice()));
 
+        // Set background color for image container based on selected category
+        String itemCategory = item.getCategory() != null ? item.getCategory().trim() : "";
+        String normalizedSelected = selectedCategory.equals("All Dishes") ? "All Dishes" : selectedCategory;
+        boolean isSelectedCategory = selectedCategory.equals("All Dishes") || itemCategory.equalsIgnoreCase(selectedCategory);
+        
+        int bgColor = isSelectedCategory ? context.getResources().getColor(R.color.light_purple) : context.getResources().getColor(R.color.light_gray);
+        if (holder.dishImageContainer != null) {
+            holder.dishImageContainer.setBackgroundColor(bgColor);
+        }
+
+        // Set card border based on selected category
+        if (holder.cardView != null) {
+            if (isSelectedCategory) {
+                holder.cardView.setForeground(ContextCompat.getDrawable(context, R.drawable.card_border_selected));
+            } else {
+                holder.cardView.setForeground(ContextCompat.getDrawable(context, R.drawable.card_border_normal));
+            }
+        }
+
         // Spice level with chili icons
         holder.spiceIconContainer.removeAllViews();
 
@@ -254,12 +329,16 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView dishImage;
+        View dishImageContainer;
         LinearLayout spiceIconContainer;
         TextView dishName, dishDescription, dishPrice;
+        androidx.cardview.widget.CardView cardView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            cardView = (androidx.cardview.widget.CardView) itemView;
             dishImage = itemView.findViewById(R.id.dishImage);
+            dishImageContainer = itemView.findViewById(R.id.dishImageContainer);
             dishName = itemView.findViewById(R.id.dishName);
             dishDescription = itemView.findViewById(R.id.dishDescription);
             dishPrice = itemView.findViewById(R.id.dishPrice);

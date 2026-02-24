@@ -1,4 +1,5 @@
 <androidx.cardview.widget.CardView
+    android:id="@+id/menuItemCardView"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:cardview="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,6 +8,7 @@
     android:layout_margin="8dp"
     cardview:cardCornerRadius="12dp"
     cardview:cardElevation="6dp"
+    android:foreground="@drawable/card_border_normal"
     android:background="@android:color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,15 +17,22 @@
         android:padding="12dp">
 
         <!-- Dish Image -->
-        <ImageView
-            android:id="@+id/dishImage"
+        <FrameLayout
+            android:id="@+id/dishImageContainer"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:scaleType="centerCrop"
             android:background="@drawable/image_rounded_bg"
-            android:contentDescription="@string/menu_item_image_desc"
+            android:backgroundTint="#F5F5F5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+            
+            <ImageView
+                android:id="@+id/dishImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/menu_item_image_desc" />
+        </FrameLayout>
 
         <!-- Dish Name -->
         <TextView
@@ -35,11 +44,11 @@
             android:textColor="#333333"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/dishImage"
+            app:layout_constraintStart_toEndOf="@id/dishImageContainer"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Dish Description -->
+        <!-- Dish Description (Hidden) -->
         <TextView
             android:id="@+id/dishDescription"
             android:layout_width="0dp"
@@ -50,6 +59,7 @@
             android:maxLines="2"
             android:ellipsize="end"
             android:layout_marginTop="4dp"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/dishName"
             app:layout_constraintTop_toBottomOf="@id/dishName"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -64,7 +74,7 @@
             android:textColor="#FF5722"
             android:layout_marginTop="6dp"
             app:layout_constraintStart_toStartOf="@id/dishName"
-            app:layout_constraintTop_toBottomOf="@id/dishDescription"
+            app:layout_constraintTop_toBottomOf="@id/dishName"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed" />
 

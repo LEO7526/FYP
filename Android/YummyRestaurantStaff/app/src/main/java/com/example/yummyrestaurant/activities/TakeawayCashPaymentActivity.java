@@ -68,9 +68,9 @@ public class TakeawayCashPaymentActivity extends androidx.appcompat.app.AppCompa
         recyclerView = findViewById(R.id.recyclerViewTakeawayOrders);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // For now, create a simple adapter
-        // adapter = new TakeawayCashOrderAdapter(this, orderList, this::onOrderClicked);
-        // recyclerView.setAdapter(adapter);
+        // Create adapter
+        adapter = new TakeawayCashOrderAdapter(this, orderList, this::onOrderClicked);
+        recyclerView.setAdapter(adapter);
         
         Log.d(TAG, "initializeUI: UI components initialized");
     }

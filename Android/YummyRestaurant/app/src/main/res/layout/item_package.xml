@@ -1,23 +1,43 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="8dp"
+<androidx.cardview.widget.CardView
+    android:id="@+id/packageCardView"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:cardview="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground">
+    android:layout_margin="8dp"
+    cardview:cardCornerRadius="8dp"
+    cardview:cardElevation="4dp"
+    android:foreground="@drawable/card_border_normal">
 
-    <ImageView
-        android:id="@+id/packageImage"
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="8dp"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scaleType="centerCrop"
-        android:contentDescription="Package image" />
-
-    <TextView
-        android:id="@+id/packageName"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Package Name"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginTop="8dp" />
-</LinearLayout>
+        android:background="@android:color/white">
+
+        <FrameLayout
+            android:id="@+id/packageImageContainer"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#F5F5F5">
+            
+            <ImageView
+                android:id="@+id/packageImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Package image" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/packageName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Package Name"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

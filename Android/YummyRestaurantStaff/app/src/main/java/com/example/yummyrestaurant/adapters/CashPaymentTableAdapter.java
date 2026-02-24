@@ -20,7 +20,7 @@ public class CashPaymentTableAdapter extends RecyclerView.Adapter<CashPaymentTab
     private OnTableClickListener listener;
 
     public interface OnTableClickListener {
-        void onTableClick(CashPaymentTable table);
+        void onTableClicked(CashPaymentTable table);
     }
 
     public CashPaymentTableAdapter(Context context, List<CashPaymentTable> tableList, OnTableClickListener listener) {
@@ -45,7 +45,7 @@ public class CashPaymentTableAdapter extends RecyclerView.Adapter<CashPaymentTab
         
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onTableClick(table);
+                listener.onTableClicked(table);
             }
         });
     }

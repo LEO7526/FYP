@@ -23,6 +23,7 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
 
     private final List<SetMenu> packages;
     private final OnPackageClickListener listener;
+    private String selectedPackageName = ""; // Track selected package
 
     public PackagesAdapter(List<SetMenu> packages, OnPackageClickListener listener) {
         this.packages = packages;
@@ -42,6 +43,25 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
         SetMenu setMenu = packages.get(position);
         holder.name.setText(setMenu.getName());
         
+        // Set background color based on selected package
+        int bgColor = setMenu.getName().equals(selectedPackageName) ? 
+            holder.itemView.getContext().getResources().getColor(R.color.light_purple) :
+            holder.itemView.getContext().getResources().getColor(R.color.light_gray);
+        if (holder.imageContainer != null) {
+            holder.imageContainer.setBackgroundColor(bgColor);
+        }
+
+        // Set card border based on selected package
+        if (holder.cardView != null) {
+            if (setMenu.getName().equals(selectedPackageName)) {
+                holder.cardView.setForeground(androidx.core.content.ContextCompat.getDrawable(
+                    holder.itemView.getContext(), R.drawable.card_border_selected));
+            } else {
+                holder.cardView.setForeground(androidx.core.content.ContextCompat.getDrawable(
+                    holder.itemView.getContext(), R.drawable.card_border_normal));
+            }
+        }
+        
         // Load package image using Glide
         if (setMenu.getImageUrl() != null && !setMenu.getImageUrl().isEmpty()) {
             Glide.with(holder.itemView.getContext())
@@ -59,13 +79,33 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
         return packages.size();
     }
 
+    // Get the position of the first package with a specific name
+    public int getPositionForPackageName(String packageName) {
+        for (int i = 0; i < packages.size(); i++) {
+            if (packages.get(i).getName().equals(packageName)) {
+                return i;
+            }
+        }
+        return 0; // Return first position if not found
+    }
+
+    // Set the currently selected package for UI highlighting
+    public void setSelectedPackageName(String packageName) {
+        this.selectedPackageName = packageName;
+        notifyDataSetChanged();
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         ImageView image;
+        View imageContainer;
+        androidx.cardview.widget.CardView cardView;
         ViewHolder(View itemView) {
             super(itemView);
+            cardView = (androidx.cardview.widget.CardView) itemView;
             name = itemView.findViewById(R.id.packageName);
             image = itemView.findViewById(R.id.packageImage);
+            imageContainer = itemView.findViewById(R.id.packageImageContainer);
         }
     }
 }

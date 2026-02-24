@@ -69,9 +69,9 @@ public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCom
         if (recyclerView != null) {
             recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
-            // For now, create a simple adapter
-            // adapter = new CashPaymentTableAdapter(this, tableList, this::onTableClicked);
-            // recyclerView.setAdapter(adapter);
+            // Create adapter
+            adapter = new CashPaymentTableAdapter(this, tableList, this::onTableClicked);
+            recyclerView.setAdapter(adapter);
         }
         
         Log.d(TAG, "initializeUI: UI components initialized");

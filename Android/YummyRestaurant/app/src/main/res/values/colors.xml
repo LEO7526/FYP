@@ -80,11 +80,16 @@
 
     <color name="primary_text">#212121</color>          <!-- Dark gray -->
     <color name="hint_text">#757575</color>             <!-- Medium gray -->
+    <color name="gray_text">#999999</color>             <!-- Light gray text -->
     <color name="link_color">#0D47A1</color>            <!-- Deep blue -->
 
     <color name="teal_700">#00796B</color>
 
     <!-- Overlay colors -->
     <color name="overlay_semi_transparent">#80000000</color>
+
+    <!-- Category selection colors -->
+    <color name="light_purple">#7C3AED</color>
+    <color name="magenta_primary">#D81B60</color>
 
 </resources>
