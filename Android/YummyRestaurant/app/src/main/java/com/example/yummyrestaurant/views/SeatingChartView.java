@@ -31,17 +31,55 @@ import java.util.Map;
  */
 public class SeatingChartView extends View {
 
+    private enum TableShape {
+        RECT,
+        OVAL,
+        CIRCLE
+    }
+
+    private static class TableLayout {
+        final float xPercent;
+        final float yPercent;
+        final TableShape shape;
+
+        TableLayout(float xPercent, float yPercent, TableShape shape) {
+            this.xPercent = xPercent;
+            this.yPercent = yPercent;
+            this.shape = shape;
+        }
+    }
+
+    private static final Map<Integer, TableLayout> FLOOR_LAYOUT = new HashMap<>();
+
+    static {
+        FLOOR_LAYOUT.put(36, new TableLayout(14f, 16f, TableShape.RECT));
+        FLOOR_LAYOUT.put(35, new TableLayout(14f, 26f, TableShape.RECT));
+        FLOOR_LAYOUT.put(34, new TableLayout(14f, 36f, TableShape.RECT));
+        FLOOR_LAYOUT.put(33, new TableLayout(14f, 46f, TableShape.RECT));
+        FLOOR_LAYOUT.put(32, new TableLayout(14f, 56f, TableShape.RECT));
+        FLOOR_LAYOUT.put(31, new TableLayout(14f, 70f, TableShape.RECT));
+
+        FLOOR_LAYOUT.put(23, new TableLayout(36f, 20f, TableShape.CIRCLE));
+        FLOOR_LAYOUT.put(13, new TableLayout(56f, 20f, TableShape.CIRCLE));
+
+        FLOOR_LAYOUT.put(22, new TableLayout(36f, 36f, TableShape.RECT));
+        FLOOR_LAYOUT.put(21, new TableLayout(36f, 50f, TableShape.RECT));
+        FLOOR_LAYOUT.put(20, new TableLayout(36f, 68f, TableShape.RECT));
+
+        FLOOR_LAYOUT.put(12, new TableLayout(56f, 36f, TableShape.RECT));
+        FLOOR_LAYOUT.put(11, new TableLayout(56f, 50f, TableShape.RECT));
+        FLOOR_LAYOUT.put(10, new TableLayout(56f, 68f, TableShape.RECT));
+
+        FLOOR_LAYOUT.put(4, new TableLayout(76f, 30f, TableShape.RECT));
+        FLOOR_LAYOUT.put(3, new TableLayout(76f, 42f, TableShape.OVAL));
+        FLOOR_LAYOUT.put(2, new TableLayout(76f, 54f, TableShape.OVAL));
+        FLOOR_LAYOUT.put(1, new TableLayout(76f, 66f, TableShape.OVAL));
+    }
+
     private List<Table> tables = new ArrayList<>();
     private Map<Integer, RectF> tableRectMap = new HashMap<>();
     private int selectedTableId = -1;
     private OnTableSelectedListener onTableSelectedListener;
-
-    // Layout configuration
-    private static final float MARGIN_PERCENT = 5f;      // 5% margin from edges
-    private static final float TABLE_SIZE_PERCENT = 4f;   // 4% of width per table
-    private static final float MIN_TABLE_SIZE_DP = 40f;   // Minimum 40dp
-    private static final float MAX_TABLE_SIZE_DP = 60f;   // Maximum 60dp
-    private static final float MIN_MARGIN_PERCENT = 2f;   // Minimum 2% margin to ensure all tables visible
 
     // Colors
     private static final int COLOR_AVAILABLE = Color.parseColor("#4CAF50");    // Green
@@ -58,6 +96,8 @@ public class SeatingChartView extends View {
     private Paint textPaint;
     private Paint borderPaint;
     private Paint backgroundPaint;
+    private Paint guidePaint;
+    private Paint guideTextPaint;
 
     // Screen dimensions (in dp)
     private float displayDensity;
@@ -113,6 +153,18 @@ public class SeatingChartView extends View {
         textPaint.setAntiAlias(true);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+
+        guidePaint = new Paint();
+        guidePaint.setColor(Color.parseColor("#212121"));
+        guidePaint.setStyle(Paint.Style.STROKE);
+        guidePaint.setStrokeWidth(2f * displayDensity);
+        guidePaint.setAntiAlias(true);
+
+        guideTextPaint = new Paint();
+        guideTextPaint.setColor(Color.parseColor("#424242"));
+        guideTextPaint.setStyle(Paint.Style.FILL);
+        guideTextPaint.setAntiAlias(true);
+        guideTextPaint.setTextSize(13f * displayDensity);
     }
 
     /**
@@ -184,70 +236,64 @@ public class SeatingChartView extends View {
 
         // Draw background
         canvas.drawRect(0, 0, getWidth(), getHeight(), backgroundPaint);
+        tableRectMap.clear();
+
+        RectF chartArea = new RectF(
+            getWidth() * 0.06f,
+            getHeight() * 0.05f,
+            getWidth() * 0.94f,
+            getHeight() * 0.86f
+        );
+
+        drawFloorPlanReference(canvas, chartArea);
 
         if (tables.isEmpty()) {
             drawEmptyState(canvas);
             return;
         }
 
-        // Calculate responsive margin - ensure all tables fit on screen
-        // Find min and max coordinates to calculate required space
-        float minX = 100f, maxX = 0f;
-        float minY = 100f, maxY = 0f;
-        
-        for (Table table : tables) {
-            minX = Math.min(minX, table.getX());
-            maxX = Math.max(maxX, table.getX());
-            minY = Math.min(minY, table.getY());
-            maxY = Math.max(maxY, table.getY());
-        }
-        
-        float rangeX = maxX - minX;  // Should be ~80 (from 10 to 90)
-        float rangeY = maxY - minY;  // Should be ~75 (from 10 to 85)
-
-        // Calculate table size (responsive)
-        float tableSizePx = Math.max(
-            MIN_TABLE_SIZE_DP * displayDensity,
-            Math.min(
-                MAX_TABLE_SIZE_DP * displayDensity,
-                (getWidth() * TABLE_SIZE_PERCENT) / 100f
-            )
-        );
-
-        // Calculate margins dynamically to ensure all tables fit
-        // We need to fit tables from minX to maxX (80% of layout) into available width
-        float availableWidth = getWidth() - tableSizePx;
-        float marginLeft = (availableWidth * minX) / (rangeX + 4);  // +4 for padding
-        
-        float availableHeight = getHeight() - tableSizePx;
-        float marginTop = (availableHeight * minY) / (rangeY + 4);   // +4 for padding
-
         // Draw each table
         for (Table table : tables) {
-            drawTable(canvas, table, marginLeft, marginTop, availableWidth, availableHeight, tableSizePx, rangeX, rangeY);
+            drawTable(canvas, table, chartArea);
         }
     }
 
     /**
      * Draw a single table
      */
-    private void drawTable(Canvas canvas, Table table, float marginLeft, float marginTop,
-                          float availableWidth, float availableHeight, float tableSize,
-                          float rangeX, float rangeY) {
-        
-        // Calculate position (x and y are percentages, map to screen space)
-        // Normalize coordinates relative to min values (10, 10) to range space (80, 75)
-        float normalizedX = (table.getX() - 10) / rangeX;  // 0 to 1
-        float normalizedY = (table.getY() - 10) / rangeY;  // 0 to 1
-        
-        float x = marginLeft + (availableWidth * normalizedX);
-        float y = marginTop + (availableHeight * normalizedY);
+    private void drawTable(Canvas canvas, Table table, RectF chartArea) {
+        TableLayout layout = FLOOR_LAYOUT.get(table.getTid());
+        if (layout == null) {
+            return;
+        }
 
-        // Adjust position to center the table
-        float left = x - (tableSize / 2f);
-        float top = y - (tableSize / 2f);
-        float right = x + (tableSize / 2f);
-        float bottom = y + (tableSize / 2f);
+        float cx = chartArea.left + (chartArea.width() * layout.xPercent / 100f);
+        float cy = chartArea.top + (chartArea.height() * layout.yPercent / 100f);
+
+        float base = Math.min(chartArea.width(), chartArea.height());
+        float rectWidth = base * 0.12f;
+        float rectHeight = base * 0.08f;
+        float ovalWidth = base * 0.125f;
+        float ovalHeight = base * 0.09f;
+        float circleDiameter = base * 0.115f;
+
+        float width;
+        float height;
+        if (layout.shape == TableShape.CIRCLE) {
+            width = circleDiameter;
+            height = circleDiameter;
+        } else if (layout.shape == TableShape.OVAL) {
+            width = ovalWidth;
+            height = ovalHeight;
+        } else {
+            width = rectWidth;
+            height = rectHeight;
+        }
+
+        float left = cx - (width / 2f);
+        float top = cy - (height / 2f);
+        float right = cx + (width / 2f);
+        float bottom = cy + (height / 2f);
 
         RectF tableRect = new RectF(left, top, right, bottom);
         tableRectMap.put(table.getTid(), tableRect);
@@ -256,8 +302,7 @@ public class SeatingChartView extends View {
         int tableColor = getTableColor(table);
         tablePaint.setColor(tableColor);
 
-        // Draw table background
-        canvas.drawRoundRect(tableRect, 8, 8, tablePaint);
+        drawTableShape(canvas, tableRect, layout.shape, tablePaint);
 
         // Draw selection highlight if selected
         if (table.getTid() == selectedTableId) {
@@ -266,32 +311,66 @@ public class SeatingChartView extends View {
                 left - 4, top - 4,
                 right + 4, bottom + 4
             );
-            canvas.drawRoundRect(outerRect, 10, 10, selectedPaint);
+            drawTableShape(canvas, outerRect, layout.shape, selectedPaint);
             
             // Redraw table on top
-            canvas.drawRoundRect(tableRect, 8, 8, tablePaint);
+            drawTableShape(canvas, tableRect, layout.shape, tablePaint);
         }
 
         // Draw border
-        canvas.drawRoundRect(tableRect, 8, 8, borderPaint);
+        drawTableShape(canvas, tableRect, layout.shape, borderPaint);
 
         // Draw table number and capacity
-        float textSize = tableSize * 0.4f;
+        float textSize = height * 0.42f;
         textPaint.setTextSize(textSize);
 
         String tableText = "T" + table.getTid();
-        float textX = x;
-        float textY = y - (textSize / 4f);
+        float textX = cx;
+        float textY = cy - (textSize / 5f);
 
         canvas.drawText(tableText, textX, textY, textPaint);
 
         // Draw capacity info (smaller text)
-        float capacitySize = tableSize * 0.3f;
+        float capacitySize = height * 0.28f;
         textPaint.setTextSize(capacitySize);
         String capacityText = table.getCapacity() + "p";
-        float capacityY = y + (capacitySize / 2f);
+        float capacityY = cy + (capacitySize * 0.85f);
 
         canvas.drawText(capacityText, textX, capacityY, textPaint);
+    }
+
+    private void drawTableShape(Canvas canvas, RectF rect, TableShape shape, Paint paint) {
+        if (shape == TableShape.CIRCLE) {
+            float radius = Math.min(rect.width(), rect.height()) / 2f;
+            canvas.drawCircle(rect.centerX(), rect.centerY(), radius, paint);
+        } else {
+            canvas.drawRoundRect(rect, rect.height() * 0.25f, rect.height() * 0.25f, paint);
+        }
+    }
+
+    private void drawFloorPlanReference(Canvas canvas, RectF chartArea) {
+        canvas.drawRect(chartArea, guidePaint);
+
+        float leftWallX = chartArea.left + chartArea.width() * 0.04f;
+        canvas.drawLine(leftWallX, chartArea.top, leftWallX, chartArea.bottom, guidePaint);
+
+        guideTextPaint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("Wall", chartArea.left - (28f * displayDensity), chartArea.top + (24f * displayDensity), guideTextPaint);
+
+        guideTextPaint.setTextAlign(Paint.Align.RIGHT);
+        canvas.drawText("Window", chartArea.right + (30f * displayDensity), chartArea.top + (24f * displayDensity), guideTextPaint);
+
+        guideTextPaint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("Door", chartArea.right - (8f * displayDensity), chartArea.bottom + (26f * displayDensity), guideTextPaint);
+        canvas.drawText("Counter", chartArea.right - (88f * displayDensity), chartArea.bottom + (58f * displayDensity), guideTextPaint);
+
+        RectF counterRect = new RectF(
+            chartArea.right - (120f * displayDensity),
+            chartArea.bottom + (10f * displayDensity),
+            chartArea.right - (50f * displayDensity),
+            chartArea.bottom + (44f * displayDensity)
+        );
+        canvas.drawRect(counterRect, guidePaint);
     }
 
     /**

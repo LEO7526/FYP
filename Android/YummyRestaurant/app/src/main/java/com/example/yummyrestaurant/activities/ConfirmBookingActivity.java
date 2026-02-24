@@ -88,7 +88,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
 
     /**
      * Parse table data from JSON response
-     * Supports new format with coordinates and real-time status
+     * Supports format with real-time status (no coordinates required)
      */
     private void parseTablesJson(String json) {
         if (json == null || json.isEmpty()) {
@@ -104,14 +104,12 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
                 int tid = tableObject.getInt("id");
                 int capacity = tableObject.getInt("capacity");
                 
-                // Extract coordinate and status information
-                float x = (float) tableObject.optDouble("x", 0);
-                float y = (float) tableObject.optDouble("y", 0);
+                // Extract status information
                 String status = tableObject.optString("status", "available");
                 boolean isAvailable = tableObject.optBoolean("is_available", true);
                 boolean suitableForBooking = tableObject.optBoolean("suitable_for_booking", false);
 
-                Table table = new Table(tid, capacity, x, y, status, isAvailable, suitableForBooking);
+                Table table = new Table(tid, capacity, status, isAvailable, suitableForBooking);
                 tableList.add(table);
             }
 

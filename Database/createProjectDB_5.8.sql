@@ -700,7 +700,7 @@ INSERT INTO seatingChart (tid, capacity, status) VALUES
 (1, 2, 0),
 (2, 2, 0),
 (3, 2, 0),
-(4, 4, 0),
+(4, 2, 0),
 (10, 4, 0),
 (11, 4, 0),
 (12, 4, 0),

@@ -3,8 +3,6 @@ package com.example.yummyrestaurant.models;
 public class Table {
     private int tid;
     private int capacity;
-    private float x;              // X coordinate (percentage from left)
-    private float y;              // Y coordinate (percentage from top)
     private String status;        // available, occupied, reserved
     private boolean is_available;
     private boolean suitable_for_booking;
@@ -18,12 +16,10 @@ public class Table {
     }
 
     // Constructor for full table info (from seating chart)
-    public Table(int tid, int capacity, float x, float y, String status, 
+    public Table(int tid, int capacity, String status,
                  boolean is_available, boolean suitable_for_booking) {
         this.tid = tid;
         this.capacity = capacity;
-        this.x = x;
-        this.y = y;
         this.status = status;
         this.is_available = is_available;
         this.suitable_for_booking = suitable_for_booking;
@@ -36,14 +32,6 @@ public class Table {
 
     public int getCapacity() {
         return capacity;
-    }
-
-    public float getX() {
-        return x;
-    }
-
-    public float getY() {
-        return y;
     }
 
     public String getStatus() {
