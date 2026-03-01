@@ -737,10 +737,10 @@ CREATE TABLE booking (
 
 INSERT INTO booking (cid, bkcname, bktel, tid, bdate, btime, pnum, purpose, remark, status) VALUES
 (1, 'Alex Wong', 21232123, 4, '2024-01-15', '18:30:00', 4, 'Family Dinner', 'We have a baby with us, need a high chair', 2),
-(2, 'Tina Chan', 31233123, 12, '2024-01-16', '19:00:00', 2, 'Date Night', NULL, 3),
-(3, 'Bowie', 61236123, 13, '2024-01-17', '20:00:00', 6, 'Business Meeting', 'Need a quiet area for discussion', 1),
-(4, 'Samuel Lee', 61231212, 22, '2024-01-18', '12:30:00', 3, 'Lunch Meeting', NULL, 2),
-(5, 'Emily Tsang', 61231555, 31, '2024-01-19', '13:00:00', 4, 'Birthday Celebration', 'Will bring a cake', 3);
+(2, 'Tina Chan', 31233123, 7, '2024-01-16', '19:00:00', 2, 'Date Night', NULL, 3),
+(3, 'Bowie', 61236123, 17, '2024-01-17', '20:00:00', 6, 'Business Meeting', 'Need a quiet area for discussion', 1),
+(4, 'Samuel Lee', 61231212, 10, '2024-01-18', '12:30:00', 3, 'Lunch Meeting', NULL, 2),
+(5, 'Emily Tsang', 61231555, 11, '2024-01-19', '13:00:00', 4, 'Birthday Celebration', 'Will bring a cake', 3);
 
 CREATE TABLE table_orders (
   toid INT NOT NULL AUTO_INCREMENT,

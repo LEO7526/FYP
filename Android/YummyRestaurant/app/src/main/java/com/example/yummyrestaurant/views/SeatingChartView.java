@@ -50,6 +50,7 @@ public class SeatingChartView extends View {
     }
 
     private static final Map<Integer, TableLayout> FLOOR_LAYOUT = new HashMap<>();
+    private static final Map<Integer, TableLayout> LEGACY_FLOOR_LAYOUT = new HashMap<>();
 
     private static final float FLOOR_MIN_X = 14f;
     private static final float FLOOR_MAX_X = 76f;
@@ -57,28 +58,53 @@ public class SeatingChartView extends View {
     private static final float FLOOR_MAX_Y = 70f;
 
     static {
-        FLOOR_LAYOUT.put(36, new TableLayout(14f, 16f, TableShape.RECT));
-        FLOOR_LAYOUT.put(35, new TableLayout(14f, 26f, TableShape.RECT));
-        FLOOR_LAYOUT.put(34, new TableLayout(14f, 36f, TableShape.RECT));
-        FLOOR_LAYOUT.put(33, new TableLayout(14f, 46f, TableShape.RECT));
-        FLOOR_LAYOUT.put(32, new TableLayout(14f, 56f, TableShape.RECT));
-        FLOOR_LAYOUT.put(31, new TableLayout(14f, 70f, TableShape.RECT));
+        // Renumbered layout (1 - 18)
+        FLOOR_LAYOUT.put(16, new TableLayout(14f, 16f, TableShape.RECT));
+        FLOOR_LAYOUT.put(15, new TableLayout(14f, 26f, TableShape.RECT));
+        FLOOR_LAYOUT.put(14, new TableLayout(14f, 36f, TableShape.RECT));
+        FLOOR_LAYOUT.put(13, new TableLayout(14f, 46f, TableShape.RECT));
+        FLOOR_LAYOUT.put(12, new TableLayout(14f, 56f, TableShape.RECT));
+        FLOOR_LAYOUT.put(11, new TableLayout(14f, 70f, TableShape.RECT));
 
-        FLOOR_LAYOUT.put(23, new TableLayout(36f, 20f, TableShape.CIRCLE));
-        FLOOR_LAYOUT.put(13, new TableLayout(56f, 20f, TableShape.CIRCLE));
+        FLOOR_LAYOUT.put(18, new TableLayout(36f, 20f, TableShape.CIRCLE));
+        FLOOR_LAYOUT.put(17, new TableLayout(56f, 20f, TableShape.CIRCLE));
 
-        FLOOR_LAYOUT.put(22, new TableLayout(36f, 36f, TableShape.RECT));
-        FLOOR_LAYOUT.put(21, new TableLayout(36f, 50f, TableShape.RECT));
-        FLOOR_LAYOUT.put(20, new TableLayout(36f, 68f, TableShape.RECT));
+        FLOOR_LAYOUT.put(10, new TableLayout(36f, 36f, TableShape.RECT));
+        FLOOR_LAYOUT.put(9, new TableLayout(36f, 50f, TableShape.RECT));
+        FLOOR_LAYOUT.put(8, new TableLayout(36f, 68f, TableShape.RECT));
 
-        FLOOR_LAYOUT.put(12, new TableLayout(56f, 36f, TableShape.RECT));
-        FLOOR_LAYOUT.put(11, new TableLayout(56f, 50f, TableShape.RECT));
-        FLOOR_LAYOUT.put(10, new TableLayout(56f, 68f, TableShape.RECT));
+        FLOOR_LAYOUT.put(7, new TableLayout(56f, 36f, TableShape.RECT));
+        FLOOR_LAYOUT.put(6, new TableLayout(56f, 50f, TableShape.RECT));
+        FLOOR_LAYOUT.put(5, new TableLayout(56f, 68f, TableShape.RECT));
 
         FLOOR_LAYOUT.put(4, new TableLayout(76f, 30f, TableShape.RECT));
         FLOOR_LAYOUT.put(3, new TableLayout(76f, 42f, TableShape.OVAL));
         FLOOR_LAYOUT.put(2, new TableLayout(76f, 54f, TableShape.OVAL));
         FLOOR_LAYOUT.put(1, new TableLayout(76f, 66f, TableShape.OVAL));
+
+        // Legacy layout IDs
+        LEGACY_FLOOR_LAYOUT.put(36, new TableLayout(14f, 16f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(35, new TableLayout(14f, 26f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(34, new TableLayout(14f, 36f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(33, new TableLayout(14f, 46f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(32, new TableLayout(14f, 56f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(31, new TableLayout(14f, 70f, TableShape.RECT));
+
+        LEGACY_FLOOR_LAYOUT.put(23, new TableLayout(36f, 20f, TableShape.CIRCLE));
+        LEGACY_FLOOR_LAYOUT.put(13, new TableLayout(56f, 20f, TableShape.CIRCLE));
+
+        LEGACY_FLOOR_LAYOUT.put(22, new TableLayout(36f, 36f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(21, new TableLayout(36f, 50f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(20, new TableLayout(36f, 68f, TableShape.RECT));
+
+        LEGACY_FLOOR_LAYOUT.put(12, new TableLayout(56f, 36f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(11, new TableLayout(56f, 50f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(10, new TableLayout(56f, 68f, TableShape.RECT));
+
+        LEGACY_FLOOR_LAYOUT.put(4, new TableLayout(76f, 30f, TableShape.RECT));
+        LEGACY_FLOOR_LAYOUT.put(3, new TableLayout(76f, 42f, TableShape.OVAL));
+        LEGACY_FLOOR_LAYOUT.put(2, new TableLayout(76f, 54f, TableShape.OVAL));
+        LEGACY_FLOOR_LAYOUT.put(1, new TableLayout(76f, 66f, TableShape.OVAL));
     }
 
     private List<Table> tables = new ArrayList<>();
@@ -276,17 +302,19 @@ public class SeatingChartView extends View {
             return;
         }
 
+        Map<Integer, TableLayout> activeLayout = resolveFloorLayout();
+
         // Draw each table
         for (Table table : tables) {
-            drawTable(canvas, table, chartArea);
+            drawTable(canvas, table, chartArea, activeLayout);
         }
     }
 
     /**
      * Draw a single table
      */
-    private void drawTable(Canvas canvas, Table table, RectF chartArea) {
-        TableLayout layout = FLOOR_LAYOUT.get(table.getTid());
+    private void drawTable(Canvas canvas, Table table, RectF chartArea, Map<Integer, TableLayout> layoutMap) {
+        TableLayout layout = layoutMap.get(table.getTid());
         if (layout == null) {
             return;
         }
@@ -369,6 +397,16 @@ public class SeatingChartView extends View {
         float capacityY = cy + (capacitySize * 0.85f);
 
         canvas.drawText(capacityText, textX, capacityY, textPaint);
+    }
+
+    private Map<Integer, TableLayout> resolveFloorLayout() {
+        for (Table table : tables) {
+            int tableId = table.getTid();
+            if (tableId > 18) {
+                return LEGACY_FLOOR_LAYOUT;
+            }
+        }
+        return FLOOR_LAYOUT;
     }
 
     private void drawTableShape(Canvas canvas, RectF rect, TableShape shape, Paint paint) {
