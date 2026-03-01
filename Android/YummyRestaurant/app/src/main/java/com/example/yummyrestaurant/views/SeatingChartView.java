@@ -103,6 +103,9 @@ public class SeatingChartView extends View {
     private Paint backgroundPaint;
     private Paint guidePaint;
     private Paint guideTextPaint;
+    private Paint wallFillPaint;
+    private Paint windowInnerLinePaint;
+    private Paint windowFillPaint;
 
     // Screen dimensions (in dp)
     private float displayDensity;
@@ -170,6 +173,22 @@ public class SeatingChartView extends View {
         guideTextPaint.setStyle(Paint.Style.FILL);
         guideTextPaint.setAntiAlias(true);
         guideTextPaint.setTextSize(13f * displayDensity);
+
+        wallFillPaint = new Paint();
+        wallFillPaint.setColor(Color.parseColor("#8B5A2B"));
+        wallFillPaint.setStyle(Paint.Style.FILL);
+        wallFillPaint.setAntiAlias(true);
+
+        windowInnerLinePaint = new Paint();
+        windowInnerLinePaint.setColor(Color.parseColor("#1E88E5"));
+        windowInnerLinePaint.setStyle(Paint.Style.STROKE);
+        windowInnerLinePaint.setStrokeWidth(1f * displayDensity);
+        windowInnerLinePaint.setAntiAlias(true);
+
+        windowFillPaint = new Paint();
+        windowFillPaint.setColor(Color.parseColor("#90CAF9"));
+        windowFillPaint.setStyle(Paint.Style.FILL);
+        windowFillPaint.setAntiAlias(true);
     }
 
     /**
@@ -365,6 +384,15 @@ public class SeatingChartView extends View {
         float doorGapTop = chartArea.bottom - (chartArea.height() * 0.14f);
         float doorGapBottom = chartArea.bottom - (chartArea.height() * 0.04f);
         float rightWallX = chartArea.right;
+        float leftWallX = chartArea.left + chartArea.width() * 0.04f;
+
+        RectF leftWallArea = new RectF(
+            chartArea.left,
+            chartArea.top,
+            leftWallX,
+            chartArea.bottom
+        );
+        canvas.drawRect(leftWallArea, wallFillPaint);
 
         // Outer boundary with right-side door opening
         canvas.drawLine(chartArea.left, chartArea.top, rightWallX, chartArea.top, guidePaint);
@@ -373,7 +401,6 @@ public class SeatingChartView extends View {
         canvas.drawLine(rightWallX, chartArea.top, rightWallX, doorGapTop, guidePaint);
         canvas.drawLine(rightWallX, doorGapBottom, rightWallX, chartArea.bottom, guidePaint);
 
-        float leftWallX = chartArea.left + chartArea.width() * 0.04f;
         canvas.drawLine(leftWallX, chartArea.top, leftWallX, chartArea.bottom, guidePaint);
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
@@ -388,19 +415,55 @@ public class SeatingChartView extends View {
         // Window marker line (right upper wall)
         float windowMarkerY = chartArea.top + (18f * displayDensity);
         canvas.drawLine(rightWallX + (4f * displayDensity), windowMarkerY, rightWallX + (16f * displayDensity), windowMarkerY, guidePaint);
-        float windowMarkerX = chartArea.top - (18f * displayDensity);
-        canvas.drawLine(rightWallX - (16f * displayDensity) ,chartArea.top , rightWallX - (16f * displayDensity), windowMarkerX, guidePaint);
-        canvas.drawLine(rightWallX + (16f * displayDensity) ,windowMarkerY , rightWallX + (16f * displayDensity), windowMarkerX, guidePaint);
+        float windowTopY = chartArea.top - (18f * displayDensity);
+        float windowLeftX = rightWallX - (16f * displayDensity);
+        float windowRightX = rightWallX + (16f * displayDensity);
+        canvas.drawLine(windowLeftX, chartArea.top, windowLeftX, windowTopY, guidePaint);
+        canvas.drawLine(windowRightX, windowMarkerY, windowRightX, windowTopY, guidePaint);
+
+        float windowInnerHorizontalY = (windowTopY + windowMarkerY) / 2f;
+        float windowInnerVerticalX = (windowLeftX + windowRightX) / 2f;
+        float windowInset = 3f * displayDensity;
+        float windowBandTopY = windowInnerHorizontalY + 23f;
+        float windowBandLeftX = chartArea.right - 18f;
+        float windowBandBottomY = chartArea.bottom - 243f;
+        RectF windowTopArea = new RectF(leftWallX, chartArea.top, chartArea.right, windowBandTopY);
+        canvas.drawRect(windowTopArea, windowFillPaint);
+        RectF windowArea = new RectF(windowBandLeftX, windowBandTopY, chartArea.right, windowBandBottomY);
+        canvas.drawRect(windowArea, windowFillPaint);
+
+        canvas.drawLine(
+            chartArea.right,
+            windowBandTopY,
+            leftWallX,
+            windowBandTopY,
+            windowInnerLinePaint
+        );
+        canvas.drawLine(
+            windowBandLeftX,
+                windowBandTopY,
+                windowBandLeftX,
+            windowBandBottomY,
+            windowInnerLinePaint
+        );
+
+        canvas.drawLine(
+                windowBandLeftX,
+                windowBandBottomY,
+                chartArea.right,
+                windowBandBottomY,
+                windowInnerLinePaint
+        );
 
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
         canvas.drawText("Door", rightWallX - (58f * displayDensity), doorGapTop + (18f * displayDensity), guideTextPaint);
 
         RectF counterRect = new RectF(
-            chartArea.right - (150f * displayDensity),
-            chartArea.bottom + (10f * displayDensity),
-            chartArea.right - (74f * displayDensity),
-            chartArea.bottom + (55f * displayDensity)
+                chartArea.right - (150f * displayDensity),
+                chartArea.bottom - (60f * displayDensity),
+                chartArea.right - (74f * displayDensity),
+                chartArea.bottom - (5f * displayDensity)
         );
         canvas.drawRect(counterRect, guidePaint);
 
