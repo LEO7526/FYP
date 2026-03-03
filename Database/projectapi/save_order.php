@@ -1,5 +1,22 @@
 <?php
 header('Content-Type: application/json');
+date_default_timezone_set('Asia/Hong_Kong');
+
+function isWithinOrderWindow(): bool {
+    $now = new DateTime('now', new DateTimeZone('Asia/Hong_Kong'));
+    $minutes = ((int)$now->format('H')) * 60 + (int)$now->format('i');
+    return $minutes >= 11 * 60 && $minutes < 21 * 60 + 30;
+}
+
+if (!isWithinOrderWindow()) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Only available 11:00–21:29 (Asia/Hong_Kong).',
+        'error' => 'Outside ordering hours'
+    ]);
+    exit;
+}
 
 // Connect to MySQL
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
@@ -405,8 +422,8 @@ if ($sid && $table_number) {
     $tableStmt->close();
 }
 
-// ✅ Handle coupon points for card payments (ostatus = 3)
-if ($ostatus == 3) {
+// ✅ Handle coupon points for successful card payments
+if ($payment_method === 'card' && $cid > 0) {
     // Calculate total order amount for coupon points
     $amountStmt = $conn->prepare("
         SELECT COALESCE(SUM(mi.item_price * oi.qty), 0) as total
@@ -433,47 +450,63 @@ if ($ostatus == 3) {
             $conn->begin_transaction();
             
             try {
-                // Add coupon points to customer
-                $pointsStmt = $conn->prepare("UPDATE customer SET coupon_point = coupon_point + ? WHERE cid = ?");
-                if (!$pointsStmt) {
-                    throw new Exception("Failed to prepare points update: " . $conn->error);
+                // Idempotency guard: don't award twice for the same order
+                $idempotencyNote = "Payment for order #" . $order_id;
+                $checkHistoryStmt = $conn->prepare("SELECT 1 FROM coupon_point_history WHERE cid = ? AND action = 'earn' AND note = ? LIMIT 1");
+                if (!$checkHistoryStmt) {
+                    throw new Exception("Failed to prepare history check: " . $conn->error);
                 }
-                
-                $pointsStmt->bind_param("ii", $couponPointsToAdd, $cid);
-                if (!$pointsStmt->execute()) {
-                    throw new Exception("Failed to add coupon points: " . $pointsStmt->error);
+                $checkHistoryStmt->bind_param("is", $cid, $idempotencyNote);
+                $checkHistoryStmt->execute();
+                $alreadyAwarded = $checkHistoryStmt->get_result()->num_rows > 0;
+                $checkHistoryStmt->close();
+
+                if ($alreadyAwarded) {
+                    $conn->rollback();
+                    error_log("⚠️ Coupon points already awarded for order_id=$order_id, skip duplicate award.");
+                } else {
+                    // Add coupon points to customer
+                    $pointsStmt = $conn->prepare("UPDATE customer SET coupon_point = coupon_point + ? WHERE cid = ?");
+                    if (!$pointsStmt) {
+                        throw new Exception("Failed to prepare points update: " . $conn->error);
+                    }
+                    
+                    $pointsStmt->bind_param("ii", $couponPointsToAdd, $cid);
+                    if (!$pointsStmt->execute()) {
+                        throw new Exception("Failed to add coupon points: " . $pointsStmt->error);
+                    }
+                    $pointsStmt->close();
+                    
+                    // Get the new coupon point balance
+                    $balanceStmt = $conn->prepare("SELECT coupon_point FROM customer WHERE cid = ?");
+                    if (!$balanceStmt) {
+                        throw new Exception("Failed to prepare balance query: " . $conn->error);
+                    }
+                    
+                    $balanceStmt->bind_param("i", $cid);
+                    $balanceStmt->execute();
+                    $balanceResult = $balanceStmt->get_result();
+                    $balanceRow = $balanceResult->fetch_assoc();
+                    $newBalance = $balanceRow['coupon_point'];
+                    $balanceStmt->close();
+                    
+                    // Insert into coupon_point_history for tracking
+                    $note = $idempotencyNote;
+                    $historyStmt = $conn->prepare("INSERT INTO coupon_point_history (cid, coupon_id, delta, resulting_points, action, note) VALUES (?, NULL, ?, ?, 'earn', ?)");
+                    if (!$historyStmt) {
+                        throw new Exception("Failed to prepare history insert: " . $conn->error);
+                    }
+                    
+                    $historyStmt->bind_param("iiis", $cid, $couponPointsToAdd, $newBalance, $note);
+                    if (!$historyStmt->execute()) {
+                        throw new Exception("Failed to insert history: " . $historyStmt->error);
+                    }
+                    $historyStmt->close();
+                    
+                    // Commit transaction
+                    $conn->commit();
+                    error_log("✅ Coupon points added successfully: cid=$cid, points=$couponPointsToAdd, new_balance=$newBalance");
                 }
-                $pointsStmt->close();
-                
-                // Get the new coupon point balance
-                $balanceStmt = $conn->prepare("SELECT coupon_point FROM customer WHERE cid = ?");
-                if (!$balanceStmt) {
-                    throw new Exception("Failed to prepare balance query: " . $conn->error);
-                }
-                
-                $balanceStmt->bind_param("i", $cid);
-                $balanceStmt->execute();
-                $balanceResult = $balanceStmt->get_result();
-                $balanceRow = $balanceResult->fetch_assoc();
-                $newBalance = $balanceRow['coupon_point'];
-                $balanceStmt->close();
-                
-                // Insert into coupon_point_history for tracking
-                $note = "Payment for order #" . $order_id . " (Amount: HK$" . $totalAmount . ")";
-                $historyStmt = $conn->prepare("INSERT INTO coupon_point_history (cid, coupon_id, delta, resulting_points, action, note) VALUES (?, NULL, ?, ?, 'earn', ?)");
-                if (!$historyStmt) {
-                    throw new Exception("Failed to prepare history insert: " . $conn->error);
-                }
-                
-                $historyStmt->bind_param("iiis", $cid, $couponPointsToAdd, $newBalance, $note);
-                if (!$historyStmt->execute()) {
-                    throw new Exception("Failed to insert history: " . $historyStmt->error);
-                }
-                $historyStmt->close();
-                
-                // Commit transaction
-                $conn->commit();
-                error_log("✅ Coupon points added successfully: cid=$cid, points=$couponPointsToAdd, new_balance=$newBalance");
                 
             } catch (Exception $e) {
                 $conn->rollback();
@@ -481,9 +514,9 @@ if ($ostatus == 3) {
             }
         }
     }
-} else if ($ostatus == 2) {
+} else if ($payment_method === 'cash') {
     // Cash payment - no coupon points added yet
-    error_log("Cash payment detected (ostatus=2). Coupon points will be added after staff confirms payment.");
+    error_log("Cash payment detected. Coupon points will be added after staff confirms payment at counter.");
 }
 
 // Final response

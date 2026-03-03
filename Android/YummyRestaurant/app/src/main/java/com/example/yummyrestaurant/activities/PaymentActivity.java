@@ -25,9 +25,11 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.paymentsheet.PaymentSheet;
 import com.stripe.android.paymentsheet.PaymentSheetResult;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -294,7 +296,20 @@ public class PaymentActivity extends ThemeBaseActivity {
                             return;
                         }
                         
-                        showError("Payment setup failed. Please try again.");
+                        if (response.code() == 403) {
+                            String serverMessage = "Only available 11:00–21:29 (Asia/Hong_Kong).";
+                            try {
+                                JSONObject errJson = new JSONObject(errorBody);
+                                String msg = errJson.optString("message", "");
+                                if (!msg.trim().isEmpty()) {
+                                    serverMessage = msg;
+                                }
+                            } catch (Exception ignored) {
+                            }
+                            showError(serverMessage);
+                        } else {
+                            showError("Payment setup failed. Please try again.");
+                        }
                         resetPaymentButton();
                     } catch (IOException e) {
                         Log.e(TAG, "Error reading errorBody", e);
@@ -631,6 +646,21 @@ public class PaymentActivity extends ThemeBaseActivity {
                     }
                 } else {
                     Log.e(TAG, "Failed to save order. Code=" + response.code());
+                    if (response.code() == 403) {
+                        String message = "Only available 11:00–21:29 (Asia/Hong_Kong).";
+                        try {
+                            String responseText = response.errorBody() != null ? response.errorBody().string() : "";
+                            if (!responseText.isEmpty()) {
+                                JSONObject json = new JSONObject(responseText);
+                                String serverMessage = json.optString("message", "");
+                                if (!serverMessage.trim().isEmpty()) {
+                                    message = serverMessage;
+                                }
+                            }
+                        } catch (Exception ignored) {
+                        }
+                        Toast.makeText(PaymentActivity.this, message, Toast.LENGTH_LONG).show();
+                    }
                 }
             }
 
@@ -647,4 +677,5 @@ public class PaymentActivity extends ThemeBaseActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         Log.e(TAG, "Error: " + message);
     }
+
 }

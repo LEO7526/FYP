@@ -21,6 +21,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -335,6 +337,13 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
 
                 // Build booking JSON
                 JSONObject bookingJson = new JSONObject();
+                try {
+                    String userId = RoleManager.getUserId();
+                    bookingJson.put("cid", Integer.parseInt(userId));
+                } catch (Exception e) {
+                    runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, "Invalid customer account. Please log in again.", Toast.LENGTH_LONG).show());
+                    return;
+                }
                 bookingJson.put("bkcname", name);
                 bookingJson.put("bktel", phone);
                 bookingJson.put("tid", selectedTable.getTid());
@@ -355,13 +364,49 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
                 os.write(input, 0, input.length);
 
                 int responseCode = conn.getResponseCode();
+                BufferedReader responseReader = null;
+                String responseMessage = "Booking failed. Please try again.";
+
+                try {
+                    if (responseCode >= 200 && responseCode < 300) {
+                        responseReader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    } else if (conn.getErrorStream() != null) {
+                        responseReader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
+                    }
+
+                    if (responseReader != null) {
+                        StringBuilder bodyBuilder = new StringBuilder();
+                        String line;
+                        while ((line = responseReader.readLine()) != null) {
+                            bodyBuilder.append(line);
+                        }
+
+                        if (bodyBuilder.length() > 0) {
+                            JSONObject responseJson = new JSONObject(bodyBuilder.toString());
+                            responseMessage = responseJson.optString("message", responseMessage);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.w("ConfirmBooking", "Unable to parse booking response body", e);
+                } finally {
+                    try {
+                        if (responseReader != null) responseReader.close();
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                if ((responseMessage == null || responseMessage.trim().isEmpty()) && responseCode != 201) {
+                    responseMessage = "Booking failed (HTTP " + responseCode + ").";
+                }
+
+                String finalResponseMessage = responseMessage;
 
                 runOnUiThread(() -> {
                     if (responseCode == 201) {
-                        Toast.makeText(ConfirmBookingActivity.this, "Booking successful!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(ConfirmBookingActivity.this, finalResponseMessage, Toast.LENGTH_LONG).show();
                         finish(); // Close the booking activity
                     } else {
-                        Toast.makeText(ConfirmBookingActivity.this, "Booking failed. Please try again.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(ConfirmBookingActivity.this, finalResponseMessage, Toast.LENGTH_LONG).show();
                     }
                 });
 

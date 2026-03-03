@@ -137,6 +137,10 @@ public class CustomerHomeActivity extends BaseCustomerActivity {
                 startActivity(new Intent(this, BookingActivity.class));
                 drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
+            } else if (id == R.id.nav_my_bookings) {
+                startActivity(new Intent(this, MyBookingsActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
             } else if (id == R.id.nav_settings) {
                 startActivity(new Intent(this, SettingsActivity.class));
                 drawerLayout.closeDrawer(GravityCompat.START);

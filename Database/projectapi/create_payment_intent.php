@@ -5,6 +5,23 @@ require 'stripe-demo/vendor/autoload.php';
 \Stripe\Stripe::setApiKey('sk_test_51S56Q5CEiSaWf7OeDUguzBcEbvJdjYZCYYfWjx4Ctu1iQPLcusx9YpFtXJahOYZftMTh3DBFtCW0NhxpqP8SIS9000ylQ4xZat');
 
 header('Content-Type: application/json');
+date_default_timezone_set('Asia/Hong_Kong');
+
+function isWithinOrderWindow(): bool {
+    $now = new DateTime('now', new DateTimeZone('Asia/Hong_Kong'));
+    $minutes = ((int)$now->format('H')) * 60 + (int)$now->format('i');
+    return $minutes >= 11 * 60 && $minutes < 21 * 60 + 30;
+}
+
+if (!isWithinOrderWindow()) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Only available 11:00–21:29 (Asia/Hong_Kong).',
+        'error' => 'Outside ordering hours'
+    ]);
+    exit;
+}
 
 $input = json_decode(file_get_contents('php://input'), true);
 $amount = $input['amount'] ?? 0;

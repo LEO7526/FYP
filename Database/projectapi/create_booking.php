@@ -2,6 +2,7 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
+date_default_timezone_set("Asia/Hong_Kong");
 
 $conn = new mysqli("localhost", "root", "", "ProjectDB");
 if ($conn->connect_error) {
@@ -25,6 +26,38 @@ $remark = $data['remark'] ?? null;
 if (empty($bkcname) || empty($bktel) || $tid <= 0 || empty($bdate) || empty($btime) || $pnum <= 0) {
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "Required booking information is missing."]);
+    exit();
+}
+
+$bookingDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $bdate . ' ' . $btime);
+if (!$bookingDateTime) {
+    $bookingDateTime = DateTime::createFromFormat('Y-m-d H:i', $bdate . ' ' . $btime);
+}
+if (!$bookingDateTime) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Invalid booking date or time format."]);
+    exit();
+}
+
+$slotHour = (int)$bookingDateTime->format('H');
+$slotMinute = (int)$bookingDateTime->format('i');
+
+if (
+    $slotHour < 11 ||
+    $slotHour > 21 ||
+    !in_array($slotMinute, [0, 30], true) ||
+    ($slotHour === 21 && $slotMinute >= 30)
+) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Booking time must be in 30-minute slots from 11:00 to before 21:30 (last slot 21:00)."]);
+    exit();
+}
+
+$now = new DateTime();
+$minimumAllowed = (clone $now)->modify('+24 hours');
+if ($bookingDateTime < $minimumAllowed) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Booking must be made at least 24 hours before the selected time."]);
     exit();
 }
 

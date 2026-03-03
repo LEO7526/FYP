@@ -447,6 +447,10 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
                 startActivity(new Intent(this, BookingActivity.class));
                 drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
+            } else if (id == R.id.nav_my_bookings) {
+                startActivity(new Intent(this, MyBookingsActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
             } else if (id == R.id.nav_logout) {
                 if (!isLoggedIn) {
                     Toast.makeText(this, "You are not logged in.", Toast.LENGTH_SHORT).show();

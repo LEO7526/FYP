@@ -1,7 +1,7 @@
 package com.example.yummyrestaurant.activities;
 
 import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +20,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -38,9 +46,19 @@ import java.util.Locale;
  */
 public class BookingActivity extends ThemeBaseActivity {
 
+    private static final int OPEN_HOUR = 11;
+    private static final int LAST_SLOT_HOUR = 21;
+    private static final int LAST_SLOT_MINUTE = 0;
+    private static final int ORDERING_CUTOFF_HOUR = 21;
+    private static final int ORDERING_CUTOFF_MINUTE = 30;
+    private static final int SLOT_INTERVAL_MINUTES = 30;
+    private static final long MIN_ADVANCE_HOURS = 24;
+
     private Button buttonSelectDate, buttonSelectTime, buttonFindTables;
     private EditText editTextNumberOfPeople;
     private int year, month, day, hour, minute;
+    private String[] timeSlotLabels;
+    private String[] timeSlotValues;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +83,44 @@ public class BookingActivity extends ThemeBaseActivity {
         minute = calendar.get(Calendar.MINUTE);
 
         buttonSelectDate.setText(String.format(Locale.US, "%d-%02d-%02d", year, month + 1, day));
-        buttonSelectTime.setText(String.format(Locale.US, "%02d:%02d", hour, minute));
+        initTimeSlots();
+        buttonSelectTime.setText(timeSlotValues[0]);
 
         buttonSelectDate.setOnClickListener(v -> showDatePicker());
         buttonSelectTime.setOnClickListener(v -> showTimePicker());
         buttonFindTables.setOnClickListener(v -> findTables());
+    }
+
+    private void initTimeSlots() {
+        List<String> labels = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+
+        int currentHour = OPEN_HOUR;
+        int currentMinute = 0;
+
+        while (currentHour < LAST_SLOT_HOUR || (currentHour == LAST_SLOT_HOUR && currentMinute <= LAST_SLOT_MINUTE)) {
+            String start = String.format(Locale.US, "%02d:%02d", currentHour, currentMinute);
+
+            int endHour = currentHour;
+            int endMinute = currentMinute + SLOT_INTERVAL_MINUTES;
+            if (endMinute >= 60) {
+                endHour += 1;
+                endMinute -= 60;
+            }
+
+            String end = String.format(Locale.US, "%02d:%02d", endHour, endMinute);
+            labels.add(start + " - " + end);
+            values.add(start);
+
+            currentMinute += SLOT_INTERVAL_MINUTES;
+            if (currentMinute >= 60) {
+                currentHour += 1;
+                currentMinute -= 60;
+            }
+        }
+
+        timeSlotLabels = labels.toArray(new String[0]);
+        timeSlotValues = values.toArray(new String[0]);
     }
 
     private boolean ensureCustomerLoggedIn() {
@@ -111,13 +162,51 @@ public class BookingActivity extends ThemeBaseActivity {
      * Show time picker dialog
      */
     private void showTimePicker() {
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this,
-                (view, selectedHour, selectedMinute) -> {
-                    hour = selectedHour;
-                    minute = selectedMinute;
-                    buttonSelectTime.setText(String.format(Locale.US, "%02d:%02d", hour, minute));
-                }, hour, minute, true);
-        timePickerDialog.show();
+        int checkedIndex = 0;
+        String currentValue = buttonSelectTime.getText().toString();
+        for (int index = 0; index < timeSlotValues.length; index++) {
+            if (timeSlotValues[index].equals(currentValue)) {
+                checkedIndex = index;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select Time Slot")
+                .setSingleChoiceItems(timeSlotLabels, checkedIndex, (dialog, which) -> {
+                    buttonSelectTime.setText(timeSlotValues[which]);
+                    dialog.dismiss();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private boolean isValidBookingDateTime(String date, String time) {
+        try {
+            LocalDate bookingDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+            LocalTime bookingTime = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
+
+            LocalTime openTime = LocalTime.of(OPEN_HOUR, 0);
+            LocalTime cutoffTime = LocalTime.of(ORDERING_CUTOFF_HOUR, ORDERING_CUTOFF_MINUTE);
+
+            if (bookingTime.isBefore(openTime) || !bookingTime.isBefore(cutoffTime)) {
+                return false;
+            }
+
+            if (!(bookingTime.getMinute() == 0 || bookingTime.getMinute() == 30)) {
+                return false;
+            }
+
+            LocalDateTime bookingDateTime = LocalDateTime.of(bookingDate, bookingTime);
+            LocalDateTime now = LocalDateTime.now();
+            long hoursAhead = Duration.between(now, bookingDateTime).toHours();
+
+            return hoursAhead >= MIN_ADVANCE_HOURS;
+
+        } catch (DateTimeParseException e) {
+            Log.e("BookingActivity", "Invalid date/time format", e);
+            return false;
+        }
     }
 
     /**
@@ -127,6 +216,13 @@ public class BookingActivity extends ThemeBaseActivity {
         String date = buttonSelectDate.getText().toString();
         String time = buttonSelectTime.getText().toString();
         String pnum = editTextNumberOfPeople.getText().toString();
+
+        if (!isValidBookingDateTime(date, time)) {
+            Toast.makeText(this,
+                    "Booking must be at least 24 hours ahead. Time slots are from 11:00 to before 21:30 (last slot 21:00).",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
 
         if (pnum.isEmpty()) {
             Toast.makeText(this, "Please enter a valid number of people.", Toast.LENGTH_SHORT).show();
