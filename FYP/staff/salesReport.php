@@ -120,6 +120,86 @@ if (!empty($salesData['category_sales'])) {
     <link rel="stylesheet" href="../CSS/common.css">
     <link rel="stylesheet" href="../CSS/header.css">
     <link rel="stylesheet" href="../CSS/salesReport.css">
+    <style>
+        /* AI Package Suggestion Styles */
+        .ai-recommend-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .btn-secondary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .package-recommendations {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .package-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        .package-card h3 {
+            margin-top: 0;
+            color: #d32f2f;
+            font-size: 20px;
+        }
+        .package-desc {
+            font-style: italic;
+            color: #555;
+        }
+        .package-servings {
+            font-weight: bold;
+            color: #ff9800;
+            margin: 10px 0;
+        }
+        .package-items {
+            border-top: 1px dashed #ccc;
+            border-bottom: 1px dashed #ccc;
+            padding: 10px 0;
+            margin: 10px 0;
+        }
+        .package-items .item {
+            padding: 3px 0;
+        }
+        .package-price {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+        .package-price .original {
+            text-decoration: line-through;
+            color: #999;
+        }
+        .package-price .discounted {
+            color: #d32f2f;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -171,6 +251,12 @@ if (!empty($salesData['category_sales'])) {
                     <button type="submit" class="btn-primary">Generate Report</button>
                 </div>
             </form>
+        </div>
+
+        <!-- AI Package Suggestion Button & Results -->
+        <div class="ai-recommend-section">
+            <button type="button" id="generatePackageBtn" class="btn-secondary">Generate AI Package Suggestions</button>
+            <div id="packageRecommendations" class="package-recommendations" style="display: none;"></div>
         </div>
 
         <div class="sales-summary">
@@ -314,6 +400,81 @@ if (!empty($salesData['category_sales'])) {
 
         // Initialize Pie Chart
         initializePieChart();
+
+        // AI Package Suggestion button event
+        $('#generatePackageBtn').click(function() {
+            const startDate = $('#start_date').val();
+            const endDate = $('#end_date').val();
+            const btn = $(this);
+            const resultDiv = $('#packageRecommendations');
+
+            // Disable button, show loading state
+            btn.prop('disabled', true).text('Generating...');
+            resultDiv.hide().empty();
+
+            $.ajax({
+                url: 'generatePackageRecommendation.php',
+                method: 'POST',
+                data: { start_date: startDate, end_date: endDate },
+                dataType: 'text',   // 改為純文字
+                success: function(text) {
+                    $('#packageRecommendations').html('<pre>' + escapeHtml(text) + '</pre>').show();
+                },
+                error: function(xhr, status, error) {
+                    let errorMsg = 'Request failed: ' + escapeHtml(error);
+                    if (xhr.responseText) {
+                        errorMsg += '<br><br>Server response:<br><pre>' + escapeHtml(xhr.responseText) + '</pre>';
+                    }
+                    $('#packageRecommendations').html('<div class="error">' + errorMsg + '</div>').show();
+                },
+                complete: function() {
+                    btn.prop('disabled', false).text('Generate AI Package Suggestions');
+                }
+            });
+        });
+
+        // Render package cards
+        function renderPackages(packages) {
+            const container = $('#packageRecommendations');
+            container.empty();
+
+            packages.forEach(pkg => {
+                const itemsHtml = pkg.items.map(item => `
+                    <div class="item">
+                        <span>${escapeHtml(item.name)} x${item.quantity}</span>
+                    </div>
+                `).join('');
+
+                const card = `
+                    <div class="package-card">
+                        <h3>${escapeHtml(pkg.name)}</h3>
+                        <p class="package-desc">${escapeHtml(pkg.description)}</p>
+                        <p class="package-servings">👥 Serves ${pkg.servings}</p>
+                        <div class="package-items">
+                            ${itemsHtml}
+                        </div>
+                        <div class="package-price">
+                            <span class="original">Original: HK$ ${pkg.total_price.toFixed(2)}</span>
+                            <span class="discounted">Package: HK$ ${pkg.discounted_price.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+                container.append(card);
+            });
+
+            container.show();
+        }
+
+        // Simple escape function (prevent XSS)
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
     });
 
     function initializePieChart() {

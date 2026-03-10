@@ -292,3 +292,143 @@
         margin-bottom: 5px;
     }
 }
+.ai-recommend-section {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+.btn-secondary:hover {
+    background: #5a6268;
+}
+.btn-secondary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.package-recommendations {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.package-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    width: 300px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: left;
+}
+.package-card h3 {
+    margin-top: 0;
+    color: #d32f2f;
+    font-size: 20px;
+}
+.package-desc {
+    font-style: italic;
+    color: #555;
+}
+.package-servings {
+    font-weight: bold;
+    color: #ff9800;
+    margin: 10px 0;
+}
+.package-items {
+    border-top: 1px dashed #ccc;
+    border-bottom: 1px dashed #ccc;
+    padding: 10px 0;
+    margin: 10px 0;
+}
+.package-items .item {
+    padding: 3px 0;
+}
+.package-price {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+.package-price .original {
+    text-decoration: line-through;
+    color: #999;
+}
+.package-price .discounted {
+    color: #d32f2f;
+}
+.error {
+    color: red;
+    text-align: center;
+    width: 100%;
+}
+.ai-recommend-section {
+    margin: 20px 0;
+    text-align: center;
+}
+
+
+.package-recommendations {
+    margin-top: 30px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    max-height: 500px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: left;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.error {
+    color: red;
+    text-align: center;
+    width: 100%;
+}
+.package-recommendations {
+    margin-top: 30px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    max-height: 500px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: left;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    white-space: pre-wrap;          /* 保留空格换行，允许自动换行 */
+    word-wrap: break-word;          /* 兼容旧浏览器 */
+    overflow-wrap: break-word;      /* 现代标准，长单词换行 */
+    word-break: break-word;         /* 强制长单词换行（如连续英文） */
+    box-sizing: border-box;         /* 确保 padding 不增加额外宽度 */
+}
+.package-recommendations pre {
+    white-space: pre-wrap;      /* 保留空格並允許換行 */
+    word-wrap: break-word;      /* 長單詞強制換行 */
+    overflow-wrap: break-word;
+    word-break: break-word;     /* 適用於連續英文字串 */
+    font-family: inherit;       /* 繼承父容器字型 */
+    margin: 0;                  /* 移除多餘外邊距 */
+    padding: 0;
+    background: transparent;
+    border: none;
+}

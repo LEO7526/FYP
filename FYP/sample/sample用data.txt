@@ -1,0 +1,75 @@
+1. Create New Coupon
+
+Title (English): 10% Off Selected Items
+Description (English): Get 10% discount on selected dishes
+Terms & Conditions (English): 
+Valid until Dec 31, 2025
+Minimum spend of HKD 200 required
+
+Title (Chinese (Simplified)): 指定菜品 9折
+Description (Chinese (Simplified)): 指定菜品享受 9折優惠
+Terms & Conditions (Chinese (Simplified)):  
+有效期至 2025年12月31日
+最低消費 200 港幣
+
+Title (Chinese (Traditional)): 指定菜式 9折
+Description (Chinese (Traditional)): 指定菜式享有 9折優惠
+Terms & Conditions (Chinese (Traditional)):
+有效期至 2025年12月31日
+最低消費 200 港幣
+
+2. Add New Dish
+
+Dish Name (English): Spicy Chicken Burger
+Dish Name (Simplified Chinese): 香辣雞腿堡
+Dish Name (Traditional Chinese): 香辣雞腿堡
+
+Dish Description (English): Crispy chicken burger with spicy sauce
+Dish Description (Simplified Chinese): 香脆雞腿堡配辣醬
+Dish Description (Traditional Chinese): 香脆雞腿堡配辣醬
+
+
+Group Type: extra_toppings
+Group Name: Extra Toppings
+Values:
+   Cheese
+   Bacon
+   Avocado
+   Fried Egg
+   Extra Sauce
+
+Tag Name: "Spicy Special"
+
+3.Create New Package
+
+Package Name:Family Feast Set
+
+Type Name:
+	English：Appetizer
+	Chinese Simplified：前菜
+	Chinese Traditional：前菜
+
+Type Name:
+	English：Main Course
+	Chinese Simplified：主菜
+	Chinese Traditional：主菜
+
+
+Type Name:
+	English：Drink
+	Chinese Simplified：饮料
+	Chinese Traditional：飲料
+
+4. Add New Material
+
+Material Name: Chicken Breast
+Category: Meat
+Unit: grams
+Initial Quantity: 5000
+Reorder Level: 1000
+
+5. Reserve a Table
+
+Name: John Smith
+Phone Number: 91234567
+Remark: Need high chair for baby
