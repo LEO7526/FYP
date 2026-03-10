@@ -263,3 +263,116 @@
 button{
     background-color: #007BFF;
 }
+
+.table-map {
+    display: grid;
+    grid-template-columns: repeat(10, 60px); /* 每行10格，總共50格 */
+    grid-gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.table {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #bdc3c7; /* 預設灰色 */
+}
+
+.table.available {
+    background-color: #2ecc71; /* 綠色可選 */
+    color: #fff;
+}
+
+.table.unavailable {
+    background-color: #e74c3c; /* 紅色不可選 */
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.table.selected {
+    background-color: #f39c12; /* 橙色選中 */
+    color: #fff;
+}
+
+.floor-plan {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5列 */
+    gap: 10px;
+    margin-top: 15px;
+    padding: 15px;
+    border: 2px solid #ccc;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.floor-plan button {
+    background-color: #e0f7fa;
+    border: 1px solid #00796b;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.floor-plan button.available {
+    background-color: #a5d6a7; /* 綠色可選 */
+}
+
+.floor-plan button.unavailable {
+    background-color: #ef9a9a; /* 紅色不可選 */
+    cursor: not-allowed;
+}
+
+.floor-plan button.selected {
+    background-color: #ffeb3b; /* 黃色選中 */
+}
+
+.floor-plan {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+    padding: 15px;
+    border: 2px solid #ccc;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.floor-plan .zone-label {
+    grid-column: span 5;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.floor-plan button {
+    background-color: #e0f7fa;
+    border: 1px solid #00796b;
+    padding: 12px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.floor-plan button.available {
+    background-color: #a5d6a7;
+}
+
+.floor-plan button.unavailable {
+    background-color: #ef9a9a;
+    cursor: not-allowed;
+}
+
+.floor-plan button.selected {
+    background-color: #ffeb3b;
+}

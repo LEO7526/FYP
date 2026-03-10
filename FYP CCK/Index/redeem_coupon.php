@@ -2,12 +2,12 @@
 session_start();
 
 // 檢查會員是否登入
-if (!isset($_SESSION['cid'])) {
+if (!isset($_COOKIE['cid'])) {
     echo "<p>Please <a href='../login/login2.php'>login</a> to redeem coupons.</p>";
     exit;
 }
 
-$cid = $_SESSION['cid'];
+$cid = $_COOKIE['cid'];
 
 $host = 'localhost';
 $dbname = 'projectdb';

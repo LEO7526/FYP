@@ -16,6 +16,45 @@
     </script>
 
     <script>
+        function openSetPopup(packageId) {
+            document.getElementById("setPopup").style.display = "flex";
+
+            // 這裡可以用 AJAX 從後端取套餐內的可選菜品
+            fetch(`get_package_items.php?package_id=${packageId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const setOptions = document.getElementById("setOptions");
+                    setOptions.innerHTML = "";
+
+                    data.forEach(item => {
+                        const option = document.createElement("div");
+                        option.innerHTML = `
+                    <label>
+                        <input type="checkbox" name="set_items[]" value="${item.item_id}">
+                        ${item.item_name}
+                    </label>
+                `;
+                        setOptions.appendChild(option);
+                    });
+                });
+        }
+        function closeSetPopup() {
+            document.getElementById("setPopup").style.display = "none";
+        }
+
+        function saveSetSelection() {
+            const selectedItems = Array.from(document.querySelectorAll("input[name='set_items[]']:checked"))
+                .map(input => input.value);
+
+            const hiddenFields = document.getElementById("hidden-fields");
+            hiddenFields.innerHTML += `<input type="hidden" name="package_selected_items[]" value="${selectedItems.join(',')}">`;
+
+            closeSetPopup();
+            updateOrderSummary();
+        }
+
+    </script>
+    <script>
         const spiceLevels = {};
         const quantities = {};
         const remarks = {};
@@ -165,6 +204,7 @@
     <button onclick="filterCategory('maincourses')" class="category-btn">Main Courses</button>
     <button onclick="filterCategory('dessert')" class="category-btn">Dessert</button>
     <button onclick="filterCategory('drink')" class="category-btn">Drink</button>
+    <button onclick="filterCategory('set')" class="category-btn">Set</button>
 </div>
 
 
@@ -181,6 +221,9 @@ try {
 
     $stmt = $pdo->query("SELECT mi.image_url, mi.item_price, mi.item_id , mit.item_name, mi.category_id FROM menu_item mi , menu_item_translation mit where mi.item_id = mit.item_id and mit.language_code = 'en'");
     $dishes = $stmt->fetchAll();
+
+    $stmt = $pdo->query("SELECT * FROM menu_package");
+    $packages = $stmt->fetchAll();
 } catch (PDOException $e) {
     die("資料庫連線失敗：" . $e->getMessage());
 }
@@ -192,7 +235,7 @@ try {
             2 => ['name' => 'Soup', 'key' => 'soup'],
             3 => ['name' => 'Main Courses', 'key' => 'maincourses'],
             4 => ['name' => 'Dessert', 'key' => 'dessert'],
-            5 => ['name' => 'Drink', 'key' => 'drink']
+            5 => ['name' => 'Drink', 'key' => 'drink'],
     ];
 
     $groupedDishes = [];
@@ -221,8 +264,32 @@ try {
             </div>
         <?php endif; ?>
     <?php endforeach; ?>
-
 </div>
+<div class="category-section" data-category="set">
+    <h2 class="category-title">Set Menu</h2>
+    <div class="dish-container">
+        <?php foreach ($packages as $package): ?>
+            <div class="dish-card" data-id="package-<?= $package['package_id'] ?>">
+                <h3><?= htmlspecialchars($package['package_name']) ?></h3>
+                <img src="<?= htmlspecialchars($package['package_image_url']) ?>"
+                     alt="<?= htmlspecialchars($package['package_name']) ?>"
+                     onclick="openSetPopup(<?= $package['package_id'] ?>)">
+                <p>Price: $<?= htmlspecialchars($package['amounts']) ?></p>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<div class="set-popup" id="setPopup" style="display:none;">
+    <div class="set-box">
+        <span class="close-btn" onclick="closeSetPopup()">&times;</span>
+        <h3>請選擇套餐內的菜品</h3>
+        <div id="setOptions"></div>
+        <button onclick="saveSetSelection()">確認</button>
+    </div>
+</div>
+
+
 
 <div class="spice-popup" id="spicePopup">
     <div class="spice-box">

@@ -126,11 +126,8 @@ if ($action === 'edit') {
         <input id='remark' name='remark' type='text' value='{$b['remark']}'>
 
         <button type='button' id='edit-loadTablesBtn'>Load Available Tables</button>
-<div id='edit-table-map' class='table-map'></div>
-<input type='hidden' id='edit-tid' name='tid' required>
-
-
-
+        <div id='edit-table-map' class='table-map'></div>
+        <input type='hidden' id='edit-tid' name='tid' required>
         <button type='submit'>Confirm Modification</button>
     </form>
 </div>";
@@ -139,8 +136,12 @@ if ($action === 'edit') {
     }
 }
 
-
-$stmt = $pdo->prepare("SELECT * FROM booking WHERE cid = ? AND status != 0 ORDER BY bdate ASC");
+// 只顯示今天或之後的訂位
+$stmt = $pdo->prepare("SELECT * FROM booking 
+                       WHERE cid = ? 
+                       AND status != 0 
+                       AND bdate >= CURDATE() 
+                       ORDER BY bdate ASC");
 $stmt->execute([$cid]);
 $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -166,4 +167,5 @@ if ($bookings) {
 } else {
     echo "<p>You have not booking。</p>";
 }
+
 ?>
