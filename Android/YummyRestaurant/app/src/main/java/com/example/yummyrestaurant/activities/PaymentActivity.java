@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -208,6 +209,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         }, 1500);
         
         CartManager.clearCart();
+        CartManager.clearPackageDetails();
     }
 
     /**
@@ -503,6 +505,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         }, 1500);
 
         CartManager.clearCart();
+        CartManager.clearPackageDetails();
     }
 
     /**
@@ -511,6 +514,10 @@ public class PaymentActivity extends ThemeBaseActivity {
     private void saveOrderToBackend(String userId, int amount, String paymentIntentId) {
         Log.d(TAG, "saveOrderToBackend: userId=" + userId + ", amount=" + amount + ", paymentIntentId=" + paymentIntentId);
         Log.d(TAG, "saveOrderToBackend: selectedPaymentMethod=" + selectedPaymentMethod);
+
+        // Prevent stale entries when users retry payment within the same Activity instance.
+        items.clear();
+        itemsForDisplay.clear();
 
         Map<String, Object> orderData = new HashMap<>();
         boolean isStaff = RoleManager.isStaff();
@@ -576,6 +583,8 @@ public class PaymentActivity extends ThemeBaseActivity {
         
         Log.d(TAG, "saveOrderToBackend: order data setup complete");
 
+        Map<Integer, Map<String, Object>> packageDetails = CartManager.getPackageDetails();
+
         // Build order items
         for (Map.Entry<CartItem, Integer> entry : CartManager.getCartItems().entrySet()) {
             CartItem cartItem = entry.getKey();
@@ -587,6 +596,27 @@ public class PaymentActivity extends ThemeBaseActivity {
             Map<String, Object> item = new HashMap<>();
             item.put("item_id", menuItem.getId());
             item.put("qty", quantity);
+
+            String category = menuItem.getCategory();
+            if (category != null && !category.trim().isEmpty()) {
+                item.put("category", category);
+            }
+
+            if ("PACKAGE".equalsIgnoreCase(category)) {
+                Map<String, Object> packageDetail = packageDetails.get(menuItem.getId());
+                if (packageDetail != null) {
+                    Object rawPackageItems = packageDetail.get("items");
+                    if (rawPackageItems instanceof List<?>) {
+                        List<Map<String, Object>> packageItemsPayload = buildPackageItemsPayload((List<?>) rawPackageItems, quantity);
+                        if (!packageItemsPayload.isEmpty()) {
+                            item.put("packageItems", packageItemsPayload);
+                            Log.d(TAG, "saveOrderToBackend: attached " + packageItemsPayload.size() + " packageItems for package_id=" + menuItem.getId());
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "saveOrderToBackend: no package details found for package_id=" + menuItem.getId());
+                }
+            }
 
             if (cartItem.getCustomization() != null) {
                 Map<String, Object> customization = new HashMap<>();
@@ -676,6 +706,51 @@ public class PaymentActivity extends ThemeBaseActivity {
         payButton.setEnabled(true);
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         Log.e(TAG, "Error: " + message);
+    }
+
+    private List<Map<String, Object>> buildPackageItemsPayload(List<?> selectedItems, int packageQty) {
+        Map<Integer, Map<String, Object>> aggregated = new LinkedHashMap<>();
+        int qtyMultiplier = Math.max(1, packageQty);
+
+        for (Object rawItem : selectedItems) {
+            if (!(rawItem instanceof MenuItem)) {
+                continue;
+            }
+
+            MenuItem packageItem = (MenuItem) rawItem;
+            int itemId = packageItem.getId();
+            if (itemId <= 0) {
+                continue;
+            }
+
+            Map<String, Object> payload = aggregated.get(itemId);
+            if (payload == null) {
+                payload = new HashMap<>();
+                payload.put("id", itemId);
+                payload.put("qty", 0);
+                payload.put("customizations", new ArrayList<Map<String, Object>>());
+                aggregated.put(itemId, payload);
+            }
+
+            int currentQty = ((Number) payload.get("qty")).intValue();
+            payload.put("qty", currentQty + qtyMultiplier);
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> customizationsPayload = (List<Map<String, Object>>) payload.get("customizations");
+            if (packageItem.getCustomizations() != null && !packageItem.getCustomizations().isEmpty()) {
+                for (com.example.yummyrestaurant.models.OrderItemCustomization detail : packageItem.getCustomizations()) {
+                    Map<String, Object> customizationDetail = new HashMap<>();
+                    customizationDetail.put("option_id", detail.getOptionId());
+                    customizationDetail.put("group_id", detail.getGroupId());
+                    customizationDetail.put("selected_value_ids", detail.getSelectedValueIds());
+                    customizationDetail.put("selected_values", detail.getSelectedChoices());
+                    customizationDetail.put("text_value", detail.getTextValue());
+                    customizationsPayload.add(customizationDetail);
+                }
+            }
+        }
+
+        return new ArrayList<>(aggregated.values());
     }
 
 }

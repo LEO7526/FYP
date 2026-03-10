@@ -85,7 +85,13 @@ public class OrderHistoryActivity extends BaseCustomerActivity {
                                 // 詳細檢查每個 customization
                                 if (item.getCustomizations() != null && item.getCustomizations().size() > 0) {
                                     for (OrderItemCustomization cust : item.getCustomizations()) {
-                                        Log.d("OrderHistory", "        * " + cust.getOptionName() + "=" + cust.getChoiceNames());
+                                        String selectedText;
+                                        if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
+                                            selectedText = String.join(", ", cust.getSelectedChoices());
+                                        } else {
+                                            selectedText = cust.getChoiceNamesDisplay();
+                                        }
+                                        Log.d("OrderHistory", "        * " + cust.getOptionName() + "=" + selectedText);
                                     }
                                 }
                             }

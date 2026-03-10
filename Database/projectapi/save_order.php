@@ -156,6 +156,9 @@ foreach ($items as $item) {
         $order_package_id = $packageStmt->insert_id;
         error_log("Package saved: order_id=$order_id, package_id=$package_id, qty=$qty, order_package_id=$order_package_id");
         $packageStmt->close();
+
+        // Keep an explicit package snapshot so history can reconstruct exactly what user selected.
+        $packageSelectedItems = [];
         
         // ✅ 保存用戶實際選擇的套餐菜品到 order_items（來自 packageItems 陣列）
         if (!empty($item['packageItems']) && is_array($item['packageItems'])) {
@@ -163,6 +166,7 @@ foreach ($items as $item) {
             foreach ($item['packageItems'] as $packageItem) {
                 $pkg_item_id = $packageItem['id'] ?? null;
                 $pkg_item_qty = $packageItem['qty'] ?? 1;
+                $pkg_note_customizations = [];
                 
                 if (!$pkg_item_id) {
                     continue;
@@ -172,8 +176,7 @@ foreach ($items as $item) {
                 $pkg_item_note = '';
                 if (!empty($packageItem['customizations']) && is_array($packageItem['customizations'])) {
                     error_log("Processing customizations for package item: item_id=$pkg_item_id");
-                    
-                    $pkg_note_customizations = [];
+
                     foreach ($packageItem['customizations'] as $custom) {
                         $group_id = intval($custom['group_id'] ?? 0);
                         
@@ -209,6 +212,13 @@ foreach ($items as $item) {
                 $pkgItemStmt = $conn->prepare("
                     INSERT INTO order_items (oid, item_id, qty, note)
                     VALUES (?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE
+                        qty = qty + VALUES(qty),
+                        note = CASE
+                            WHEN VALUES(note) IS NULL OR VALUES(note) = '' THEN note
+                            WHEN note IS NULL OR note = '' THEN VALUES(note)
+                            ELSE note
+                        END
                 ");
                 
                 if (!$pkgItemStmt) {
@@ -222,10 +232,38 @@ foreach ($items as $item) {
                     error_log("Execute failed for package item: item_id=$pkg_item_id, error=" . $pkgItemStmt->error);
                 } else {
                     error_log("Package item saved with customizations: order_id=$order_id, item_id=$pkg_item_id, qty=$pkg_item_qty, note_length=" . strlen($pkg_item_note));
+                    $packageSelectedItems[] = [
+                        'item_id' => intval($pkg_item_id),
+                        'qty' => intval($pkg_item_qty),
+                        'customizations' => $pkg_note_customizations
+                    ];
                 }
                 
                 $pkgItemStmt->close();
             }
+        }
+
+        $userPackageNote = $item['note'] ?? '';
+        $packageNotePayload = [
+            'user_note' => $userPackageNote,
+            'selected_items' => $packageSelectedItems
+        ];
+        $packageSnapshotNote = json_encode($packageNotePayload, JSON_UNESCAPED_UNICODE);
+        if ($packageSnapshotNote === false) {
+            $packageSnapshotNote = $userPackageNote;
+        }
+
+        $updatePackageNoteStmt = $conn->prepare("UPDATE order_packages SET note = ? WHERE op_id = ?");
+        if ($updatePackageNoteStmt) {
+            $updatePackageNoteStmt->bind_param("si", $packageSnapshotNote, $order_package_id);
+            if (!$updatePackageNoteStmt->execute()) {
+                error_log("Failed to update package snapshot note: op_id=$order_package_id, error=" . $updatePackageNoteStmt->error);
+            } else {
+                error_log("Package snapshot saved for op_id=$order_package_id, selected_items=" . count($packageSelectedItems));
+            }
+            $updatePackageNoteStmt->close();
+        } else {
+            error_log("Prepare failed for package note update: " . $conn->error);
         }
         
         continue;
@@ -318,6 +356,13 @@ foreach ($items as $item) {
     $itemStmt = $conn->prepare("
         INSERT INTO order_items (oid, item_id, qty, note)
         VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            qty = qty + VALUES(qty),
+            note = CASE
+                WHEN VALUES(note) IS NULL OR VALUES(note) = '' THEN note
+                WHEN note IS NULL OR note = '' THEN VALUES(note)
+                ELSE note
+            END
     ");
     if (!$itemStmt) {
         error_log("Prepare failed for item: " . $conn->error);

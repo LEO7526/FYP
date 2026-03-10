@@ -16,6 +16,9 @@ public class OrderPackageDish {
     @SerializedName("price_modifier")
     private double priceModifier;
 
+    @SerializedName("quantity")
+    private int quantity;
+
     @SerializedName("customizations")
     private List<OrderItemCustomization> customizations;
 
@@ -49,6 +52,14 @@ public class OrderPackageDish {
 
     public void setPriceModifier(double priceModifier) {
         this.priceModifier = priceModifier;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public List<OrderItemCustomization> getCustomizations() {

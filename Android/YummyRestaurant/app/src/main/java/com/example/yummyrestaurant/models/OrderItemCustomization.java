@@ -143,7 +143,13 @@ public class OrderItemCustomization implements Serializable {
      * (保持與舊代碼的相容性)
      */
     public String getOptionName() {
-        return groupName;
+        if (groupName != null && !groupName.trim().isEmpty()) {
+            return groupName;
+        }
+        if (groupId > 0) {
+            return "Option " + groupId;
+        }
+        return "Customization";
     }
 
     /**
@@ -184,15 +190,16 @@ public class OrderItemCustomization implements Serializable {
      * 獲取該自訂的簡短顯示文字（v4.5更新）
      */
     public String getDisplayText() {
+        String optionLabel = getOptionName();
         if (textValue != null && !textValue.isEmpty()) {
-            return groupName + ": " + textValue;
+            return optionLabel + ": " + textValue;
         } else if (selectedValues != null && !selectedValues.isEmpty()) {
-            return groupName + ": " + String.join(", ", selectedValues);
+            return optionLabel + ": " + String.join(", ", selectedValues);
         } else if (choiceNames != null && !choiceNames.isEmpty()) {
             // Use the helper method to get cleaned display value
-            return groupName + ": " + getChoiceNamesDisplay();
+            return optionLabel + ": " + getChoiceNamesDisplay();
         }
-        return groupName;
+        return optionLabel;
     }
 
     @Override

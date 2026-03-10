@@ -13,7 +13,13 @@ if ($cid <= 0) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT points FROM coupon_point WHERE cid = ?");
+$stmt = $conn->prepare("SELECT coupon_point FROM customer WHERE cid = ?");
+if (!$stmt) {
+    echo json_encode(["success" => false, "error" => "Prepare failed: " . $conn->error]);
+    $conn->close();
+    exit;
+}
+
 $stmt->bind_param("i", $cid);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -21,34 +27,16 @@ $result = $stmt->get_result();
 if ($row = $result->fetch_assoc()) {
     echo json_encode([
         "success" => true,
-        "points" => (int)$row['points']
+        "points" => (int)$row['coupon_point']
     ], JSON_UNESCAPED_UNICODE);
-    $stmt->close();
 } else {
-    $stmt->close();
-    // Customer not found in coupon_point table - initialize with 0 points
-    // Using INSERT IGNORE to handle concurrent requests gracefully
-    $insertStmt = $conn->prepare("INSERT IGNORE INTO coupon_point (cid, points) VALUES (?, 0)");
-    $insertStmt->bind_param("i", $cid);
-    $insertStmt->execute();
-    $insertStmt->close();
-    
-    // Re-fetch to get actual points (in case INSERT IGNORE skipped due to race condition)
-    $stmt = $conn->prepare("SELECT points FROM coupon_point WHERE cid = ?");
-    $stmt->bind_param("i", $cid);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    $stmt->close();
-    
-    if ($row) {
-        echo json_encode([
-            "success" => true,
-            "points" => (int)$row['points']
-        ], JSON_UNESCAPED_UNICODE);
-    } else {
-        echo json_encode(["success"=>false,"error"=>"Failed to initialize customer points"]);
-    }
+    echo json_encode([
+        "success" => false,
+        "error" => "Customer not found",
+        "points" => 0
+    ], JSON_UNESCAPED_UNICODE);
 }
+
+$stmt->close();
 
 $conn->close();

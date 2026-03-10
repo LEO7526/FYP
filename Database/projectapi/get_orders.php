@@ -17,10 +17,125 @@ if ($conn->connect_error) {
 $cid = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
 $language = $_GET['lang'] ?? 'en'; // default to English
 
-// ✅ FIX: Include ALL orders (including unpaid cash orders with ostatus=2)
-// Removed any status filters - display all orders regardless of payment status
+function normalize_customization_entry(array $entry): array {
+    $valueIdsRaw = $entry['selected_value_ids'] ?? [];
+    if (is_string($valueIdsRaw)) {
+        $decoded = json_decode($valueIdsRaw, true);
+        $valueIdsRaw = is_array($decoded) ? $decoded : [];
+    }
+
+    $selectedValueIds = [];
+    if (is_array($valueIdsRaw)) {
+        foreach ($valueIdsRaw as $valueId) {
+            if (is_numeric($valueId)) {
+                $selectedValueIds[] = (int)$valueId;
+            }
+        }
+    }
+
+    $selectedValuesRaw = $entry['selected_values'] ?? [];
+    if (is_string($selectedValuesRaw)) {
+        $decoded = json_decode($selectedValuesRaw, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $selectedValuesRaw = $decoded;
+        }
+    }
+
+    $selectedValues = [];
+    if (is_array($selectedValuesRaw)) {
+        foreach ($selectedValuesRaw as $value) {
+            if ($value !== null && $value !== '') {
+                $selectedValues[] = (string)$value;
+            }
+        }
+    } elseif ($selectedValuesRaw !== null && $selectedValuesRaw !== '') {
+        $selectedValues[] = (string)$selectedValuesRaw;
+    }
+
+    return [
+        'option_id' => (int)($entry['option_id'] ?? 0),
+        'group_id' => (int)($entry['group_id'] ?? 0),
+        'group_name' => (string)($entry['group_name'] ?? ''),
+        'selected_value_ids' => $selectedValueIds,
+        'selected_values' => $selectedValues,
+        'text_value' => (string)($entry['text_value'] ?? '')
+    ];
+}
+
+function parse_note_customizations($note): array {
+    if (!is_string($note) || trim($note) === '') {
+        return [];
+    }
+
+    $decoded = json_decode($note, true);
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+        return [];
+    }
+
+    $entries = [];
+
+    // Legacy format: note is directly an array of customization objects.
+    if (array_keys($decoded) === range(0, count($decoded) - 1)) {
+        $entries = $decoded;
+    }
+
+    // Newer object format support if needed in future.
+    if (isset($decoded['customizations']) && is_array($decoded['customizations'])) {
+        $entries = $decoded['customizations'];
+    }
+
+    $customizations = [];
+    foreach ($entries as $entry) {
+        if (is_array($entry)) {
+            $customizations[] = normalize_customization_entry($entry);
+        }
+    }
+
+    return $customizations;
+}
+
+function build_customization_map(mysqli $conn, int $oid): array {
+    $map = [];
+
+    $customSql = "
+        SELECT
+            oic.item_id,
+            oic.option_id,
+            oic.group_id,
+            cog.group_name,
+            oic.selected_value_ids,
+            oic.selected_values,
+            oic.text_value
+        FROM order_item_customizations oic
+        LEFT JOIN customization_option_group cog ON oic.group_id = cog.group_id
+        WHERE oic.oid = ?
+    ";
+
+    $customStmt = $conn->prepare($customSql);
+    if (!$customStmt) {
+        error_log("Prepare failed for customization map: " . $conn->error);
+        return $map;
+    }
+
+    $customStmt->bind_param("i", $oid);
+    $customStmt->execute();
+    $customResult = $customStmt->get_result();
+
+    while ($customRow = $customResult->fetch_assoc()) {
+        $itemId = (int)$customRow['item_id'];
+        if (!isset($map[$itemId])) {
+            $map[$itemId] = [];
+        }
+        $map[$itemId][] = normalize_customization_entry($customRow);
+    }
+
+    $customStmt->close();
+    return $map;
+}
+
+// Include all non-cancelled orders for the customer.
 $sql = "
-    SELECT 
+    SELECT
         o.oid,
         o.odate,
         o.ostatus,
@@ -44,225 +159,15 @@ $orders = [];
 
 while ($row = $result->fetch_assoc()) {
     $order = $row;
-    $oid = $order['oid'];
+    $oid = (int)$order['oid'];
 
-    // Fetch items for this order
-    $itemSql = "
-        SELECT 
-            oi.item_id,
-            mi.item_price,
-            mit.item_name,
-            mi.image_url,
-            oi.qty AS quantity
-        FROM order_items oi
-        JOIN menu_item_translation mit ON oi.item_id = mit.item_id
-        JOIN menu_item mi ON mit.item_id = mi.item_id
-        WHERE mit.language_code = ? AND oi.oid = ?
-    ";
+    $customizationMap = build_customization_map($conn, $oid);
 
-    $itemStmt = $conn->prepare($itemSql);
-    $itemStmt->bind_param("si", $language, $oid);
-    $itemStmt->execute();
-    $itemResult = $itemStmt->get_result();
+    $packages = [];
+    $reservedQtyByItem = [];
 
-    $items = [];
-    while ($itemRow = $itemResult->fetch_assoc()) {
-        $item_id = (int)$itemRow['item_id'];
-        $itemPrice = (float)$itemRow['item_price'];
-        $quantity = (int)$itemRow['quantity'];
-        $imagUrl = $itemRow['image_url'];
-        
-        // Check if this item_id corresponds to a package
-        $package_check_sql = "SELECT package_id FROM menu_package WHERE package_id = ?";
-        $package_stmt = $conn->prepare($package_check_sql);
-        $package_stmt->bind_param("i", $item_id);
-        $package_stmt->execute();
-        $package_result = $package_stmt->get_result();
-        
-        if ($package_result->num_rows > 0) {
-            // This is a package - first add the package itself
-            // Get package name
-            $package_name_sql = "SELECT package_name FROM menu_package WHERE package_id = ?";
-            $package_name_stmt = $conn->prepare($package_name_sql);
-            $package_name_stmt->bind_param("i", $item_id);
-            $package_name_stmt->execute();
-            $package_name_result = $package_name_stmt->get_result();
-            $package_name = "Package #" . $item_id;
-            if ($package_name_result->num_rows > 0) {
-                $package_row = $package_name_result->fetch_assoc();
-                $package_name = $package_row['package_name'];
-            }
-            $package_name_stmt->close();
-            
-            // Get all items in the package for expansion
-            $package_items_sql = "
-                SELECT 
-                    pd.item_id,
-                    mi.item_price,
-                    mit.item_name,
-                    mi.image_url,
-                    pd.price_modifier
-                FROM package_dish pd
-                JOIN menu_item_translation mit ON pd.item_id = mit.item_id
-                JOIN menu_item mi ON pd.item_id = mi.item_id
-                WHERE pd.package_id = ? AND mit.language_code = ?
-                ORDER BY pd.item_id
-            ";
-            
-            $package_items_stmt = $conn->prepare($package_items_sql);
-            $package_items_stmt->bind_param("is", $item_id, $language);
-            $package_items_stmt->execute();
-            $package_items_result = $package_items_stmt->get_result();
-            
-            $package_items = [];
-            while ($package_item = $package_items_result->fetch_assoc()) {
-                $package_item_id = (int)$package_item['item_id'];
-                $package_item_price = (float)$package_item['item_price'];
-                
-                // Fetch customizations for this package item (if any)
-                $customSql = "
-                    SELECT 
-                        option_id,
-                        group_id,
-                        selected_value_ids,
-                        selected_values,
-                        text_value
-                    FROM order_item_customizations
-                    WHERE oid = ? AND item_id = ?
-                ";
-                
-                $customStmt = $conn->prepare($customSql);
-                $customStmt->bind_param("ii", $oid, $package_item_id);
-                $customStmt->execute();
-                $customResult = $customStmt->get_result();
-                
-                $customizations = [];
-                while ($customRow = $customResult->fetch_assoc()) {
-                    // Process customizations (same logic as before)
-                    $valueIds = json_decode($customRow['selected_value_ids'] ?? '[]', true);
-                    $selectedValues = json_decode($customRow['selected_values'] ?? '[]', true);
-                    
-                    $fixedValueIds = [];
-                    if (is_array($valueIds)) {
-                        foreach ($valueIds as $valueId) {
-                            if (is_numeric($valueId)) {
-                                $fixedValueIds[] = (int)$valueId;
-                            }
-                        }
-                    }
-                    
-                    $customizations[] = [
-                        'option_id' => (int)$customRow['option_id'],
-                        'group_id' => (int)$customRow['group_id'],
-                        'selected_value_ids' => $fixedValueIds,
-                        'selected_values' => is_array($selectedValues) ? $selectedValues : [],
-                        'text_value' => $customRow['text_value']
-                    ];
-                }
-                
-                $package_items[] = [
-                    "item_id" => $package_item_id,
-                    "name" => $package_item['item_name'],
-                    "quantity" => $quantity,
-                    "itemPrice" => $package_item_price,
-                    "image_url" => $package_item['image_url'],
-                    "customizations" => $customizations,
-                    "isPackageItem" => true,
-                    "parentPackageId" => $item_id
-                ];
-            }
-            
-            // Add package as main item with nested items
-            $items[] = [
-                "item_id" => $item_id,
-                "name" => $package_name,
-                "quantity" => $quantity,
-                "itemPrice" => $itemPrice,
-                "itemCost" => $itemPrice * $quantity,
-                "image_url" => $imagUrl,
-                "customizations" => [],
-                "isPackage" => true,
-                "packageId" => $item_id,
-                "packageItems" => $package_items
-            ];
-            
-            $package_items_stmt->close();
-        } else {
-            // This is a regular individual item
-            $customSql = "
-                SELECT 
-                    option_id,
-                    group_id,
-                    selected_value_ids,
-                    selected_values,
-                    text_value
-                FROM order_item_customizations
-                WHERE oid = ? AND item_id = ?
-            ";
-            
-            $customStmt = $conn->prepare($customSql);
-            $customStmt->bind_param("ii", $oid, $item_id);
-            $customStmt->execute();
-            $customResult = $customStmt->get_result();
-            
-            $customizations = [];
-            while ($customRow = $customResult->fetch_assoc()) {
-                error_log("DEBUG get_orders: customRow = " . json_encode($customRow));
-                
-                $valueIds = json_decode($customRow['selected_value_ids'] ?? '[]', true);
-                $selectedValues = json_decode($customRow['selected_values'] ?? '[]', true);
-                
-                error_log("DEBUG get_orders: valueIds=" . json_encode($valueIds) . ", selectedValues=" . json_encode($selectedValues));
-            
-                // 🔴 CRITICAL FIX: Ensure selected_value_ids only contains integers
-                // If it contains strings (from legacy data), use selected_values instead
-                $cleanValueIds = [];
-                if (is_array($valueIds)) {
-                    foreach ($valueIds as $val) {
-                        if (is_numeric($val)) {
-                            $cleanValueIds[] = (int)$val;
-                        }
-                    }
-                }
-                
-                // If we couldn't get valid integer IDs, use an empty array
-                // The selected_values will still show the names for display
-                if (empty($cleanValueIds) && !empty($selectedValues)) {
-                    $cleanValueIds = [];  // Empty array but selected_values has the display names
-                }
-                
-                $customizations[] = [
-                    "option_id" => (int)$customRow['option_id'],
-                    "group_id" => (int)$customRow['group_id'],
-                    "selected_value_ids" => $cleanValueIds,
-                    "selected_values" => $selectedValues,
-                    "text_value" => $customRow['text_value']
-                ];
-            }
-            $customStmt->close();
-            
-            error_log("DEBUG get_orders: Found " . count($customizations) . " customizations for item_id=$item_id");
-            
-            $items[] = [
-                "item_id" => $item_id,
-                "name" => $itemRow['item_name'],
-                "quantity" => $quantity,
-                "itemPrice" => $itemPrice,
-                "itemCost" => $itemPrice * $quantity,
-                "image_url" => $imagUrl,
-                "customizations" => $customizations,
-                "isFromPackage" => false
-            ];
-        }
-        
-        $package_stmt->close();
-    }
-
-    $order['items'] = $items;
-    
-    // Fetch packages for this order
     $packageSql = "
-        SELECT 
+        SELECT
             op.package_id,
             mp.package_name,
             mp.amounts AS package_price,
@@ -276,95 +181,222 @@ while ($row = $result->fetch_assoc()) {
     $packageStmt = $conn->prepare($packageSql);
     if (!$packageStmt) {
         error_log("Prepare failed for packages: " . $conn->error);
+        $order['packages'] = [];
     } else {
         $packageStmt->bind_param("i", $oid);
         $packageStmt->execute();
         $packageResult = $packageStmt->get_result();
 
-        $packages = [];
         while ($packageRow = $packageResult->fetch_assoc()) {
-            $package_id = (int)$packageRow['package_id'];
-            $package_name = $packageRow['package_name'];
-            $package_price = (float)$packageRow['package_price'];
-            $qty = (int)$packageRow['quantity'];
-            
-            // ✅ 修改：只查詢實際保存的菜品（order_items），而不是 package_dish 中的所有選項
-            $dishSql = "
-                SELECT 
-                    oi.item_id,
-                    mit.item_name,
-                    mi.item_price,
-                    oi.qty,
-                    oi.note
-                FROM order_items oi
-                JOIN menu_item mi ON oi.item_id = mi.item_id
-                JOIN menu_item_translation mit ON mi.item_id = mit.item_id
-                WHERE oi.oid = ? AND mit.language_code = ?
-            ";
-            
-            $dishStmt = $conn->prepare($dishSql);
-            if (!$dishStmt) {
-                error_log("Prepare failed for order items: " . $conn->error);
-                continue;
-            }
-            
-            $dishStmt->bind_param("is", $oid, $language);
-            $dishStmt->execute();
-            $dishResult = $dishStmt->get_result();
-            
+            $packageId = (int)$packageRow['package_id'];
+            $packageQty = max(1, (int)$packageRow['quantity']);
+            $packageNote = $packageRow['note'] ?? '';
+
             $dishes = [];
-            while ($dishRow = $dishResult->fetch_assoc()) {
-                $dish_item_id = (int)$dishRow['item_id'];
-                
-                // Parse customizations from note column
-                $customizations = [];
-                if (!empty($dishRow['note'])) {
-                    $decoded = json_decode($dishRow['note'], true);
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                        // The note contains customizations as JSON array
-                        foreach ($decoded as $cust) {
-                            $customizations[] = [
-                                "option_id" => (int)($cust['option_id'] ?? 0),
-                                "group_id" => (int)($cust['group_id'] ?? 0),
-                                "group_name" => $cust['group_name'] ?? '',
-                                "selected_value_ids" => $cust['selected_value_ids'] ?? [],
-                                "selected_values" => $cust['selected_values'] ?? [],
-                                "text_value" => $cust['text_value'] ?? ''
-                            ];
-                        }
-                        error_log("Parsed " . count($customizations) . " customizations for package dish item_id=$dish_item_id");
-                    } else {
-                        error_log("Failed to parse customizations JSON for item_id=$dish_item_id: " . json_last_error_msg());
-                    }
-                }
-                
-                $dishes[] = [
-                    "item_id" => $dish_item_id,
-                    "name" => $dishRow['item_name'],
-                    "price" => (float)$dishRow['item_price'],
-                    "quantity" => (int)$dishRow['qty'],
-                    "customizations" => $customizations
-                ];
+            $selectedItemsFromNote = [];
+
+            // Preferred source: package snapshot in order_packages.note (if present).
+            $decodedPackageNote = json_decode($packageNote, true);
+            if (json_last_error() === JSON_ERROR_NONE
+                && is_array($decodedPackageNote)
+                && isset($decodedPackageNote['selected_items'])
+                && is_array($decodedPackageNote['selected_items'])) {
+                $selectedItemsFromNote = $decodedPackageNote['selected_items'];
             }
-            $dishStmt->close();
-            
+
+            if (!empty($selectedItemsFromNote)) {
+                $dishMetaSql = "
+                    SELECT
+                        mi.item_id,
+                        mit.item_name,
+                        mi.item_price
+                    FROM menu_item mi
+                    JOIN menu_item_translation mit ON mi.item_id = mit.item_id
+                    WHERE mi.item_id = ? AND mit.language_code = ?
+                    LIMIT 1
+                ";
+                $dishMetaStmt = $conn->prepare($dishMetaSql);
+
+                foreach ($selectedItemsFromNote as $selectedItem) {
+                    if (!is_array($selectedItem)) {
+                        continue;
+                    }
+
+                    $dishItemId = (int)($selectedItem['item_id'] ?? ($selectedItem['id'] ?? 0));
+                    if ($dishItemId <= 0) {
+                        continue;
+                    }
+
+                    $dishQty = max(1, (int)($selectedItem['qty'] ?? 1));
+
+                    $dishName = 'Item #' . $dishItemId;
+                    $dishPrice = 0.0;
+
+                    if ($dishMetaStmt) {
+                        $dishMetaStmt->bind_param("is", $dishItemId, $language);
+                        $dishMetaStmt->execute();
+                        $dishMetaResult = $dishMetaStmt->get_result();
+                        if ($dishMetaResult->num_rows > 0) {
+                            $dishMetaRow = $dishMetaResult->fetch_assoc();
+                            $dishName = $dishMetaRow['item_name'];
+                            $dishPrice = (float)$dishMetaRow['item_price'];
+                        }
+                    }
+
+                    $customizations = [];
+                    if (isset($selectedItem['customizations']) && is_array($selectedItem['customizations'])) {
+                        foreach ($selectedItem['customizations'] as $customEntry) {
+                            if (is_array($customEntry)) {
+                                $customizations[] = normalize_customization_entry($customEntry);
+                            }
+                        }
+                    }
+
+                    if (empty($customizations) && isset($customizationMap[$dishItemId])) {
+                        $customizations = $customizationMap[$dishItemId];
+                    }
+
+                    $dishes[] = [
+                        'item_id' => $dishItemId,
+                        'name' => $dishName,
+                        'price' => $dishPrice,
+                        'quantity' => $dishQty,
+                        'customizations' => $customizations
+                    ];
+
+                    if (!isset($reservedQtyByItem[$dishItemId])) {
+                        $reservedQtyByItem[$dishItemId] = 0;
+                    }
+                    $reservedQtyByItem[$dishItemId] += $dishQty;
+                }
+
+                if ($dishMetaStmt) {
+                    $dishMetaStmt->close();
+                }
+            } else {
+                // Legacy fallback: infer package dishes from saved order_items + package_dish mapping.
+                $dishSql = "
+                    SELECT
+                        oi.item_id,
+                        mit.item_name,
+                        mi.item_price,
+                        oi.qty,
+                        oi.note
+                    FROM order_items oi
+                    JOIN package_dish pd ON oi.item_id = pd.item_id AND pd.package_id = ?
+                    JOIN menu_item mi ON oi.item_id = mi.item_id
+                    JOIN menu_item_translation mit ON mi.item_id = mit.item_id
+                    WHERE oi.oid = ? AND mit.language_code = ?
+                ";
+
+                $dishStmt = $conn->prepare($dishSql);
+                if ($dishStmt) {
+                    $dishStmt->bind_param("iis", $packageId, $oid, $language);
+                    $dishStmt->execute();
+                    $dishResult = $dishStmt->get_result();
+
+                    while ($dishRow = $dishResult->fetch_assoc()) {
+                        $dishItemId = (int)$dishRow['item_id'];
+                        $dishQty = max(1, (int)$dishRow['qty']);
+
+                        $customizations = $customizationMap[$dishItemId] ?? [];
+                        if (empty($customizations)) {
+                            $customizations = parse_note_customizations($dishRow['note'] ?? '');
+                        }
+
+                        $dishes[] = [
+                            'item_id' => $dishItemId,
+                            'name' => $dishRow['item_name'],
+                            'price' => (float)$dishRow['item_price'],
+                            'quantity' => $dishQty,
+                            'customizations' => $customizations
+                        ];
+
+                        if (!isset($reservedQtyByItem[$dishItemId])) {
+                            $reservedQtyByItem[$dishItemId] = 0;
+                        }
+                        $reservedQtyByItem[$dishItemId] += $dishQty;
+                    }
+
+                    $dishStmt->close();
+                } else {
+                    error_log("Prepare failed for package dishes: " . $conn->error);
+                }
+            }
+
             $packages[] = [
-                "package_id" => $package_id,
-                "package_name" => $package_name,
-                "package_price" => $package_price,
-                "quantity" => $qty,
-                "note" => $packageRow['note'],
-                "dishes" => $dishes,
-                "packageCost" => $package_price * $qty
+                'package_id' => $packageId,
+                'package_name' => $packageRow['package_name'],
+                'package_price' => (float)$packageRow['package_price'],
+                'quantity' => $packageQty,
+                'note' => $packageNote,
+                'dishes' => $dishes,
+                'packageCost' => ((float)$packageRow['package_price']) * $packageQty
             ];
         }
+
         $packageStmt->close();
-        
         $order['packages'] = $packages;
     }
-    $orders[] = $order;
 
-    $itemStmt->close();
+    // Build top-level regular items and remove quantities already attributed to packages.
+    $itemSql = "
+        SELECT
+            oi.item_id,
+            mi.item_price,
+            mit.item_name,
+            mi.image_url,
+            oi.qty AS quantity,
+            oi.note
+        FROM order_items oi
+        JOIN menu_item_translation mit ON oi.item_id = mit.item_id
+        JOIN menu_item mi ON mit.item_id = mi.item_id
+        WHERE mit.language_code = ? AND oi.oid = ?
+    ";
+
+    $itemStmt = $conn->prepare($itemSql);
+    $items = [];
+
+    if ($itemStmt) {
+        $itemStmt->bind_param("si", $language, $oid);
+        $itemStmt->execute();
+        $itemResult = $itemStmt->get_result();
+
+        while ($itemRow = $itemResult->fetch_assoc()) {
+            $itemId = (int)$itemRow['item_id'];
+            $rawQty = (int)$itemRow['quantity'];
+            $reservedQty = (int)($reservedQtyByItem[$itemId] ?? 0);
+            $displayQty = $rawQty - $reservedQty;
+
+            if ($displayQty <= 0) {
+                continue;
+            }
+
+            $itemPrice = (float)$itemRow['item_price'];
+            $customizations = $customizationMap[$itemId] ?? [];
+            if (empty($customizations)) {
+                $customizations = parse_note_customizations($itemRow['note'] ?? '');
+            }
+
+            $items[] = [
+                'item_id' => $itemId,
+                'name' => $itemRow['item_name'],
+                'quantity' => $displayQty,
+                'itemPrice' => $itemPrice,
+                'itemCost' => $itemPrice * $displayQty,
+                'image_url' => $itemRow['image_url'],
+                'customizations' => $customizations,
+                'isFromPackage' => false
+            ];
+        }
+
+        $itemStmt->close();
+    } else {
+        error_log("Prepare failed for order items: " . $conn->error);
+    }
+
+    $order['items'] = $items;
+    $orders[] = $order;
 }
 
 $stmt->close();

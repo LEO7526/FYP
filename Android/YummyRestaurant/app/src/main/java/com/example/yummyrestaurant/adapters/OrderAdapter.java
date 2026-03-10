@@ -60,7 +60,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         holder.orderId.setText("#" + order.getOid());
         
         double total = 0;
-        List<OrderItem> items = order.getItems();
+        List<OrderItem> items = buildDisplayItems(order);
         List<OrderPackage> packages = order.getPackages();
         
         Log.d("OrderAdapter", "=== BINDING ORDER #" + order.getOid() + " at position " + position + " ===");
@@ -434,9 +434,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     private void showOrderDetails(Context context, Order order) {
         try {
+            List<OrderItem> detailItems = buildDisplayItems(order);
             Log.d("OrderAdapter", "ℹ️ SHOWING DETAILS FOR ORDER #" + order.getOid());
             Log.d("OrderAdapter", "  Order Date: " + order.getOdate() + ", Status: " + order.getOstatus() + 
-                       ", Items: " + (order.getItems() != null ? order.getItems().size() : 0));
+                       ", Items: " + (detailItems != null ? detailItems.size() : 0));
             
             // 創建詳細信息對話框
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -472,9 +473,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             
             // 添加常規項目
             double itemsTotal = 0;
-            if (order.getItems() != null && order.getItems().size() > 0) {
-                Log.d("OrderAdapter", "  Processing " + order.getItems().size() + " items for details display");
-                for (OrderItem item : order.getItems()) {
+            if (detailItems != null && detailItems.size() > 0) {
+                Log.d("OrderAdapter", "  Processing " + detailItems.size() + " items for details display");
+                for (OrderItem item : detailItems) {
                     double itemCost = item.getItemPrice() * item.getQuantity();
                     itemsTotal += itemCost;
                     
@@ -597,7 +598,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                                 String custText = "";
                                 if (cust.getOptionId() == SPECIAL_OPTION_ID) {
                                     // 特殊要求
-                                    custText = "   └─ Special: " + cust.getTextValue();
+                                    custText = "   └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
                                     Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
                                 } else {
                                     // 常規自訂選項 - 優先使用 selectedChoices，備用 choiceNames
@@ -854,6 +855,80 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         });
         
         holder.itemsContainer.addView(collapseView);
+    }
+
+    private List<OrderItem> buildDisplayItems(Order order) {
+        List<OrderItem> result = new ArrayList<>();
+
+        if (order.getItems() != null) {
+            result.addAll(order.getItems());
+        }
+
+        if (order.getPackages() != null && !order.getPackages().isEmpty()) {
+            for (OrderPackage pkg : order.getPackages()) {
+                if (pkg == null) {
+                    continue;
+                }
+
+                boolean alreadyExists = false;
+                for (OrderItem existing : result) {
+                    if (existing != null && existing.isPackage() && existing.getPackageId() == pkg.getPackageId()) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyExists) {
+                    result.add(convertPackageToOrderItem(pkg));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private OrderItem convertPackageToOrderItem(OrderPackage pkg) {
+        int packageQty = Math.max(1, pkg.getQuantity());
+        double unitPrice = pkg.getPackagePrice();
+
+        if (unitPrice <= 0 && pkg.getPackageCost() > 0) {
+            unitPrice = pkg.getPackageCost() / packageQty;
+        }
+
+        OrderItem packageItem = new OrderItem(
+                pkg.getPackageId(),
+                pkg.getPackageName(),
+                packageQty,
+                unitPrice,
+                unitPrice * packageQty
+        );
+        packageItem.setPackage(true);
+        packageItem.setPackageId(pkg.getPackageId());
+
+        List<OrderItem> packageItems = new ArrayList<>();
+        if (pkg.getDishes() != null) {
+            for (OrderPackageDish dish : pkg.getDishes()) {
+                if (dish == null) {
+                    continue;
+                }
+
+                int dishQty = Math.max(1, dish.getQuantity());
+                OrderItem dishItem = new OrderItem(
+                        dish.getItemId(),
+                        dish.getName(),
+                        dishQty,
+                        dish.getPrice(),
+                        dish.getPrice() * dishQty
+                );
+                dishItem.setPackageItem(true);
+                dishItem.setParentPackageId(pkg.getPackageId());
+                dishItem.setCustomizations(dish.getCustomizations());
+                packageItems.add(dishItem);
+            }
+        }
+
+        packageItem.setPackageItems(packageItems);
+        return packageItem;
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
