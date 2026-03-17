@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.AnimationUtils;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.MaterialAvailabilityChecker;
 
@@ -80,7 +81,12 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Map.Entry<CartItem, Integer> entry = items.get(position);
+        int bindPos = holder.getBindingAdapterPosition();
+        if (bindPos == RecyclerView.NO_POSITION || bindPos >= items.size()) {
+            return;
+        }
+
+        Map.Entry<CartItem, Integer> entry = items.get(bindPos);
         CartItem cartItem = entry.getKey();
         int quantity = entry.getValue();
 
@@ -150,16 +156,22 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
 
         // Set up quantity controls
         holder.btnDecreaseQuantity.setOnClickListener(v -> {
-            int currentQty = quantity;
+            int adapterPosition = holder.getBindingAdapterPosition();
+            if (adapterPosition == RecyclerView.NO_POSITION || adapterPosition >= items.size()) return;
+
+            Map.Entry<CartItem, Integer> currentEntry = items.get(adapterPosition);
+            CartItem currentItem = currentEntry.getKey();
+            int currentQty = currentEntry.getValue() != null ? currentEntry.getValue() : 0;
+
             if (currentQty > 1) {
-                CartManager.updateQuantity(cartItem, currentQty - 1);
+                CartManager.updateQuantity(currentItem, currentQty - 1);
                 updateItems(CartManager.getCartItems());
                 if (cartUpdateListener != null) {
                     cartUpdateListener.onCartUpdated();
                 }
             } else {
                 // If quantity is 1, decrease acts as delete
-                CartManager.removeItem(cartItem);
+                CartManager.removeItem(currentItem);
                 updateItems(CartManager.getCartItems());
                 if (cartUpdateListener != null) {
                     cartUpdateListener.onCartUpdated();
@@ -169,13 +181,20 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
         });
 
         holder.btnIncreaseQuantity.setOnClickListener(v -> {
+            int adapterPosition = holder.getBindingAdapterPosition();
+            if (adapterPosition == RecyclerView.NO_POSITION || adapterPosition >= items.size()) return;
+
+            Map.Entry<CartItem, Integer> currentEntry = items.get(adapterPosition);
+            CartItem currentItem = currentEntry.getKey();
+            int currentQty = currentEntry.getValue() != null ? currentEntry.getValue() : 0;
+
             android.util.Log.d("MaterialCheck", "=== INCREASE QUANTITY CLICKED ===");
-            android.util.Log.d("MaterialCheck", "Current item: " + (cartItem.getMenuItem() != null ? cartItem.getMenuItem().getId() : "null"));
-            android.util.Log.d("MaterialCheck", "Current quantity: " + quantity);
+            android.util.Log.d("MaterialCheck", "Current item: " + (currentItem.getMenuItem() != null ? currentItem.getMenuItem().getId() : "null"));
+            android.util.Log.d("MaterialCheck", "Current quantity: " + currentQty);
             android.util.Log.d("MaterialCheck", "Attempting to add 1 more unit");
             
             // Check material availability before increasing quantity
-            MaterialAvailabilityChecker.checkAdditionalQuantity(context, cartItem, 1, 
+            MaterialAvailabilityChecker.checkAdditionalQuantity(context, currentItem, 1,
                 new MaterialAvailabilityChecker.MaterialCheckCallback() {
                     @Override
                     public void onCheckComplete(boolean allAvailable, String message, JSONArray materialDetails) {
@@ -186,7 +205,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
                         if (allAvailable) {
                             // Materials are sufficient, increase quantity
                             android.util.Log.d("MaterialCheck", "✅ Materials sufficient - increasing quantity");
-                            CartManager.updateQuantity(cartItem, quantity + 1);
+                            CartManager.updateQuantity(currentItem, currentQty + 1);
                             updateItems(CartManager.getCartItems());
                             if (cartUpdateListener != null) {
                                 cartUpdateListener.onCartUpdated();
@@ -207,7 +226,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
                         android.util.Log.e("MaterialCheck", "Error: " + error);
                         
                         // On error, allow increasing quantity but warn user
-                        CartManager.updateQuantity(cartItem, quantity + 1);
+                        CartManager.updateQuantity(currentItem, currentQty + 1);
                         updateItems(CartManager.getCartItems());
                         if (cartUpdateListener != null) {
                             cartUpdateListener.onCartUpdated();
@@ -220,7 +239,11 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
         });
 
         holder.btnDeleteItem.setOnClickListener(v -> {
-            CartManager.removeItem(cartItem);
+            int adapterPosition = holder.getBindingAdapterPosition();
+            if (adapterPosition == RecyclerView.NO_POSITION || adapterPosition >= items.size()) return;
+
+            Map.Entry<CartItem, Integer> currentEntry = items.get(adapterPosition);
+            CartManager.removeItem(currentEntry.getKey());
             updateItems(CartManager.getCartItems());
             if (cartUpdateListener != null) {
                 cartUpdateListener.onCartUpdated();
@@ -233,6 +256,30 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error_image)
                 .into(holder.image);
+
+        AnimationUtils.animateItemEntry(holder.itemView, bindPos);
+    }
+
+    public Map.Entry<CartItem, Integer> removeItem(int position) {
+        if (position < 0 || position >= items.size()) return null;
+        Map.Entry<CartItem, Integer> removed = items.remove(position);
+        if (removed != null && removed.getKey() != null) {
+            CartManager.removeItem(removed.getKey());
+        }
+        notifyItemRemoved(position);
+        if (cartUpdateListener != null) {
+            cartUpdateListener.onCartUpdated();
+        }
+        return removed;
+    }
+
+    public void restoreItem(Map.Entry<CartItem, Integer> entry, int position) {
+        if (entry == null || entry.getKey() == null || entry.getValue() == null) return;
+        CartManager.addItem(entry.getKey(), entry.getValue());
+        updateItems(CartManager.getCartItems());
+        if (cartUpdateListener != null) {
+            cartUpdateListener.onCartUpdated();
+        }
     }
 
     @Override

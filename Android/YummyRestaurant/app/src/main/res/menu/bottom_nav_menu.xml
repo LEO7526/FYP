@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/orderBellIcon"
+        android:icon="@drawable/ic_order_bell"
+        android:title="Browse" />
+    <item
+        android:id="@+id/couponIcon"
+        android:icon="@drawable/ic_coupon"
+        android:title="Coupons" />
+    <item
+        android:id="@+id/membershipIcon"
+        android:icon="@drawable/ic_qr"
+        android:title="Member" />
+    <item
+        android:id="@+id/orderRecordIcon"
+        android:icon="@drawable/ic_order_record"
+        android:title="Orders" />
+    <item
+        android:id="@+id/profileIcon"
+        android:icon="@drawable/ic_profile"
+        android:title="Profile" />
+</menu>

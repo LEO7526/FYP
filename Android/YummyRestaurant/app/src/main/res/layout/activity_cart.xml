@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
@@ -35,13 +36,17 @@
         android:layout_marginBottom="72dp"
         android:layout_centerHorizontal="true" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/checkoutBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Proceed to Payment"
         android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/primaryColor"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        app:backgroundTint="@color/colorPrimary"
+        app:cornerRadius="14dp"
+        app:icon="@drawable/ic_cart"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp" />
 </RelativeLayout>

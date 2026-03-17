@@ -1,11 +1,13 @@
 package com.example.yummyrestaurant.inventory;
 
+import com.example.yummyrestaurant.BuildConfig;
+
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
 
-    public static final String BASE_URL = "http://10.0.2.2/androidstaff_api/inventory/";
+    public static final String BASE_URL = BuildConfig.INVENTORY_BASE_URL;
 
     private static Retrofit retrofit = null;
 

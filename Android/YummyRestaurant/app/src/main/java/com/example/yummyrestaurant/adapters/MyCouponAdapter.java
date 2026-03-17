@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.Coupon;
+import com.example.yummyrestaurant.utils.AnimationUtils;
 import com.example.yummyrestaurant.utils.CouponValidator;
 
 import java.util.List;
@@ -67,6 +68,7 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
     @Override
     public void onBindViewHolder(@NonNull MyCouponViewHolder holder, int position) {
         Coupon coupon = myCoupons.get(position);
+        AnimationUtils.animateItemEntry(holder.itemView, position);
 
         // Title with quantity
         if (coupon.getQuantity() > 1) {

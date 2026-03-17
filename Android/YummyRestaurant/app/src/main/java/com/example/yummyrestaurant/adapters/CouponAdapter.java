@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.Coupon;
+import com.example.yummyrestaurant.utils.AnimationUtils;
 
 import java.util.List;
 
@@ -65,6 +66,7 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
     @Override
     public void onBindViewHolder(@NonNull CouponViewHolder holder, int position) {
         Coupon coupon = couponList.get(position);
+        AnimationUtils.animateItemEntry(holder.itemView, position);
 
         holder.tvTitle.setText(coupon.getTitle());
         holder.tvDescription.setText(coupon.getDescription());

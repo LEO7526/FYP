@@ -73,6 +73,7 @@ public class DishDetailActivity extends BaseCustomerActivity {
             name.setText(item.getName() != null ? item.getName() : "Unknown Dish");
             description.setText(item.getDescription() != null ? item.getDescription() : "No description available.");
             price.setText(String.format(Locale.getDefault(), "$ %.2f", item.getPrice()));
+            ViewCompat.setTransitionName(image, "dish_image_" + item.getId());
 
             // Tags
             LinearLayout tagsContainer = findViewById(R.id.tagsContainer);

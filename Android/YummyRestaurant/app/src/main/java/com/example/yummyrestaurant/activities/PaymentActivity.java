@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -64,6 +65,11 @@ public class PaymentActivity extends ThemeBaseActivity {
     private String paymentIntentId;
     private PaymentSheet paymentSheet;
     private String selectedPaymentMethod = "card"; // Default payment method
+
+    private interface SaveOrderCallback {
+        void onSuccess();
+        void onFailure(String message);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +131,8 @@ public class PaymentActivity extends ThemeBaseActivity {
             
             if ("cash".equals(selectedPaymentMethod)) {
                 // Direct cash payment - no Stripe involved
+                payButton.setEnabled(false);
+                loadingSpinner.setVisibility(View.VISIBLE);
                 onCashPaymentSelected();
             } else {
                 // Card payment - use Stripe
@@ -183,33 +191,29 @@ public class PaymentActivity extends ThemeBaseActivity {
         
         Log.i(TAG, "Cash payment. userId=" + userId + ", amount=" + amount);
         Log.d(TAG, "onCashPaymentSelected: Saving order to backend");
+
+        if (userId == null || userId.trim().isEmpty()) {
+            showError("Invalid customer account. Please log in again.");
+            resetPaymentButton();
+            return;
+        }
         
         // Generate a fake payment intent ID for cash orders
         paymentIntentId = "cash_" + System.currentTimeMillis();
         
         // Save order with cash payment method and ostatus=0 (pending front desk confirmation)
-        saveOrderToBackend(userId, amount, paymentIntentId);
-        
-        // Show success icon
-        successIcon.setAlpha(0f);
-        successIcon.setVisibility(View.VISIBLE);
-        successIcon.animate().alpha(1f).setDuration(500).start();
-        
-        new Handler().postDelayed(() -> {
-            Log.d(TAG, "Navigating to OrderConfirmationActivity");
-            Log.i(TAG, ">>> REDIRECTING: Moving to OrderConfirmationActivity");
-            Intent confirmIntent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
-            confirmIntent.putExtra("customerId", userId);
-            confirmIntent.putExtra("totalAmount", amount);
-            confirmIntent.putExtra("itemCount", items.size());
-            confirmIntent.putExtra("dishJson", dishJson);
-            confirmIntent.putExtra("paymentMethod", "cash");
-            startActivity(confirmIntent);
-            finish();
-        }, 1500);
-        
-        CartManager.clearCart();
-        CartManager.clearPackageDetails();
+        saveOrderToBackend(userId, amount, paymentIntentId, new SaveOrderCallback() {
+            @Override
+            public void onSuccess() {
+                completeCheckoutAndNavigate(userId, amount, true);
+            }
+
+            @Override
+            public void onFailure(String message) {
+                showError(message);
+                resetPaymentButton();
+            }
+        });
     }
 
     /**
@@ -222,11 +226,27 @@ public class PaymentActivity extends ThemeBaseActivity {
         int totalAmount = CartManager.getTotalAmountInCents();
         String userId = RoleManager.getUserId();
 
+        if (userId == null || userId.trim().isEmpty()) {
+            showError("Invalid customer account. Please log in again.");
+            resetPaymentButton();
+            return;
+        }
+
+        int customerId;
+        try {
+            customerId = Integer.parseInt(userId);
+        } catch (NumberFormatException e) {
+            showError("Invalid customer account. Please log in again.");
+            resetPaymentButton();
+            return;
+        }
+
         Map<String, Object> data = new HashMap<>();
         data.put("amount", totalAmount);
-        data.put("cid", Integer.parseInt(userId));
+        data.put("cid", customerId);
         data.put("currency", "hkd");
         data.put("paymentMethod", selectedPaymentMethod);
+        data.put("client_timezone", TimeZone.getDefault().getID());
 
         Log.d(TAG, "createPaymentIntent: request body = " + new Gson().toJson(data));
         Log.i(TAG, "createPaymentIntent: Sending request with paymentMethod=" + selectedPaymentMethod + ", amount=" + totalAmount);
@@ -480,38 +500,35 @@ public class PaymentActivity extends ThemeBaseActivity {
         Log.i(TAG, ">>> Payment method used: " + selectedPaymentMethod);
         Log.i(TAG, ">>> Payment intent ID: " + paymentIntentId);
 
-        // Show success icon
-        successIcon.setAlpha(0f);
-        successIcon.setVisibility(View.VISIBLE);
-        successIcon.animate().alpha(1f).setDuration(500).start();
-
         String userId = RoleManager.getUserId();
         int amount = CartManager.getTotalAmountInCents();
 
+        if (userId == null || userId.trim().isEmpty()) {
+            showError("Invalid customer account. Please log in again.");
+            resetPaymentButton();
+            return;
+        }
+
         Log.i(TAG, "Payment success. userId=" + userId + ", amount=" + amount + ", method=" + selectedPaymentMethod);
         Log.d(TAG, "onPaymentSuccess: Saving order to backend");
-        saveOrderToBackend(userId, amount, paymentIntentId);
+        saveOrderToBackend(userId, amount, paymentIntentId, new SaveOrderCallback() {
+            @Override
+            public void onSuccess() {
+                completeCheckoutAndNavigate(userId, amount, false);
+            }
 
-        new Handler().postDelayed(() -> {
-            Log.d(TAG, "Navigating to OrderConfirmationActivity");
-            Log.i(TAG, ">>> REDIRECTING: Moving to OrderConfirmationActivity");
-            Intent confirmIntent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
-            confirmIntent.putExtra("customerId", userId);
-            confirmIntent.putExtra("totalAmount", amount);
-            confirmIntent.putExtra("itemCount", items.size());
-            confirmIntent.putExtra("dishJson", dishJson);
-            startActivity(confirmIntent);
-            finish();
-        }, 1500);
-
-        CartManager.clearCart();
-        CartManager.clearPackageDetails();
+            @Override
+            public void onFailure(String message) {
+                showError(message);
+                resetPaymentButton();
+            }
+        });
     }
 
     /**
      * Step 5: Save order to backend after successful payment
      */
-    private void saveOrderToBackend(String userId, int amount, String paymentIntentId) {
+    private void saveOrderToBackend(String userId, int amount, String paymentIntentId, SaveOrderCallback callback) {
         Log.d(TAG, "saveOrderToBackend: userId=" + userId + ", amount=" + amount + ", paymentIntentId=" + paymentIntentId);
         Log.d(TAG, "saveOrderToBackend: selectedPaymentMethod=" + selectedPaymentMethod);
 
@@ -529,11 +546,18 @@ public class PaymentActivity extends ThemeBaseActivity {
             orderData.put("table_number", RoleManager.getAssignedTable());
             Log.d(TAG, "saveOrderToBackend: staff order, sid=" + RoleManager.getUserId());
         } else {
-            customerId = Integer.parseInt(userId);
+            try {
+                customerId = Integer.parseInt(userId);
+            } catch (NumberFormatException e) {
+                callback.onFailure("Invalid customer account. Please log in again.");
+                return;
+            }
+            orderData.put("sid", null);
             Log.d(TAG, "saveOrderToBackend: customer order, cid=" + customerId);
         }
 
         orderData.put("cid", customerId);
+        orderData.put("client_timezone", TimeZone.getDefault().getID());
         
         // ✅ Set ostatus based on payment method
         // Cash payment: ostatus=0 (pending front desk confirmation)
@@ -569,7 +593,6 @@ public class PaymentActivity extends ThemeBaseActivity {
             Log.d(TAG, "saveOrderToBackend: takeaway order, table_number=null");
         }
         
-        orderData.put("sid", "not applicable");
         orderData.put("payment_method", selectedPaymentMethod);
         
         // ✅ Only set payment_intent_id for card payments
@@ -674,10 +697,12 @@ public class PaymentActivity extends ThemeBaseActivity {
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to read response body", e);
                     }
+                    callback.onSuccess();
                 } else {
                     Log.e(TAG, "Failed to save order. Code=" + response.code());
+                    String message = "Failed to save order. Please try again.";
                     if (response.code() == 403) {
-                        String message = "Only available 11:00–21:29 (Asia/Hong_Kong).";
+                        message = "Only available 11:00–21:29 (Asia/Hong_Kong).";
                         try {
                             String responseText = response.errorBody() != null ? response.errorBody().string() : "";
                             if (!responseText.isEmpty()) {
@@ -689,16 +714,55 @@ public class PaymentActivity extends ThemeBaseActivity {
                             }
                         } catch (Exception ignored) {
                         }
-                        Toast.makeText(PaymentActivity.this, message, Toast.LENGTH_LONG).show();
+                    } else {
+                        try {
+                            String responseText = response.errorBody() != null ? response.errorBody().string() : "";
+                            if (!responseText.isEmpty()) {
+                                JSONObject json = new JSONObject(responseText);
+                                String serverMessage = json.optString("message", "");
+                                if (!serverMessage.trim().isEmpty()) {
+                                    message = serverMessage;
+                                }
+                            }
+                        } catch (Exception ignored) {
+                        }
                     }
+                    callback.onFailure(message);
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e(TAG, "saveOrderToBackend onFailure: " + t.getMessage(), t);
+                callback.onFailure("Network error while saving order.");
             }
         });
+    }
+
+    private void completeCheckoutAndNavigate(String userId, int amount, boolean isCashPayment) {
+        loadingSpinner.setVisibility(View.GONE);
+
+        successIcon.setAlpha(0f);
+        successIcon.setVisibility(View.VISIBLE);
+        successIcon.animate().alpha(1f).setDuration(500).start();
+
+        new Handler().postDelayed(() -> {
+            Log.d(TAG, "Navigating to OrderConfirmationActivity");
+            Log.i(TAG, ">>> REDIRECTING: Moving to OrderConfirmationActivity");
+            Intent confirmIntent = new Intent(PaymentActivity.this, OrderConfirmationActivity.class);
+            confirmIntent.putExtra("customerId", userId);
+            confirmIntent.putExtra("totalAmount", amount);
+            confirmIntent.putExtra("itemCount", items.size());
+            confirmIntent.putExtra("dishJson", dishJson);
+            if (isCashPayment) {
+                confirmIntent.putExtra("paymentMethod", "cash");
+            }
+            startActivity(confirmIntent);
+            finish();
+        }, 1500);
+
+        CartManager.clearCart();
+        CartManager.clearPackageDetails();
     }
 
     private void showError(String message) {

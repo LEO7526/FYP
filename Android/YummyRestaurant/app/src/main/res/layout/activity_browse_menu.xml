@@ -96,11 +96,11 @@
                 android:layout_marginEnd="8dp"
                 android:text="Dine In"
                 android:textSize="14sp"
-                android:textColor="@color/purple_700"
+                android:textColor="@color/colorPrimary"
                 app:cornerRadius="8dp"
-                app:strokeColor="@color/purple_700"
+                app:strokeColor="@color/colorPrimary"
                 app:strokeWidth="2dp"
-                app:rippleColor="@color/purple_200" />
+                app:rippleColor="@color/orange_light" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTakeaway"
@@ -111,11 +111,11 @@
                 android:layout_marginStart="8dp"
                 android:text="Takeaway"
                 android:textSize="14sp"
-                android:textColor="@color/purple_700"
+                android:textColor="@color/colorPrimary"
                 app:cornerRadius="8dp"
-                app:strokeColor="@color/purple_700"
+                app:strokeColor="@color/colorPrimary"
                 app:strokeWidth="2dp"
-                app:rippleColor="@color/purple_200" />
+                app:rippleColor="@color/orange_light" />
 
         </LinearLayout>
 
@@ -139,7 +139,7 @@
                     android:layout_weight="1"
                     android:text="Menu"
                     android:textSize="14sp"
-                    android:textColor="@color/purple_700"
+                    android:textColor="@color/colorPrimary"
                     android:background="@color/transparent"
                     style="?attr/buttonBarButtonStyle"
                     android:textStyle="bold" />
@@ -162,7 +162,7 @@
                 android:layout_width="0dp"
                 android:layout_height="3dp"
                 android:layout_gravity="bottom"
-                android:background="@color/purple_700" />
+                android:background="@color/colorPrimary" />
         </FrameLayout>
 
         <!-- Search Bar (Menu only) -->
@@ -252,12 +252,15 @@
         </LinearLayout>
 
         <!-- Loading Spinner -->
-        <ProgressBar
+        <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/loadingSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
             android:layout_centerInParent="true"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/loading_wave" />
 
         <!-- Order Type Selection Overlay Hint -->
         <FrameLayout

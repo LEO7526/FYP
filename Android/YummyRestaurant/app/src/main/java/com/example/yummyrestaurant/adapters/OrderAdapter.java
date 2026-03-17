@@ -27,6 +27,7 @@ import com.example.yummyrestaurant.models.OrderItem;
 import com.example.yummyrestaurant.models.OrderItemCustomization;
 import com.example.yummyrestaurant.models.OrderPackage;
 import com.example.yummyrestaurant.models.OrderPackageDish;
+import com.example.yummyrestaurant.utils.AnimationUtils;
 import com.example.yummyrestaurant.utils.CartManager;
 
 import java.text.ParseException;
@@ -55,6 +56,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         Order order = orders.get(position);
+        AnimationUtils.animateItemEntry(holder.itemView, position);
 
         // 基本信息
         holder.orderId.setText("#" + order.getOid());

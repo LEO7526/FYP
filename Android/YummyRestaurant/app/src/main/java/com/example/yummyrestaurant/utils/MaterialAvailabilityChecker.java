@@ -6,6 +6,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.yummyrestaurant.BuildConfig;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
 
@@ -22,7 +23,7 @@ import java.util.Map;
 public class MaterialAvailabilityChecker {
     
     private static final String TAG = "MaterialChecker";
-    private static final String API_BASE_URL = "http://10.0.2.2/newFolder/Database/projectapi/";
+    private static final String API_BASE_URL = BuildConfig.API_DEFAULT_BASE_URL;
     
     /**
      * Interface for material availability callback

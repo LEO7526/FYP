@@ -7,23 +7,75 @@ require 'stripe-demo/vendor/autoload.php';
 header('Content-Type: application/json');
 date_default_timezone_set('Asia/Hong_Kong');
 
-function isWithinOrderWindow(): bool {
-    $now = new DateTime('now', new DateTimeZone('Asia/Hong_Kong'));
-    $minutes = ((int)$now->format('H')) * 60 + (int)$now->format('i');
-    return $minutes >= 11 * 60 && $minutes < 21 * 60 + 30;
+const DEFAULT_ORDER_TIMEZONE = 'Asia/Hong_Kong';
+const ORDER_WINDOW_START_MINUTES = 11 * 60;
+const ORDER_WINDOW_END_MINUTES = 21 * 60 + 30;
+
+// Read payload first so timezone can be provided by client.
+$input = json_decode(file_get_contents('php://input'), true);
+if (!is_array($input)) {
+    $input = [];
 }
 
-if (!isWithinOrderWindow()) {
+function resolveOrderTimezone(array $input): DateTimeZone {
+    $candidate = '';
+
+    if (!empty($input['client_timezone']) && is_string($input['client_timezone'])) {
+        $candidate = trim($input['client_timezone']);
+    }
+
+    if ($candidate === '' && !empty($_SERVER['HTTP_X_CLIENT_TIMEZONE'])) {
+        $candidate = trim((string)$_SERVER['HTTP_X_CLIENT_TIMEZONE']);
+    }
+
+    if ($candidate === '') {
+        $envTz = getenv('RESTAURANT_TIMEZONE');
+        if ($envTz !== false) {
+            $candidate = trim((string)$envTz);
+        }
+    }
+
+    if ($candidate === '') {
+        $candidate = DEFAULT_ORDER_TIMEZONE;
+    }
+
+    try {
+        return new DateTimeZone($candidate);
+    } catch (Exception $e) {
+        error_log('create_payment_intent: invalid timezone "' . $candidate . '", fallback to ' . DEFAULT_ORDER_TIMEZONE);
+        return new DateTimeZone(DEFAULT_ORDER_TIMEZONE);
+    }
+}
+
+function getOrderWindowContext(array $input): array {
+    $tz = resolveOrderTimezone($input);
+    $now = new DateTimeImmutable('now', $tz);
+    $minutes = ((int)$now->format('H')) * 60 + (int)$now->format('i');
+    $allowed = $minutes >= ORDER_WINDOW_START_MINUTES && $minutes < ORDER_WINDOW_END_MINUTES;
+
+    return [
+        'allowed' => $allowed,
+        'timezone' => $tz->getName(),
+        'server_time' => $now->format('Y-m-d H:i:s P'),
+        'minutes' => $minutes,
+        'window' => '11:00-21:29'
+    ];
+}
+
+$window = getOrderWindowContext($input);
+if (!$window['allowed']) {
+    error_log('create_payment_intent: order window blocked; tz=' . $window['timezone'] . ', server_time=' . $window['server_time']);
     http_response_code(403);
     echo json_encode([
         'success' => false,
-        'message' => 'Only available 11:00–21:29 (Asia/Hong_Kong).',
-        'error' => 'Outside ordering hours'
+        'message' => 'Only available during business hours (11:00-21:29).',
+        'error' => 'Outside ordering hours',
+        'timezone_used' => $window['timezone'],
+        'server_time' => $window['server_time'],
+        'window' => $window['window']
     ]);
     exit;
 }
-
-$input = json_decode(file_get_contents('php://input'), true);
 $amount = $input['amount'] ?? 0;
 $cid = $input['cid'] ?? null;
 $paymentMethod = $input['paymentMethod'] ?? 'card'; // Default to card if not specified

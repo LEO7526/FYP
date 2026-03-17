@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.app.Activity;
+import android.app.ActivityOptions;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +28,7 @@ import com.bumptech.glide.request.target.Target;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.activities.DishDetailActivity;
 import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.AnimationUtils;
 import com.example.yummyrestaurant.utils.CartManager;
 
 import java.util.ArrayList;
@@ -305,15 +309,38 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                 })
                 .into(holder.dishImage);
 
+        int bindPos = holder.getBindingAdapterPosition();
+        AnimationUtils.animateItemEntry(holder.itemView, bindPos == RecyclerView.NO_POSITION ? 0 : bindPos);
+
         holder.itemView.setOnClickListener(v -> {
+            int adapterPosition = holder.getBindingAdapterPosition();
+            if (adapterPosition == RecyclerView.NO_POSITION || adapterPosition >= filteredList.size()) return;
+
+            MenuItem clickedItem = filteredList.get(adapterPosition);
+
             // Check if order type is selected
             if (!CartManager.isOrderTypeSelected()) {
                 Toast.makeText(context, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
                 return;
             }
             Intent intent = new Intent(context, DishDetailActivity.class);
-            intent.putExtra("menuItem", item);
-            context.startActivity(intent);
+            intent.putExtra("menuItem", clickedItem);
+            if (context instanceof Activity) {
+                Activity activity = (Activity) context;
+                holder.dishImage.setTransitionName("dish_image_" + clickedItem.getId());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                            activity,
+                            holder.dishImage,
+                            holder.dishImage.getTransitionName()
+                    );
+                    activity.startActivity(intent, options.toBundle());
+                } else {
+                    activity.startActivity(intent);
+                }
+            } else {
+                context.startActivity(intent);
+            }
         });
     }
 

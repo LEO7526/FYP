@@ -12,9 +12,10 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.animation.ValueAnimator;
+import android.view.animation.DecelerateInterpolator;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -37,6 +38,7 @@ import com.example.yummyrestaurant.utils.BadgeManager;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.android.material.navigation.NavigationView;
+import com.airbnb.lottie.LottieAnimationView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,7 +57,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     private MenuItemAdapter adapter;
     private PackagesAdapter packagesAdapter;
     private List<SetMenu> packages = new ArrayList<>();
-    private ProgressBar loadingSpinner;
+    private LottieAnimationView loadingSpinner;
     private EditText searchBar;
     private String currentLanguage = "en";
     private static boolean login;
@@ -174,7 +176,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
 
         // Update button styles
         if ("menu".equals(tab)) {
-            btnMenuTab.setTextColor(getResources().getColor(R.color.purple_700));
+            btnMenuTab.setTextColor(getResources().getColor(R.color.colorPrimary));
             btnMenuTab.setTypeface(null, android.graphics.Typeface.BOLD);
             btnPackageTab.setTextColor(getResources().getColor(R.color.gray_text));
             btnPackageTab.setTypeface(null, android.graphics.Typeface.NORMAL);
@@ -185,7 +187,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             // Show menu content
             showMenuContent();
         } else {
-            btnPackageTab.setTextColor(getResources().getColor(R.color.purple_700));
+            btnPackageTab.setTextColor(getResources().getColor(R.color.colorPrimary));
             btnPackageTab.setTypeface(null, android.graphics.Typeface.BOLD);
             btnMenuTab.setTextColor(getResources().getColor(R.color.gray_text));
             btnMenuTab.setTypeface(null, android.graphics.Typeface.NORMAL);
@@ -199,16 +201,31 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     }
 
     private void animateTabUnderline(Button targetButton) {
-        // Move underline under the selected tab
         targetButton.post(() -> {
+            int targetLeft = targetButton.getLeft();
+            int targetWidth = targetButton.getWidth();
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) tabUnderline.getLayoutParams();
             if (params == null) {
-                params = new FrameLayout.LayoutParams(0, 6); // height = 3dp, will be set by layout
+                params = new FrameLayout.LayoutParams(targetWidth, 6);
+                params.leftMargin = targetLeft;
+                params.gravity = android.view.Gravity.BOTTOM;
+                tabUnderline.setLayoutParams(params);
+                return;
             }
-            params.width = targetButton.getWidth();
-            params.leftMargin = targetButton.getLeft();
-            params.gravity = android.view.Gravity.BOTTOM;
-            tabUnderline.setLayoutParams(params);
+            int startLeft = params.leftMargin;
+            int startWidth = params.width;
+            final FrameLayout.LayoutParams animParams = params;
+            ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+            anim.setDuration(220);
+            anim.setInterpolator(new DecelerateInterpolator());
+            anim.addUpdateListener(va -> {
+                float t = (float) va.getAnimatedValue();
+                animParams.leftMargin = Math.round(startLeft + (targetLeft - startLeft) * t);
+                animParams.width = Math.round(startWidth + (targetWidth - startWidth) * t);
+                animParams.gravity = android.view.Gravity.BOTTOM;
+                tabUnderline.setLayoutParams(animParams);
+            });
+            anim.start();
         });
     }
 

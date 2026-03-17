@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.MyBooking;
+import com.example.yummyrestaurant.utils.AnimationUtils;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class MyBookingAdapter extends RecyclerView.Adapter<MyBookingAdapter.Book
     @Override
     public void onBindViewHolder(@NonNull BookingViewHolder holder, int position) {
         MyBooking booking = bookings.get(position);
+        AnimationUtils.animateItemEntry(holder.itemView, position);
 
         holder.textBookingId.setText("Booking #" + booking.getBid());
         holder.textDateTime.setText(booking.getBookingDate() + " " + booking.getBookingTime());

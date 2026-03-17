@@ -1,8 +1,9 @@
 package com.example.yummyrestaurant.api;
 
+import com.example.yummyrestaurant.BuildConfig;
+
 public class ApiConstants {
-    // 你的 IP (模擬器 10.0.2.2，實機請用電腦 IP)
-    public static final String BASE_URL = "http://10.0.2.2/newFolder/Database/projectapi/";
+    public static final String BASE_URL = BuildConfig.API_DEFAULT_BASE_URL;
 
     public static final String LOGIN = BASE_URL + "staff_login.php";
     public static final String GET_ORDERS = BASE_URL + "get_all_orders.php";

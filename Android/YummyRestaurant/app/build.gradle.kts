@@ -19,8 +19,22 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            // Keep current local development behavior for emulator/phone over HTTP.
+            manifestPlaceholders["usesCleartextTraffic"] = true
+            buildConfigField("String", "API_DEFAULT_BASE_URL", "\"http://10.0.2.2/newFolder/Database/projectapi/\"")
+            buildConfigField("String", "API_SIMULATOR_BASE_URL", "\"http://10.0.2.2/newFolder/Database/projectapi/\"")
+            buildConfigField("String", "API_PHONE_BASE_URL", "\"http://192.168.0.122/newFolder/Database/projectapi/\"")
+            buildConfigField("String", "INVENTORY_BASE_URL", "\"http://10.0.2.2/androidstaff_api/inventory/\"")
+        }
+
         getByName("release") {
             isMinifyEnabled = false
+            manifestPlaceholders["usesCleartextTraffic"] = false
+            buildConfigField("String", "API_DEFAULT_BASE_URL", "\"https://api.yummyrestaurant.com/projectapi/\"")
+            buildConfigField("String", "API_SIMULATOR_BASE_URL", "\"https://api.yummyrestaurant.com/projectapi/\"")
+            buildConfigField("String", "API_PHONE_BASE_URL", "\"https://api.yummyrestaurant.com/projectapi/\"")
+            buildConfigField("String", "INVENTORY_BASE_URL", "\"https://api.yummyrestaurant.com/inventory/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,6 +51,10 @@ android {
         jvmTarget = "11"
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
 
 }
 
@@ -45,7 +63,6 @@ dependencies {
     implementation("com.stripe:stripe-android:20.11.0")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.activity:activity:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
@@ -65,13 +82,17 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.1")
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     implementation("androidx.annotation:annotation:1.7.0")
 
     implementation("androidx.cardview:cardview:1.0.0")
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // Animation
+    implementation("com.airbnb.android:lottie:6.4.1")
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 
     // ============================================
     // Staff App Dependencies

@@ -98,12 +98,12 @@ $result = $stmt->get_result();
 
 $coupons = [];
 while ($row = $result->fetch_assoc()) {
-    // explode safe separator '||' and filter empty strings
+    // Cast IDs to int so Android Gson can deserialize them as List<Integer> without type errors.
     $items = isset($row['applicable_items']) && $row['applicable_items'] !== null && $row['applicable_items'] !== ''
-        ? array_filter(explode('||', $row['applicable_items']), function($v){ return $v !== ''; })
+        ? array_values(array_map('intval', array_filter(explode('||', $row['applicable_items']), function($v){ return $v !== ''; })))
         : [];
     $cats = isset($row['applicable_categories']) && $row['applicable_categories'] !== null && $row['applicable_categories'] !== ''
-        ? array_filter(explode('||', $row['applicable_categories']), function($v){ return $v !== ''; })
+        ? array_values(array_map('intval', array_filter(explode('||', $row['applicable_categories']), function($v){ return $v !== ''; })))
         : [];
     $terms = isset($row['terms']) && $row['terms'] !== null && $row['terms'] !== ''
         ? array_filter(explode('||', $row['terms']), function($v){ return $v !== ''; })

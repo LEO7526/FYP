@@ -5,15 +5,17 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
+import com.example.yummyrestaurant.BuildConfig;
+
 public class ApiConfig {
     private static final String TAG = "ApiConfig";
     private static final String PREFS_NAME = "AppSettingsPrefs";
     private static final String KEY_API_ENV = "api_environment";
     private static final String KEY_ENV_AUTO_DETECTED = "api_env_auto_detected";
 
-    // Define your environments here
-    public static final String BASE_SIMULATOR_URL = "http://10.0.2.2/newFolder/Database/projectapi/";
-    public static final String BASE_PHONE_URL     = "http://192.168.0.122/newFolder/Database/projectapi/";
+    // URLs come from build types to keep debug(local HTTP) and release(HTTPS) isolated.
+    public static final String BASE_SIMULATOR_URL = BuildConfig.API_SIMULATOR_BASE_URL;
+    public static final String BASE_PHONE_URL     = BuildConfig.API_PHONE_BASE_URL;
     // 真實 IP: 192.168.0.122 (開發機器 - XAMPP 所在位置)
 
     /**

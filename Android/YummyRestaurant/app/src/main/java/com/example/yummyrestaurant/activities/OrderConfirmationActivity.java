@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.utils.RoleManager;
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -30,6 +31,12 @@ public class OrderConfirmationActivity extends ThemeBaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_confirmation);
+
+        LottieAnimationView successAnimation = findViewById(R.id.successAnimation);
+        if (successAnimation != null) {
+            successAnimation.setProgress(0f);
+            successAnimation.playAnimation();
+        }
 
         backToHomeBtn = findViewById(R.id.backToHomeBtn);
         backToHomeBtn.setOnClickListener(v -> {

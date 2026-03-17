@@ -53,7 +53,7 @@
                 android:padding="16dp">
 
                 <!-- 1. 基本資訊 -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Basic Info" style="@style/SectionTitle"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Basic Info" style="@style/SectionTitle"/>
 
                 <EditText
                     android:id="@+id/etPoints"
@@ -73,7 +73,7 @@
                     android:layout_marginBottom="12dp"/>
 
                 <!-- 2. 折扣設定 -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Discount Type" style="@style/SectionTitle"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Discount Type" style="@style/SectionTitle"/>
                 <RadioGroup
                     android:id="@+id/rgDiscountType"
                     android:layout_width="match_parent"
@@ -93,7 +93,7 @@
                     style="@style/InputStyle"/>
 
                 <!-- 3. 適用範圍 -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Applicable To" style="@style/SectionTitle"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Applicable To" style="@style/SectionTitle"/>
                 <RadioGroup
                     android:id="@+id/rgAppliesTo"
                     android:layout_width="match_parent"
@@ -121,7 +121,7 @@
                     android:layout_marginBottom="12dp"/>
 
                 <!-- 4. 規則 -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Rules" style="@style/SectionTitle"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rules" style="@style/SectionTitle"/>
                 <CheckBox android:id="@+id/cbMinSpend" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Minimum Spend"/>
                 <EditText android:id="@+id/etMinSpend" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Amount" android:visibility="gone" style="@style/InputStyle"/>
 
@@ -141,7 +141,7 @@
                 <CheckBox android:id="@+id/cbBirthday" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Birthday Only"/>
 
                 <!-- 5. 多語言 (卡片式) -->
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Coupon Details (Multi-Language)" style="@style/SectionTitle" android:layout_marginTop="24dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Coupon Details (Multi-Language)" style="@style/SectionTitle" android:layout_marginTop="24dp"/>
 
                 <!-- English -->
                 <androidx.cardview.widget.CardView

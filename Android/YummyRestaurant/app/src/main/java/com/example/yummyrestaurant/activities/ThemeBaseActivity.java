@@ -1,9 +1,11 @@
 package com.example.yummyrestaurant.activities;
 
 import android.os.Bundle;
+import android.os.Build;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.yummyrestaurant.utils.ThemeManager;
 import android.util.Log;
+import com.google.android.material.transition.platform.MaterialFadeThrough;
 
 /**
  * Base Activity class that automatically applies app-wide theme
@@ -24,6 +26,13 @@ public abstract class ThemeBaseActivity extends AppCompatActivity {
         
         // ✅ Apply theme based on user role
         applyAppTheme();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            MaterialFadeThrough fadeThrough = new MaterialFadeThrough();
+            fadeThrough.setDuration(220L);
+            getWindow().setEnterTransition(fadeThrough);
+            getWindow().setReturnTransition(new MaterialFadeThrough());
+        }
     }
 
     /**

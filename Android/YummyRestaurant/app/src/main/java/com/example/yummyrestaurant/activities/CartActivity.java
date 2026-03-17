@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.CartItemAdapter;
@@ -27,6 +28,7 @@ import com.example.yummyrestaurant.utils.MaterialAvailabilityChecker;
 import org.json.JSONArray;
 import com.google.gson.Gson;
 import com.bumptech.glide.Glide;
+import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -67,6 +69,7 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
         activeAdapter = new CartItemAdapter(this, CartManager.getCartItems());
         activeAdapter.setCartUpdateListener(this);
         cartRecyclerView.setAdapter(activeAdapter);
+        setupSwipeToDelete();
 
         updateCartUI();
 
@@ -186,6 +189,39 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
         if (activeAdapter != null) {
             activeAdapter.updateItems(CartManager.getCartItems());
         }
+    }
+
+    private void setupSwipeToDelete() {
+        ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                if (activeAdapter == null) return;
+                int position = viewHolder.getAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) return;
+
+                Map.Entry<CartItem, Integer> removed = activeAdapter.removeItem(position);
+                if (removed == null) {
+                    updateCartUI();
+                    return;
+                }
+
+                Snackbar.make(cartRecyclerView, "Item removed", Snackbar.LENGTH_LONG)
+                        .setAction("UNDO", v -> {
+                            activeAdapter.restoreItem(removed, position);
+                            updateCartUI();
+                        })
+                        .show();
+
+                updateCartUI();
+            }
+        };
+
+        new ItemTouchHelper(swipeCallback).attachToRecyclerView(cartRecyclerView);
     }
 
     private void updateCartUI() {
