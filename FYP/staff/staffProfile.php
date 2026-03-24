@@ -30,33 +30,13 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - Smile & Sunshine Toy</title>
+    <title>Yummy Restaurant - Profile</title>
     <link rel="stylesheet" href="../CSS/common.css">
     <link rel="stylesheet" href="../CSS/profile.css">
     <link rel="stylesheet" href="../CSS/header.css">
 </head>
 <body>
-<header>
-    <div class="hamburger-menu" id="hamburgerMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    <div class="logo">
-        <a href="staffIndex.php">Yummy Restaurant</a>
-    </div>
-    <nav class="main-nav">
-        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
-        <a href="newInventory.php" class="nav-button insert-materials">Inventory</a>
-        <a href="bookingList.php" class="nav-button order-list">Reservations</a>
-        <a href="salesReport.php" class="nav-button report">Sales Reports</a>
-    </nav>
-
-    <div class="user-actions">
-        <a href="staffProfile.php" class="profile-btn">Profile</a>
-        <a href="../logout.php" class="logout-btn">Log out</a>
-    </div>
-</header>
+<?php include 'header.php'; ?>
 <div class="container">
     <h1>Profile</h1>
     <div class="profile-header">

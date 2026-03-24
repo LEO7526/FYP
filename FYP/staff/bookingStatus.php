@@ -13,8 +13,8 @@ if (isset($_POST['bid']) && isset($_POST['action'])) {
     $bid = intval($_POST['bid']);
     $action = $_POST['action'];
 
-    // Define allowed actions
-    $allowedActions = ['accept', 'reject', 'cancel'];
+    // Define allowed actions (accept, reject, cancel, checkin)
+    $allowedActions = ['accept', 'reject', 'cancel', 'checkin'];
     if (!in_array($action, $allowedActions)) {
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
         exit();
@@ -25,6 +25,8 @@ if (isset($_POST['bid']) && isset($_POST['action'])) {
         $newStatus = 2; // Confirmed
     } elseif ($action === 'reject' || $action === 'cancel') {
         $newStatus = 0; // Cancelled
+    } elseif ($action === 'checkin') {
+        $newStatus = 3; // Completed
     }
 
     // Update booking status in the database

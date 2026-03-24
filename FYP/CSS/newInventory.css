@@ -205,8 +205,8 @@ h1 {
     align-items: center;
     justify-content: center;
     padding: 0 12px;
-    height: 40px; /* 固定高度與輸入框一致 */
-    margin-top: 28px; /* 與標籤對齊 */
+    height: 40px;
+    margin-top: 28px;
     font-size: 14px;
     box-sizing: border-box;
 }
@@ -217,13 +217,13 @@ h1 {
     font-weight: normal;
 }
 
-/* 修正：Calculated Total 輸入框寬度 */
+
 .calculated-total-group {
-    flex: 0.8; /* 減少 flex 比例，讓寬度變小 */
+    flex: 0.8;
 }
 
 .calculated-total-group input {
-    background-color: #e8f4fd !important; /* 確保背景色 */
+    background-color: #e8f4fd !important;
     cursor: not-allowed;
     color: #2c3e50;
 }
@@ -400,4 +400,15 @@ h1 {
 .current-info .value .low-stock {
     color: #e74c3c;
     font-weight: bold;
+}
+.search-box input {
+    border-radius: 60px;
+    border: 1px solid #dee7ef;
+    padding: 14px 8px;
+    background: #fefefe;
+    font-size: 0.95rem;
+}
+.material-name {
+    font-weight: 700;
+    color: #1e4663;
 }

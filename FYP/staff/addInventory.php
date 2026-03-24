@@ -67,7 +67,7 @@ if ($category_result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yummy Restaurant - Add New Material</title>
+    <title>Yummy Restaurant - Add New Inventory</title>
     <link rel="stylesheet" href="../CSS/header.css">
     <link rel="stylesheet" href="../CSS/addInventory.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -93,14 +93,14 @@ if ($category_result) {
                 const unit = $('#unit').val().trim();
 
                 if (!mname) {
-                    alert('Please enter the material name！');
+                    alert('Please enter the inventory name！');
                     $('#mname').focus();
                     e.preventDefault();
                     return false;
                 }
 
                 if (!category) {
-                    alert('Please select material category！');
+                    alert('Please select inventory category！');
                     $('#category_id').focus();
                     e.preventDefault();
                     return false;
@@ -120,30 +120,10 @@ if ($category_result) {
 </head>
 
 <body>
-<header>
-    <div class="hamburger-menu" id="hamburgerMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    <div class="logo">
-        <a href="staffIndex.php">Yummy Restaurant</a>
-    </div>
-    <nav class="main-nav">
-        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
-        <a href="newInventory.php" class="nav-button insert-materials">Inventory</a>
-        <a href="bookingList.php" class="nav-button order-list">Reservations</a>
-        <a href="salesReport.php" class="nav-button report">Sales Reports</a>
-    </nav>
-
-    <div class="user-actions">
-        <a href="staffProfile.php" class="profile-btn">Profile</a>
-        <a href="../logout.php" class="logout-btn">Log out</a>
-    </div>
-</header>
+<?php include 'header.php'; ?>
 
 <div class="container">
-    <h1>Add New Material</h1>
+    <h1>Add New Inventory</h1>
 
     <?php if ($message): ?>
         <div class="message <?php echo $message_type; ?>">
@@ -153,10 +133,10 @@ if ($category_result) {
 
     <form method="POST" action="">
         <div class="form-group">
-            <label for="mname">Material Name *</label>
+            <label for="mname">Inventory Name *</label>
             <input type="text" id="mname" name="mname"
                    value="<?php echo htmlspecialchars($_POST['mname'] ?? ''); ?>"
-                   placeholder="Enter material name" required>
+                   placeholder="Enter inventory name" required>
         </div>
 
         <div class="form-row">
@@ -201,7 +181,7 @@ if ($category_result) {
             </div>
         </div>
 
-        <button type="submit" class="submit-btn">Add Material</button>
+        <button type="submit" class="submit-btn">Add Inventory</button>
 
         <a href="newInventory.php" class="back-btn">← Back to Inventory</a>
     </form>

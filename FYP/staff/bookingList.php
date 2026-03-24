@@ -3,23 +3,24 @@ require_once '../auth_check.php';
 check_staff_auth();
 include '../conn.php';
 
-// Get filter parameter
+// 若 filter 為 pending 則重定向到 all
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
+if ($filter === 'pending') {
+    header("Location: ?filter=all&page=" . urlencode($_GET['page'] ?? 'staffIndex.php'));
+    exit();
+}
+
 $page = isset($_GET['page']) ? $_GET['page'] : 'staffIndex.php';
 
-// Build SQL WHERE conditions
 $whereConditions = [];
-if ($filter === 'pending') {
-    $whereConditions[] = "b.status = 1";
-} elseif ($filter === 'confirmed') {
+if ($filter === 'confirmed') {
     $whereConditions[] = "b.status = 2";
 } elseif ($filter === 'history') {
     $whereConditions[] = "b.status = 3";
 } elseif ($filter === 'cancelled') {
     $whereConditions[] = "b.status = 0";
-} else {
-    // Default show all (except cancelled)
-    $whereConditions[] = "b.status != 0";
+} else { // all
+    $whereConditions[] = "b.status IN (2,3)";
 }
 
 $whereSql = implode(" AND ", $whereConditions);
@@ -42,7 +43,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking List</title>
+    <title>Yummy Restaurant - Booking List</title>
     <link rel="stylesheet" href="../CSS/header.css">
     <link rel="stylesheet" href="../CSS/common.css">
     <link rel="stylesheet" href="../CSS/order.css">
@@ -51,31 +52,9 @@ while ($row = mysqli_fetch_assoc($result)) {
     <link rel="stylesheet" href="../CSS/reservation.css">
     <script src="floorplan.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-    </style>
 </head>
 <body>
-<header>
-    <div class="hamburger-menu" id="hamburgerMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    <div class="logo">
-        <a href="staffIndex.php">Yummy Restaurant</a>
-    </div>
-    <nav class="main-nav">
-        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
-        <a href="newInventory.php" class="nav-button insert-materials">Inventory</a>
-        <a href="bookingList.php" class="nav-button order-list">Reservations</a>
-        <a href="salesReport.php" class="nav-button report">Sales Reports</a>
-    </nav>
-
-    <div class="user-actions">
-        <a href="staffProfile.php" class="profile-btn">Profile</a>
-        <a href="../logout.php" class="logout-btn">Log out</a>
-    </div>
-</header>
+<?php include 'header.php'; ?>
 
 <div class="container">
     <div class="page-header">
@@ -138,13 +117,12 @@ while ($row = mysqli_fetch_assoc($result)) {
         </form>
     </div>
 
-    <!-- Filter buttons -->
+    <!-- Filter buttons (pending removed) -->
     <div class="filter-buttons">
-        <a href="?filter=all&page=<?= htmlspecialchars($page) ?>" class="filter-btn <?= $filter === 'all' ? 'active' : '' ?>">All</a>
-        <a href="?filter=pending&page=<?= htmlspecialchars($page) ?>" class="filter-btn <?= $filter === 'pending' ? 'active' : '' ?>">Pending</a>
-        <a href="?filter=confirmed&page=<?= htmlspecialchars($page) ?>" class="filter-btn <?= $filter === 'confirmed' ? 'active' : '' ?>">Confirmed</a>
-        <a href="?filter=history&page=<?= htmlspecialchars($page) ?>" class="filter-btn <?= $filter === 'history' ? 'active' : '' ?>">History</a>
-        <a href="?filter=cancelled&page=<?= htmlspecialchars($page) ?>" class="filter-btn <?= $filter === 'cancelled' ? 'active' : '' ?>">Cancelled</a>
+        <a href="?filter=all&page=<?= htmlspecialchars($page) ?>" class="filter-btn filter-all <?= $filter === 'all' ? 'active' : '' ?>">All</a>
+        <a href="?filter=confirmed&page=<?= htmlspecialchars($page) ?>" class="filter-btn filter-confirmed <?= $filter === 'confirmed' ? 'active' : '' ?>">Confirmed</a>
+        <a href="?filter=history&page=<?= htmlspecialchars($page) ?>" class="filter-btn filter-history <?= $filter === 'history' ? 'active' : '' ?>">History</a>
+        <a href="?filter=cancelled&page=<?= htmlspecialchars($page) ?>" class="filter-btn filter-cancelled <?= $filter === 'cancelled' ? 'active' : '' ?>">Cancelled</a>
     </div>
 
     <!-- Desktop table view -->
@@ -158,9 +136,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <th class="time-col">Booking Time</th>
                 <th class="guests-col">Guests</th>
                 <th class="purpose-col">Purpose</th>
-                <th class="status-col">
-                    <div class="column-header">Status</div>
-                </th>
+                <th class="status-col">Status</th>
                 <th class="actions-col">Actions</th>
             </tr>
             </thead>
@@ -171,10 +147,9 @@ while ($row = mysqli_fetch_assoc($result)) {
                 $isMember = !is_null($row['cid']);
                 $customerName = $isMember ? $row['member_name'] : $row['bkcname'];
 
-                // Status mapping
+                // Status mapping (only 0,2,3)
                 $statusMap = [
                     0 => ['text' => 'Cancelled', 'class' => 'cancelled'],
-                    1 => ['text' => 'Pending', 'class' => 'pending'],
                     2 => ['text' => 'Confirmed', 'class' => 'confirmed'],
                     3 => ['text' => 'Completed', 'class' => 'completed']
                 ];
@@ -209,9 +184,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 echo "<td class='status-cell' data-status='{$row['status']}'>";
                 echo "<div class='status {$statusInfo['class']}'>{$statusInfo['text']}</div>";
                 echo "</td>";
-                echo "<td class='actions-cell'>";
-                // Actions will be set by jQuery based on status
-                echo "</td>";
+                echo "<td class='actions-cell'></td>"; // Buttons will be filled by JS
                 echo "</tr>";
 
                 // Append remark row if any
@@ -236,7 +209,6 @@ while ($row = mysqli_fetch_assoc($result)) {
 
             $statusMap = [
                 0 => ['text' => 'Cancelled', 'class' => 'cancelled'],
-                1 => ['text' => 'Pending', 'class' => 'pending'],
                 2 => ['text' => 'Confirmed', 'class' => 'confirmed'],
                 3 => ['text' => 'Completed', 'class' => 'completed']
             ];
@@ -297,10 +269,8 @@ while ($row = mysqli_fetch_assoc($result)) {
             }
 
             echo "<div class='card-actions'>";
-            if ($row['status'] == 1) { // Pending
-                echo "<button class='card-btn btn-action accept' data-bid='{$row['bid']}' data-action='accept'>Accept</button>";
-                echo "<button class='card-btn btn-action reject' data-bid='{$row['bid']}' data-action='reject'>Reject</button>";
-            } else if ($row['status'] == 2) { // Confirmed
+            if ($row['status'] == 2) { // Confirmed
+                echo "<button class='card-btn btn-action checkin' data-bid='{$row['bid']}' data-action='checkin'>Check-in</button>";
                 echo "<button class='card-btn btn-action cancel' data-bid='{$row['bid']}' data-action='cancel'>Cancel</button>";
             } else { // Cancelled / Completed
                 echo "<button class='card-btn locked' disabled>Locked</button>";
@@ -379,7 +349,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         const startHour = 11;
         const stepMinutes = 30;
         const durationMinutes = 90;
-        const finalEndTime = 23; // Last end time must not exceed 23:00
+        const finalEndTime = 23;
 
         let current = new Date();
         current.setHours(startHour, 0, 0, 0);
@@ -426,7 +396,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             generateTimeSlots(timeSelect);
         }
 
-        // Name and phone input effect (original wrapNameTel logic retained)
+        // Name and phone input effect
         $(document).on('input', '#reserve_cname, #tel_num', function () {
             const $input = $(this);
             if ($input.val().trim().length > 0) {
@@ -436,7 +406,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             }
         });
 
-        // Wrap name and phone into two-column layout (original function)
+        // Wrap name and phone into two-column layout
         function wrapNameTel() {
             if ($('.name-tel-row').length) return;
             $('#reserve_cname').prev('label').addBack().wrapAll('<div class="name-tel-group name-wrap"/>');
@@ -510,7 +480,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             });
         });
 
-        // Initial canvas draw (all tables default unavailable, wait for load)
+        // Initial canvas draw
         drawTables();
 
         // ========== Form submission (AJAX) ==========
@@ -518,7 +488,6 @@ while ($row = mysqli_fetch_assoc($result)) {
             e.preventDefault();
             const $form = $(this);
 
-            // Ensure tid has a value
             if (!$('#tid').val()) {
                 alert("Please select a table first");
                 return;
@@ -531,7 +500,6 @@ while ($row = mysqli_fetch_assoc($result)) {
                 success: function (res) {
                     if (res.includes('successfully')) {
                         $('#bookingForm').hide();
-                        // Show notification
                         $('#toastNotification').text('✅ Reservation created!').fadeIn(300);
                         setTimeout(() => $('#toastNotification').fadeOut(300), 2000);
                         setTimeout(() => location.reload(), 600);
@@ -546,33 +514,22 @@ while ($row = mysqli_fetch_assoc($result)) {
             });
         });
 
-        // ========== Original action button logic (unchanged) ==========
-        /* ===== Status Text & Style Mapping ===== */
-        const statusMap = {
-            0: { text: 'Cancelled',  class: 'cancelled' },
-            1: { text: 'Pending',    class: 'pending' },
-            2: { text: 'Confirmed',  class: 'confirmed' },
-            3: { text: 'Completed',  class: 'completed' }
-        };
-
-        /* ===== Render Action Buttons ===== */
+        // ========== Render action buttons for desktop table ==========
         function renderActionButtons($element, status, bid) {
             let actionsHtml = '';
-            if (status === 1) { // Pending
+            if (status === 2) { // Confirmed
                 actionsHtml = `
-            <div class="action-buttons-vertical">
-                <button class="btn-action btn-accept" data-bid="${bid}" data-action="accept">Accept</button>
-                <button class="btn-action btn-reject" data-bid="${bid}" data-action="reject">Reject</button>
-            </div>`;
-            } else if (status === 2) { // Confirmed
-                actionsHtml = `<button class="btn-action btn-cancel" data-bid="${bid}" data-action="cancel">Cancel</button>`;
+                    <div class="action-buttons-vertical">
+                        <button class="btn-action btn-checkin" data-bid="${bid}" data-action="checkin">Check-in</button>
+                        <button class="btn-action btn-cancel" data-bid="${bid}" data-action="cancel">Cancel</button>
+                    </div>`;
             } else { // Cancelled / Completed
                 actionsHtml = `<button class="btn-action btn-locked" disabled>Locked</button>`;
             }
             $element.html(actionsHtml);
         }
 
-        // Initialize table actions
+        // Initialize desktop table actions
         $('#bookingTable tbody tr').each(function () {
             const $row = $(this);
             const status = parseInt($row.data('status'));
@@ -580,24 +537,14 @@ while ($row = mysqli_fetch_assoc($result)) {
             renderActionButtons($row.find('.actions-cell'), status, bid);
         });
 
-        // Initialize card actions
-        $('.booking-card').each(function () {
-            const $card = $(this);
-            const status = parseInt($card.data('status'));
-            const bid = $card.data('bid');
-            // Cards already have buttons, so we just need to add the appropriate classes
-            $card.find('.card-btn').addClass('btn-action');
-        });
-
-        /* ===== Unified Action Handler ===== */
+        // ========== Unified Action Handler ==========
         $(document).on('click', '.btn-action', function () {
             const $btn   = $(this);
             const bid    = $btn.data('bid');
-            const action = $btn.data('action'); // accept / reject / cancel
+            const action = $btn.data('action'); // checkin / cancel / accept (though accept won't appear)
 
             if (action === 'locked') return;
 
-            /* ---- Execute AJAX request ---- */
             const executeAction = () => {
                 $.ajax({
                     url: 'bookingStatus.php',
@@ -613,16 +560,16 @@ while ($row = mysqli_fetch_assoc($result)) {
                 });
             };
 
-            /* ---- Accept: no confirmation ---- */
-            if (action === 'accept') {
+            // Check-in and accept: no confirmation
+            if (action === 'checkin' || action === 'accept') {
                 executeAction();
                 return;
             }
 
-            /* ---- Reject / Cancel: ask for confirmation ---- */
-            const msg = action === 'reject'
-                ? 'Are you sure you want to reject this booking?'
-                : 'Are you sure you want to cancel this booking?';
+            // Cancel / reject: ask for confirmation
+            const msg = action === 'cancel'
+                ? 'Are you sure you want to cancel this booking?'
+                : 'Are you sure you want to reject this booking?';
 
             $('#confirmMessage').text(msg);
             $('#confirmModal').show();
@@ -635,7 +582,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             $('#cancelBtn').off('click').on('click', () => $('#confirmModal').hide());
         });
 
-        /* ===== Allow close modal by clicking outside ===== */
+        // Close modal by clicking outside
         $(window).on('click', function (e) {
             if (e.target.id === 'confirmModal') $('#confirmModal').hide();
         });

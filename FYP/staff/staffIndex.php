@@ -20,31 +20,11 @@ include '../conn.php'; //
 </head>
 
 <body>
-<header>
-    <div class="hamburger-menu" id="hamburgerMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    <div class="logo">
-        <a href="staffIndex.php">Yummy Restaurant</a>
-    </div>
-    <nav class="main-nav">
-        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
-        <a href="newInventory.php" class="nav-button insert-materials">Inventory</a>
-        <a href="bookingList.php" class="nav-button order-list">Reservations</a>
-        <a href="salesReport.php" class="nav-button report">Sales Reports</a>
-    </nav>
-
-    <div class="user-actions">
-        <a href="staffProfile.php" class="profile-btn">Profile</a>
-        <a href="../logout.php" class="logout-btn">Log out</a>
-    </div>
-</header>
+<?php include 'header.php'; ?>
 
 <div class="container">
     <div class="order-section">
-        <h2>Pending Reservations</h2>
+        <h2>Confirmed Reservations</h2>
         <div class="table-container">
             <table id="pendingBookingTable">
                 <thead>
@@ -65,7 +45,7 @@ include '../conn.php'; //
                                b.cid, c.cname as member_name
                         FROM booking b
                         LEFT JOIN customer c ON b.cid = c.cid
-                        WHERE b.status = 1
+                        WHERE b.status = 2
                         ORDER BY b.bdate ASC, b.btime ASC
                         LIMIT 3";
                 $result = mysqli_query($conn, $sql);
@@ -103,12 +83,12 @@ include '../conn.php'; //
                         echo "<td>{$row['pnum']}</td>";
                         echo "<td>{$row['purpose']}</td>";
                         echo "<td class='status-cell' data-status='{$row['status']}'>";
-                        echo "<span class='status pending'>Pending</span>";
+                        echo "<span class='status pending'>Confirmed</span>";
                         echo "</td>";
                         echo "<td class='actions-cell'>";
                         echo "<div class='action-buttons-vertical'>";
-                        echo "<button class='btn-action btn-accept' data-bid='{$row['bid']}' data-action='accept'>Accept</button>";
-                        echo "<button class='btn-action btn-reject' data-bid='{$row['bid']}' data-action='reject'>Reject</button>";
+                        echo "<button class='btn-action btn-accept' data-bid='{$row['bid']}' data-action='accept'>check-in</button>";
+                        echo "<button class='btn-action btn-reject' data-bid='{$row['bid']}' data-action='reject'>Cancel</button>";
                         echo "</div>";
                         echo "</td>";
                         echo "</tr>";

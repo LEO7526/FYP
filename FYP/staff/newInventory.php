@@ -126,7 +126,8 @@ if ($result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yummy Restaurant - Restock Material</title>
+    <title>Yummy Restaurant - Restock Inventory</title>
+    <link rel="stylesheet" href="../CSS/common.css">
     <link rel="stylesheet" href="../CSS/header.css">
     <link rel="stylesheet" href="../CSS/newInventory.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -203,30 +204,10 @@ if ($result) {
 </head>
 
 <body>
-<header>
-    <div class="hamburger-menu" id="hamburgerMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    <div class="logo">
-        <a href="staffIndex.php">Yummy Restaurant</a>
-    </div>
-    <nav class="main-nav">
-        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
-        <a href="newInventory.php" class="nav-button insert-materials">Inventory</a>
-        <a href="bookingList.php" class="nav-button order-list">Reservations</a>
-        <a href="salesReport.php" class="nav-button report">Sales Reports</a>
-    </nav>
-
-    <div class="user-actions">
-        <a href="staffProfile.php" class="profile-btn">Profile</a>
-        <a href="../logout.php" class="logout-btn">Log out</a>
-    </div>
-</header>
+<?php include 'header.php'; ?>
 
 <div class="container">
-    <h1>Restock Material</h1>
+    <h1>Restock Inventory</h1>
 
     <?php if ($message): ?>
         <div class="message <?php echo $message_type; ?>">
@@ -235,7 +216,7 @@ if ($result) {
     <?php endif; ?>
 
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search materials by name or category...">
+        <input type="text" id="searchInput" placeholder="Search inventory by name or category...">
         <div class="search-icon">
             <i class="fas fa-search"></i>
         </div>
@@ -250,7 +231,7 @@ if ($result) {
         <?php if (empty($materials)): ?>
             <div style="text-align: center; padding: 40px; color: #7f8c8d;">
                 <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px;"></i>
-                <p>No materials found. <a href="addInventory.php">Add new materials</a></p>
+                <p>No materials found. <a href="addInventory.php">Add new Inventory</a></p>
             </div>
         <?php else: ?>
             <?php foreach ($materials as $material):
@@ -279,7 +260,7 @@ if ($result) {
         $selectedQuantityClass = $isSelectedLowStock ? 'low-stock' : '';
         ?>
         <div class="selected-material">
-            <h3>Selected Material: <?php echo htmlspecialchars($selected_material['mname']); ?></h3>
+            <h3>Selected Inventory: <?php echo htmlspecialchars($selected_material['mname']); ?></h3>
 
             <div class="current-info">
                 <div class="info-item">
@@ -334,7 +315,7 @@ if ($result) {
                 </div>
 
                 <button type="submit" name="restock_material" value="1" class="submit-btn">
-                    <i class="fas fa-plus-circle"></i> Restock Material
+                    <i class="fas fa-plus-circle"></i> Restock Inventory
                 </button>
             </form>
         </div>
@@ -343,7 +324,7 @@ if ($result) {
     <div style="text-align: center; margin-top: 30px;">
 
         <a href="addInventory.php" class="back-btn" style="background: #43a047;">
-            <i class="fas fa-plus"></i> Add New Material
+            <i class="fas fa-plus"></i> Add New Inventory
         </a>
     </div>
 </div>

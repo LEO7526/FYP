@@ -232,33 +232,14 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Dishes</title>
+    <title>Yummy Restaurant - New Dishes</title>
+    <link rel="stylesheet" href="../CSS/common.css">
     <link rel="stylesheet" href="../CSS/header.css">
     <link rel="stylesheet" href="../CSS/newDishes.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<header>
-    <div class="hamburger-menu" id="hamburgerMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    <div class="logo">
-        <a href="staffIndex.php">Yummy Restaurant</a>
-    </div>
-    <nav class="main-nav">
-        <a href="MenuManagement.php" class="nav-button insert-items">Menu Management</a>
-        <a href="newInventory.php" class="nav-button insert-materials">Inventory</a>
-        <a href="bookingList.php" class="nav-button order-list">Reservations</a>
-        <a href="salesReport.php" class="nav-button report">Sales Reports</a>
-    </nav>
-
-    <div class="user-actions">
-        <a href="staffProfile.php" class="profile-btn">Profile</a>
-        <a href="../logout.php" class="logout-btn">Log out</a>
-    </div>
-</header>
+<?php include 'header.php'; ?>
 <div class="container">
     <h1>New Dish</h1>
 
@@ -352,10 +333,10 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
 
     <!-- Recipe Materials Section -->
     <div class="section">
-        <div class="section-title">Recipe Materials</div>
+        <div class="section-title">Recipe Ingredient</div>
         <div id="recipeContainer">
         </div>
-        <button type="button" class="btn btn-secondary add-row-btn" onclick="addRecipeRow()">+ Add Material</button>
+        <button type="button" class="btn btn-secondary add-row-btn" onclick="addRecipeRow()">+ Add Ingredient</button>
     </div>
 
     <!-- Customization Options Section -->
@@ -1481,7 +1462,7 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
         matSelect.style.display = 'none';
         qtyInput.style.display = 'none';
         unitDiv.style.display = 'none';
-        matSelect.innerHTML = '<option value="">Select Material</option>';
+        matSelect.innerHTML = '<option value="">Select Ingredient</option>';
 
         const catId = selectElem.value;
         if (!catId) return;

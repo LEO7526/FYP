@@ -1,3 +1,3 @@
 <?php
-define('GEMINI_API_KEY', 'AIzaSyDUjK8hnRElZWucrAabKL-HPrDp4JCclVI');
+define('GEMINI_API_KEY', 'AIzaSyAjxwqq1M_Tan6O8EA0EspcbjsoJJuMZEQ');
 ?>

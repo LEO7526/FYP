@@ -568,3 +568,52 @@
     border-color: #4CAF50;
 }
 
+
+.filter-all {
+    background-color: #e3f2fd;
+}
+.filter-all:hover {
+    background-color: #bbdefb;
+}
+.filter-confirmed {
+    background-color: #e8f5e9;
+}
+.filter-confirmed:hover {
+    background-color: #c8e6c9;
+}
+.filter-history {
+    background-color: #f3e5f5;
+}
+.filter-history:hover {
+    background-color: #e1bee7;
+}
+.filter-cancelled {
+    background-color: #ffebee;
+}
+.filter-cancelled:hover {
+    background-color: #ffcdd2;
+}
+
+.btn-checkin {
+    background-color: #4CAF50;
+    color: white;
+}
+.btn-checkin:hover {
+    background-color: #45a049;
+}
+
+.card-btn.checkin {
+    background-color: #2ecc71;
+    color: white;
+}
+.card-btn.checkin:hover {
+    background-color: #27ae60;
+}
+
+.action-buttons-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+}

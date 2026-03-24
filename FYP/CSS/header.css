@@ -217,7 +217,6 @@ header {
 
 
 
-/* ---------- Extra Small Screens ---------- */
 @media (max-width: 360px) {
     header {
         height: 55px;
@@ -235,3 +234,183 @@ header {
         font-size: 13px;
     }
 }
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(105deg, #1f3b4c, #143240);
+    color: white;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+    height: 70px;
+    backdrop-filter: blur(0px);
+}
+
+.logo a {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #e1f5fe;
+    text-decoration: none;
+    letter-spacing: -0.3px;
+}
+
+.nav-button {
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+    .main-nav {
+        background: linear-gradient(135deg, #1f3b4c, #102b38);
+        border-radius: 0 20px 20px 0;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+    }
+    .nav-button {
+        border-radius: 30px;
+        margin: 6px 12px;
+        width: calc(100% - 24px);
+        text-align: center;
+    }
+}
+header {
+    background-image: url('https://raw.githubusercontent.com/LEO7526/FYP/main/Image/background/staffheaderbackground.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    height: 70px;
+}
+.nav-button {
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.nav-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.20);
+    border-radius: 8px;
+    z-index: 1;
+    transition: background-color 0.3s ease;
+}
+
+.nav-button span {
+    position: relative;
+    z-index: 2;
+}
+
+.nav-button:hover::before {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.nav-button.insert-items {
+    background-image: url('https://raw.githubusercontent.com/LEO7526/FYP/main/Image/background/buttonbackground1.jpg');
+}
+
+.nav-button.insert-materials {
+    background-image: url('https://raw.githubusercontent.com/LEO7526/FYP/main/Image/background/buttonbackground2.jpg');
+}
+
+.nav-button.order-list {
+    background-image: url('https://raw.githubusercontent.com/LEO7526/FYP/main/Image/background/buttonbackground3.jpg');
+}
+
+.nav-button.report {
+    background-image: url('https://raw.githubusercontent.com/LEO7526/FYP/main/Image/background/buttonbackground4.jpg');
+}
+.profile-btn {
+    background-image: url('https://raw.githubusercontent.com/LEO7526/FYP/main/Image/background/buttonbackground5.jpg');
+}
+.profile-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.20);
+    border-radius: 6px;
+    z-index: 1;
+    transition: background-color 0.3s ease;
+}
+
+
+
+.profile-btn span,
+.profile-btn {
+    position: relative;
+    z-index: 2;
+}
+
+.logo a {
+    font-size: 27px;
+    font-weight: 700;
+    text-decoration: none;
+
+    background-image: url('https://raw.githubusercontent.com/LEO7526/FYP/main/Image/background/text1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    background-clip: text;
+    -webkit-background-clip: text;
+
+    color: transparent;
+
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button,
+.user-actions a {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+.nav-button,
+.user-actions a {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+

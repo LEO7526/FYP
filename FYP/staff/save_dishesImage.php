@@ -2,7 +2,7 @@
 require_once '../conn.php';
 
 // GitHub configuration
-$githubToken = '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';
+$githubToken = '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';
 $repoOwner = 'LEO7526';
 $repoName = 'FYP';
 $branch = 'main';

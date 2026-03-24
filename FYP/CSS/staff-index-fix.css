@@ -124,8 +124,8 @@
 }
 
 #pendingBookingTable .status.pending {
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: #d4edda;
+    color: #155724;
 }
 
 #pendingBookingTable .status.confirmed {
@@ -153,12 +153,15 @@
 }
 
 #pendingBookingTable .btn-reject {
-    background-color: #f44336;
+    background: #666;
     color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 #pendingBookingTable .btn-reject:hover {
-    background-color: #d32f2f;
+    background: #555;
 }
 
 #pendingBookingTable .btn-cancel {
@@ -297,5 +300,56 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+}
+
+#pendingBookingTable {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+#pendingBookingTable th {
+    background: #eef3fc;
+    color: #1f4f6e;
+    font-weight: 700;
+    padding: 14px 10px;
+    font-size: 0.85rem;
+}
+
+#pendingBookingTable td {
+    padding: 12px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid #eaf0f6;
+}
+
+
+
+#pendingBookingTable .status {
+    border-radius: 40px;
+    padding: 4px 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    background: #ecf7f0;
+    color: #2c7a6e;
+    width: auto;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+#pendingBookingTable .status.pending {
+    background: #fff2e0;
+    color: #c97e0a;
+}
+#pendingBookingTable .status.confirmed {
+    background: #e0f2fe;
+    color: #1e6f8f;
+}
+#pendingBookingTable .status.cancelled {
+    background: #ffe6e5;
+    color: #bf4d3e;
 }
 
