@@ -2,6 +2,9 @@ package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -10,6 +13,8 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.MenuItem;
 
 public abstract class BaseCustomerActivity extends ThemeBaseActivity {
+
+    private static final String TAG = "BottomNav";
 
     protected BottomNavigationView bottomNavigationView;
     private boolean suppressNavigation = false;
@@ -40,7 +45,21 @@ public abstract class BaseCustomerActivity extends ThemeBaseActivity {
 
     protected void setupBottomFunctionBar() {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        if (bottomNavigationView == null) return;
+        if (bottomNavigationView == null) {
+            // Some layouts override the included root id as bottomFunctionBar.
+            View includeRoot = findViewById(R.id.bottomFunctionBar);
+            if (includeRoot instanceof BottomNavigationView) {
+                bottomNavigationView = (BottomNavigationView) includeRoot;
+            }
+        }
+        if (bottomNavigationView == null) {
+            View contentRoot = findViewById(android.R.id.content);
+            bottomNavigationView = findBottomNavigationView(contentRoot);
+        }
+        if (bottomNavigationView == null) {
+            Log.w(TAG, "BottomNavigationView not found (bottomNavigationView/bottomFunctionBar)");
+            return;
+        }
 
         // Highlight current tab without triggering navigation
         int selectedIconId = getIntent().getIntExtra("selectedIcon", 0);
@@ -55,18 +74,21 @@ public abstract class BaseCustomerActivity extends ThemeBaseActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (suppressNavigation) return true;
             int id = item.getItemId();
+            int currentSelectedIconId = getIntent().getIntExtra("selectedIcon", 0);
+            Log.d(TAG, "onItemSelected tappedId=" + id + ", currentSelectedIconId=" + currentSelectedIconId + ", login=" + login);
             if (id == R.id.orderBellIcon) {
-                navigateProtected(R.id.orderBellIcon, BrowseMenuActivity.class, null, 0, null, null);
+                return navigateProtected(R.id.orderBellIcon, BrowseMenuActivity.class, null, 0, null, null);
             } else if (id == R.id.couponIcon) {
-                navigateProtected(R.id.couponIcon, CouponActivity.class, null, 0, null, null);
+                return navigateProtected(R.id.couponIcon, CouponActivity.class, null, 0, null, null);
             } else if (id == R.id.membershipIcon) {
-                navigateProtected(R.id.membershipIcon, MembershipActivity.class, null, 0, null, null);
+                return navigateProtected(R.id.membershipIcon, MembershipActivity.class, null, 0, null, null);
             } else if (id == R.id.orderRecordIcon) {
-                navigateProtected(R.id.orderRecordIcon, OrderHistoryActivity.class, null, 0, null, null);
+                return navigateProtected(R.id.orderRecordIcon, OrderHistoryActivity.class, null, 0, null, null);
             } else if (id == R.id.profileIcon) {
-                navigateProtected(R.id.profileIcon, ProfileActivity.class, null, 0, null, null);
+                return navigateProtected(R.id.profileIcon, ProfileActivity.class, null, 0, null, null);
             }
-            return true;
+            Log.w(TAG, "Unknown bottom nav item id=" + id + ", keeping current tab");
+            return false;
         });
 
         // Suppress reselection (no re-launch if already on this screen)
@@ -77,24 +99,41 @@ public abstract class BaseCustomerActivity extends ThemeBaseActivity {
      * Checks login state; BrowseMenuActivity and CouponActivity are always allowed.
      * Other activities require login. Optionally passes pending cart extras.
      */
-    protected void navigateProtected(int iconId,
+    protected boolean navigateProtected(int iconId,
+                                     Class<? extends ThemeBaseActivity> target,
+                                     MenuItem pendingItem,
+                                     int pendingQuantity,
+                                     String pendingSpice,
+                                     String pendingNotes) {
+        return navigateProtectedInternal(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes);
+    }
+
+    private boolean navigateProtectedInternal(int iconId,
                                      Class<? extends ThemeBaseActivity> target,
                                      MenuItem pendingItem,
                                      int pendingQuantity,
                                      String pendingSpice,
                                      String pendingNotes) {
         if (target == BrowseMenuActivity.class || target == CouponActivity.class) {
+            Log.d(TAG, "Navigate allowed without login. target=" + target.getSimpleName() + ", iconId=" + iconId);
             launchScreen(iconId, target, null, 0, null, null);
-            return;
+            return true;
         }
 
         if (login) {
+            Log.d(TAG, "Navigate allowed (logged in). target=" + target.getSimpleName() + ", iconId=" + iconId);
             launchScreen(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes);
+            return true;
         } else {
+            Log.i(TAG, "Navigate blocked (not logged in). target=" + target.getSimpleName() + ", iconId=" + iconId + ". Showing login sheet.");
             showInlineLogin(
-                    () -> launchScreen(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes),
+                    () -> {
+                        Log.i(TAG, "Login success from sheet. Continue navigation to " + target.getSimpleName());
+                        launchScreen(iconId, target, pendingItem, pendingQuantity, pendingSpice, pendingNotes);
+                    },
                     pendingItem, pendingQuantity, pendingSpice, pendingNotes
             );
+            return false;
         }
     }
 
@@ -107,6 +146,13 @@ public abstract class BaseCustomerActivity extends ThemeBaseActivity {
                               int pendingQuantity,
                               String pendingSpice,
                               String pendingNotes) {
+        int currentSelectedIconId = getIntent().getIntExtra("selectedIcon", 0);
+        if (currentSelectedIconId == iconId) {
+            Log.d(TAG, "Skip relaunch for same tab. iconId=" + iconId + ", target=" + cls.getSimpleName());
+            return;
+        }
+
+        Log.d(TAG, "Launching screen. fromIcon=" + currentSelectedIconId + ", toIcon=" + iconId + ", target=" + cls.getSimpleName());
         Intent intent = new Intent(this, cls);
         intent.putExtra("selectedIcon", iconId);
 
@@ -157,5 +203,20 @@ public abstract class BaseCustomerActivity extends ThemeBaseActivity {
         });
 
         sheet.show(getSupportFragmentManager(), "login_sheet");
+    }
+
+    private BottomNavigationView findBottomNavigationView(View view) {
+        if (view == null) return null;
+        if (view instanceof BottomNavigationView) {
+            return (BottomNavigationView) view;
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                BottomNavigationView found = findBottomNavigationView(group.getChildAt(i));
+                if (found != null) return found;
+            }
+        }
+        return null;
     }
 }

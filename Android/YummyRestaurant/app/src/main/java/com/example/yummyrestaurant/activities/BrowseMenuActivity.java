@@ -107,7 +107,6 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         setupSearchBar();
         setupTabButtons();
         setupNavigationDrawer();
-        setupBottomFunctionBar();
         setupOrderTypeButtons();
 
         updateCartBadge();
