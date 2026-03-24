@@ -28,7 +28,6 @@ import com.bumptech.glide.request.target.Target;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.activities.DishDetailActivity;
 import com.example.yummyrestaurant.models.MenuItem;
-import com.example.yummyrestaurant.utils.AnimationUtils;
 import com.example.yummyrestaurant.utils.CartManager;
 
 import java.util.ArrayList;
@@ -104,6 +103,15 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
             }
         }
         return 0; // Return first position if category not found
+    }
+
+    @Nullable
+    public String getCategoryAtPosition(int position) {
+        if (position < 0 || position >= filteredList.size()) {
+            return null;
+        }
+        MenuItem item = filteredList.get(position);
+        return item != null ? item.getCategory() : null;
     }
 
     // Set the currently selected category for UI highlighting
@@ -208,6 +216,11 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MenuItem item = filteredList.get(position);
 
+        // Ensure recycled views are always visible (prevents invisible-but-clickable cards).
+        holder.itemView.animate().cancel();
+        holder.itemView.setAlpha(1f);
+        holder.itemView.setTranslationY(0f);
+
         // Set text values
         holder.dishName.setText(item.getName() != null ? item.getName() : "");
         holder.dishDescription.setText(item.getDescription() != null ? item.getDescription() : "");
@@ -309,8 +322,8 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                 })
                 .into(holder.dishImage);
 
-        int bindPos = holder.getBindingAdapterPosition();
-        AnimationUtils.animateItemEntry(holder.itemView, bindPos == RecyclerView.NO_POSITION ? 0 : bindPos);
+        // Disabled entry animation for menu list because delayed/recycled animations
+        // can leave occasional transparent placeholders on fast scroll.
 
         holder.itemView.setOnClickListener(v -> {
             int adapterPosition = holder.getBindingAdapterPosition();

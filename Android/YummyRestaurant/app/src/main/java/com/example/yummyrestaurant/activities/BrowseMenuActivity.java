@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.animation.ValueAnimator;
@@ -78,8 +79,10 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
 
     // Category management
     private LinearLayout menuCategoryList, packageCategoryList;
+    private ScrollView menuCategoryScroll;
     private RecyclerView packageRecyclerView;
     private LinearLayout menuContentContainer, packageContentContainer;
+    private boolean suppressMenuCategorySync = false;
 
     public static boolean isLogin() {
         return login;
@@ -133,6 +136,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         tabUnderline = findViewById(R.id.tabUnderline);
 
         // Category lists
+        menuCategoryScroll = findViewById(R.id.menuCategoryScroll);
         menuCategoryList = findViewById(R.id.menuCategoryList);
         packageCategoryList = findViewById(R.id.packageCategoryList);
 
@@ -148,6 +152,16 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         menuRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MenuItemAdapter(this, new ArrayList<>());
         menuRecyclerView.setAdapter(adapter);
+        menuRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (!"menu".equals(currentTab) || suppressMenuCategorySync) {
+                    return;
+                }
+                syncMenuCategoryByVisibleItems();
+            }
+        });
     }
 
     private void setupSearchBar() {
@@ -276,6 +290,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
                 selectedCategory = categoryName;
                 updateMenuCategoryHighlight(categoryName);
                 adapter.setSelectedCategory(categoryName);
+                scrollMenuCategoryButtonIntoView(categoryName);
+                suppressMenuCategorySync = true;
                 
                 // Show all items and scroll to the category
                 if (categoryName.equals("All Dishes")) {
@@ -286,6 +302,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
                     int position = adapter.getPositionForCategory(categoryName);
                     smoothScrollToPosition(menuRecyclerView, position);
                 }
+
+                menuRecyclerView.postDelayed(() -> suppressMenuCategorySync = false, 650);
             });
 
             menuCategoryList.addView(btn);
@@ -343,6 +361,82 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
                 } else {
                     btn.setBackgroundColor(getResources().getColor(R.color.white));
                     btn.setTextColor(getResources().getColor(R.color.gray_text));
+                }
+            }
+        }
+    }
+
+    private void syncMenuCategoryByVisibleItems() {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) menuRecyclerView.getLayoutManager();
+        if (layoutManager == null || adapter == null || adapter.getItemCount() == 0) {
+            return;
+        }
+
+        int first = layoutManager.findFirstVisibleItemPosition();
+        int last = layoutManager.findLastVisibleItemPosition();
+        if (first == RecyclerView.NO_POSITION || last == RecyclerView.NO_POSITION || first > last) {
+            return;
+        }
+
+        Map<String, Integer> visibleCount = new HashMap<>();
+        Map<String, Integer> firstSeenPosition = new HashMap<>();
+
+        for (int i = first; i <= last; i++) {
+            String category = normalizeMenuCategory(adapter.getCategoryAtPosition(i));
+            if (category == null) continue;
+
+            visibleCount.put(category, visibleCount.getOrDefault(category, 0) + 1);
+            if (!firstSeenPosition.containsKey(category)) {
+                firstSeenPosition.put(category, i);
+            }
+        }
+
+        String dominantCategory = null;
+        int maxCount = -1;
+        int bestFirstPos = Integer.MAX_VALUE;
+
+        for (Map.Entry<String, Integer> entry : visibleCount.entrySet()) {
+            String category = entry.getKey();
+            int count = entry.getValue();
+            int firstPos = firstSeenPosition.getOrDefault(category, Integer.MAX_VALUE);
+
+            if (count > maxCount || (count == maxCount && firstPos < bestFirstPos)) {
+                maxCount = count;
+                bestFirstPos = firstPos;
+                dominantCategory = category;
+            }
+        }
+
+        if (dominantCategory != null && !dominantCategory.equals(selectedCategory)) {
+            selectedCategory = dominantCategory;
+            updateMenuCategoryHighlight(dominantCategory);
+            adapter.setSelectedCategory(dominantCategory);
+            scrollMenuCategoryButtonIntoView(dominantCategory);
+        }
+    }
+
+    private String normalizeMenuCategory(String rawCategory) {
+        if (rawCategory == null) return null;
+        String c = rawCategory.trim().toLowerCase();
+        if (c.isEmpty()) return null;
+        if (c.equals("appetizer") || c.equals("appetizers")) return "Appetizers";
+        if (c.equals("soup") || c.equals("soups")) return "Soup";
+        if (c.equals("main course") || c.equals("main courses")) return "Main Courses";
+        if (c.equals("dessert") || c.equals("desserts")) return "Dessert";
+        if (c.equals("drink") || c.equals("drinks") || c.equals("beverage") || c.equals("beverages")) return "Drink";
+        return null;
+    }
+
+    private void scrollMenuCategoryButtonIntoView(String categoryName) {
+        if (menuCategoryScroll == null || menuCategoryList == null) return;
+        for (int i = 0; i < menuCategoryList.getChildCount(); i++) {
+            View child = menuCategoryList.getChildAt(i);
+            if (child instanceof Button) {
+                Button button = (Button) child;
+                if (categoryName.equals(button.getText().toString())) {
+                    int targetY = Math.max(0, child.getTop() - 12);
+                    menuCategoryScroll.smoothScrollTo(0, targetY);
+                    return;
                 }
             }
         }
