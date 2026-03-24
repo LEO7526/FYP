@@ -70,8 +70,8 @@ public class DishDetailActivity extends BaseCustomerActivity {
         });
 
         if (item != null) {
-            name.setText(item.getName() != null ? item.getName() : "Unknown Dish");
-            description.setText(item.getDescription() != null ? item.getDescription() : "No description available.");
+            name.setText(item.getName() != null ? item.getName() : getString(R.string.unknown_dish));
+            description.setText(item.getDescription() != null ? item.getDescription() : getString(R.string.no_description_available));
             price.setText(String.format(Locale.getDefault(), "$ %.2f", item.getPrice()));
             ViewCompat.setTransitionName(image, "dish_image_" + item.getId());
 
@@ -153,7 +153,7 @@ public class DishDetailActivity extends BaseCustomerActivity {
             addToCartBtn.setOnClickListener(v -> {
                 // Defensive check: should not happen but safety first
                 if (!CartManager.isOrderTypeSelected()) {
-                    Toast.makeText(this, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.error_select_order_type_first), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 
@@ -186,7 +186,7 @@ public class DishDetailActivity extends BaseCustomerActivity {
                                     String detailedMessage = MaterialAvailabilityChecker.formatInsufficientMaterialsMessage(materialDetails);
                                     Toast.makeText(
                                             DishDetailActivity.this,
-                                            "Cannot add to cart:\n" + detailedMessage,
+                                            getString(R.string.cannot_add_to_cart_with_reason, detailedMessage),
                                             Toast.LENGTH_LONG
                                     ).show();
                                 }
@@ -198,7 +198,7 @@ public class DishDetailActivity extends BaseCustomerActivity {
                                 CartManager.updateQuantity(cartItem, currentQty + quantity[0]);
                                 Toast.makeText(
                                         DishDetailActivity.this,
-                                        "Added to cart (unable to verify ingredients: " + error + ")",
+                                        getString(R.string.added_to_cart_unable_verify_ingredients, error),
                                         Toast.LENGTH_SHORT
                                 ).show();
                             }
@@ -217,9 +217,9 @@ public class DishDetailActivity extends BaseCustomerActivity {
             });
 
         } else {
-            name.setText("Dish not found");
-            description.setText("Unable to load dish details.");
-            price.setText("$ --");
+            name.setText(getString(R.string.dish_not_found));
+            description.setText(getString(R.string.unable_load_dish_details));
+            price.setText(getString(R.string.price_unavailable));
             image.setImageResource(R.drawable.error_image);
         }
 

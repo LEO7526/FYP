@@ -103,7 +103,7 @@ public class OrderHistoryActivity extends BaseCustomerActivity {
                     orderAdapter = new OrderAdapter(orderList);
                     orderRecyclerView.setAdapter(orderAdapter);
                 } else {
-                    Toast.makeText(OrderHistoryActivity.this, "Failed to load order history", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OrderHistoryActivity.this, getString(R.string.failed_load_order_history), Toast.LENGTH_SHORT).show();
                     Log.e("OrderHistory", "❌ Response not successful: " + response.code());
                     if (response.errorBody() != null) {
                         try {
@@ -118,7 +118,7 @@ public class OrderHistoryActivity extends BaseCustomerActivity {
             @Override
             public void onFailure(Call<List<Order>> call, Throwable t) {
                 Log.e("OrderHistory", "❌ Error fetching orders", t);
-                Toast.makeText(OrderHistoryActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(OrderHistoryActivity.this, getString(R.string.error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

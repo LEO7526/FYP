@@ -309,7 +309,7 @@ public class PaymentActivity extends ThemeBaseActivity {
                         if (response.code() == 400 && selectedPaymentMethod.equals("alipay_hk")) {
                             Log.w(TAG, ">>> ALIPAY ERROR: HTTP 400 received for Alipay, falling back to Card");
                             Log.w(TAG, ">>> Error details: " + errorBody);
-                            Toast.makeText(PaymentActivity.this, "Alipay currently unavailable. Using Card instead.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(PaymentActivity.this, getString(R.string.alipay_unavailable_using_card), Toast.LENGTH_LONG).show();
                             selectedPaymentMethod = "card";
                             rbCard.setChecked(true);
                             payButton.setEnabled(true);
@@ -319,7 +319,7 @@ public class PaymentActivity extends ThemeBaseActivity {
                         }
                         
                         if (response.code() == 403) {
-                            String serverMessage = "Only available 11:00–21:29 (Asia/Hong_Kong).";
+                            String serverMessage = getString(R.string.payment_available_time_only);
                             try {
                                 JSONObject errJson = new JSONObject(errorBody);
                                 String msg = errJson.optString("message", "");
@@ -330,12 +330,12 @@ public class PaymentActivity extends ThemeBaseActivity {
                             }
                             showError(serverMessage);
                         } else {
-                            showError("Payment setup failed. Please try again.");
+                            showError(getString(R.string.payment_setup_failed_try_again));
                         }
                         resetPaymentButton();
                     } catch (IOException e) {
                         Log.e(TAG, "Error reading errorBody", e);
-                        showError("Network error");
+                        showError(getString(R.string.network_error));
                         resetPaymentButton();
                     }
                 }
@@ -344,7 +344,7 @@ public class PaymentActivity extends ThemeBaseActivity {
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 Log.e(TAG, "createPaymentIntent onFailure: " + t.getMessage(), t);
-                showError("Error: " + t.getMessage());
+                showError(getString(R.string.error_with_reason, t.getMessage()));
                 resetPaymentButton();
             }
         });
@@ -362,7 +362,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         
         if (clientSecret == null || clientSecret.isEmpty()) {
             Log.e(TAG, ">>> CRITICAL: clientSecret is null or empty!");
-            showError("Failed to initialize payment. Please try again.");
+            showError(getString(R.string.failed_initialize_payment_try_again));
             resetPaymentButton();
             return;
         }
@@ -405,7 +405,7 @@ public class PaymentActivity extends ThemeBaseActivity {
                 Log.w(TAG, ">>> AUTO-FALLBACK: Switching from " + selectedPaymentMethod + " to card (method not supported by Stripe)");
                 selectedPaymentMethod = "card";
                 rbCard.setChecked(true);
-                Toast.makeText(this, "Switched to Card payment (only option available)", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.switched_to_card_only_option), Toast.LENGTH_LONG).show();
                 
                 // Retry with Card
                 Log.i(TAG, ">>> RETRY: Requesting new PaymentIntent with Card method");
@@ -415,7 +415,7 @@ public class PaymentActivity extends ThemeBaseActivity {
             } else {
                 Log.e(TAG, ">>> FATAL: NoSuchElementException occurred even with Card payment");
                 Log.e(TAG, ">>> This might be a Stripe Dashboard configuration issue");
-                showError("Payment service temporarily unavailable. Please try again later or contact support.");
+                showError(getString(R.string.payment_service_temporarily_unavailable));
                 resetPaymentButton();
             }
         } catch (Exception e) {
@@ -433,7 +433,7 @@ public class PaymentActivity extends ThemeBaseActivity {
                     Log.w(TAG, ">>> AUTO-FALLBACK: Attempting Card payment due to error");
                     selectedPaymentMethod = "card";
                     rbCard.setChecked(true);
-                    Toast.makeText(this, "Switched to Card payment", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.switched_to_card_payment), Toast.LENGTH_SHORT).show();
                     payButton.setEnabled(true);
                     loadingSpinner.setVisibility(View.GONE);
                     createPaymentIntent();
@@ -441,14 +441,14 @@ public class PaymentActivity extends ThemeBaseActivity {
                 }
             }
             
-            showError("Payment method unavailable. Please try Card payment.");
+            showError(getString(R.string.payment_method_unavailable_try_card));
             
             // Fall back to Card
             if (selectedPaymentMethod.equals("alipay_hk")) {
                 Log.w(TAG, "Falling back from Alipay to Card due to exception");
                 selectedPaymentMethod = "card";
                 rbCard.setChecked(true);
-                Toast.makeText(this, "Switched to Card payment", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.switched_to_card_payment), Toast.LENGTH_SHORT).show();
             }
             resetPaymentButton();
         }
@@ -476,14 +476,14 @@ public class PaymentActivity extends ThemeBaseActivity {
         } else if (paymentSheetResult instanceof PaymentSheetResult.Canceled) {
             Log.d(TAG, ">>> PAYMENT CANCELED");
             Log.w(TAG, ">>> User canceled payment with method: " + selectedPaymentMethod);
-            showError("Payment cancelled");
+            showError(getString(R.string.payment_cancelled));
             resetPaymentButton();
         } else if (paymentSheetResult instanceof PaymentSheetResult.Failed) {
             PaymentSheetResult.Failed failedResult = (PaymentSheetResult.Failed) paymentSheetResult;
             Log.e(TAG, ">>> PAYMENT FAILED");
             Log.e(TAG, ">>> Failed error: " + failedResult.getError().getMessage());
             Log.e(TAG, ">>> Failed with method: " + selectedPaymentMethod);
-            showError("Payment failed");
+            showError(getString(R.string.payment_failed));
             resetPaymentButton();
         } else {
             Log.e(TAG, ">>> UNKNOWN: Unknown payment sheet result type");

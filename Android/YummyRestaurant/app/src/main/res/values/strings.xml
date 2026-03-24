@@ -209,5 +209,90 @@
     <string name="unknown">Unknown</string>
     <string name="no_email">No email</string>
 
+    <string name="your_cart_is_empty">Your cart is empty!</string>
+    <string name="material_check_warning">Material Check Warning</string>
+    <string name="unable_verify_ingredient_with_reason">Unable to verify ingredient availability: %1$s</string>
+    <string name="proceed_anyway_question">Do you want to proceed anyway?</string>
+    <string name="proceed">Proceed</string>
+    <string name="item_removed">Item removed</string>
+    <string name="undo">UNDO</string>
+    <string name="price_hkd_fixed">Price: HK$%1$s</string>
+    <string name="add_wooden_chopsticks_question">Add Wooden Chopsticks?</string>
+    <string name="yes_add_chopsticks">Yes, add chopsticks</string>
+    <string name="wooden_chopsticks_name">Wooden Chopsticks</string>
+    <string name="no_thanks">No thanks</string>
+
+    <string name="unknown_dish">Unknown Dish</string>
+    <string name="no_description_available">No description available.</string>
+    <string name="cannot_add_to_cart_with_reason">Cannot add to cart:\n%1$s</string>
+    <string name="added_to_cart_unable_verify_ingredients">Added to cart (unable to verify ingredients: %1$s)</string>
+    <string name="dish_not_found">Dish not found</string>
+    <string name="unable_load_dish_details">Unable to load dish details.</string>
+    <string name="price_unavailable">$ --</string>
+
+    <string name="failed_load_order_history">Failed to load order history</string>
+
+    <string name="server_error_with_reason">Server error: %1$s</string>
+    <string name="registration_failed_try_again">Registration failed. Please try again.</string>
+
+    <string name="alipay_unavailable_using_card">Alipay currently unavailable. Using Card instead.</string>
+    <string name="payment_available_time_only">Only available 11:00-21:29 (Asia/Hong_Kong).</string>
+    <string name="payment_setup_failed_try_again">Payment setup failed. Please try again.</string>
+    <string name="network_error">Network error</string>
+    <string name="failed_initialize_payment_try_again">Failed to initialize payment. Please try again.</string>
+    <string name="switched_to_card_only_option">Switched to Card payment (only option available)</string>
+    <string name="payment_service_temporarily_unavailable">Payment service temporarily unavailable. Please try again later or contact support.</string>
+    <string name="switched_to_card_payment">Switched to Card payment</string>
+    <string name="payment_method_unavailable_try_card">Payment method unavailable. Please try Card payment.</string>
+    <string name="payment_cancelled">Payment cancelled</string>
+    <string name="payment_failed">Payment failed</string>
+
+    <string name="booking_id_format">Booking #%1$d</string>
+    <string name="table_people_format">Table %1$d • %2$d people</string>
+    <string name="purpose_format">Purpose: %1$s</string>
+    <string name="remark_format">Remark: %1$s</string>
+    <string name="status_cancelled">Status: Cancelled</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="status_active">Status: Active</string>
+    <string name="cancel_booking">Cancel Booking</string>
+
+    <string name="item_removed_from_cart">Item removed from cart</string>
+    <string name="cannot_increase_quantity_with_reason">Cannot increase quantity:\n%1$s</string>
+    <string name="quantity_increased_unable_verify_ingredients">Quantity increased (unable to verify ingredients: %1$s)</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_make_reservation">Make a Reservation</string>
+    <string name="nav_my_bookings">My Bookings</string>
+    <string name="nav_browse">Browse</string>
+    <string name="nav_coupons">Coupons</string>
+    <string name="nav_member">Member</string>
+    <string name="nav_orders">Orders</string>
+    <string name="nav_profile">Profile</string>
+
+    <string name="desc_open_menu">Open menu</string>
+    <string name="desc_open_cart">Open cart</string>
+    <string name="order_type_dine_in">Dine In</string>
+    <string name="order_type_takeaway">Takeaway</string>
+    <string name="tab_menu">Menu</string>
+    <string name="tab_package">Package</string>
+
+    <string name="profile_user_name_placeholder">User Name</string>
+    <string name="profile_user_email_placeholder">user@example.com</string>
+    <string name="edit_profile">Edit Profile</string>
+
+    <string name="booking_title_make_reservation">Make a Reservation</string>
+    <string name="booking_select_date">Select Date:</string>
+    <string name="booking_choose_date">Choose Date</string>
+    <string name="booking_select_time">Select Time:</string>
+    <string name="booking_choose_time">Choose Time</string>
+    <string name="booking_number_of_people">Number of People:</string>
+    <string name="booking_people_hint_example">e.g., 4</string>
+    <string name="booking_find_available_tables">Find Available Tables</string>
+
+    <string name="coupon_points_zero">Points: 0</string>
+    <string name="my_coupons">My Coupons</string>
+    <string name="history">History</string>
+    <string name="done">Done</string>
+
 
 </resources>

@@ -27,7 +27,7 @@
             android:id="@+id/userNameText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User Name"
+            android:text="@string/profile_user_name_placeholder"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
@@ -36,7 +36,7 @@
             android:id="@+id/userEmailText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="user@example.com"
+            android:text="@string/profile_user_email_placeholder"
             android:textSize="16sp"
             android:textColor="#666"
             android:layout_marginBottom="24dp" />
@@ -45,7 +45,7 @@
             android:id="@+id/userBirthdayText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Birthday not set"
+            android:text="@string/birthday_not_set"
             android:textSize="16sp"
             android:textColor="#666"
             android:layout_marginBottom="24dp" />
@@ -54,7 +54,7 @@
             android:id="@+id/editButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Edit Profile"
+            android:text="@string/edit_profile"
             android:layout_marginBottom="12dp" />
     </LinearLayout>
 

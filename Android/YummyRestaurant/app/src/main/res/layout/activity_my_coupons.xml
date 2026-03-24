@@ -11,7 +11,7 @@
         android:id="@+id/tvMyCouponsHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="My Coupons"
+        android:text="@string/my_coupons"
         android:textSize="20sp"
         android:textStyle="bold"
         android:paddingBottom="8dp" />
@@ -29,7 +29,7 @@
         android:id="@+id/btnDone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Done"
+        android:text="@string/done"
         android:layout_margin="12dp" />
 
     <!-- Bottom bar -->

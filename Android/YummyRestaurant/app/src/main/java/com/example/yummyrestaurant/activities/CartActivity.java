@@ -77,7 +77,7 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
             Log.d(TAG, "Checkout button clicked");
             if (cartItems == null || cartItems.isEmpty()) {
                 Log.d(TAG, "Checkout aborted: cart is empty");
-                Toast.makeText(this, "Your cart is empty!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.your_cart_is_empty), Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -121,10 +121,10 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
                     public void onCheckError(String error) {
                         // On error, show warning but allow checkout
                         AlertDialog.Builder builder = new AlertDialog.Builder(CartActivity.this);
-                        builder.setTitle("Material Check Warning")
-                               .setMessage("Unable to verify ingredient availability: " + error + "\n\nDo you want to proceed anyway?")
-                               .setPositiveButton("Proceed", (dialog, which) -> proceedToCheckout())
-                               .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        builder.setTitle(getString(R.string.material_check_warning))
+                               .setMessage(getString(R.string.unable_verify_ingredient_with_reason, error) + "\n\n" + getString(R.string.proceed_anyway_question))
+                               .setPositiveButton(getString(R.string.proceed), (dialog, which) -> proceedToCheckout())
+                               .setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss())
                                .show();
                     }
                 });
@@ -210,8 +210,8 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
                     return;
                 }
 
-                Snackbar.make(cartRecyclerView, "Item removed", Snackbar.LENGTH_LONG)
-                        .setAction("UNDO", v -> {
+                Snackbar.make(cartRecyclerView, getString(R.string.item_removed), Snackbar.LENGTH_LONG)
+                    .setAction(getString(R.string.undo), v -> {
                             activeAdapter.restoreItem(removed, position);
                             updateCartUI();
                         })
@@ -286,7 +286,7 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
         );
         textParams.setMargins(0, 10, 0, 10);
         messageText.setLayoutParams(textParams);
-        messageText.setText("Price: HK$1.00");
+        messageText.setText(getString(R.string.price_hkd_fixed, "1.00"));
         messageText.setTextSize(14);
         
         // Add views to dialog
@@ -295,14 +295,14 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
         
         // Create AlertDialog with custom view
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add Wooden Chopsticks?")
+        builder.setTitle(getString(R.string.add_wooden_chopsticks_question))
                 .setView(dialogView)
-                .setPositiveButton("Yes, add chopsticks", (dialog, which) -> {
+            .setPositiveButton(getString(R.string.yes_add_chopsticks), (dialog, which) -> {
                     Log.d(TAG, "User chose to add chopsticks");
                     // Create MenuItem for chopsticks with image URL
                     MenuItem chopsticks = new MenuItem();
                     chopsticks.setId(22);
-                    chopsticks.setName("Wooden Chopsticks");
+                chopsticks.setName(getString(R.string.wooden_chopsticks_name));
                     chopsticks.setPrice(1.00);
                     chopsticks.setCategory("Supplies");
                     chopsticks.setImage_url("https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/22.jpg");
@@ -316,7 +316,7 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
                     updateCartUI();
                     proceedToCheckout();
                 })
-                .setNegativeButton("No thanks", (dialog, which) -> {
+                .setNegativeButton(getString(R.string.no_thanks), (dialog, which) -> {
                     Log.d(TAG, "User chose not to add chopsticks");
                     dialog.dismiss();
                     proceedToCheckout();

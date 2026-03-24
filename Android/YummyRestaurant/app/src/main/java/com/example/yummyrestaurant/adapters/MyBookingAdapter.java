@@ -41,32 +41,34 @@ public class MyBookingAdapter extends RecyclerView.Adapter<MyBookingAdapter.Book
         MyBooking booking = bookings.get(position);
         AnimationUtils.animateItemEntry(holder.itemView, position);
 
-        holder.textBookingId.setText("Booking #" + booking.getBid());
+        android.content.Context context = holder.itemView.getContext();
+
+        holder.textBookingId.setText(context.getString(R.string.booking_id_format, booking.getBid()));
         holder.textDateTime.setText(booking.getBookingDate() + " " + booking.getBookingTime());
-        holder.textTableAndPeople.setText("Table " + booking.getTableId() + " • " + booking.getPeopleCount() + " people");
+        holder.textTableAndPeople.setText(context.getString(R.string.table_people_format, booking.getTableId(), booking.getPeopleCount()));
 
         if (booking.getPurpose() != null && !booking.getPurpose().trim().isEmpty()) {
             holder.textPurpose.setVisibility(View.VISIBLE);
-            holder.textPurpose.setText("Purpose: " + booking.getPurpose());
+            holder.textPurpose.setText(context.getString(R.string.purpose_format, booking.getPurpose()));
         } else {
             holder.textPurpose.setVisibility(View.GONE);
         }
 
         if (booking.getRemark() != null && !booking.getRemark().trim().isEmpty()) {
             holder.textRemark.setVisibility(View.VISIBLE);
-            holder.textRemark.setText("Remark: " + booking.getRemark());
+            holder.textRemark.setText(context.getString(R.string.remark_format, booking.getRemark()));
         } else {
             holder.textRemark.setVisibility(View.GONE);
         }
 
         if (booking.isCancelled()) {
-            holder.textStatus.setText("Status: Cancelled");
+            holder.textStatus.setText(context.getString(R.string.status_cancelled));
             holder.buttonCancelBooking.setEnabled(false);
-            holder.buttonCancelBooking.setText("Cancelled");
+            holder.buttonCancelBooking.setText(context.getString(R.string.cancelled));
         } else {
-            holder.textStatus.setText("Status: Active");
+            holder.textStatus.setText(context.getString(R.string.status_active));
             holder.buttonCancelBooking.setEnabled(true);
-            holder.buttonCancelBooking.setText("Cancel Booking");
+            holder.buttonCancelBooking.setText(context.getString(R.string.cancel_booking));
             holder.buttonCancelBooking.setOnClickListener(v -> onCancelClickListener.onCancelClick(booking));
         }
     }

@@ -168,4 +168,89 @@
     <string name="birthday_not_set">尚未設定生日</string>
     <string name="unknown">未知</string>
     <string name="no_email">無電郵</string>
+
+    <string name="your_cart_is_empty">您的購物車是空的！</string>
+    <string name="material_check_warning">食材檢查警告</string>
+    <string name="unable_verify_ingredient_with_reason">無法驗證食材供應：%1$s</string>
+    <string name="proceed_anyway_question">是否仍要繼續？</string>
+    <string name="proceed">繼續</string>
+    <string name="item_removed">商品已移除</string>
+    <string name="undo">還原</string>
+    <string name="price_hkd_fixed">價格：HK$%1$s</string>
+    <string name="add_wooden_chopsticks_question">要加入木筷嗎？</string>
+    <string name="yes_add_chopsticks">是，加入木筷</string>
+    <string name="wooden_chopsticks_name">木筷</string>
+    <string name="no_thanks">不用了</string>
+
+    <string name="unknown_dish">未知菜式</string>
+    <string name="no_description_available">暫無描述。</string>
+    <string name="cannot_add_to_cart_with_reason">無法加入購物車：\n%1$s</string>
+    <string name="added_to_cart_unable_verify_ingredients">已加入購物車（無法驗證食材：%1$s）</string>
+    <string name="dish_not_found">找不到菜式</string>
+    <string name="unable_load_dish_details">無法載入菜式詳情。</string>
+    <string name="price_unavailable">$ --</string>
+
+    <string name="failed_load_order_history">載入訂單歷史失敗</string>
+
+    <string name="server_error_with_reason">伺服器錯誤：%1$s</string>
+    <string name="registration_failed_try_again">註冊失敗，請稍後再試。</string>
+
+    <string name="alipay_unavailable_using_card">Alipay 目前不可用，已切換為信用卡支付。</string>
+    <string name="payment_available_time_only">僅可於 11:00-21:29 使用（Asia/Hong_Kong）。</string>
+    <string name="payment_setup_failed_try_again">支付設定失敗，請稍後再試。</string>
+    <string name="network_error">網路錯誤</string>
+    <string name="failed_initialize_payment_try_again">初始化支付失敗，請稍後再試。</string>
+    <string name="switched_to_card_only_option">已切換為信用卡支付（目前唯一可用方式）</string>
+    <string name="payment_service_temporarily_unavailable">支付服務暫時無法使用，請稍後再試或聯絡客服。</string>
+    <string name="switched_to_card_payment">已切換為信用卡支付</string>
+    <string name="payment_method_unavailable_try_card">此支付方式不可用，請改用信用卡支付。</string>
+    <string name="payment_cancelled">付款已取消</string>
+    <string name="payment_failed">付款失敗</string>
+
+    <string name="booking_id_format">預訂 #%1$d</string>
+    <string name="table_people_format">餐桌 %1$d • %2$d 人</string>
+    <string name="purpose_format">用途：%1$s</string>
+    <string name="remark_format">備註：%1$s</string>
+    <string name="status_cancelled">狀態：已取消</string>
+    <string name="cancelled">已取消</string>
+    <string name="status_active">狀態：有效</string>
+    <string name="cancel_booking">取消預訂</string>
+
+    <string name="item_removed_from_cart">商品已從購物車移除</string>
+    <string name="cannot_increase_quantity_with_reason">無法增加數量：\n%1$s</string>
+    <string name="quantity_increased_unable_verify_ingredients">數量已增加（無法驗證食材：%1$s）</string>
+
+    <string name="nav_home">首頁</string>
+    <string name="nav_make_reservation">預約訂座</string>
+    <string name="nav_my_bookings">我的預訂</string>
+    <string name="nav_browse">瀏覽</string>
+    <string name="nav_coupons">優惠券</string>
+    <string name="nav_member">會員</string>
+    <string name="nav_orders">訂單</string>
+    <string name="nav_profile">個人資料</string>
+
+    <string name="desc_open_menu">開啟選單</string>
+    <string name="desc_open_cart">開啟購物車</string>
+    <string name="order_type_dine_in">內用</string>
+    <string name="order_type_takeaway">外帶</string>
+    <string name="tab_menu">菜單</string>
+    <string name="tab_package">套餐</string>
+
+    <string name="profile_user_name_placeholder">用戶名稱</string>
+    <string name="profile_user_email_placeholder">user@example.com</string>
+    <string name="edit_profile">編輯資料</string>
+
+    <string name="booking_title_make_reservation">預約訂座</string>
+    <string name="booking_select_date">選擇日期：</string>
+    <string name="booking_choose_date">選擇日期</string>
+    <string name="booking_select_time">選擇時間：</string>
+    <string name="booking_choose_time">選擇時間</string>
+    <string name="booking_number_of_people">用餐人數：</string>
+    <string name="booking_people_hint_example">例如：4</string>
+    <string name="booking_find_available_tables">查找可用餐桌</string>
+
+    <string name="coupon_points_zero">積分：0</string>
+    <string name="my_coupons">我的優惠券</string>
+    <string name="history">歷史記錄</string>
+    <string name="done">完成</string>
 </resources>

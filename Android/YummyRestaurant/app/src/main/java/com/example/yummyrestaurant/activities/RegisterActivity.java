@@ -71,7 +71,7 @@ public class RegisterActivity extends ThemeBaseActivity {
                     Log.d("RegisterDebug", "Response body: " + registerResponse.getMessage());
 
                     if (registerResponse.isSuccess()) {
-                        Toast.makeText(RegisterActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, getString(R.string.registration_successful), Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                         finish();
                     } else {
@@ -81,10 +81,10 @@ public class RegisterActivity extends ThemeBaseActivity {
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "null";
                         Log.e("RegisterDebug", "Error body: " + errorBody);
-                        Toast.makeText(RegisterActivity.this, "Server error: " + errorBody, Toast.LENGTH_LONG).show();
+                        Toast.makeText(RegisterActivity.this, getString(R.string.server_error_with_reason, errorBody), Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         Log.e("RegisterDebug", "Error parsing error body", e);
-                        Toast.makeText(RegisterActivity.this, "Registration failed. Please try again.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, getString(R.string.registration_failed_try_again), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -92,44 +92,44 @@ public class RegisterActivity extends ThemeBaseActivity {
             @Override
             public void onFailure(Call<RegisterResponse> call, Throwable t) {
                 Log.e("RegisterDebug", "Network failure", t);
-                Toast.makeText(RegisterActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private boolean isValidInput(String name, String email, String password, String confirmPassword) {
         if (name.isEmpty()) {
-            nameEditText.setError("Please fill in your name");
+            nameEditText.setError(getString(R.string.please_fill_name));
             nameEditText.requestFocus();
             return false;
         }
 
         if (email.isEmpty()) {
-            emailEditText.setError("Please fill in your email address");
+            emailEditText.setError(getString(R.string.please_fill_email));
             emailEditText.requestFocus();
             return false;
         }
 
         if (password.isEmpty()) {
-            passwordEditText.setError("Please fill in your password");
+            passwordEditText.setError(getString(R.string.please_fill_password));
             passwordEditText.requestFocus();
             return false;
         }
 
         if (confirmPassword.isEmpty()) {
-            confirmPasswordEditText.setError("Please fill in your confirm password");
+            confirmPasswordEditText.setError(getString(R.string.please_fill_confirm_password));
             confirmPasswordEditText.requestFocus();
             return false;
         }
 
         if (!password.equals(confirmPassword)) {
-            confirmPasswordEditText.setError("Wrong password");
+            confirmPasswordEditText.setError(getString(R.string.passwords_do_not_match));
             confirmPasswordEditText.requestFocus();
             return false;
         }
 
         if (password.length() < 6) {
-            passwordEditText.setError("Password must at least contain 6 characters");
+            passwordEditText.setError(getString(R.string.password_min_6_chars));
             passwordEditText.requestFocus();
             return false;
         }

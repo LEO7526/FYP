@@ -23,7 +23,7 @@
             android:id="@+id/tvCouponPoints"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Points: 0"
+            android:text="@string/coupon_points_zero"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"
@@ -34,14 +34,14 @@
             android:id="@+id/btnMyCoupons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="My Coupons"
+            android:text="@string/my_coupons"
             android:layout_marginEnd="8dp"/>
 
         <Button
             android:id="@+id/btnHistory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="History"/>
+            android:text="@string/history"/>
     </LinearLayout>
 
     <!-- RecyclerView for coupon cards -->
@@ -99,7 +99,7 @@
                 android:id="@+id/redeemSuccessText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Redeemed successfully"
+                android:text="@string/redeemed_successfully"
                 android:textColor="@color/black"
                 android:textStyle="bold"
                 android:layout_marginTop="8dp"

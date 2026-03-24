@@ -176,7 +176,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
                 if (cartUpdateListener != null) {
                     cartUpdateListener.onCartUpdated();
                 }
-                Toast.makeText(context, "Item removed from cart", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.item_removed_from_cart), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -215,7 +215,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
                             android.util.Log.d("MaterialCheck", "❌ Materials insufficient - blocking increase");
                             String detailedMessage = MaterialAvailabilityChecker.formatInsufficientMaterialsMessage(materialDetails);
                             Toast.makeText(context, 
-                                "Cannot increase quantity:\n" + detailedMessage, 
+                                context.getString(R.string.cannot_increase_quantity_with_reason, detailedMessage), 
                                 Toast.LENGTH_LONG).show();
                         }
                     }
@@ -232,7 +232,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
                             cartUpdateListener.onCartUpdated();
                         }
                         Toast.makeText(context, 
-                            "Quantity increased (unable to verify ingredients: " + error + ")", 
+                            context.getString(R.string.quantity_increased_unable_verify_ingredients, error), 
                             Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -248,7 +248,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
             if (cartUpdateListener != null) {
                 cartUpdateListener.onCartUpdated();
             }
-            Toast.makeText(context, "Item removed from cart", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.item_removed_from_cart), Toast.LENGTH_SHORT).show();
         });
 
         Glide.with(context)
