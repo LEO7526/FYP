@@ -288,6 +288,15 @@ CREATE TABLE menu_category (
   category_name VARCHAR(100) NOT NULL
 );
 
+CREATE TABLE menu_category_translation (
+  translation_id INT PRIMARY KEY AUTO_INCREMENT,
+  category_id INT NOT NULL,
+  language_code VARCHAR(10) NOT NULL,
+  category_name VARCHAR(100) NOT NULL,
+  FOREIGN KEY (category_id) REFERENCES menu_category(category_id) ON DELETE CASCADE,
+  UNIQUE KEY uq_category_lang (category_id, language_code)
+);
+
 INSERT INTO menu_category (category_name) VALUES
 ('Appetizers'),
 ('Soup'),
@@ -297,6 +306,29 @@ INSERT INTO menu_category (category_name) VALUES
 ('Staple Foods');
 
 INSERT INTO menu_category (category_name) VALUES ('Supplies');
+
+INSERT INTO menu_category_translation (category_id, language_code, category_name) VALUES
+(1, 'en', 'Appetizers'),
+(1, 'zh-CN', '前菜'),
+(1, 'zh-TW', '前菜'),
+(2, 'en', 'Soup'),
+(2, 'zh-CN', '汤'),
+(2, 'zh-TW', '湯品'),
+(3, 'en', 'Main Courses'),
+(3, 'zh-CN', '主菜'),
+(3, 'zh-TW', '主菜'),
+(4, 'en', 'Dessert'),
+(4, 'zh-CN', '甜品'),
+(4, 'zh-TW', '甜品'),
+(5, 'en', 'Drink'),
+(5, 'zh-CN', '饮料'),
+(5, 'zh-TW', '飲料'),
+(6, 'en', 'Staple Foods'),
+(6, 'zh-CN', '主食'),
+(6, 'zh-TW', '主食'),
+(7, 'en', 'Supplies'),
+(7, 'zh-CN', '用品'),
+(7, 'zh-TW', '用品');
 
 
 CREATE TABLE menu_item (

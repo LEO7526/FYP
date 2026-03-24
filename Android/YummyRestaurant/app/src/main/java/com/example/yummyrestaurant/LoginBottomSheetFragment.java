@@ -1,7 +1,6 @@
 package com.example.yummyrestaurant;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -15,7 +14,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.activities.BrowseMenuActivity;
@@ -61,13 +59,6 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         // Reuse your existing activity_login.xml layout
         View view = inflater.inflate(R.layout.activity_login, container, false);
 
-        // Apply dark mode preference if needed
-        SharedPreferences prefs = requireContext().getSharedPreferences("AppSettingsPrefs", requireContext().MODE_PRIVATE);
-        boolean darkMode = prefs.getBoolean("enable_dark_mode", false);
-        AppCompatDelegate.setDefaultNightMode(
-                darkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
-        );
-
         // Initialize UI components
         emailEditText = view.findViewById(R.id.email);
         passwordEditText = view.findViewById(R.id.password);
@@ -96,7 +87,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         String password = passwordEditText.getText().toString().trim();
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(getContext(), "Please enter a valid email address.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.please_enter_valid_email), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -124,7 +115,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                                     handleLoginSuccess(response.body(), email);
                                 } else {
                                     Toast.makeText(getContext(),
-                                            "Login failed. Please check your credentials.",
+                                            getString(R.string.login_failed_check_credentials),
                                             Toast.LENGTH_SHORT).show();
                                 }
                             }
@@ -132,7 +123,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                             @Override
                             public void onFailure(Call<LoginResponse> call, Throwable t) {
                                 Toast.makeText(getContext(),
-                                        "Network error: " + t.getMessage(),
+                                        getString(R.string.network_error_with_reason, t.getMessage()),
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -142,17 +133,17 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                 @Override
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
                     Toast.makeText(getContext(),
-                            "Network error: " + t.getMessage(),
+                            getString(R.string.network_error_with_reason, t.getMessage()),
                             Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Toast.makeText(getContext(), "Please enter your email and password.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.please_enter_email_and_password), Toast.LENGTH_SHORT).show();
         }
     }
 
     private void handleLoginSuccess(LoginResponse loginResponse, String email) {
-        Toast.makeText(getContext(), "Login successful", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), getString(R.string.login_successful), Toast.LENGTH_SHORT).show();
 
         // Save user info
         RoleManager.setUserEmail(email);
@@ -205,11 +196,13 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
 
                 Toast.makeText(
                         getContext(),
-                        qty + " × " + (pendingItem.getName() == null ? "" : pendingItem.getName()) +
+                    getString(R.string.item_added_to_cart_with_qty,
+                        qty,
+                        (pendingItem.getName() == null ? "" : pendingItem.getName())) +
                                 (customization != null && customization.getSpiceLevel() != null
                                         ? " (" + customization.getSpiceLevel() + ")"
                                         : "") +
-                                " added to cart",
+                        getString(R.string.added_to_cart_suffix),
                         Toast.LENGTH_SHORT
                 ).show();
             }

@@ -47,9 +47,9 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
     public void setMenuItems(List<MenuItem> menuItems) {
         fullList.clear();
-        // Filter out wooden chopsticks (item_id = 22) from fullList
+        // Filter out hidden browse items (e.g., supplies and staple foods) from fullList
         for (MenuItem item : menuItems) {
-            if (item.getId() != 22) { // Exclude wooden chopsticks
+            if (shouldIncludeInBrowse(item)) {
                 fullList.add(item);
             }
         }
@@ -81,7 +81,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     public void showAllItems() {
         filteredList.clear();
         for (MenuItem item : fullList) {
-            if (item.getId() != 22) {
+            if (shouldIncludeInBrowse(item)) {
                 filteredList.add(item);
             }
         }
@@ -131,8 +131,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         }
 
         for (MenuItem item : fullList) {
-            // Skip wooden chopsticks (item_id = 22)
-            if (item.getId() == 22) {
+            if (!shouldIncludeInBrowse(item)) {
                 continue;
             }
             
@@ -156,17 +155,16 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         filteredList.clear();
 
         if (query == null || query.trim().isEmpty()) {
-            // Exclude wooden chopsticks (item_id = 22) from filtered list
+            // Keep consistent browse visibility rules when query is empty.
             for (MenuItem item : fullList) {
-                if (item.getId() != 22) {
+                if (shouldIncludeInBrowse(item)) {
                     filteredList.add(item);
                 }
             }
         } else {
             String lowerQuery = query.toLowerCase();
             for (MenuItem item : fullList) {
-                // Skip wooden chopsticks (item_id = 22)
-                if (item.getId() == 22) {
+                if (!shouldIncludeInBrowse(item)) {
                     continue;
                 }
                 String name = item.getName() != null ? item.getName().toLowerCase() : "";
@@ -183,17 +181,16 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         filteredList.clear();
 
         if (query == null || query.trim().isEmpty()) {
-            // Exclude wooden chopsticks (item_id = 22) from filtered list
+            // Keep consistent browse visibility rules when query is empty.
             for (MenuItem item : fullList) {
-                if (item.getId() != 22) {
+                if (shouldIncludeInBrowse(item)) {
                     filteredList.add(item);
                 }
             }
         } else {
             String lowerQuery = query.toLowerCase();
             for (MenuItem item : fullList) {
-                // Skip wooden chopsticks (item_id = 22)
-                if (item.getId() == 22) {
+                if (!shouldIncludeInBrowse(item)) {
                     continue;
                 }
                 if (item.getName() != null && item.getName().toLowerCase().contains(lowerQuery)) {
@@ -289,7 +286,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
             if (!item.getCategory().equalsIgnoreCase("Drink")) {
                 TextView noSpice = new TextView(context);
-                noSpice.setText("No spice");
+                noSpice.setText(context.getString(R.string.no_spice));
                 noSpice.setTextSize(10);
                 noSpice.setTextColor(Color.GRAY);
                 holder.spiceIconContainer.addView(noSpice);
@@ -333,7 +330,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
             // Check if order type is selected
             if (!CartManager.isOrderTypeSelected()) {
-                Toast.makeText(context, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.error_select_order_type_first), Toast.LENGTH_SHORT).show();
                 return;
             }
             Intent intent = new Intent(context, DishDetailActivity.class);
@@ -384,5 +381,15 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
             dishPrice = itemView.findViewById(R.id.dishPrice);
             spiceIconContainer = itemView.findViewById(R.id.spiceIconContainer);
         }
+    }
+
+    private boolean shouldIncludeInBrowse(MenuItem item) {
+        if (item == null) return false;
+        if (item.getId() == 22) return false; // Wooden Chopsticks in Supplies
+
+        String category = item.getCategory();
+        if (category == null) return true;
+        String normalized = category.trim().toLowerCase();
+        return !"staple foods".equals(normalized);
     }
 }

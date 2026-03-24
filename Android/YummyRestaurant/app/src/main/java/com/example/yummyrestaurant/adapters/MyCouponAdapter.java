@@ -72,7 +72,7 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
 
         // Title with quantity
         if (coupon.getQuantity() > 1) {
-            holder.tvTitle.setText(coupon.getTitle() + " x" + coupon.getQuantity());
+            holder.tvTitle.setText(holder.itemView.getContext().getString(R.string.coupon_title_quantity_format, coupon.getTitle(), coupon.getQuantity()));
         } else {
             holder.tvTitle.setText(coupon.getTitle());
         }
@@ -84,24 +84,25 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
         if ("free_item".equalsIgnoreCase(coupon.getType())) {
             holder.tvReward.setVisibility(View.VISIBLE);
             holder.tvDiscount.setVisibility(View.GONE);
-            holder.tvReward.setText("Reward: Free " + coupon.getItemCategory());
+            holder.tvReward.setText(holder.itemView.getContext().getString(R.string.reward_free_item_format, coupon.getItemCategory()));
         } else if ("percent".equalsIgnoreCase(coupon.getType())) {
             holder.tvReward.setVisibility(View.GONE);
             holder.tvDiscount.setVisibility(View.VISIBLE);
-            holder.tvDiscount.setText("Discount: " + coupon.getDiscountAmount() + "% OFF");
+            holder.tvDiscount.setText(holder.itemView.getContext().getString(R.string.discount_percent_off_format, coupon.getDiscountAmount()));
         } else { // cash
             holder.tvReward.setVisibility(View.GONE);
             holder.tvDiscount.setVisibility(View.VISIBLE);
             holder.tvDiscount.setText(
-                    String.format(Locale.getDefault(), "Discount: HK$%.2f", coupon.getDiscountAmount() / 100.0)
+                    holder.itemView.getContext().getString(R.string.discount_cash_off_format,
+                            String.format(Locale.getDefault(), "%.2f", coupon.getDiscountAmount() / 100.0))
             );
         }
 
         // Expiry
         if (coupon.getExpiryDate() != null && !coupon.getExpiryDate().isEmpty()) {
-            holder.tvExpiry.setText("Valid until: " + coupon.getExpiryDate());
+            holder.tvExpiry.setText(holder.itemView.getContext().getString(R.string.coupon_valid_until_format, coupon.getExpiryDate()));
         } else {
-            holder.tvExpiry.setText("No expiry");
+            holder.tvExpiry.setText(R.string.coupon_no_expiry);
         }
 
         // --- Validation with reason ---
@@ -109,7 +110,7 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
 
         if (!valid) {
             holder.btnUse.setEnabled(false);
-            holder.btnUse.setText("Not Applicable");
+            holder.btnUse.setText(R.string.not_applicable);
             holder.btnUse.setAlpha(0.5f);
             holder.itemView.setAlpha(0.7f);
             
@@ -118,21 +119,21 @@ public class MyCouponAdapter extends RecyclerView.Adapter<MyCouponAdapter.MyCoup
                 CouponValidator.validateCouponWithReason(coupon, 1);
             if (!result.reason.isEmpty()) {
                 holder.tvReason.setVisibility(View.VISIBLE);
-                holder.tvReason.setText("ℹ️ " + result.reason);
+                holder.tvReason.setText(holder.itemView.getContext().getString(R.string.info_reason_prefix, result.reason));
                 holder.tvReason.setTextColor(0xFFFF9800); // Orange warning color
             } else {
                 holder.tvReason.setVisibility(View.GONE);
             }
         } else {
             holder.btnUse.setEnabled(true);
-            holder.btnUse.setText("Use Coupon");
+            holder.btnUse.setText(R.string.use_coupon);
             holder.btnUse.setAlpha(1f);
             holder.itemView.setAlpha(1f);
             holder.tvReason.setVisibility(View.GONE);
 
             holder.btnUse.setOnClickListener(v -> {
                 holder.btnUse.setEnabled(false);
-                holder.btnUse.setText("Applying...");
+                holder.btnUse.setText(R.string.applying);
                 if (listener != null) {
                     int pos = holder.getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {

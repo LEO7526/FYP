@@ -14,7 +14,15 @@
 
     <string name="title_settings">Settings</string>
     <string name="enable_notifications">Enable Notifications</string>
-    <string name="enable_dark_mode">Enable Dark Mode</string>
+    <string name="notifications_enabled">Notifications enabled</string>
+    <string name="notifications_disabled">Notifications disabled</string>
+    <string name="language_updated">Language updated</string>
+    <string name="login_to_earn_points">Login to earn and redeem points</string>
+    <string name="points_format">Points: %1$d</string>
+    <string name="error_load_packages">Failed to load packages</string>
+    <string name="error_load_menu_items">Failed to load menu items</string>
+    <string name="error_select_order_type_first">Please select Dine In or Takeaway first</string>
+    <string name="error_with_reason">Error: %1$s</string>
 
     <string-array name="language_options">
         <item>English</item>
@@ -58,6 +66,148 @@
     <string name="filter_main_courses">Main Courses</string>
     <string name="filter_soup">Soup</string>
     <string name="filter_dessert">Dessert</string>
+    <string name="filter_drink">Drink</string>
+
+    <string name="notification_permission_denied">Notification permission was denied</string>
+    <string name="please_login_access_feature">Please log in to access this feature.</string>
+    <string name="not_logged_in">You are not logged in.</string>
+    <string name="confirm_logout_title">Confirm Logout</string>
+    <string name="confirm_logout_message">Are you sure you want to log out?</string>
+    <string name="logout">Logout</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="scanning_qr_code">Scanning QR code...</string>
+
+    <string name="failed_load_points">Failed to load points</string>
+    <string name="error_loading_points">Error loading points</string>
+    <string name="failed_load_coupons">Failed to load coupons</string>
+    <string name="please_login_to_redeem">Please login to redeem</string>
+    <string name="not_enough_points_to_redeem_coupon">Not enough points to redeem this coupon</string>
+    <string name="not_enough_points_to_redeem">Not enough points to redeem</string>
+    <string name="select_quantity_to_redeem">Select quantity to redeem</string>
+    <string name="birthday_coupon_redeemed_this_year">You have already redeemed your birthday coupon this year.</string>
+    <string name="birthday_coupon_already_used">Birthday coupon already used this year.</string>
+    <string name="redeem_failed">Redeem failed</string>
+    <string name="redeemed_successfully">Redeemed successfully</string>
+    <string name="please_set_birthday_to_redeem">Please set your birthday to redeem this coupon</string>
+    <string name="birthday_coupon_month_only">Birthday coupon can only be redeemed in your birthday month</string>
+    <string name="invalid_birthday_format">Invalid birthday format returned: %1$s</string>
+    <string name="error_parsing_birthday">Error parsing birthday: %1$s</string>
+    <string name="failed_check_birthday">Failed to check birthday</string>
+    <string name="error_checking_birthday">Error checking birthday: %1$s</string>
+
+    <string name="invalid_coupon_selected">Invalid coupon selected</string>
+    <string name="failed_load_terms">Failed to load terms</string>
+    <string name="error_loading_terms">Error loading terms</string>
+    <string name="points_required_format">Points required: %1$d</string>
+    <string name="remaining_points_format">Remaining points: %1$d</string>
+    <string name="no_terms_available">No terms available</string>
+
+    <string name="please_login_view_history">Please log in to view history</string>
+    <string name="no_history_found_for_customer">No history found for this customer</string>
+    <string name="unexpected_empty_response">Unexpected empty response</string>
+    <string name="failed_load_history_http">Failed to load history (HTTP %1$d)</string>
+
+    <string name="coupons_checkout_only">Coupons can only be used during checkout</string>
+    <string name="proceed_without_coupon">Proceed without coupon</string>
+    <string name="no_coupons_found">No coupons found</string>
+    <string name="no_coupons_available_to_use">No coupons available to use</string>
+    <string name="select_quantity_to_use">Select quantity to use</string>
+    <string name="coupon_not_valid_for_cart">Coupon not valid for this cart</string>
+    <string name="can_only_use_more_coupon">You can only use %1$d more of this coupon</string>
+    <string name="coupon_applied_press_done">Coupon applied (%1$d). Press Done when finished selecting.</string>
+    <string name="failed_apply_coupon">Failed to apply coupon</string>
+
+    <string name="network_error_with_reason">Network error: %1$s</string>
+    <string name="no_menu_data">No menu data</string>
+    <string name="failed_load_set_menu">Failed to load set menu</string>
+    <string name="choose_items_format">Choose %1$d %2$s</string>
+    <string name="customization_saved">Customization saved</string>
+    <string name="complete_selection">Please complete your selection</string>
+    <string name="unnamed_dish">Unnamed Dish</string>
+    <string name="original_total_format">Original Total: $%1$s</string>
+    <string name="discounted_total_format">Discounted Total: $%1$s</string>
+    <string name="confirm_your_package">Confirm Your %1$s</string>
+    <string name="package_added_you_saved">%1$s added! You saved HK$%2$s</string>
+
+    <string name="coupon_requires_points_format">Requires: %1$d pts</string>
+    <string name="coupon_valid_until_format">Valid until: %1$s</string>
+    <string name="coupon_no_expiry">No expiry</string>
+    <string name="login_to_redeem">Login to Redeem</string>
+    <string name="birthday_not_eligible">Birthday Not Eligible</string>
+    <string name="already_redeemed">Already Redeemed</string>
+    <string name="not_enough_points">Not enough points</string>
+    <string name="redeem">Redeem</string>
+
+    <string name="coupon_title_quantity_format">%1$s x%2$d</string>
+    <string name="reward_free_item_format">Reward: Free %1$s</string>
+    <string name="discount_percent_off_format">Discount: %1$d%% OFF</string>
+    <string name="discount_cash_off_format">Discount: HK$%1$s</string>
+    <string name="not_applicable">Not Applicable</string>
+    <string name="use_coupon">Use Coupon</string>
+    <string name="applying">Applying...</string>
+    <string name="info_reason_prefix">Info: %1$s</string>
+    <string name="balance_format">Balance: %1$d</string>
+
+    <string name="please_enter_valid_email">Please enter a valid email address.</string>
+    <string name="login_failed_check_credentials">Login failed. Please check your credentials.</string>
+    <string name="please_enter_email_and_password">Please enter your email and password.</string>
+    <string name="login_successful">Login successful</string>
+    <string name="item_added_to_cart_with_qty">%1$d × %2$s</string>
+    <string name="added_to_cart_suffix"> added to cart</string>
+
+    <string name="registration_successful">Registration successful</string>
+    <string name="server_error_try_again">Server error. Please try again.</string>
+    <string name="please_fill_name">Please fill in your name</string>
+    <string name="please_fill_email">Please fill in your email address</string>
+    <string name="invalid_email_format">Invalid email format</string>
+    <string name="please_fill_password">Please fill in your password</string>
+    <string name="please_fill_confirm_password">Please fill in your confirm password</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="password_min_6_chars">Password must be at least 6 characters</string>
+
+    <string name="no_spice">No spice</string>
+
+    <string name="please_login_customer_before_booking">Please login as customer before booking a table.</string>
+    <string name="please_login_customer_first">Please login as customer first.</string>
+    <string name="select_time_slot">Select Time Slot</string>
+    <string name="booking_time_invalid_rule">Booking must be at least 24 hours ahead. Time slots are from 11:00 to before 21:30 (last slot 21:00).</string>
+    <string name="please_enter_valid_people_count">Please enter a valid number of people.</string>
+    <string name="please_enter_valid_number">Please enter a valid number.</string>
+    <string name="no_available_tables_for_criteria">No available tables found for the selected criteria.</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="invalid_server_response">Invalid response from server.</string>
+
+    <string name="no_table_data_available">No table data available.</string>
+    <string name="failed_parse_table_data">Failed to parse table data.</string>
+    <string name="no_tables_available_for_booking">No tables available for this booking.</string>
+    <string name="table_selected_tap_confirm">Table %1$d selected. Tap confirm to continue.</string>
+    <string name="table_occupied">Table %1$d is occupied.</string>
+    <string name="table_reserved">Table %1$d is already reserved.</string>
+    <string name="table_too_small_for_people">Table %1$d (capacity %2$d) is too small for %3$s people.</string>
+    <string name="table_not_available">Table %1$d is not available.</string>
+    <string name="please_select_table_first">Please select a table first.</string>
+    <string name="table_capacity_format">Table #%1$d (Capacity: %2$d)</string>
+    <string name="booking_cancelled_select_another">Booking cancelled. Select another table.</string>
+    <string name="please_select_table">Please select a table.</string>
+    <string name="please_enter_name_phone">Please enter your name and phone number.</string>
+    <string name="invalid_customer_account_login_again">Invalid customer account. Please log in again.</string>
+    <string name="invalid_number_of_people">Invalid number of people.</string>
+    <string name="booking_failed_try_again">Booking failed. Please try again.</string>
+    <string name="booking_failed_http">Booking failed (HTTP %1$d).</string>
+
+    <string name="failed_load_bookings">Failed to load bookings.</string>
+    <string name="cancel_booking_title">Cancel Booking</string>
+    <string name="confirm_cancel_booking">Are you sure you want to cancel booking #%1$d?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="booking_cancelled">Booking cancelled.</string>
+    <string name="failed_cancel_booking">Failed to cancel booking.</string>
+
+    <string name="birthday_format">Birthday: %1$s</string>
+    <string name="birthday_not_set">Birthday not set</string>
+    <string name="unknown">Unknown</string>
+    <string name="no_email">No email</string>
 
 
 </resources>

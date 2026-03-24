@@ -13,6 +13,7 @@ import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.CouponHistoryItem;
 import com.example.yummyrestaurant.models.CouponHistoryResponse;
+import com.example.yummyrestaurant.utils.LanguageManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ public class CouponHistoryActivity extends BaseCustomerActivity {
     private RecyclerView recyclerView;
     private CouponHistoryAdapter adapter;
     private final List<CouponHistoryItem> historyList = new ArrayList<>();
+    private String currentLanguage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,7 @@ public class CouponHistoryActivity extends BaseCustomerActivity {
         setContentView(R.layout.activity_coupon_history);
 
         setupBottomFunctionBar();
+        currentLanguage = LanguageManager.getCurrentLanguage(this);
 
         recyclerView = findViewById(R.id.recyclerViewHistory);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -49,7 +52,7 @@ public class CouponHistoryActivity extends BaseCustomerActivity {
             loadHistory(customerId);
         } else {
             Log.w(TAG, "onCreate: No customerId provided, user not logged in");
-            Toast.makeText(this, "Please log in to view history", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_login_view_history), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -57,7 +60,7 @@ public class CouponHistoryActivity extends BaseCustomerActivity {
         Log.d(TAG, "loadHistory: Fetching history for customerId=" + customerId);
 
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.getCouponHistory(customerId,"en").enqueue(new Callback<CouponHistoryResponse>() {
+        api.getCouponHistory(customerId, currentLanguage).enqueue(new Callback<CouponHistoryResponse>() {
             @Override
             public void onResponse(Call<CouponHistoryResponse> call, Response<CouponHistoryResponse> response) {
                 Log.d(TAG, "onResponse: HTTP code=" + response.code());
@@ -90,12 +93,12 @@ public class CouponHistoryActivity extends BaseCustomerActivity {
                         } else {
                             Log.w(TAG, "onResponse: API returned success=false or empty history");
                             Toast.makeText(CouponHistoryActivity.this,
-                                    "No history found for this customer", Toast.LENGTH_SHORT).show();
+                                    getString(R.string.no_history_found_for_customer), Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         Log.w(TAG, "onResponse: Body is null despite success");
                         Toast.makeText(CouponHistoryActivity.this,
-                                "Unexpected empty response", Toast.LENGTH_SHORT).show();
+                                getString(R.string.unexpected_empty_response), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     // 🔎 Log raw error body for debugging
@@ -107,14 +110,14 @@ public class CouponHistoryActivity extends BaseCustomerActivity {
                     }
 
                     Toast.makeText(CouponHistoryActivity.this,
-                            "Failed to load history (HTTP " + response.code() + ")", Toast.LENGTH_SHORT).show();
+                            getString(R.string.failed_load_history_http, response.code()), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<CouponHistoryResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: Error fetching history", t);
-                Toast.makeText(CouponHistoryActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CouponHistoryActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

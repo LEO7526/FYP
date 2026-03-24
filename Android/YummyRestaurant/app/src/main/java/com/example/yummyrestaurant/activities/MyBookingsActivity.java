@@ -73,7 +73,7 @@ public class MyBookingsActivity extends ThemeBaseActivity {
                 && "customer".equalsIgnoreCase(role);
 
         if (!isCustomerLoggedIn) {
-            Toast.makeText(this, "Please login as customer first.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.please_login_customer_first), Toast.LENGTH_LONG).show();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return false;
@@ -82,7 +82,7 @@ public class MyBookingsActivity extends ThemeBaseActivity {
         try {
             currentCid = Integer.parseInt(userId);
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Invalid customer account. Please log in again.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.invalid_customer_account_login_again), Toast.LENGTH_LONG).show();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return false;
@@ -118,7 +118,7 @@ public class MyBookingsActivity extends ThemeBaseActivity {
                 boolean success = jsonObject.optBoolean("success", false);
 
                 if (!success) {
-                    String message = jsonObject.optString("message", "Failed to load bookings.");
+                    String message = jsonObject.optString("message", getString(R.string.failed_load_bookings));
                     runOnUiThread(() -> {
                         progressMyBookings.setVisibility(View.GONE);
                         Toast.makeText(MyBookingsActivity.this, message, Toast.LENGTH_LONG).show();
@@ -160,7 +160,7 @@ public class MyBookingsActivity extends ThemeBaseActivity {
                 Log.e("MyBookingsActivity", "loadMyBookings error", e);
                 runOnUiThread(() -> {
                     progressMyBookings.setVisibility(View.GONE);
-                    Toast.makeText(MyBookingsActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyBookingsActivity.this, getString(R.string.error_with_reason, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
             } finally {
                 try {
@@ -174,10 +174,10 @@ public class MyBookingsActivity extends ThemeBaseActivity {
 
     private void confirmCancelBooking(MyBooking booking) {
         new AlertDialog.Builder(this)
-                .setTitle("Cancel Booking")
-                .setMessage("Are you sure you want to cancel booking #" + booking.getBid() + "?")
-                .setPositiveButton("Yes", (dialog, which) -> cancelBooking(booking))
-                .setNegativeButton("No", null)
+                .setTitle(getString(R.string.cancel_booking_title))
+                .setMessage(getString(R.string.confirm_cancel_booking, booking.getBid()))
+                .setPositiveButton(getString(R.string.yes), (dialog, which) -> cancelBooking(booking))
+                .setNegativeButton(getString(R.string.no), null)
                 .show();
     }
 
@@ -222,7 +222,7 @@ public class MyBookingsActivity extends ThemeBaseActivity {
 
                 JSONObject jsonObject = new JSONObject(response.toString());
                 boolean success = jsonObject.optBoolean("success", false);
-                String message = jsonObject.optString("message", success ? "Booking cancelled." : "Failed to cancel booking.");
+                String message = jsonObject.optString("message", success ? getString(R.string.booking_cancelled) : getString(R.string.failed_cancel_booking));
 
                 runOnUiThread(() -> {
                     progressMyBookings.setVisibility(View.GONE);
@@ -236,7 +236,7 @@ public class MyBookingsActivity extends ThemeBaseActivity {
                 Log.e("MyBookingsActivity", "cancelBooking error", e);
                 runOnUiThread(() -> {
                     progressMyBookings.setVisibility(View.GONE);
-                    Toast.makeText(MyBookingsActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyBookingsActivity.this, getString(R.string.error_with_reason, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
             } finally {
                 try {

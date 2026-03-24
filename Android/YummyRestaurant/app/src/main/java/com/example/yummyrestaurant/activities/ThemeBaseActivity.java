@@ -1,8 +1,10 @@
 package com.example.yummyrestaurant.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Build;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.ThemeManager;
 import android.util.Log;
 import com.google.android.material.transition.platform.MaterialFadeThrough;
@@ -17,6 +19,11 @@ import com.google.android.material.transition.platform.MaterialFadeThrough;
 public abstract class ThemeBaseActivity extends AppCompatActivity {
 
     private static final String TAG = "ThemeBaseActivity";
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LanguageManager.wrapContext(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

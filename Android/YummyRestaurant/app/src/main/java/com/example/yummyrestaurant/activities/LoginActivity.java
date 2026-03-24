@@ -1,7 +1,6 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -9,9 +8,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
-import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.LoginCustomerApi;
@@ -43,12 +39,6 @@ public class LoginActivity extends ThemeBaseActivity {
         // Initialize RoleManager
         RoleManager.init(this);
 
-        SharedPreferences prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
-        boolean darkMode = prefs.getBoolean("enable_dark_mode", false);
-        AppCompatDelegate.setDefaultNightMode(
-                darkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
-        );
-
         setContentView(R.layout.activity_login);
 
         // Initialize UI components
@@ -75,7 +65,7 @@ public class LoginActivity extends ThemeBaseActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, "Please enter a valid email address.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_enter_valid_email), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -102,7 +92,7 @@ public class LoginActivity extends ThemeBaseActivity {
                                     handleLoginSuccess(response.body(), email);
                                 } else {
                                     Toast.makeText(LoginActivity.this,
-                                            "Login failed. Please check your credentials.",
+                                            getString(R.string.login_failed_check_credentials),
                                             Toast.LENGTH_SHORT).show();
                                 }
                             }
@@ -110,7 +100,7 @@ public class LoginActivity extends ThemeBaseActivity {
                             @Override
                             public void onFailure(Call<LoginResponse> call, Throwable t) {
                                 Toast.makeText(LoginActivity.this,
-                                        "Network error: " + t.getMessage(),
+                                        getString(R.string.network_error_with_reason, t.getMessage()),
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -120,17 +110,17 @@ public class LoginActivity extends ThemeBaseActivity {
                 @Override
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
                     Toast.makeText(LoginActivity.this,
-                            "Network error: " + t.getMessage(),
+                            getString(R.string.network_error_with_reason, t.getMessage()),
                             Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Please enter your email and password.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_enter_email_and_password), Toast.LENGTH_SHORT).show();
         }
     }
 
     private void handleLoginSuccess(LoginResponse loginResponse, String email) {
-        Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+        Toast.makeText(LoginActivity.this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show();
 
         // Initialize RoleManager first
         RoleManager.init(this);
@@ -182,11 +172,13 @@ public class LoginActivity extends ThemeBaseActivity {
 
                 Toast.makeText(
                         this,
-                        qty + " × " + (pendingItem.getName() == null ? "" : pendingItem.getName()) +
+                    getString(R.string.item_added_to_cart_with_qty,
+                        qty,
+                        (pendingItem.getName() == null ? "" : pendingItem.getName())) +
                                 (customization != null && customization.getSpiceLevel() != null
                                         ? " (" + customization.getSpiceLevel() + ")"
                                         : "") +
-                                " added to cart",
+                        getString(R.string.added_to_cart_suffix),
                         Toast.LENGTH_SHORT
                 ).show();
 

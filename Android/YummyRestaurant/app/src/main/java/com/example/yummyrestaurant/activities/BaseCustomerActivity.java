@@ -1,10 +1,13 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -26,10 +29,15 @@ public abstract class BaseCustomerActivity extends ThemeBaseActivity {
         login = BrowseMenuActivity.getLogin();
 
         int selectedIconId = getIntent().getIntExtra("selectedIcon", 0);
-        if (selectedIconId != 0 && bottomNavigationView != null) {
+        if (bottomNavigationView != null) {
             suppressNavigation = true;
             try {
-                bottomNavigationView.setSelectedItemId(selectedIconId);
+                if (selectedIconId != 0) {
+                    applyNormalBottomNavStyle();
+                    bottomNavigationView.setSelectedItemId(selectedIconId);
+                } else {
+                    applyNeutralBottomNavStyle();
+                }
             } catch (Exception ignored) {
                 // selectedIconId may not be a nav item (e.g. R.id.addToCartBtn)
             }
@@ -66,33 +74,75 @@ public abstract class BaseCustomerActivity extends ThemeBaseActivity {
         if (selectedIconId != 0) {
             suppressNavigation = true;
             try {
+                applyNormalBottomNavStyle();
                 bottomNavigationView.setSelectedItemId(selectedIconId);
+            } catch (Exception ignored) {}
+            suppressNavigation = false;
+        } else {
+            suppressNavigation = true;
+            try {
+                applyNeutralBottomNavStyle();
             } catch (Exception ignored) {}
             suppressNavigation = false;
         }
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (suppressNavigation) return true;
-            int id = item.getItemId();
-            int currentSelectedIconId = getIntent().getIntExtra("selectedIcon", 0);
-            Log.d(TAG, "onItemSelected tappedId=" + id + ", currentSelectedIconId=" + currentSelectedIconId + ", login=" + login);
-            if (id == R.id.orderBellIcon) {
-                return navigateProtected(R.id.orderBellIcon, BrowseMenuActivity.class, null, 0, null, null);
-            } else if (id == R.id.couponIcon) {
-                return navigateProtected(R.id.couponIcon, CouponActivity.class, null, 0, null, null);
-            } else if (id == R.id.membershipIcon) {
-                return navigateProtected(R.id.membershipIcon, MembershipActivity.class, null, 0, null, null);
-            } else if (id == R.id.orderRecordIcon) {
-                return navigateProtected(R.id.orderRecordIcon, OrderHistoryActivity.class, null, 0, null, null);
-            } else if (id == R.id.profileIcon) {
-                return navigateProtected(R.id.profileIcon, ProfileActivity.class, null, 0, null, null);
-            }
-            Log.w(TAG, "Unknown bottom nav item id=" + id + ", keeping current tab");
-            return false;
+            return handleBottomNavTap(item.getItemId(), false);
         });
 
-        // Suppress reselection (no re-launch if already on this screen)
-        bottomNavigationView.setOnItemReselectedListener(item -> {});
+        // If default selection is visually stuck on first tab, still allow reselection to route.
+        bottomNavigationView.setOnItemReselectedListener(item -> handleBottomNavTap(item.getItemId(), true));
+    }
+
+    private boolean handleBottomNavTap(int id, boolean fromReselection) {
+        int currentSelectedIconId = getIntent().getIntExtra("selectedIcon", 0);
+        Log.d(TAG, "onBottomNavTap tappedId=" + id
+                + ", currentSelectedIconId=" + currentSelectedIconId
+                + ", login=" + login
+                + ", reselection=" + fromReselection);
+
+        if (id == R.id.orderBellIcon) {
+            return navigateProtected(R.id.orderBellIcon, BrowseMenuActivity.class, null, 0, null, null);
+        } else if (id == R.id.couponIcon) {
+            return navigateProtected(R.id.couponIcon, CouponActivity.class, null, 0, null, null);
+        } else if (id == R.id.membershipIcon) {
+            return navigateProtected(R.id.membershipIcon, MembershipActivity.class, null, 0, null, null);
+        } else if (id == R.id.orderRecordIcon) {
+            return navigateProtected(R.id.orderRecordIcon, OrderHistoryActivity.class, null, 0, null, null);
+        } else if (id == R.id.profileIcon) {
+            return navigateProtected(R.id.profileIcon, ProfileActivity.class, null, 0, null, null);
+        }
+
+        Log.w(TAG, "Unknown bottom nav item id=" + id + ", keeping current tab");
+        return false;
+    }
+
+    private void clearBottomNavigationSelection() {
+        if (bottomNavigationView == null) return;
+        // Disable exclusive check temporarily so no item stays selected by default.
+        bottomNavigationView.getMenu().setGroupCheckable(0, true, false);
+        for (int i = 0; i < bottomNavigationView.getMenu().size(); i++) {
+            bottomNavigationView.getMenu().getItem(i).setChecked(false);
+        }
+    }
+
+    private void applyNeutralBottomNavStyle() {
+        if (bottomNavigationView == null) return;
+        ColorStateList neutral = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.gray_text));
+        bottomNavigationView.setItemIconTintList(neutral);
+        bottomNavigationView.setItemTextColor(neutral);
+        bottomNavigationView.setItemActiveIndicatorEnabled(false);
+    }
+
+    private void applyNormalBottomNavStyle() {
+        if (bottomNavigationView == null) return;
+        ColorStateList normal = ContextCompat.getColorStateList(this, R.color.bottom_nav_icon_color);
+        if (normal != null) {
+            bottomNavigationView.setItemIconTintList(normal);
+            bottomNavigationView.setItemTextColor(normal);
+        }
+        bottomNavigationView.setItemActiveIndicatorEnabled(true);
     }
 
     /**

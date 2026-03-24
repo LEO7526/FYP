@@ -37,6 +37,7 @@ import com.example.yummyrestaurant.models.PackagesResponse;
 import com.example.yummyrestaurant.models.SetMenu;
 import com.example.yummyrestaurant.utils.BadgeManager;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.android.material.navigation.NavigationView;
 import com.airbnb.lottie.LottieAnimationView;
@@ -62,7 +63,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     private EditText searchBar;
     private String currentLanguage = "en";
     private static boolean login;
-    private String selectedCategory = "All Dishes"; // default
+    private String selectedCategory = ""; // initialized in onCreate
 
     private List<ImageView> functionIcons = new ArrayList<>();
     private Map<ImageView, String> iconBaseNames = new HashMap<>();
@@ -104,6 +105,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         setupBottomFunctionBar();
 
         login = RoleManager.getUser() != null;
+        currentLanguage = LanguageManager.getCurrentLanguage(this);
+        selectedCategory = getString(R.string.filter_all);
 
         initViews();
         setupRecyclerView();
@@ -268,7 +271,14 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         menuCategoryList.removeAllViews();
 
         // Get unique categories from menu items
-        String[] categories = {"All Dishes", "Appetizers", "Soup", "Main Courses", "Dessert", "Drink"};
+        String[] categories = {
+            getString(R.string.filter_all),
+            getString(R.string.filter_appetizers),
+            getString(R.string.filter_soup),
+            getString(R.string.filter_main_courses),
+            getString(R.string.filter_dessert),
+            getString(R.string.filter_drink)
+        };
 
         for (String category : categories) {
             Button btn = new Button(this);
@@ -294,7 +304,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
                 suppressMenuCategorySync = true;
                 
                 // Show all items and scroll to the category
-                if (categoryName.equals("All Dishes")) {
+                if (categoryName.equals(getString(R.string.filter_all))) {
                     adapter.showAllItems();
                     smoothScrollToPosition(menuRecyclerView, 0);
                 } else {
@@ -310,7 +320,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         }
 
         // Highlight the first category
-        updateMenuCategoryHighlight("All Dishes");
+        updateMenuCategoryHighlight(getString(R.string.filter_all));
     }
 
     private void populatePackageCategories() {
@@ -419,11 +429,11 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         if (rawCategory == null) return null;
         String c = rawCategory.trim().toLowerCase();
         if (c.isEmpty()) return null;
-        if (c.equals("appetizer") || c.equals("appetizers")) return "Appetizers";
-        if (c.equals("soup") || c.equals("soups")) return "Soup";
-        if (c.equals("main course") || c.equals("main courses")) return "Main Courses";
-        if (c.equals("dessert") || c.equals("desserts")) return "Dessert";
-        if (c.equals("drink") || c.equals("drinks") || c.equals("beverage") || c.equals("beverages")) return "Drink";
+        if (c.equals("appetizer") || c.equals("appetizers") || c.contains("前菜")) return getString(R.string.filter_appetizers);
+        if (c.equals("soup") || c.equals("soups") || c.contains("汤") || c.contains("湯")) return getString(R.string.filter_soup);
+        if (c.equals("main course") || c.equals("main courses") || c.contains("主菜")) return getString(R.string.filter_main_courses);
+        if (c.equals("dessert") || c.equals("desserts") || c.contains("甜品") || c.contains("甜点") || c.contains("甜點")) return getString(R.string.filter_dessert);
+        if (c.equals("drink") || c.equals("drinks") || c.equals("beverage") || c.equals("beverages") || c.contains("饮料") || c.contains("飲料")) return getString(R.string.filter_drink);
         return null;
     }
 
@@ -500,7 +510,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
                     packageRecyclerView.setAdapter(packagesAdapter);
                     populatePackageCategories();
                 } else {
-                    Toast.makeText(BrowseMenuActivity.this, "Failed to load packages", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BrowseMenuActivity.this, getString(R.string.error_load_packages), Toast.LENGTH_SHORT).show();
                 }
 
                 updateCartBadge();
@@ -510,7 +520,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             public void onFailure(Call<PackagesResponse> call, Throwable t) {
                 loadingSpinner.setVisibility(View.GONE);
                 packageRecyclerView.setVisibility(View.VISIBLE);
-                Toast.makeText(BrowseMenuActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(BrowseMenuActivity.this, getString(R.string.error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
                 updateCartBadge();
             }
         });
@@ -520,7 +530,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     public void onPackageClick(SetMenu setMenu) {
         // Check if order type is selected
         if (!CartManager.isOrderTypeSelected()) {
-            Toast.makeText(this, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_select_order_type_first), Toast.LENGTH_SHORT).show();
             return;
         }
         Intent intent = new Intent(this, BuildSetMenuActivity.class);
@@ -545,7 +555,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
 
             // ✅ Allow nav_settings even if not logged in
             if (!isLoggedIn && id != R.id.nav_logout && id != R.id.nav_settings) {
-                Toast.makeText(this, "Please log in to access this feature.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.please_login_access_feature), Toast.LENGTH_SHORT).show();
                 return false;
             }
 
@@ -563,19 +573,19 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
                 return true;
             } else if (id == R.id.nav_logout) {
                 if (!isLoggedIn) {
-                    Toast.makeText(this, "You are not logged in.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.not_logged_in), Toast.LENGTH_SHORT).show();
                     return false;
                 }
 
                 new AlertDialog.Builder(this)
-                        .setTitle("Confirm Logout")
-                        .setMessage("Are you sure you want to log out?")
-                        .setPositiveButton("Logout", (dialog, which) -> {
+                        .setTitle(getString(R.string.confirm_logout_title))
+                        .setMessage(getString(R.string.confirm_logout_message))
+                        .setPositiveButton(getString(R.string.logout), (dialog, which) -> {
                             RoleManager.clearUserData();
                             startActivity(new Intent(this, BrowseMenuActivity.class));
                             finish();
                         })
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss())
                         .show();
                 drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
@@ -611,7 +621,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
                     applyFilters();
 
                 } else {
-                    Toast.makeText(BrowseMenuActivity.this, "Failed to load menu items", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BrowseMenuActivity.this, getString(R.string.error_load_menu_items), Toast.LENGTH_SHORT).show();
                 }
 
                 // Ensure badge is current after data load
@@ -622,7 +632,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             public void onFailure(Call<MenuResponse> call, Throwable t) {
                 loadingSpinner.setVisibility(View.GONE);
                 menuRecyclerView.setVisibility(View.VISIBLE);
-                Toast.makeText(BrowseMenuActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(BrowseMenuActivity.this, getString(R.string.error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
 
                 // Ensure badge is current on failure too
                 updateCartBadge();
@@ -683,7 +693,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
 
         btnDineIn.setOnClickListener(v -> {
             // Launch QR Scanner for table selection
-            Toast.makeText(BrowseMenuActivity.this, "Scanning QR code...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(BrowseMenuActivity.this, getString(R.string.scanning_qr_code), Toast.LENGTH_SHORT).show();
             Intent qrScanIntent = new Intent(BrowseMenuActivity.this, 
                     com.example.yummyrestaurant.utils.QRScannerActivity.class);
             startActivity(qrScanIntent);

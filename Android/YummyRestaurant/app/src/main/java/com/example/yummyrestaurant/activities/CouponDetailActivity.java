@@ -14,6 +14,7 @@ import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.CouponDetailResponse;
 import com.example.yummyrestaurant.models.RedeemCouponResponse;
+import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 import retrofit2.Call;
@@ -31,6 +32,7 @@ public class CouponDetailActivity extends BaseCustomerActivity {
     private int customerId;
     private int requiredPoints = 0;   // from API
     private int currentPoints = 0;    // passed from intent or fetched separately
+    private String currentLanguage;
 
     private Coupon currentCoupon;     // hold the full coupon object
 
@@ -49,9 +51,10 @@ public class CouponDetailActivity extends BaseCustomerActivity {
 
         couponId = getIntent().getIntExtra("coupon_id", 0);
         currentPoints = getIntent().getIntExtra("current_points", 0);
+        currentLanguage = LanguageManager.getCurrentLanguage(this);
 
         if (couponId == 0) {
-            Toast.makeText(this, "Invalid coupon selected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_coupon_selected), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -67,7 +70,7 @@ public class CouponDetailActivity extends BaseCustomerActivity {
 
         btnRedeem.setOnClickListener(v -> {
             if (customerId == 0) {
-                Toast.makeText(this, "Please login to redeem", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.please_login_to_redeem), Toast.LENGTH_SHORT).show();
             } else if (btnRedeem.isEnabled()) {
                 showQuantityPickerAndRedeem();
             }
@@ -77,7 +80,7 @@ public class CouponDetailActivity extends BaseCustomerActivity {
 
     private void fetchCouponDetails(int couponId) {
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.getCouponDetail(couponId, "en").enqueue(new Callback<CouponDetailResponse>() {
+        api.getCouponDetail(couponId, currentLanguage).enqueue(new Callback<CouponDetailResponse>() {
             @Override
             public void onResponse(Call<CouponDetailResponse> call, Response<CouponDetailResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
@@ -85,14 +88,14 @@ public class CouponDetailActivity extends BaseCustomerActivity {
                     updateCouponUI(currentCoupon);
                 } else {
                     Log.w(TAG, "fetchCouponDetails failed: " + response.code());
-                    tvTerms.setText("Failed to load terms");
+                    tvTerms.setText(getString(R.string.failed_load_terms));
                 }
             }
 
             @Override
             public void onFailure(Call<CouponDetailResponse> call, Throwable t) {
                 Log.e(TAG, "fetchCouponDetails onFailure", t);
-                tvTerms.setText("Error loading terms");
+                tvTerms.setText(getString(R.string.error_loading_terms));
             }
         });
     }
@@ -101,16 +104,16 @@ public class CouponDetailActivity extends BaseCustomerActivity {
         if (coupon != null) {
             tvTitle.setText(coupon.getTitle());
             requiredPoints = coupon.getPointsRequired();
-            tvRequiredPoints.setText("Points required: " + requiredPoints);
+            tvRequiredPoints.setText(getString(R.string.points_required_format, requiredPoints));
 
             // Show current points passed from intent
-            tvRemainingPoints.setText("Remaining points: " + currentPoints);
+            tvRemainingPoints.setText(getString(R.string.remaining_points_format, currentPoints));
 
             // 🚨 Disable redeem button if not enough points
             if (requiredPoints > 0 && currentPoints < requiredPoints) {
                 btnRedeem.setEnabled(false);
                 btnRedeem.setAlpha(0.5f); // optional visual cue
-                Toast.makeText(this, "Not enough points to redeem this coupon", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.not_enough_points_to_redeem_coupon), Toast.LENGTH_SHORT).show();
             } else {
                 btnRedeem.setEnabled(true);
                 btnRedeem.setAlpha(1f);
@@ -123,7 +126,7 @@ public class CouponDetailActivity extends BaseCustomerActivity {
                 }
                 tvTerms.setText(sb.toString());
             } else {
-                tvTerms.setText("No terms available");
+                tvTerms.setText(getString(R.string.no_terms_available));
             }
         }
     }
@@ -136,7 +139,7 @@ public class CouponDetailActivity extends BaseCustomerActivity {
                 : 5; // fallback if free coupon
 
         if (maxRedeemable <= 0) {
-            Toast.makeText(this, "Not enough points to redeem", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.not_enough_points_to_redeem), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -146,7 +149,7 @@ public class CouponDetailActivity extends BaseCustomerActivity {
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Select quantity to redeem")
+            .setTitle(getString(R.string.select_quantity_to_redeem))
                 .setItems(options, (dialog, which) -> {
                     int quantity = which + 1;
                     redeemCoupon(couponId, customerId, quantity);
@@ -166,32 +169,32 @@ public class CouponDetailActivity extends BaseCustomerActivity {
                     if (res.isSuccess()) {
                         Toast.makeText(CouponDetailActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
                         if (res.getPointsAfter() != null) {
-                            tvRemainingPoints.setText("Remaining points: " + res.getPointsAfter());
+                            tvRemainingPoints.setText(getString(R.string.remaining_points_format, res.getPointsAfter()));
                         }
                     } else {
                         if ("BIRTHDAY_ALREADY_REDEEMED".equals(res.getErrorCode())) {
                             Toast.makeText(CouponDetailActivity.this,
-                                    "Birthday coupon already used this year 🎂",
+                                    getString(R.string.birthday_coupon_already_used),
                                     Toast.LENGTH_LONG).show();
                             // Optional: disable the redeem button so user doesn’t retry
                             btnRedeem.setEnabled(false);
                             btnRedeem.setAlpha(0.5f);
                         } else {
                             Toast.makeText(CouponDetailActivity.this,
-                                    res.getError() != null ? res.getError() : "Redeem failed",
+                                    res.getError() != null ? res.getError() : getString(R.string.redeem_failed),
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
                 } else {
                     Log.w(TAG, "redeemCoupon failed: " + response.code());
-                    Toast.makeText(CouponDetailActivity.this, "Redeem failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CouponDetailActivity.this, getString(R.string.redeem_failed), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<RedeemCouponResponse> call, Throwable t) {
                 Log.e(TAG, "redeemCoupon onFailure", t);
-                Toast.makeText(CouponDetailActivity.this, "Redeem failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CouponDetailActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -26,6 +26,7 @@ import com.example.yummyrestaurant.models.PackageType;
 import com.example.yummyrestaurant.models.SetMenu;
 import com.example.yummyrestaurant.models.SetMenuResponse;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.LanguageManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
         prefillPackageId = packageId;
 
         MenuApi menuApi = RetrofitClient.getClient(this).create(MenuApi.class);
-        Call<SetMenuResponse> call = menuApi.getSetMenu(packageId, "en");
+        Call<SetMenuResponse> call = menuApi.getSetMenu(packageId, LanguageManager.getCurrentLanguage(this));
 
         call.enqueue(new Callback<SetMenuResponse>() {
             @Override
@@ -69,18 +70,18 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
                         setupAdaptersFromPackage(currentSetMenu);
                     } else {
                         Log.w("BuildSetMenuActivity", "SetMenu data is null");
-                        Toast.makeText(BuildSetMenuActivity.this, "No menu data", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(BuildSetMenuActivity.this, getString(R.string.no_menu_data), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Log.e("BuildSetMenuActivity", "API failed: " + response.code());
-                    Toast.makeText(BuildSetMenuActivity.this, "Failed to load set menu", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BuildSetMenuActivity.this, getString(R.string.failed_load_set_menu), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<SetMenuResponse> call, Throwable t) {
                 Log.e("BuildSetMenuActivity", "API error", t);
-                Toast.makeText(BuildSetMenuActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(BuildSetMenuActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -113,7 +114,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
 
             // 1. Create label
             TextView label = new TextView(this);
-            label.setText("Choose " + type.getOptionalQuantity() + " " + type.getName());
+            label.setText(getString(R.string.choose_items_format, type.getOptionalQuantity(), type.getName()));
             label.setTextSize(16f);
             label.setTypeface(null, Typeface.BOLD);
             label.setPadding(0, 24, 0, 8);
@@ -169,7 +170,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
         confirmBtn.setOnClickListener(v -> {
             // Defensive check: should not happen but safety first
             if (!CartManager.isOrderTypeSelected()) {
-                Toast.makeText(BuildSetMenuActivity.this, "Please select Dine In or Takeaway first", Toast.LENGTH_SHORT).show();
+                Toast.makeText(BuildSetMenuActivity.this, getString(R.string.error_select_order_type_first), Toast.LENGTH_SHORT).show();
                 return;
             }
             confirmSelection();
@@ -197,7 +198,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
                 }
                 
                 if (updated) {
-                    Toast.makeText(this, "Customization saved", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.customization_saved), Toast.LENGTH_SHORT).show();
                 } else {
                     Log.w("BuildSetMenuActivity", "Could not find item to update: " + customizedItem.getName());
                 }
@@ -213,7 +214,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
             // Use getSelectedItemsDirect() to preserve customizations
             List<MenuItem> selected = adapter.getSelectedItemsDirect();
             if (selected.size() < adapter.getRequiredCount()) {
-                Toast.makeText(this, "Please complete your selection", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.complete_selection), Toast.LENGTH_SHORT).show();
                 return;
             }
             allChosen.addAll(selected);
@@ -234,7 +235,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
         StringBuilder summary = new StringBuilder();
         for (MenuItem item : allChosen) {
             summary.append("• ")
-                    .append(item.getName() != null ? item.getName() : "Unnamed Dish")
+                    .append(item.getName() != null ? item.getName() : getString(R.string.unnamed_dish))
                     .append("  $")
                     .append(String.format("%.2f", item.getPrice()))
                     .append("\n");
@@ -247,14 +248,14 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
             }
         }
 
-        summary.append("\nOriginal Total: $").append(String.format("%.2f", finalTotal))
-                .append("\nDiscounted Total: $").append(String.format("%.2f", discountedPrice));
+        summary.append("\n").append(getString(R.string.original_total_format, String.format("%.2f", finalTotal)))
+            .append("\n").append(getString(R.string.discounted_total_format, String.format("%.2f", discountedPrice)));
 
         // Show confirmation dialog
         new AlertDialog.Builder(this)
-                .setTitle("Confirm Your " + currentSetMenu.getName())
+            .setTitle(getString(R.string.confirm_your_package, currentSetMenu.getName()))
                 .setMessage(summary.toString())
-                .setPositiveButton("Confirm", (dialog, which) -> {
+            .setPositiveButton(getString(R.string.confirm), (dialog, which) -> {
                     // ✅ Add package item to cart (as a special marker item)
                     // Store package ID and selected items in a custom CartItem
                     MenuItem packageMarker = new MenuItem();
@@ -276,8 +277,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
 
                     Toast.makeText(
                             BuildSetMenuActivity.this,
-                            currentSetMenu.getName() + " added! You saved HK$" +
-                                    String.format("%.2f", finalTotal - discountedPrice),
+                            getString(R.string.package_added_you_saved, currentSetMenu.getName(), String.format("%.2f", finalTotal - discountedPrice)),
                             Toast.LENGTH_LONG
                     ).show();
 
@@ -286,7 +286,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
                     startActivity(intent);
                     finish();
                 })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss())
                 .show();
     }
 }

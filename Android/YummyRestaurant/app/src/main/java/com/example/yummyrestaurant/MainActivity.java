@@ -1,6 +1,7 @@
 package com.example.yummyrestaurant;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -14,7 +15,7 @@ import com.example.yummyrestaurant.activities.CustomerHomeActivity;
 import com.example.yummyrestaurant.activities.DashboardActivity;
 import com.example.yummyrestaurant.activities.LoginActivity;
 import com.example.yummyrestaurant.activities.StaffOrdersActivity;
-import com.example.yummyrestaurant.api.ApiConfig;
+import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,14 +24,16 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_POST_NOTIFICATIONS = 100;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LanguageManager.wrapContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Initialize RoleManager
         RoleManager.init(this);
-
-        // 🚀 自動偵測環境（模擬器 vs 真實手機）
-        ApiConfig.autoDetectEnvironment(this);
 
         // Check and request POST_NOTIFICATIONS permission (required for Android 13 and above)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -94,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 handleUserLogin();
             } else {
                 // Permission denied, show a message
-                Toast.makeText(this, "Notification permission was denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.notification_permission_denied), Toast.LENGTH_SHORT).show();
                 // Proceed with login logic even if permission was denied
                 handleUserLogin();
             }

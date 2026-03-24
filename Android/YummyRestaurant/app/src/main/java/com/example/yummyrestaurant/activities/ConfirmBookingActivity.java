@@ -104,7 +104,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
                 && "customer".equalsIgnoreCase(role);
 
         if (!isCustomerLoggedIn) {
-            Toast.makeText(this, "Please login as customer before booking a table.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.please_login_customer_before_booking), Toast.LENGTH_LONG).show();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return false;
@@ -119,7 +119,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
      */
     private void parseTablesJson(String json) {
         if (json == null || json.isEmpty()) {
-            Toast.makeText(this, "No table data available.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_table_data_available), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -145,7 +145,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
         } catch (Exception e) {
             e.printStackTrace();
             Log.e("ConfirmBooking", "Error parsing table JSON: " + e.getMessage());
-            Toast.makeText(this, "Failed to parse table data.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.failed_parse_table_data), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -154,7 +154,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
      */
     private void setupSeatingChart() {
         if (tableList.isEmpty()) {
-            Toast.makeText(this, "No tables available for this booking.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_tables_available_for_booking), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -214,7 +214,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
         fabConfirm.setEnabled(true);
         fabConfirm.setAlpha(1.0f);
         
-        Toast.makeText(this, "Table " + table.getTid() + " selected. Tap confirm to continue.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.table_selected_tap_confirm, table.getTid()), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -235,17 +235,17 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
         if (table != null) {
             // Check why table is unavailable
             if ("occupied".equals(table.getStatus())) {
-                message = "Table " + tableId + " is occupied.";
+                message = getString(R.string.table_occupied, tableId);
             } else if ("reserved".equals(table.getStatus())) {
-                message = "Table " + tableId + " is already reserved.";
+                message = getString(R.string.table_reserved, tableId);
             } else if (!table.isSuitableForBooking()) {
                 // Table is available but too small for the party size
-                message = "Table " + tableId + " (capacity " + table.getCapacity() + ") is too small for " + numPeople + " people.";
+                message = getString(R.string.table_too_small_for_people, tableId, table.getCapacity(), numPeople);
             } else {
-                message = "Table " + tableId + " is not available.";
+                message = getString(R.string.table_not_available, tableId);
             }
         } else {
-            message = "Table " + tableId + " is not available.";
+            message = getString(R.string.table_not_available, tableId);
         }
 
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
@@ -256,7 +256,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
      */
     private void showBookingDetailsSheet() {
         if (selectedTable == null) {
-            Toast.makeText(this, "Please select a table first.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_select_table_first), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -278,7 +278,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
         Button buttonConfirmBooking = findViewById(R.id.buttonConfirmBooking);
 
         // Display selected table info
-        textViewSelectedTable.setText("Table #" + selectedTable.getTid() + " (Capacity: " + selectedTable.getCapacity() + ")");
+        textViewSelectedTable.setText(getString(R.string.table_capacity_format, selectedTable.getTid(), selectedTable.getCapacity()));
 
         // Pre-fill user information from RoleManager
         String userName = RoleManager.getUserName();
@@ -296,7 +296,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
             fabConfirm.setEnabled(false);
             fabConfirm.setAlpha(0.5f);
             bottomSheetContainer.removeAllViews();
-            Toast.makeText(this, "Booking cancelled. Select another table.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.booking_cancelled_select_another), Toast.LENGTH_SHORT).show();
         });
 
         // Confirm button - submit booking
@@ -313,12 +313,12 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
      */
     private void submitBooking(String name, String phone, String purpose, String remark) {
         if (selectedTable == null) {
-            Toast.makeText(this, "Please select a table.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_select_table), Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (name.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(this, "Please enter your name and phone number.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_enter_name_phone), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -341,7 +341,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
                     String userId = RoleManager.getUserId();
                     bookingJson.put("cid", Integer.parseInt(userId));
                 } catch (Exception e) {
-                    runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, "Invalid customer account. Please log in again.", Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, getString(R.string.invalid_customer_account_login_again), Toast.LENGTH_LONG).show());
                     return;
                 }
                 bookingJson.put("bkcname", name);
@@ -352,7 +352,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
                 try {
                     bookingJson.put("pnum", Integer.parseInt(numPeople));
                 } catch (NumberFormatException e) {
-                    runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, "Invalid number of people.", Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, getString(R.string.invalid_number_of_people), Toast.LENGTH_LONG).show());
                     return;
                 }
                 bookingJson.put("purpose", purpose);
@@ -365,7 +365,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
 
                 int responseCode = conn.getResponseCode();
                 BufferedReader responseReader = null;
-                String responseMessage = "Booking failed. Please try again.";
+                String responseMessage = getString(R.string.booking_failed_try_again);
 
                 try {
                     if (responseCode >= 200 && responseCode < 300) {
@@ -396,7 +396,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
                 }
 
                 if ((responseMessage == null || responseMessage.trim().isEmpty()) && responseCode != 201) {
-                    responseMessage = "Booking failed (HTTP " + responseCode + ").";
+                    responseMessage = getString(R.string.booking_failed_http, responseCode);
                 }
 
                 String finalResponseMessage = responseMessage;
@@ -413,7 +413,7 @@ public class ConfirmBookingActivity extends ThemeBaseActivity implements Seating
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e("ConfirmBooking", "Booking error: " + e.getMessage());
-                runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> Toast.makeText(ConfirmBookingActivity.this, getString(R.string.error_with_reason, e.getMessage()), Toast.LENGTH_LONG).show());
             } finally {
                 try {
                     if (os != null) os.close();

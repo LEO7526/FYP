@@ -38,7 +38,7 @@ public class CouponHistoryAdapter extends RecyclerView.Adapter<CouponHistoryAdap
         // Bind data to UI
         holder.tvAction.setText(item.getAction());
         holder.tvCouponTitle.setText(item.getCouponTitle()); // show coupon name
-        holder.tvResulting.setText("Balance: " + item.getResulting_points());
+        holder.tvResulting.setText(holder.itemView.getContext().getString(R.string.balance_format, item.getResulting_points()));
         holder.tvDate.setText(item.getCreated_at());
 
         // Handle delta display

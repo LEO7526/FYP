@@ -25,6 +25,7 @@ import com.example.yummyrestaurant.models.CouponPointResponse;
 import com.example.yummyrestaurant.models.CouponPointsResponse;
 import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.RedeemCouponResponse;
+import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.airbnb.lottie.LottieAnimationView;
 
@@ -55,6 +56,7 @@ public class CouponActivity extends BaseCustomerActivity {
     private LottieAnimationView redeemSuccessLottie;
     private TextView redeemSuccessText;
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
+    private String currentLanguage;
 
 
 
@@ -64,6 +66,7 @@ public class CouponActivity extends BaseCustomerActivity {
         setContentView(R.layout.activity_coupon);
 
         setupBottomFunctionBar();
+        currentLanguage = LanguageManager.getCurrentLanguage(this);
 
         tvCouponPoints = findViewById(R.id.tvCouponPoints);
         rvCoupons = findViewById(R.id.rvCoupons);
@@ -117,7 +120,7 @@ public class CouponActivity extends BaseCustomerActivity {
         if (customerId != 0) {
             fetchCouponPoints(customerId);
         } else {
-            tvCouponPoints.setText("Login to earn and redeem points");
+            tvCouponPoints.setText(getString(R.string.login_to_earn_points));
         }
     }
 
@@ -145,7 +148,7 @@ public class CouponActivity extends BaseCustomerActivity {
             btnMyCoupons.setVisibility(View.GONE);
             btnMyCoupons.setOnClickListener(null);
 
-            tvCouponPoints.setText("Login to earn and redeem points");
+            tvCouponPoints.setText(getString(R.string.login_to_earn_points));
             adapter.setLoggedIn(false);
         } else {
             Log.d(TAG, "User logged in (id=" + customerId + ") → showing buttons");
@@ -183,19 +186,19 @@ public class CouponActivity extends BaseCustomerActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     int points = response.body().getCouponPoints();
                     currentPoints = points;
-                    tvCouponPoints.setText("Points: " + points);
+                    tvCouponPoints.setText(getString(R.string.points_format, points));
                     adapter.setCurrentPoints(points);
                     Log.d(TAG, "fetchCouponPoints success: points=" + points);
                 } else {
                     Log.w(TAG, "fetchCouponPoints failed: code=" + response.code());
-                    tvCouponPoints.setText("Failed to load points");
+                    tvCouponPoints.setText(getString(R.string.failed_load_points));
                 }
             }
 
             @Override
             public void onFailure(Call<CouponPointsResponse> call, Throwable t) {
                 Log.e(TAG, "fetchCouponPoints onFailure", t);
-                tvCouponPoints.setText("Error loading points");
+                tvCouponPoints.setText(getString(R.string.error_loading_points));
             }
         });
     }
@@ -204,7 +207,7 @@ public class CouponActivity extends BaseCustomerActivity {
         Log.d(TAG, "Fetching coupons...");
 
         CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-        service.getCoupons("en").enqueue(new Callback<CouponListResponse>() {
+        service.getCoupons(currentLanguage).enqueue(new Callback<CouponListResponse>() {
             @Override
             public void onResponse(Call<CouponListResponse> call, Response<CouponListResponse> response) {
                 Log.d(TAG, "fetchCoupons onResponse: code=" + response.code());
@@ -222,14 +225,14 @@ public class CouponActivity extends BaseCustomerActivity {
             @Override
             public void onFailure(Call<CouponListResponse> call, Throwable t) {
                 Log.e(TAG, "fetchCoupons onFailure", t);
-                Toast.makeText(CouponActivity.this, "Failed to load coupons", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CouponActivity.this, getString(R.string.failed_load_coupons), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void redeemCoupon(Coupon coupon) {
         if (customerId == 0) {
-            Toast.makeText(this, "Please login to redeem", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_login_to_redeem), Toast.LENGTH_SHORT).show();
             Log.w(TAG, "redeemCoupon called with customerId=0");
             return;
         }
@@ -246,7 +249,7 @@ public class CouponActivity extends BaseCustomerActivity {
 
 
         if (maxRedeemable <= 0) {
-            Toast.makeText(this, "Not enough points to redeem this coupon", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.not_enough_points_to_redeem_coupon), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -257,7 +260,7 @@ public class CouponActivity extends BaseCustomerActivity {
         }
 
         new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Select quantity to redeem")
+            .setTitle(getString(R.string.select_quantity_to_redeem))
                 .setItems(options, (dialog, which) -> {
                     int quantity = which + 1;
                     Log.d(TAG, "Redeeming " + quantity + " of couponId=" + coupon.getCouponId());
@@ -276,31 +279,31 @@ public class CouponActivity extends BaseCustomerActivity {
                                             if (res.getPointsAfter() != null) {
                                                 int remaining = res.getPointsAfter();
                                                 currentPoints = remaining;
-                                                tvCouponPoints.setText("Points: " + remaining);
+                                                tvCouponPoints.setText(getString(R.string.points_format, remaining));
                                                 adapter.setCurrentPoints(remaining);
                                             }
                                         } else {
                                             if ("BIRTHDAY_ALREADY_REDEEMED".equals(res.getErrorCode())) {
                                                 Toast.makeText(CouponActivity.this,
-                                                        "You’ve already redeemed your birthday coupon this year 🎂",
+                                                        getString(R.string.birthday_coupon_redeemed_this_year),
                                                         Toast.LENGTH_LONG).show();
 
                                                 coupon.setRedeemable(false);   // mark coupon
                                                 adapter.notifyDataSetChanged(); // refresh list
                                             } else {
                                                 Toast.makeText(CouponActivity.this,
-                                                        res.getError() != null ? res.getError() : "Redeem failed",
+                                                        res.getError() != null ? res.getError() : getString(R.string.redeem_failed),
                                                         Toast.LENGTH_SHORT).show();
                                             }
                                         }
                                     } else {
-                                        Toast.makeText(CouponActivity.this, "Redeem failed", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(CouponActivity.this, getString(R.string.redeem_failed), Toast.LENGTH_SHORT).show();
                                     }
                                 }
 
                                 @Override
                                 public void onFailure(Call<RedeemCouponResponse> call, Throwable t) {
-                                    Toast.makeText(CouponActivity.this, "Redeem failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(CouponActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
                                 }
                             });
                 })
@@ -309,7 +312,7 @@ public class CouponActivity extends BaseCustomerActivity {
 
     private void showRedeemSuccessOverlay(String message) {
         if (redeemSuccessOverlay == null || redeemSuccessLottie == null) return;
-        redeemSuccessText.setText(message != null && !message.isEmpty() ? message : "Redeemed successfully");
+        redeemSuccessText.setText(message != null && !message.isEmpty() ? message : getString(R.string.redeemed_successfully));
         redeemSuccessOverlay.setVisibility(View.VISIBLE);
         redeemSuccessLottie.setProgress(0f);
         redeemSuccessLottie.playAnimation();
@@ -335,7 +338,7 @@ public class CouponActivity extends BaseCustomerActivity {
                     if (birthdayStr == null || birthdayStr.trim().isEmpty()) {
                         // No birthday set → direct to ProfileActivity
                         Toast.makeText(CouponActivity.this,
-                                "Please set your birthday to redeem this coupon",
+                                getString(R.string.please_set_birthday_to_redeem),
                                 Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(CouponActivity.this, ProfileActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -352,7 +355,7 @@ public class CouponActivity extends BaseCustomerActivity {
 
                             if (birthdayMonth != currentMonth) {
                                 Toast.makeText(CouponActivity.this,
-                                        "Birthday coupon can only be redeemed in your birthday month",
+                                        getString(R.string.birthday_coupon_month_only),
                                         Toast.LENGTH_LONG).show();
                                 return;
                             }
@@ -361,17 +364,17 @@ public class CouponActivity extends BaseCustomerActivity {
                             redeemCoupon(coupon);
                         } else {
                             Toast.makeText(CouponActivity.this,
-                                    "Invalid birthday format returned: " + birthdayStr,
+                                    getString(R.string.invalid_birthday_format, birthdayStr),
                                     Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         Toast.makeText(CouponActivity.this,
-                                "Error parsing birthday: " + e.getMessage(),
+                                getString(R.string.error_parsing_birthday, e.getMessage()),
                                 Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(CouponActivity.this,
-                            "Failed to check birthday",
+                            getString(R.string.failed_check_birthday),
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -379,7 +382,7 @@ public class CouponActivity extends BaseCustomerActivity {
             @Override
             public void onFailure(Call<BirthdayResponse> call, Throwable t) {
                 Toast.makeText(CouponActivity.this,
-                        "Error checking birthday: " + t.getMessage(),
+                        getString(R.string.error_checking_birthday, t.getMessage()),
                         Toast.LENGTH_SHORT).show();
             }
         });

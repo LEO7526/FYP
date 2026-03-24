@@ -57,10 +57,10 @@ public class ProfileActivity extends BaseCustomerActivity {
 
         // Show birthday if available
         if (birthday != null && !birthday.isEmpty()) {
-            userBirthdayText.setText("Birthday: " + birthday);
+            userBirthdayText.setText(getString(R.string.birthday_format, birthday));
             userBirthdayText.setTextColor(ContextCompat.getColor(this, R.color.teal_700));
         } else {
-            userBirthdayText.setText("Birthday not set");
+            userBirthdayText.setText(getString(R.string.birthday_not_set));
             userBirthdayText.setTextColor(Color.GRAY);
         }
 
@@ -72,8 +72,8 @@ public class ProfileActivity extends BaseCustomerActivity {
         Log.d(TAG, "onCreate: Final image path = " + finalImagePath);
         loadProfileImage(finalImagePath);
 
-        userNameText.setText(name != null ? name : "Unknown");
-        userEmailText.setText(email != null ? email : "No email");
+        userNameText.setText(name != null ? name : getString(R.string.unknown));
+        userEmailText.setText(email != null ? email : getString(R.string.no_email));
 
         editButton.setOnClickListener(v -> {
             Log.d(TAG, "Edit button clicked");
@@ -101,16 +101,16 @@ public class ProfileActivity extends BaseCustomerActivity {
         // 🔹 Refresh birthday
         String birthday = RoleManager.getUserBirthday();
         if (birthday != null && !birthday.isEmpty()) {
-            userBirthdayText.setText("Birthday: " + birthday);
+            userBirthdayText.setText(getString(R.string.birthday_format, birthday));
             userBirthdayText.setTextColor(ContextCompat.getColor(this, R.color.teal_700));
         } else {
-            userBirthdayText.setText("Birthday not set");
+            userBirthdayText.setText(getString(R.string.birthday_not_set));
             userBirthdayText.setTextColor(Color.GRAY);
         }
 
         // Refresh name/email too, in case they were edited
-        userNameText.setText(RoleManager.getUserName() != null ? RoleManager.getUserName() : "Unknown");
-        userEmailText.setText(RoleManager.getUserEmail() != null ? RoleManager.getUserEmail() : "No email");
+        userNameText.setText(RoleManager.getUserName() != null ? RoleManager.getUserName() : getString(R.string.unknown));
+        userEmailText.setText(RoleManager.getUserEmail() != null ? RoleManager.getUserEmail() : getString(R.string.no_email));
     }
 
     private void loadProfileImage(String imagePath) {

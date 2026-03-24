@@ -18,6 +18,7 @@ import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.MyCouponListResponse;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.example.yummyrestaurant.utils.CouponValidator;
 import com.google.gson.Gson;
@@ -44,6 +45,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
     private final ArrayList<Coupon> selectedCoupons = new ArrayList<>();
     private final HashMap<Integer, Integer> couponQuantities = new HashMap<>();
+    private String currentLanguage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         btnDone = findViewById(R.id.btnDone);
 
         fromCart = getIntent().getBooleanExtra("fromCart", false);
+        currentLanguage = LanguageManager.getCurrentLanguage(this);
         int intentCid = getIntent().getIntExtra("customer_id", Integer.MIN_VALUE);
 
         if (fromCart) {
@@ -81,7 +84,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
         adapter = new MyCouponAdapter(myCoupons, (coupon, position) -> {
             if (!fromCart) {
-                Toast.makeText(this, "Coupons can only be used during checkout", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.coupons_checkout_only), Toast.LENGTH_SHORT).show();
                 return;
             }
             showQuantityPickerAndUse(coupon, position);
@@ -108,7 +111,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
     private void fetchMyCoupons(int customerId) {
         CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.getMyCoupons(customerId, "en").enqueue(new Callback<MyCouponListResponse>() {
+        api.getMyCoupons(customerId, currentLanguage).enqueue(new Callback<MyCouponListResponse>() {
             @Override
             public void onResponse(Call<MyCouponListResponse> call, Response<MyCouponListResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -119,22 +122,22 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                         Log.i(TAG, "Coupons loaded successfully, count=" + myCoupons.size());
 
                         if (myCoupons.isEmpty()) {
-                            btnDone.setText("Proceed without coupon");
+                            btnDone.setText(getString(R.string.proceed_without_coupon));
                         }
                     } else {
-                        Toast.makeText(MyCouponsActivity.this, "No coupons found", Toast.LENGTH_SHORT).show();
-                        btnDone.setText("Proceed without coupon");
+                        Toast.makeText(MyCouponsActivity.this, getString(R.string.no_coupons_found), Toast.LENGTH_SHORT).show();
+                        btnDone.setText(getString(R.string.proceed_without_coupon));
                     }
                 } else {
-                    Toast.makeText(MyCouponsActivity.this, "Failed to load coupons", Toast.LENGTH_SHORT).show();
-                    btnDone.setText("Proceed without coupon");
+                    Toast.makeText(MyCouponsActivity.this, getString(R.string.failed_load_coupons), Toast.LENGTH_SHORT).show();
+                    btnDone.setText(getString(R.string.proceed_without_coupon));
                 }
             }
 
             @Override
             public void onFailure(Call<MyCouponListResponse> call, Throwable t) {
-                Toast.makeText(MyCouponsActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                btnDone.setText("Proceed without coupon");
+                Toast.makeText(MyCouponsActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
+                btnDone.setText(getString(R.string.proceed_without_coupon));
             }
         });
     }
@@ -144,7 +147,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         int maxUsable = ownedQty;
 
         if (maxUsable <= 0) {
-            Toast.makeText(this, "No coupons available to use", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_coupons_available_to_use), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -154,7 +157,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Select quantity to use")
+            .setTitle(getString(R.string.select_quantity_to_use))
                 .setItems(options, (dialog, which) -> {
                     int quantity = which + 1;
                     
@@ -164,7 +167,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                     
                     if (!validationResult.isValid) {
                         String message = validationResult.reason.isEmpty() ? 
-                            "Coupon not valid for this cart" : validationResult.reason;
+                            getString(R.string.coupon_not_valid_for_cart) : validationResult.reason;
                         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                         return;
                     }
@@ -189,7 +192,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             
             if (remainingQty < quantity) {
                 Toast.makeText(this, 
-                    "You can only use " + remainingQty + " more of this coupon", 
+                    getString(R.string.can_only_use_more_coupon, remainingQty), 
                     Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -217,11 +220,11 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                             adapter.decrementCouponQuantity(position, quantity);
                             
                             Toast.makeText(MyCouponsActivity.this,
-                                    "Coupon applied (" + quantity + "). Press Done when finished selecting.",
+                                    getString(R.string.coupon_applied_press_done, quantity),
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             String errorMsg = response.body() != null ? 
-                                response.body().getMessage() : "Failed to apply coupon";
+                                response.body().getMessage() : getString(R.string.failed_apply_coupon);
                             Toast.makeText(MyCouponsActivity.this,
                                     errorMsg, Toast.LENGTH_SHORT).show();
                         }
@@ -230,7 +233,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                     @Override
                     public void onFailure(Call<GenericResponse> call, Throwable t) {
                         Toast.makeText(MyCouponsActivity.this,
-                                "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

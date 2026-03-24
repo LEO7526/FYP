@@ -87,7 +87,7 @@ public class RegisterBottomSheetFragment extends BottomSheetDialogFragment {
                     Log.d("RegisterDebug", "Response body: " + registerResponse.getMessage());
 
                     if (registerResponse.isSuccess()) {
-                        Toast.makeText(getContext(), "Registration successful", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.registration_successful), Toast.LENGTH_SHORT).show();
                         dismiss();
 
                         // Auto-open login sheet after successful registration
@@ -97,57 +97,57 @@ public class RegisterBottomSheetFragment extends BottomSheetDialogFragment {
                         Toast.makeText(getContext(), registerResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getContext(), "Server error. Please try again.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.server_error_try_again), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<RegisterResponse> call, Throwable t) {
                 Log.e("RegisterDebug", "Network failure", t);
-                Toast.makeText(getContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private boolean isValidInput(String name, String email, String password, String confirmPassword) {
         if (name.isEmpty()) {
-            nameEditText.setError("Please fill in your name");
+            nameEditText.setError(getString(R.string.please_fill_name));
             nameEditText.requestFocus();
             return false;
         }
 
         if (email.isEmpty()) {
-            emailEditText.setError("Please fill in your email address");
+            emailEditText.setError(getString(R.string.please_fill_email));
             emailEditText.requestFocus();
             return false;
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailEditText.setError("Invalid email format");
+            emailEditText.setError(getString(R.string.invalid_email_format));
             emailEditText.requestFocus();
             return false;
         }
 
         if (password.isEmpty()) {
-            passwordEditText.setError("Please fill in your password");
+            passwordEditText.setError(getString(R.string.please_fill_password));
             passwordEditText.requestFocus();
             return false;
         }
 
         if (confirmPassword.isEmpty()) {
-            confirmPasswordEditText.setError("Please fill in your confirm password");
+            confirmPasswordEditText.setError(getString(R.string.please_fill_confirm_password));
             confirmPasswordEditText.requestFocus();
             return false;
         }
 
         if (!password.equals(confirmPassword)) {
-            confirmPasswordEditText.setError("Passwords do not match");
+            confirmPasswordEditText.setError(getString(R.string.passwords_do_not_match));
             confirmPasswordEditText.requestFocus();
             return false;
         }
 
         if (password.length() < 6) {
-            passwordEditText.setError("Password must be at least 6 characters");
+            passwordEditText.setError(getString(R.string.password_min_6_chars));
             passwordEditText.requestFocus();
             return false;
         }

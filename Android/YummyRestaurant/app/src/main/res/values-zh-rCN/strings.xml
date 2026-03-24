@@ -1,0 +1,171 @@
+<resources>
+    <string name="app_name">Yummy Restaurant</string>
+
+    <string name="title_settings">设置</string>
+    <string name="enable_notifications">启用通知</string>
+    <string name="notifications_enabled">通知已启用</string>
+    <string name="notifications_disabled">通知已禁用</string>
+    <string name="language_updated">语言已更新</string>
+    <string name="select_language">选择语言</string>
+
+    <string-array name="language_options">
+        <item>English</item>
+        <item>简体中文</item>
+        <item>繁體中文</item>
+    </string-array>
+
+    <string name="login_to_earn_points">登录后可赚取和兑换积分</string>
+    <string name="points_format">积分：%1$d</string>
+    <string name="error_load_packages">加载套餐失败</string>
+    <string name="error_load_menu_items">加载菜单项目失败</string>
+    <string name="error_select_order_type_first">请先选择堂食或外带</string>
+    <string name="error_with_reason">错误：%1$s</string>
+
+    <string name="filter_all">全部菜品</string>
+    <string name="filter_appetizers">前菜</string>
+    <string name="filter_main_courses">主菜</string>
+    <string name="filter_soup">汤</string>
+    <string name="filter_dessert">甜品</string>
+    <string name="filter_drink">饮料</string>
+
+    <string name="notification_permission_denied">通知权限被拒绝</string>
+    <string name="please_login_access_feature">请先登录以使用此功能。</string>
+    <string name="not_logged_in">您尚未登录。</string>
+    <string name="confirm_logout_title">确认登出</string>
+    <string name="confirm_logout_message">确定要登出吗？</string>
+    <string name="logout">登出</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="scanning_qr_code">正在扫描二维码...</string>
+
+    <string name="failed_load_points">加载积分失败</string>
+    <string name="error_loading_points">加载积分时出错</string>
+    <string name="failed_load_coupons">加载优惠券失败</string>
+    <string name="please_login_to_redeem">请先登录再兑换</string>
+    <string name="not_enough_points_to_redeem_coupon">积分不足，无法兑换此优惠券</string>
+    <string name="not_enough_points_to_redeem">积分不足，无法兑换</string>
+    <string name="select_quantity_to_redeem">选择兑换数量</string>
+    <string name="birthday_coupon_redeemed_this_year">您今年已经兑换过生日优惠券。</string>
+    <string name="birthday_coupon_already_used">生日优惠券今年已使用。</string>
+    <string name="redeem_failed">兑换失败</string>
+    <string name="redeemed_successfully">兑换成功</string>
+    <string name="please_set_birthday_to_redeem">请先设置生日再兑换此优惠券</string>
+    <string name="birthday_coupon_month_only">生日优惠券仅可在生日月份兑换</string>
+    <string name="invalid_birthday_format">返回的生日格式无效：%1$s</string>
+    <string name="error_parsing_birthday">解析生日时出错：%1$s</string>
+    <string name="failed_check_birthday">检查生日失败</string>
+    <string name="error_checking_birthday">检查生日时出错：%1$s</string>
+
+    <string name="invalid_coupon_selected">选择的优惠券无效</string>
+    <string name="failed_load_terms">加载条款失败</string>
+    <string name="error_loading_terms">加载条款时出错</string>
+    <string name="points_required_format">所需积分：%1$d</string>
+    <string name="remaining_points_format">剩余积分：%1$d</string>
+    <string name="no_terms_available">暂无条款</string>
+
+    <string name="please_login_view_history">请先登录查看历史记录</string>
+    <string name="no_history_found_for_customer">该用户暂无历史记录</string>
+    <string name="unexpected_empty_response">返回为空</string>
+    <string name="failed_load_history_http">加载历史失败（HTTP %1$d）</string>
+
+    <string name="coupons_checkout_only">优惠券仅可在结账时使用</string>
+    <string name="proceed_without_coupon">不使用优惠券继续</string>
+    <string name="no_coupons_found">未找到优惠券</string>
+    <string name="no_coupons_available_to_use">没有可用优惠券</string>
+    <string name="select_quantity_to_use">选择使用数量</string>
+    <string name="coupon_not_valid_for_cart">该优惠券不适用于当前购物车</string>
+    <string name="can_only_use_more_coupon">该优惠券您最多还能使用 %1$d 张</string>
+    <string name="coupon_applied_press_done">优惠券已应用（%1$d）。选择完成后请点击完成。</string>
+    <string name="failed_apply_coupon">应用优惠券失败</string>
+
+    <string name="network_error_with_reason">网络错误：%1$s</string>
+    <string name="no_menu_data">没有菜单数据</string>
+    <string name="failed_load_set_menu">加载套餐失败</string>
+    <string name="choose_items_format">请选择 %1$d 个%2$s</string>
+    <string name="customization_saved">自定义已保存</string>
+    <string name="complete_selection">请完成您的选择</string>
+    <string name="unnamed_dish">未命名菜品</string>
+    <string name="original_total_format">原价合计：$%1$s</string>
+    <string name="discounted_total_format">折后合计：$%1$s</string>
+    <string name="confirm_your_package">确认您的 %1$s</string>
+    <string name="package_added_you_saved">已添加 %1$s！您节省了 HK$%2$s</string>
+
+    <string name="coupon_requires_points_format">兑换需要：%1$d 积分</string>
+    <string name="coupon_valid_until_format">有效期至：%1$s</string>
+    <string name="coupon_no_expiry">无到期日</string>
+    <string name="login_to_redeem">登录后兑换</string>
+    <string name="birthday_not_eligible">不符合生日优惠资格</string>
+    <string name="already_redeemed">已兑换</string>
+    <string name="not_enough_points">积分不足</string>
+    <string name="redeem">兑换</string>
+
+    <string name="coupon_title_quantity_format">%1$s x%2$d</string>
+    <string name="reward_free_item_format">奖励：免费 %1$s</string>
+    <string name="discount_percent_off_format">折扣：%1$d%% OFF</string>
+    <string name="discount_cash_off_format">折扣：HK$%1$s</string>
+    <string name="not_applicable">不适用</string>
+    <string name="use_coupon">使用优惠券</string>
+    <string name="applying">套用中...</string>
+    <string name="info_reason_prefix">说明：%1$s</string>
+    <string name="balance_format">余额：%1$d</string>
+
+    <string name="please_enter_valid_email">请输入有效的邮箱地址。</string>
+    <string name="login_failed_check_credentials">登录失败，请检查账号或密码。</string>
+    <string name="please_enter_email_and_password">请输入邮箱和密码。</string>
+    <string name="login_successful">登录成功</string>
+    <string name="item_added_to_cart_with_qty">%1$d × %2$s</string>
+    <string name="added_to_cart_suffix"> 已加入购物车</string>
+
+    <string name="registration_successful">注册成功</string>
+    <string name="server_error_try_again">服务器错误，请稍后重试。</string>
+    <string name="please_fill_name">请填写姓名</string>
+    <string name="please_fill_email">请填写邮箱地址</string>
+    <string name="invalid_email_format">邮箱格式无效</string>
+    <string name="please_fill_password">请填写密码</string>
+    <string name="please_fill_confirm_password">请填写确认密码</string>
+    <string name="passwords_do_not_match">两次输入的密码不一致</string>
+    <string name="password_min_6_chars">密码长度至少为 6 位</string>
+
+    <string name="no_spice">不辣</string>
+
+    <string name="please_login_customer_before_booking">请先以顾客身份登录再预订座位。</string>
+    <string name="please_login_customer_first">请先以顾客身份登录。</string>
+    <string name="select_time_slot">选择时段</string>
+    <string name="booking_time_invalid_rule">预订需至少提前 24 小时。时段为 11:00 至 21:30 前（最后时段 21:00）。</string>
+    <string name="please_enter_valid_people_count">请输入有效的用餐人数。</string>
+    <string name="please_enter_valid_number">请输入有效数字。</string>
+    <string name="no_available_tables_for_criteria">未找到符合条件的可用餐桌。</string>
+    <string name="unknown_error">未知错误</string>
+    <string name="invalid_server_response">服务器返回数据无效。</string>
+
+    <string name="no_table_data_available">没有可用餐桌数据。</string>
+    <string name="failed_parse_table_data">解析餐桌数据失败。</string>
+    <string name="no_tables_available_for_booking">本次预订暂无可用餐桌。</string>
+    <string name="table_selected_tap_confirm">已选择餐桌 %1$d，请点击确认继续。</string>
+    <string name="table_occupied">餐桌 %1$d 正在使用中。</string>
+    <string name="table_reserved">餐桌 %1$d 已被预订。</string>
+    <string name="table_too_small_for_people">餐桌 %1$d（容量 %2$d）不足以容纳 %3$s 人。</string>
+    <string name="table_not_available">餐桌 %1$d 暂不可用。</string>
+    <string name="please_select_table_first">请先选择餐桌。</string>
+    <string name="table_capacity_format">餐桌 #%1$d（容量：%2$d）</string>
+    <string name="booking_cancelled_select_another">预订已取消，请重新选择餐桌。</string>
+    <string name="please_select_table">请选择餐桌。</string>
+    <string name="please_enter_name_phone">请输入您的姓名和电话号码。</string>
+    <string name="invalid_customer_account_login_again">顾客账号无效，请重新登录。</string>
+    <string name="invalid_number_of_people">用餐人数无效。</string>
+    <string name="booking_failed_try_again">预订失败，请稍后再试。</string>
+    <string name="booking_failed_http">预订失败（HTTP %1$d）。</string>
+
+    <string name="failed_load_bookings">加载预订记录失败。</string>
+    <string name="cancel_booking_title">取消预订</string>
+    <string name="confirm_cancel_booking">确定要取消预订 #%1$d 吗？</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="booking_cancelled">预订已取消。</string>
+    <string name="failed_cancel_booking">取消预订失败。</string>
+
+    <string name="birthday_format">生日：%1$s</string>
+    <string name="birthday_not_set">未设置生日</string>
+    <string name="unknown">未知</string>
+    <string name="no_email">无邮箱</string>
+</resources>

@@ -134,7 +134,7 @@ public class BookingActivity extends ThemeBaseActivity {
                 && "customer".equalsIgnoreCase(role);
 
         if (!isCustomerLoggedIn) {
-            Toast.makeText(this, "Please login as customer before booking a table.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.please_login_customer_before_booking), Toast.LENGTH_LONG).show();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return false;
@@ -172,12 +172,12 @@ public class BookingActivity extends ThemeBaseActivity {
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Select Time Slot")
+                .setTitle(getString(R.string.select_time_slot))
                 .setSingleChoiceItems(timeSlotLabels, checkedIndex, (dialog, which) -> {
                     buttonSelectTime.setText(timeSlotValues[which]);
                     dialog.dismiss();
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
@@ -219,24 +219,24 @@ public class BookingActivity extends ThemeBaseActivity {
 
         if (!isValidBookingDateTime(date, time)) {
             Toast.makeText(this,
-                    "Booking must be at least 24 hours ahead. Time slots are from 11:00 to before 21:30 (last slot 21:00).",
+                    getString(R.string.booking_time_invalid_rule),
                     Toast.LENGTH_LONG).show();
             return;
         }
 
         if (pnum.isEmpty()) {
-            Toast.makeText(this, "Please enter a valid number of people.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_enter_valid_people_count), Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
             int numPeople = Integer.parseInt(pnum);
             if (numPeople <= 0) {
-                Toast.makeText(this, "Please enter a valid number of people.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.please_enter_valid_people_count), Toast.LENGTH_SHORT).show();
                 return;
             }
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Please enter a valid number.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_enter_valid_number), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -282,7 +282,7 @@ public class BookingActivity extends ThemeBaseActivity {
                         if (totalAvailable == 0) {
                             runOnUiThread(() -> 
                                 Toast.makeText(BookingActivity.this, 
-                                    "No available tables found for the selected criteria.", 
+                                    getString(R.string.no_available_tables_for_criteria), 
                                     Toast.LENGTH_LONG).show()
                             );
                         } else {
@@ -301,10 +301,10 @@ public class BookingActivity extends ThemeBaseActivity {
                             });
                         }
                     } else {
-                        String errorMessage = jsonResponse.optString("message", "Unknown error");
+                        String errorMessage = jsonResponse.optString("message", getString(R.string.unknown_error));
                         runOnUiThread(() -> 
                             Toast.makeText(BookingActivity.this, 
-                                "Error: " + errorMessage, 
+                                getString(R.string.error_with_reason, errorMessage), 
                                 Toast.LENGTH_LONG).show()
                         );
                     }
@@ -312,7 +312,7 @@ public class BookingActivity extends ThemeBaseActivity {
                     Log.e("BookingActivity", "JSON parsing error: " + e.getMessage());
                     runOnUiThread(() -> 
                         Toast.makeText(BookingActivity.this, 
-                            "Invalid response from server.", 
+                            getString(R.string.invalid_server_response), 
                             Toast.LENGTH_LONG).show()
                     );
                 }
@@ -320,7 +320,7 @@ public class BookingActivity extends ThemeBaseActivity {
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e("BookingActivity", "Network error: " + e.getMessage());
-                runOnUiThread(() -> Toast.makeText(BookingActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> Toast.makeText(BookingActivity.this, getString(R.string.error_with_reason, e.getMessage()), Toast.LENGTH_LONG).show());
             } finally {
                 try {
                     if (reader != null) reader.close();

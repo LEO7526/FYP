@@ -14,6 +14,7 @@ import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.utils.AnimationUtils;
 
 import java.util.List;
+import java.util.Locale;
 
 public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponViewHolder> {
 
@@ -70,11 +71,11 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
 
         holder.tvTitle.setText(coupon.getTitle());
         holder.tvDescription.setText(coupon.getDescription());
-        holder.tvPoints.setText("Requires: " + coupon.getPointsRequired() + " pts");
+        holder.tvPoints.setText(holder.itemView.getContext().getString(R.string.coupon_requires_points_format, coupon.getPointsRequired()));
         holder.tvExpiry.setText(
                 coupon.getExpiryDate() != null && !coupon.getExpiryDate().isEmpty()
-                        ? "Valid until: " + coupon.getExpiryDate()
-                        : "No expiry"
+                ? holder.itemView.getContext().getString(R.string.coupon_valid_until_format, coupon.getExpiryDate())
+                : holder.itemView.getContext().getString(R.string.coupon_no_expiry)
         );
 
         // 👉 Handle item click for details
@@ -86,7 +87,7 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
 
         // --- Redeem button logic ---
         if (!isLoggedIn) {
-            holder.btnRedeem.setText("Login to Redeem");
+            holder.btnRedeem.setText(R.string.login_to_redeem);
             holder.btnRedeem.setEnabled(true);
             holder.btnRedeem.setAlpha(1f);
             holder.btnRedeem.setOnClickListener(v -> {
@@ -98,9 +99,9 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
         // If coupon is not redeemable (e.g. already redeemed, or birthday not eligible)
         if (!coupon.isRedeemable()) {
             if (coupon.isBirthdayOnly()) {
-                holder.btnRedeem.setText("Birthday Not Eligible");
+                holder.btnRedeem.setText(R.string.birthday_not_eligible);
             } else {
-                holder.btnRedeem.setText("Already Redeemed");
+                holder.btnRedeem.setText(R.string.already_redeemed);
             }
             holder.btnRedeem.setEnabled(false);
             holder.btnRedeem.setAlpha(0.5f);
@@ -111,7 +112,7 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
         // Check points requirement
         boolean hasEnoughPoints = currentPoints >= coupon.getPointsRequired();
         if (!hasEnoughPoints) {
-            holder.btnRedeem.setText("Not enough points");
+            holder.btnRedeem.setText(R.string.not_enough_points);
             holder.btnRedeem.setEnabled(false);
             holder.btnRedeem.setAlpha(0.5f);
             holder.btnRedeem.setOnClickListener(null);
@@ -119,7 +120,7 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.CouponView
         }
 
         // ✅ Eligible to redeem
-        holder.btnRedeem.setText("Redeem");
+    holder.btnRedeem.setText(R.string.redeem);
         holder.btnRedeem.setEnabled(true);
         holder.btnRedeem.setAlpha(1f);
         holder.btnRedeem.setOnClickListener(v -> {

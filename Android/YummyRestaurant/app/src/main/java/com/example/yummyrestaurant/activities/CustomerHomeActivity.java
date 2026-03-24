@@ -124,7 +124,7 @@ public class CustomerHomeActivity extends BaseCustomerActivity {
 
             // Allow nav_settings even if not logged in
             if (!isLoggedIn && id != R.id.nav_settings && id != R.id.nav_home) {
-                Toast.makeText(this, "Please log in to access this feature.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.please_login_access_feature), Toast.LENGTH_SHORT).show();
                 drawerLayout.closeDrawer(GravityCompat.START);
                 return false;
             }
@@ -147,19 +147,19 @@ public class CustomerHomeActivity extends BaseCustomerActivity {
                 return true;
             } else if (id == R.id.nav_logout) {
                 if (!isLoggedIn) {
-                    Toast.makeText(this, "You are not logged in.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.not_logged_in), Toast.LENGTH_SHORT).show();
                     return false;
                 }
 
                 new AlertDialog.Builder(this)
-                        .setTitle("Confirm Logout")
-                        .setMessage("Are you sure you want to log out?")
-                        .setPositiveButton("Logout", (dialog, which) -> {
+                        .setTitle(getString(R.string.confirm_logout_title))
+                        .setMessage(getString(R.string.confirm_logout_message))
+                        .setPositiveButton(getString(R.string.logout), (dialog, which) -> {
                             RoleManager.clearUserData();
                             startActivity(new Intent(this, BrowseMenuActivity.class));
                             finish();
                         })
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss())
                         .show();
                 drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
