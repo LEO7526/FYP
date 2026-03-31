@@ -25,6 +25,7 @@ import com.example.yummyrestaurant.models.CustomizationOptionsResponse;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.models.OrderItemCustomization;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.LanguageManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,7 +101,8 @@ public class CustomizeDishActivity extends ThemeBaseActivity {
      */
     private void fetchCustomizationOptions(int itemId) {
         ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
-        Call<CustomizationOptionsResponse> call = apiService.getCustomizationOptions(itemId);
+        String lang = LanguageManager.getCurrentLanguage(this);
+        Call<CustomizationOptionsResponse> call = apiService.getCustomizationOptions(itemId, lang);
 
         call.enqueue(new Callback<CustomizationOptionsResponse>() {
             @Override
