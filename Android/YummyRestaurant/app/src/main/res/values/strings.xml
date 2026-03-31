@@ -227,67 +227,7 @@
     <string name="option_value_peanuts">Peanuts</string>
     <string name="option_value_honey_drizzle">Honey Drizzle</string>
     <string name="option_value_chocolate_chips">Chocolate Chips</string>
-
-    <string name="please_login_customer_before_booking">Please login as customer before booking a table.</string>
-    <string name="please_login_customer_first">Please login as customer first.</string>
-    <string name="select_time_slot">Select Time Slot</string>
-    <string name="booking_time_invalid_rule">Booking must be at least 24 hours ahead. Time slots are from 11:00 to before 21:30 (last slot 21:00).</string>
-    <string name="please_enter_valid_people_count">Please enter a valid number of people.</string>
-    <string name="please_enter_valid_number">Please enter a valid number.</string>
-    <string name="no_available_tables_for_criteria">No available tables found for the selected criteria.</string>
-    <string name="unknown_error">Unknown error</string>
-    <string name="invalid_server_response">Invalid response from server.</string>
-
-    <string name="no_table_data_available">No table data available.</string>
-    <string name="failed_parse_table_data">Failed to parse table data.</string>
-    <string name="no_tables_available_for_booking">No tables available for this booking.</string>
-    <string name="table_selected_tap_confirm">Table %1$d selected. Tap confirm to continue.</string>
-    <string name="table_occupied">Table %1$d is occupied.</string>
-    <string name="table_reserved">Table %1$d is already reserved.</string>
-    <string name="table_too_small_for_people">Table %1$d (capacity %2$d) is too small for %3$s people.</string>
-    <string name="table_not_available">Table %1$d is not available.</string>
-    <string name="please_select_table_first">Please select a table first.</string>
-    <string name="table_capacity_format">Table #%1$d (Capacity: %2$d)</string>
-    <string name="booking_cancelled_select_another">Booking cancelled. Select another table.</string>
-    <string name="please_select_table">Please select a table.</string>
-    <string name="please_enter_name_phone">Please enter your name and phone number.</string>
-    <string name="invalid_customer_account_login_again">Invalid customer account. Please log in again.</string>
-    <string name="invalid_number_of_people">Invalid number of people.</string>
-    <string name="booking_failed_try_again">Booking failed. Please try again.</string>
-    <string name="booking_failed_http">Booking failed (HTTP %1$d).</string>
-
-    <string name="failed_load_bookings">Failed to load bookings.</string>
-    <string name="cancel_booking_title">Cancel Booking</string>
-    <string name="confirm_cancel_booking">Are you sure you want to cancel booking #%1$d?</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="booking_cancelled">Booking cancelled.</string>
-    <string name="failed_cancel_booking">Failed to cancel booking.</string>
-
-    <string name="birthday_format">Birthday: %1$s</string>
-    <string name="birthday_not_set">Birthday not set</string>
-    <string name="unknown">Unknown</string>
-    <string name="no_email">No email</string>
-
-    <string name="your_cart_is_empty">Your cart is empty!</string>
-    <string name="material_check_warning">Material Check Warning</string>
-    <string name="unable_verify_ingredient_with_reason">Unable to verify ingredient availability: %1$s</string>
-    <string name="proceed_anyway_question">Do you want to proceed anyway?</string>
-    <string name="proceed">Proceed</string>
-    <string name="item_removed">Item removed</string>
-    <string name="undo">UNDO</string>
-    <string name="price_hkd_fixed">Price: HK$%1$s</string>
-    <string name="add_wooden_chopsticks_question">Add Wooden Chopsticks?</string>
-    <string name="yes_add_chopsticks">Yes, add chopsticks</string>
-    <string name="wooden_chopsticks_name">Wooden Chopsticks</string>
-    <string name="no_thanks">No thanks</string>
-
-    <string name="unknown_dish">Unknown Dish</string>
-    <string name="no_description_available">No description available.</string>
-    <string name="cannot_add_to_cart_with_reason">Cannot add to cart:\n%1$s</string>
-    <string name="added_to_cart_unable_verify_ingredients">Added to cart (unable to verify ingredients: %1$s)</string>
-    <string name="dish_not_found">Dish not found</string>
-    <string name="unable_load_dish_details">Unable to load dish details.</string>
+    <!-- Removed: Spice levels, Tags, Customization groups/values are now fetched from database -->
     <string name="price_unavailable">$ --</string>
 
     <string name="failed_load_order_history">Failed to load order history</string>

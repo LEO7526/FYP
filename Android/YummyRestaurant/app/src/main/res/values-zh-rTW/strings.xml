@@ -192,67 +192,7 @@
     <string name="please_login_customer_first">請先以顧客身分登入。</string>
     <string name="select_time_slot">選擇時段</string>
     <string name="booking_time_invalid_rule">預訂需至少提前 24 小時。時段為 11:00 至 21:30 前（最後時段 21:00）。</string>
-    <string name="please_enter_valid_people_count">請輸入有效的用餐人數。</string>
-    <string name="please_enter_valid_number">請輸入有效數字。</string>
-    <string name="no_available_tables_for_criteria">找不到符合條件的可用餐桌。</string>
-    <string name="unknown_error">未知錯誤</string>
-    <string name="invalid_server_response">伺服器回傳資料無效。</string>
-
-    <string name="no_table_data_available">沒有可用餐桌資料。</string>
-    <string name="failed_parse_table_data">解析餐桌資料失敗。</string>
-    <string name="no_tables_available_for_booking">本次預訂沒有可用餐桌。</string>
-    <string name="table_selected_tap_confirm">已選擇餐桌 %1$d，請點擊確認繼續。</string>
-    <string name="table_occupied">餐桌 %1$d 使用中。</string>
-    <string name="table_reserved">餐桌 %1$d 已被預訂。</string>
-    <string name="table_too_small_for_people">餐桌 %1$d（容量 %2$d）不足以容納 %3$s 人。</string>
-    <string name="table_not_available">餐桌 %1$d 目前不可用。</string>
-    <string name="please_select_table_first">請先選擇餐桌。</string>
-    <string name="table_capacity_format">餐桌 #%1$d（容量：%2$d）</string>
-    <string name="booking_cancelled_select_another">預訂已取消，請重新選擇餐桌。</string>
-    <string name="please_select_table">請選擇餐桌。</string>
-    <string name="please_enter_name_phone">請輸入您的姓名和電話號碼。</string>
-    <string name="invalid_customer_account_login_again">顧客帳號無效，請重新登入。</string>
-    <string name="invalid_number_of_people">用餐人數無效。</string>
-    <string name="booking_failed_try_again">預訂失敗，請稍後再試。</string>
-    <string name="booking_failed_http">預訂失敗（HTTP %1$d）。</string>
-
-    <string name="failed_load_bookings">載入預訂紀錄失敗。</string>
-    <string name="cancel_booking_title">取消預訂</string>
-    <string name="confirm_cancel_booking">確定要取消預訂 #%1$d 嗎？</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
-    <string name="booking_cancelled">預訂已取消。</string>
-    <string name="failed_cancel_booking">取消預訂失敗。</string>
-
-    <string name="birthday_format">生日：%1$s</string>
-    <string name="birthday_not_set">尚未設定生日</string>
-    <string name="unknown">未知</string>
-    <string name="no_email">無電郵</string>
-
-    <string name="your_cart_is_empty">您的購物車是空的！</string>
-    <string name="material_check_warning">食材檢查警告</string>
-    <string name="unable_verify_ingredient_with_reason">無法驗證食材供應：%1$s</string>
-    <string name="proceed_anyway_question">是否仍要繼續？</string>
-    <string name="proceed">繼續</string>
-    <string name="item_removed">商品已移除</string>
-    <string name="undo">還原</string>
-    <string name="price_hkd_fixed">價格：HK$%1$s</string>
-    <string name="add_wooden_chopsticks_question">要加入木筷嗎？</string>
-    <string name="yes_add_chopsticks">是，加入木筷</string>
-    <string name="wooden_chopsticks_name">木筷</string>
-    <string name="no_thanks">不用了</string>
-
-    <string name="unknown_dish">未知菜式</string>
-    <string name="no_description_available">暫無描述。</string>
-    <string name="cannot_add_to_cart_with_reason">無法加入購物車：\n%1$s</string>
-    <string name="added_to_cart_unable_verify_ingredients">已加入購物車（無法驗證食材：%1$s）</string>
-    <string name="dish_not_found">找不到菜式</string>
-    <string name="unable_load_dish_details">無法載入菜式詳情。</string>
-    <string name="price_unavailable">$ --</string>
-
-    <string name="failed_load_order_history">載入訂單歷史失敗</string>
-
-    <string name="server_error_with_reason">伺服器錯誤：%1$s</string>
+        <!-- Removed: Spice levels, Tags, Customization groups/values are now fetched from database -->
     <string name="registration_failed_try_again">註冊失敗，請稍後再試。</string>
 
     <string name="alipay_unavailable_using_card">Alipay 目前不可用，已切換為信用卡支付。</string>

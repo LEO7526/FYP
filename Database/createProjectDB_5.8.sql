@@ -2120,15 +2120,6 @@ INSERT INTO coupon_point_history (cid, coupon_id, delta, resulting_points, actio
  'Points from Oct 2025 - Feb 2026 orders');
 
 
-
- -- =================================================================
--- VERSION 5.9 – Add translation tables for tags, customization option
---               groups and customization option values.
---               Supports zh-CN (Simplified Chinese) and zh-TW
---               (Traditional Chinese) in addition to the default
---               English values stored in the base tables.
--- =================================================================
-
 -- -----------------------------------------------------------------
 -- 1.  Tag translations
 -- -----------------------------------------------------------------
@@ -2288,5 +2279,61 @@ INSERT INTO customization_option_value_translation (value_id, language_code, val
 (16, 'zh-CN', '蜂蜜淋酱'),
 (17, 'zh-CN', '巧克力粒');
 
+
+-- =================================================================
+-- ADD SPICE LEVEL TABLE (NEW)
+-- =================================================================
+-- This table stores predefined spice levels that can be used as 
+-- menu item modifiers or for displaying spice level information
+
+CREATE TABLE IF NOT EXISTS spice_level (
+  spice_id INT NOT NULL AUTO_INCREMENT,
+  spice_key VARCHAR(50) NOT NULL UNIQUE COMMENT 'Key for API/code reference (e.g., mild, medium, hot, numbing)',
+  spice_order INT DEFAULT 0 COMMENT 'Display order in UI',
+  PRIMARY KEY (spice_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Insert predefined spice levels
+INSERT INTO spice_level (spice_key, spice_order) VALUES
+('no_spice', 0),
+('mild', 1),
+('medium', 2),
+('hot', 3),
+('numbing', 4);
+
+-- -----------------------------------------------------------------
+-- SPICE LEVEL TRANSLATION TABLE
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS spice_level_translation (
+  spice_id INT NOT NULL,
+  language_code VARCHAR(10) NOT NULL,
+  spice_name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (spice_id, language_code),
+  CONSTRAINT fk_spice_trans_spice FOREIGN KEY (spice_id) REFERENCES spice_level(spice_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Traditional Chinese (zh-TW)
+INSERT INTO spice_level_translation (spice_id, language_code, spice_name) VALUES
+(1, 'zh-TW', '不辣'),
+(2, 'zh-TW', '微辣'),
+(3, 'zh-TW', '中辣'),
+(4, 'zh-TW', '辣'),
+(5, 'zh-TW', '麻辣');
+
+-- Simplified Chinese (zh-CN)
+INSERT INTO spice_level_translation (spice_id, language_code, spice_name) VALUES
+(1, 'zh-CN', '不辣'),
+(2, 'zh-CN', '微辣'),
+(3, 'zh-CN', '中辣'),
+(4, 'zh-CN', '辣'),
+(5, 'zh-CN', '麻辣');
+
+-- English (default)
+INSERT INTO spice_level_translation (spice_id, language_code, spice_name) VALUES
+(1, 'en', 'No Spice'),
+(2, 'en', 'Mild'),
+(3, 'en', 'Medium'),
+(4, 'en', 'Hot'),
+(5, 'en', 'Numbing');
 
 COMMIT;
