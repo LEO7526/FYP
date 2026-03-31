@@ -546,11 +546,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                                         } else {
                                             String choices = "";
                                             if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                                choices = String.join(", ", cust.getSelectedChoices());
+                                                choices = translateOptionValues(context, String.join(", ", cust.getSelectedChoices()));
                                             } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                                choices = cust.getChoiceNamesDisplay();
+                                                choices = translateOptionValues(context, cust.getChoiceNamesDisplay());
                                             }
-                                            custText = "      └─ " + cust.getOptionName() + ": " + choices;
+                                            custText = "      └─ " + translateOptionName(context, cust.getOptionName()) + ": " + choices;
                                         }
                                         TextView custRow = new TextView(context);
                                         custRow.setText(custText);
@@ -606,11 +606,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                                     // 常規自訂選項 - 優先使用 selectedChoices，備用 choiceNames
                                     String choices = "";
                                     if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                        choices = String.join(", ", cust.getSelectedChoices());
+                                        choices = translateOptionValues(context, String.join(", ", cust.getSelectedChoices()));
                                     } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                        choices = cust.getChoiceNamesDisplay();
+                                        choices = translateOptionValues(context, cust.getChoiceNamesDisplay());
                                     }
-                                    custText = "   └─ " + cust.getOptionName() + ": " + choices;
+                                    custText = "   └─ " + translateOptionName(context, cust.getOptionName()) + ": " + choices;
                                     Log.d("OrderAdapter", "        Option: " + cust.getOptionName() + " = " + choices);
                                 }
                                 
@@ -763,11 +763,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                         } else {
                             String choices = "";
                             if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                choices = String.join(", ", cust.getSelectedChoices());
+                                choices = translateOptionValues(context, String.join(", ", cust.getSelectedChoices()));
                             } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                choices = cust.getChoiceNamesDisplay();
+                                choices = translateOptionValues(context, cust.getChoiceNamesDisplay());
                             }
-                            custText = "      └─ " + cust.getOptionName() + ": " + choices;
+                            custText = "      └─ " + translateOptionName(context, cust.getOptionName()) + ": " + choices;
                         }
                         custView.setText(custText);
                         custView.setTextSize(10);
@@ -827,12 +827,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                             custView.setText("    └─ " + holder.itemsContainer.getContext().getString(R.string.order_special_label) + ": " + (cust.getTextValue() != null ? cust.getTextValue() : ""));
                         } else {
                             String choices = "";
+                            Context ctx = holder.itemsContainer.getContext();
                             if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
-                                choices = String.join(", ", cust.getSelectedChoices());
+                                choices = translateOptionValues(ctx, String.join(", ", cust.getSelectedChoices()));
                             } else if (cust.getChoiceNames() != null && !cust.getChoiceNames().isEmpty()) {
-                                choices = cust.getChoiceNamesDisplay();
+                                choices = translateOptionValues(ctx, cust.getChoiceNamesDisplay());
                             }
-                            custView.setText("    ├─ " + cust.getOptionName() + ": " + choices);
+                            custView.setText("    ├─ " + translateOptionName(ctx, cust.getOptionName()) + ": " + choices);
                         }
                         custView.setTextSize(11);
                         custView.setPadding(16, 2, 8, 2);
@@ -857,6 +858,61 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         });
         
         holder.itemsContainer.addView(collapseView);
+    }
+
+    /**
+     * Translates a customization option group name (e.g. "Spice Level") stored in
+     * the database into the current locale using Android string resources.
+     */
+    private static String translateOptionName(Context context, String optionName) {
+        if (optionName == null) return "";
+        switch (optionName.trim().toLowerCase()) {
+            case "spice level":  return context.getString(R.string.option_group_spice_level);
+            case "sugar level":  return context.getString(R.string.option_group_sugar_level);
+            case "ice level":    return context.getString(R.string.option_group_ice_level);
+            case "milk level":   return context.getString(R.string.option_group_milk_level);
+            case "toppings":     return context.getString(R.string.option_group_toppings);
+            default:             return optionName;
+        }
+    }
+
+    /**
+     * Translates a comma-separated list of option value names (e.g. "Mild, Hot")
+     * into the current locale using Android string resources.
+     */
+    private static String translateOptionValues(Context context, String values) {
+        if (values == null || values.isEmpty()) return "";
+        String[] parts = values.split(",\\s*");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(translateSingleValue(context, parts[i].trim()));
+        }
+        return sb.toString();
+    }
+
+    private static String translateSingleValue(Context context, String value) {
+        if (value == null) return "";
+        switch (value.trim().toLowerCase()) {
+            case "mild":            return context.getString(R.string.option_value_mild);
+            case "medium":          return context.getString(R.string.option_value_medium);
+            case "hot":             return context.getString(R.string.option_value_hot);
+            case "numbing":         return context.getString(R.string.option_value_numbing);
+            case "more sweet":      return context.getString(R.string.option_value_more_sweet);
+            case "less sweet":      return context.getString(R.string.option_value_less_sweet);
+            case "no sweet":        return context.getString(R.string.option_value_no_sweet);
+            case "more ice":        return context.getString(R.string.option_value_more_ice);
+            case "less ice":        return context.getString(R.string.option_value_less_ice);
+            case "no ice":          return context.getString(R.string.option_value_no_ice);
+            case "more milk":       return context.getString(R.string.option_value_more_milk);
+            case "less milk":       return context.getString(R.string.option_value_less_milk);
+            case "no milk":         return context.getString(R.string.option_value_no_milk);
+            case "extra sesame":    return context.getString(R.string.option_value_extra_sesame);
+            case "peanuts":         return context.getString(R.string.option_value_peanuts);
+            case "honey drizzle":   return context.getString(R.string.option_value_honey_drizzle);
+            case "chocolate chips": return context.getString(R.string.option_value_chocolate_chips);
+            default:                return value;
+        }
     }
 
     private List<OrderItem> buildDisplayItems(Order order) {

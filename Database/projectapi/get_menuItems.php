@@ -20,6 +20,7 @@ if (!in_array($lang, $validLangs)) {
 // Prepare SQL query
 // - Join menu_item_translation for requested language
 // - LEFT JOIN menu_tag and tag to aggregate tags
+// - Use tag_translation when available, fall back to tag.tag_name
 // - GROUP_CONCAT to collect tags as comma separated string
 $sql = "
     SELECT
@@ -29,14 +30,15 @@ $sql = "
         mi.item_price AS price,
         mi.image_url,
         mi.spice_level,
-        mi.category_id AS category_id, 
+        mi.category_id AS category_id,
         mc.category_name AS category,
-        GROUP_CONCAT(t.tag_name SEPARATOR ',') AS tags_concat
+        GROUP_CONCAT(COALESCE(tt.tag_name, t.tag_name) SEPARATOR ',') AS tags_concat
     FROM menu_item mi
     JOIN menu_item_translation mit ON mi.item_id = mit.item_id
     JOIN menu_category mc ON mi.category_id = mc.category_id
     LEFT JOIN menu_tag mt ON mi.item_id = mt.item_id
     LEFT JOIN tag t ON mt.tag_id = t.tag_id
+    LEFT JOIN tag_translation tt ON t.tag_id = tt.tag_id AND tt.language_code = ?
     WHERE mi.is_available = 1 AND mit.language_code = ?
     GROUP BY mi.item_id, mit.item_name, mit.item_description, mi.item_price, mi.image_url, mi.spice_level, mc.category_name
     ORDER BY mc.category_name, mit.item_name
@@ -49,7 +51,7 @@ if ($stmt === false) {
     exit;
 }
 
-$stmt->bind_param("s", $lang);
+$stmt->bind_param("ss", $lang, $lang);
 $stmt->execute();
 $result = $stmt->get_result();
 

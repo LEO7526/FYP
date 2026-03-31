@@ -15,6 +15,7 @@ import com.example.yummyrestaurant.api.OrderApiService;
 import com.example.yummyrestaurant.models.Order;
 import com.example.yummyrestaurant.models.OrderItem;
 import com.example.yummyrestaurant.models.OrderItemCustomization;
+import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 import java.util.List;
@@ -58,8 +59,9 @@ public class OrderHistoryActivity extends BaseCustomerActivity {
     }
 
     private void fetchOrderHistory(int cid) {
+        String lang = LanguageManager.getCurrentLanguage(this);
         OrderApiService service = RetrofitClient.getClient(this).create(OrderApiService.class);
-        Call<List<Order>> call = service.getOrdersByCustomer(cid); // 👈 Updated method
+        Call<List<Order>> call = service.getOrdersByCustomer(cid, lang);
 
         Log.d("OrderHistory", "🚀 Making API call to get orders for customer: " + cid);
         Log.d("OrderHistory", "🚀 API URL will be: " + call.request().url().toString());

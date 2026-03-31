@@ -168,6 +168,66 @@
 
     <string name="no_spice">No spice</string>
 
+    <!-- Spice level labels -->
+    <string name="spice_level_mild">Mild</string>
+    <string name="spice_level_medium">Medium</string>
+    <string name="spice_level_hot">Hot</string>
+    <string name="spice_level_numbing">Numbing</string>
+
+    <!-- Tag labels (matching database tag names) -->
+    <string name="tag_vegetarian">Vegetarian</string>
+    <string name="tag_spicy">Spicy</string>
+    <string name="tag_numbing">Numbing</string>
+    <string name="tag_sour">Sour</string>
+    <string name="tag_sweet">Sweet</string>
+    <string name="tag_salty">Salty</string>
+    <string name="tag_chicken">Chicken</string>
+    <string name="tag_beef">Beef</string>
+    <string name="tag_pork">Pork</string>
+    <string name="tag_seafood">Seafood</string>
+    <string name="tag_fish">Fish</string>
+    <string name="tag_tofu">Tofu</string>
+    <string name="tag_milk">Milk</string>
+    <string name="tag_tea">Tea</string>
+    <string name="tag_cold">Cold</string>
+    <string name="tag_hot">Hot</string>
+    <string name="tag_refreshing">Refreshing</string>
+    <string name="tag_classic">Classic</string>
+    <string name="tag_traditional">Traditional</string>
+    <string name="tag_glutinous">Glutinous</string>
+    <string name="tag_lemon">Lemon</string>
+    <string name="tag_soda">Soda</string>
+    <string name="tag_grape">Grape</string>
+    <string name="tag_noodles">Noodles</string>
+    <string name="tag_streetfood">Street Food</string>
+    <string name="tag_stirfry">Stir-fry</string>
+
+    <!-- Customization option group labels -->
+    <string name="option_group_spice_level">Spice Level</string>
+    <string name="option_group_sugar_level">Sugar Level</string>
+    <string name="option_group_ice_level">Ice Level</string>
+    <string name="option_group_milk_level">Milk Level</string>
+    <string name="option_group_toppings">Toppings</string>
+
+    <!-- Customization option value labels -->
+    <string name="option_value_mild">Mild</string>
+    <string name="option_value_medium">Medium</string>
+    <string name="option_value_hot">Hot</string>
+    <string name="option_value_numbing">Numbing</string>
+    <string name="option_value_more_sweet">More Sweet</string>
+    <string name="option_value_less_sweet">Less Sweet</string>
+    <string name="option_value_no_sweet">No Sweet</string>
+    <string name="option_value_more_ice">More Ice</string>
+    <string name="option_value_less_ice">Less Ice</string>
+    <string name="option_value_no_ice">No Ice</string>
+    <string name="option_value_more_milk">More Milk</string>
+    <string name="option_value_less_milk">Less Milk</string>
+    <string name="option_value_no_milk">No Milk</string>
+    <string name="option_value_extra_sesame">Extra Sesame</string>
+    <string name="option_value_peanuts">Peanuts</string>
+    <string name="option_value_honey_drizzle">Honey Drizzle</string>
+    <string name="option_value_chocolate_chips">Chocolate Chips</string>
+
     <string name="please_login_customer_before_booking">Please login as customer before booking a table.</string>
     <string name="please_login_customer_first">Please login as customer first.</string>
     <string name="select_time_slot">Select Time Slot</string>
