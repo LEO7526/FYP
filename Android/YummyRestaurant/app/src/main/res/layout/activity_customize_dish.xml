@@ -25,7 +25,7 @@
             android:id="@+id/customizeTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Customize Your Dish"
+            android:text="@string/customize_your_dish"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
@@ -49,7 +49,7 @@
             android:id="@+id/notesEditText"
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:hint="Special instructions (optional)"
+            android:hint="@string/special_instructions_optional"
             android:textSize="14sp"
             android:padding="8dp"
             android:inputType="textMultiLine"
@@ -61,7 +61,7 @@
             android:id="@+id/saveCustomizationBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add To Cart"
+            android:text="@string/add_to_cart"
             android:backgroundTint="@color/colorSecondary"
             android:textColor="@android:color/white" />
 

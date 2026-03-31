@@ -234,7 +234,7 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
 
         total = CartManager.getTotalCost();
         Log.d(TAG, "updateCartUI: total HK$ " + total);
-        totalCostText.setText(String.format(Locale.getDefault(), "Total: HK$ %.2f", total));
+        totalCostText.setText(getString(R.string.cart_total_format, total));
 
         checkoutBtn.setEnabled(!cartItems.isEmpty());
     }
@@ -410,10 +410,9 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
         String detailedMessage = MaterialAvailabilityChecker.formatInsufficientMaterialsMessage(materialDetails);
         
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Insufficient Ingredients")
-               .setMessage("Sorry, we don't have enough ingredients to fulfill your order:\n\n" + detailedMessage + 
-                          "\n\nPlease remove some items from your cart or contact our staff.")
-               .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+         builder.setTitle(getString(R.string.insufficient_ingredients_title))
+             .setMessage(getString(R.string.insufficient_ingredients_message, detailedMessage))
+             .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
                .show();
     }
 

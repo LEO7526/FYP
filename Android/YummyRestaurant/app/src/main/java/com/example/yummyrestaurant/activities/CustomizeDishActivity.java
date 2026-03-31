@@ -79,7 +79,7 @@ public class CustomizeDishActivity extends ThemeBaseActivity {
         isFromPackage = getIntent().getBooleanExtra("FROM_PACKAGE", false);
 
         if (menuItem == null) {
-            Toast.makeText(this, "No dish data provided", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.customize_no_dish_data), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -307,7 +307,7 @@ public class CustomizeDishActivity extends ThemeBaseActivity {
                     // 超過上限，取消選中
                     cb.setChecked(false);
                     Toast.makeText(CustomizeDishActivity.this,
-                            "Maximum " + option.getMaxSelections() + " selection(s) allowed",
+                            getString(R.string.maximum_selection_allowed, option.getMaxSelections()),
                             Toast.LENGTH_SHORT).show();
                 } else {
                     updateTotalPrice();
@@ -333,7 +333,7 @@ public class CustomizeDishActivity extends ThemeBaseActivity {
         sectionLayout.setPadding(0, 16, 0, 0);
 
         TextView label = new TextView(this);
-        label.setText("Special Instructions");
+        label.setText(getString(R.string.special_instructions_label));
         label.setTextSize(16);
         label.setTypeface(null, android.graphics.Typeface.BOLD);
         label.setPadding(0, 0, 0, 8);
@@ -443,7 +443,7 @@ public class CustomizeDishActivity extends ThemeBaseActivity {
             }
 
             if (!hasSelection) {
-                Toast.makeText(this, "Required: " + option.getOptionName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.required_option_format, option.getOptionName()), Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -524,7 +524,7 @@ public class CustomizeDishActivity extends ThemeBaseActivity {
         // 收集特殊要求
         String notes = notesEditText.getText().toString().trim();
         if (notes.length() > 500) {
-            Toast.makeText(this, "Special instructions are too long (max 500 characters)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.special_instructions_too_long), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -547,7 +547,7 @@ public class CustomizeDishActivity extends ThemeBaseActivity {
             int newQty = (currentQty != null ? currentQty : 0) + quantity;
             CartManager.updateQuantity(cartItem, newQty);
 
-            Toast.makeText(this, quantity + " × " + menuItem.getName() + " added to cart", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.added_to_cart_message, quantity, menuItem.getName()), Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(this, CartActivity.class);
             startActivity(intent);
@@ -564,7 +564,7 @@ public class CustomizeDishActivity extends ThemeBaseActivity {
                 return option.getOptionName();
             }
         }
-        return "Unknown";
+        return getString(R.string.status_unknown);
     }
 
     /**

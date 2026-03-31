@@ -14,6 +14,7 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.OrderItem;
 
 import java.util.List;
+import java.util.Locale;
 
 public class OrderItemAdapter extends ArrayAdapter<OrderItem> {
 
@@ -41,9 +42,9 @@ public class OrderItemAdapter extends ArrayAdapter<OrderItem> {
         TextView costText = convertView.findViewById(R.id.itemCostText);
 
         nameText.setText(item.getName());
-        priceText.setText("Unit: HK$" + String.format("%.2f", item.getItemPrice()));
-        quantityText.setText("Qty: " + item.getQuantity());
-        costText.setText("Subtotal: HK$" + String.format("%.2f", item.getItemCost()));
+        priceText.setText(context.getString(R.string.order_item_unit_price, String.format(Locale.getDefault(), "%.2f", item.getItemPrice())));
+        quantityText.setText(context.getString(R.string.order_item_qty, item.getQuantity()));
+        costText.setText(context.getString(R.string.order_item_subtotal, String.format(Locale.getDefault(), "%.2f", item.getItemCost())));
 
         return convertView;
     }

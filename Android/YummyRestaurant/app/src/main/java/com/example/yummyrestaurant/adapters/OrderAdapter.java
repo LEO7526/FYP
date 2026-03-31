@@ -117,7 +117,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             if (items.size() > MAX_OVERVIEW_ITEMS) {
                 TextView moreItemsView = new TextView(holder.itemsContainer.getContext());
                 int hiddenCount = items.size() - MAX_OVERVIEW_ITEMS;
-                moreItemsView.setText("... and " + hiddenCount + " more item" + (hiddenCount > 1 ? "s" : ""));
+                moreItemsView.setText(holder.itemsContainer.getContext().getString(R.string.order_more_items_format, hiddenCount));
                 moreItemsView.setTextSize(11);
                 moreItemsView.setPadding(8, 4, 8, 4);
                 moreItemsView.setTextColor(Color.parseColor("#888888"));
@@ -170,7 +170,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             if (items.size() > MAX_OVERVIEW_ITEMS) {
                 TextView moreItemsView = new TextView(holder.itemsContainer.getContext());
                 int hiddenCount = items.size() - MAX_OVERVIEW_ITEMS;
-                moreItemsView.setText("... and " + hiddenCount + " more item" + (hiddenCount > 1 ? "s" : ""));
+                moreItemsView.setText(holder.itemsContainer.getContext().getString(R.string.order_more_items_format, hiddenCount));
                 moreItemsView.setTextSize(11);
                 moreItemsView.setPadding(8, 4, 8, 4);
                 moreItemsView.setTextColor(Color.parseColor("#888888"));
@@ -188,15 +188,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         }
 
         // 設置項目計數
-        holder.itemCount.setText(totalItemCount + " item" + (totalItemCount > 1 ? "s" : ""));
+        holder.itemCount.setText(holder.itemView.getContext().getString(R.string.order_item_count_format, totalItemCount));
         Log.d("OrderAdapter", "Total item count: " + totalItemCount);
         
         // 設置總金額
-        holder.totalAmount.setText(String.format("HK$%.2f", total));
+        holder.totalAmount.setText(holder.itemView.getContext().getString(R.string.order_total_amount_format, total));
         Log.d("OrderAdapter", "Total amount: HK$" + String.format("%.2f", total));
 
         // 設置時間戳
-        String timeAgoText = formatTimeAgo(order.getOdate());
+        String timeAgoText = formatTimeAgo(holder.itemView.getContext(), order.getOdate());
         holder.timeAgo.setText(timeAgoText);
         Log.d("OrderAdapter", "Order date: " + order.getOdate() + " (" + timeAgoText + ")");
 
@@ -225,23 +225,23 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         return orders != null ? orders.size() : 0;
     }
 
-    private String formatTimeAgo(String orderDate) {
+    private String formatTimeAgo(Context context, String orderDate) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             Date date = sdf.parse(orderDate);
             long timeAgo = System.currentTimeMillis() - date.getTime();
             
             if (timeAgo < 60000) {
-                return "Just now";
+                return context.getString(R.string.time_just_now);
             } else if (timeAgo < 3600000) {
                 long minutes = timeAgo / 60000;
-                return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+                return context.getString(R.string.time_minutes_ago, minutes);
             } else if (timeAgo < 86400000) {
                 long hours = timeAgo / 3600000;
-                return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+                return context.getString(R.string.time_hours_ago, hours);
             } else {
                 long days = timeAgo / 86400000;
-                return days + " day" + (days > 1 ? "s" : "") + " ago";
+                return context.getString(R.string.time_days_ago, days);
             }
         } catch (ParseException e) {
             return orderDate;
@@ -254,31 +254,31 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         
         switch (status) {
             case 0:
-                statusText = "Awaiting Cash Payment";
+                statusText = holder.itemView.getContext().getString(R.string.status_awaiting_cash_payment);
                 backgroundColor = Color.parseColor("#FF5722"); // 橘紅色 - 需要注意
                 break;
             case 1:
-                statusText = "Pending";
+                statusText = holder.itemView.getContext().getString(R.string.status_pending);
                 backgroundColor = Color.parseColor("#FFC107"); // 黃色
                 break;
             case 2:
-                statusText = "Preparing";
+                statusText = holder.itemView.getContext().getString(R.string.status_preparing);
                 backgroundColor = Color.parseColor("#2196F3"); // 藍色
                 break;
             case 3:
-                statusText = "Delivered";
+                statusText = holder.itemView.getContext().getString(R.string.status_delivered);
                 backgroundColor = Color.parseColor("#4CAF50"); // 綠色
                 break;
             case 4:
-                statusText = "Cancelled";
+                statusText = holder.itemView.getContext().getString(R.string.cancelled);
                 backgroundColor = Color.parseColor("#F44336"); // 紅色
                 break;
             case 5:
-                statusText = "Paid";
+                statusText = holder.itemView.getContext().getString(R.string.status_paid);
                 backgroundColor = Color.parseColor("#4CAF50"); // 綠色
                 break;
             default:
-                statusText = "Unknown";
+                statusText = holder.itemView.getContext().getString(R.string.status_unknown);
                 backgroundColor = Color.parseColor("#9E9E9E"); // 灰色
         }
         
@@ -344,7 +344,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 Log.d("OrderAdapter", "Navigating to BuildSetMenuActivity with package_id=" + pkg.getPackageId());
                 context.startActivity(intent);
                 
-                Toast.makeText(context, "Please customize your package", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.please_customize_package), Toast.LENGTH_SHORT).show();
             } else if (order.getItems() != null && order.getItems().size() > 0) {
                 // ===== 常規訂單：直接恢復到購物車 =====
                 Log.d("OrderAdapter", "This is a REGULAR order with " + order.getItems().size() + " item(s)");
@@ -415,7 +415,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     Log.d("OrderAdapter", "  ✅ CartItem added: " + item.getName() + " x" + item.getQuantity());
                 }
                 
-                Toast.makeText(context, "Order restored to cart!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.order_restored_to_cart), Toast.LENGTH_SHORT).show();
                 Log.d("OrderAdapter", "✅ ALL ITEMS RESTORED TO CART - Ready for reorder");
                 
                 // 導航到購物車
@@ -425,12 +425,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 Log.d("OrderAdapter", "✅ CartActivity started");
             } else {
                 Log.d("OrderAdapter", "❌ No items found in order");
-                Toast.makeText(context, "No items to reorder", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.no_items_to_reorder), Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             Log.e("OrderAdapter", "❌ Error reordering order #" + order.getOid() + ": " + e.getMessage(), e);
             Log.e("OrderAdapter", "Stack trace:", e);
-            Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.error_with_reason, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -443,7 +443,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             
             // 創建詳細信息對話框
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("Order Details - #" + order.getOid());
+            builder.setTitle(context.getString(R.string.order_details_title_format, order.getOid()));
             
             // 創建滾動視圖用於詳細信息
             ScrollView scrollView = new ScrollView(context);
@@ -452,11 +452,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             detailsLayout.setPadding(20, 20, 20, 20);
             
             // 添加基本信息
-            addDetailRow(detailsLayout, "Order ID:", "#" + order.getOid());
-            addDetailRow(detailsLayout, "Date:", order.getOdate());
-            addDetailRow(detailsLayout, "Status:", getStatusText(order.getOstatus()));
-            addDetailRow(detailsLayout, "Customer:", order.getCname() != null ? order.getCname() : "N/A");
-            addDetailRow(detailsLayout, "Table:", String.valueOf(order.getTable_number()));
+            addDetailRow(detailsLayout, context.getString(R.string.order_detail_order_id), "#" + order.getOid());
+            addDetailRow(detailsLayout, context.getString(R.string.order_detail_date), order.getOdate());
+            addDetailRow(detailsLayout, context.getString(R.string.order_detail_status), getStatusText(context, order.getOstatus()));
+            addDetailRow(detailsLayout, context.getString(R.string.order_detail_customer), order.getCname() != null ? order.getCname() : context.getString(R.string.not_available_short));
+            addDetailRow(detailsLayout, context.getString(R.string.order_detail_table), String.valueOf(order.getTable_number()));
             
             // 添加分隔線
             View separator1 = new View(context);
@@ -467,7 +467,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             
             // 添加項目標題
             TextView itemsTitle = new TextView(context);
-            itemsTitle.setText("Items:");
+            itemsTitle.setText(context.getString(R.string.order_detail_items));
             itemsTitle.setTypeface(null, android.graphics.Typeface.BOLD);
             itemsTitle.setTextSize(14);
             itemsTitle.setPadding(0, 10, 0, 10);
@@ -542,7 +542,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                                     for (OrderItemCustomization cust : packageItem.getCustomizations()) {
                                         String custText = "";
                                         if (cust.getOptionId() == SPECIAL_OPTION_ID) {
-                                            custText = "      └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
+                                            custText = "      └─ " + context.getString(R.string.order_special_label) + ": " + (cust.getTextValue() != null ? cust.getTextValue() : "");
                                         } else {
                                             String choices = "";
                                             if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
@@ -600,7 +600,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                                 String custText = "";
                                 if (cust.getOptionId() == SPECIAL_OPTION_ID) {
                                     // 特殊要求
-                                    custText = "   └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
+                                    custText = "   └─ " + context.getString(R.string.order_special_label) + ": " + (cust.getTextValue() != null ? cust.getTextValue() : "");
                                     Log.d("OrderAdapter", "        Special note: " + cust.getTextValue());
                                 } else {
                                     // 常規自訂選項 - 優先使用 selectedChoices，備用 choiceNames
@@ -635,7 +635,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             
             // 添加總計
             TextView totalRow = new TextView(context);
-            totalRow.setText("Total: HK$" + String.format("%.2f", itemsTotal));
+            totalRow.setText(context.getString(R.string.order_detail_total_format, itemsTotal));
             totalRow.setTypeface(null, android.graphics.Typeface.BOLD);
             totalRow.setTextSize(14);
             totalRow.setPadding(0, 10, 0, 10);
@@ -644,8 +644,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             scrollView.addView(detailsLayout);
             builder.setView(scrollView);
             
-            builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
-            builder.setNegativeButton("Reorder", (dialog, which) -> {
+            builder.setPositiveButton(context.getString(R.string.close), (dialog, which) -> dialog.dismiss());
+            builder.setNegativeButton(context.getString(R.string.reorder), (dialog, which) -> {
                 dialog.dismiss();
                 handleReorder(context, order);
             });
@@ -653,7 +653,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             builder.create().show();
         } catch (Exception e) {
             Log.e("OrderAdapter", "Error showing order details", e);
-            Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.error_with_reason, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -678,15 +678,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         parent.addView(row);
     }
 
-    private String getStatusText(int status) {
+    private String getStatusText(Context context, int status) {
         switch (status) {
-            case 0: return "Awaiting Cash Payment";
-            case 1: return "Pending";
-            case 2: return "Preparing";
-            case 3: return "Delivered";
-            case 4: return "Cancelled";
-            case 5: return "Paid";
-            default: return "Unknown";
+            case 0: return context.getString(R.string.status_awaiting_cash_payment);
+            case 1: return context.getString(R.string.status_pending);
+            case 2: return context.getString(R.string.status_preparing);
+            case 3: return context.getString(R.string.status_delivered);
+            case 4: return context.getString(R.string.cancelled);
+            case 5: return context.getString(R.string.status_paid);
+            default: return context.getString(R.string.status_unknown);
         }
     }
 
@@ -759,7 +759,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                         TextView custView = new TextView(context);
                         String custText = "";
                         if (cust.getOptionId() == SPECIAL_OPTION_ID) {
-                            custText = "      └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : "");
+                            custText = "      └─ " + context.getString(R.string.order_special_label) + ": " + (cust.getTextValue() != null ? cust.getTextValue() : "");
                         } else {
                             String choices = "";
                             if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
@@ -824,7 +824,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     for (OrderItemCustomization cust : item.getCustomizations()) {
                         TextView custView = new TextView(holder.itemsContainer.getContext());
                         if (cust.getOptionId() == SPECIAL_OPTION_ID) {
-                            custView.setText("    └─ Special: " + (cust.getTextValue() != null ? cust.getTextValue() : ""));
+                            custView.setText("    └─ " + holder.itemsContainer.getContext().getString(R.string.order_special_label) + ": " + (cust.getTextValue() != null ? cust.getTextValue() : ""));
                         } else {
                             String choices = "";
                             if (cust.getSelectedChoices() != null && !cust.getSelectedChoices().isEmpty()) {
@@ -845,7 +845,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         
         // Add "collapse" option
         TextView collapseView = new TextView(holder.itemsContainer.getContext());
-        collapseView.setText("▲ Show less");
+        collapseView.setText("▲ " + holder.itemsContainer.getContext().getString(R.string.show_less));
         collapseView.setTextSize(11);
         collapseView.setPadding(8, 8, 8, 4);
         collapseView.setTextColor(Color.parseColor("#2196F3"));

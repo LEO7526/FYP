@@ -102,7 +102,7 @@ public class PaymentActivity extends ThemeBaseActivity {
 
         int totalAmount = CartManager.getTotalAmountInCents();
         Log.d(TAG, "onCreate: totalAmount=" + totalAmount);
-        amountText.setText(String.format(Locale.getDefault(), "Total: HK$%.2f", totalAmount / 100.0));
+        amountText.setText(getString(R.string.payment_total_format, totalAmount / 100.0));
 
         // ✅ Apply theme colors based on user role
         applyThemeColors();
@@ -193,7 +193,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         Log.d(TAG, "onCashPaymentSelected: Saving order to backend");
 
         if (userId == null || userId.trim().isEmpty()) {
-            showError("Invalid customer account. Please log in again.");
+            showError(getString(R.string.invalid_customer_account_login_again));
             resetPaymentButton();
             return;
         }
@@ -227,7 +227,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         String userId = RoleManager.getUserId();
 
         if (userId == null || userId.trim().isEmpty()) {
-            showError("Invalid customer account. Please log in again.");
+            showError(getString(R.string.invalid_customer_account_login_again));
             resetPaymentButton();
             return;
         }
@@ -236,7 +236,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         try {
             customerId = Integer.parseInt(userId);
         } catch (NumberFormatException e) {
-            showError("Invalid customer account. Please log in again.");
+            showError(getString(R.string.invalid_customer_account_login_again));
             resetPaymentButton();
             return;
         }
@@ -295,7 +295,7 @@ public class PaymentActivity extends ThemeBaseActivity {
                     } else {
                         Log.e(TAG, ">>> ERROR: clientSecret is null or empty");
                         Log.e(TAG, ">>> clientSecret value: " + (clientSecret != null ? clientSecret : "null"));
-                        showError("Failed to retrieve client secret from backend");
+                        showError(getString(R.string.failed_retrieve_client_secret));
                         resetPaymentButton();
                     }
                 } else {
@@ -504,7 +504,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         int amount = CartManager.getTotalAmountInCents();
 
         if (userId == null || userId.trim().isEmpty()) {
-            showError("Invalid customer account. Please log in again.");
+            showError(getString(R.string.invalid_customer_account_login_again));
             resetPaymentButton();
             return;
         }
@@ -549,7 +549,7 @@ public class PaymentActivity extends ThemeBaseActivity {
             try {
                 customerId = Integer.parseInt(userId);
             } catch (NumberFormatException e) {
-                callback.onFailure("Invalid customer account. Please log in again.");
+                callback.onFailure(getString(R.string.invalid_customer_account_login_again));
                 return;
             }
             orderData.put("sid", null);
@@ -700,9 +700,9 @@ public class PaymentActivity extends ThemeBaseActivity {
                     callback.onSuccess();
                 } else {
                     Log.e(TAG, "Failed to save order. Code=" + response.code());
-                    String message = "Failed to save order. Please try again.";
+                    String message = getString(R.string.failed_save_order_try_again);
                     if (response.code() == 403) {
-                        message = "Only available 11:00–21:29 (Asia/Hong_Kong).";
+                        message = getString(R.string.payment_available_time_only);
                         try {
                             String responseText = response.errorBody() != null ? response.errorBody().string() : "";
                             if (!responseText.isEmpty()) {
@@ -734,7 +734,7 @@ public class PaymentActivity extends ThemeBaseActivity {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e(TAG, "saveOrderToBackend onFailure: " + t.getMessage(), t);
-                callback.onFailure("Network error while saving order.");
+                callback.onFailure(getString(R.string.network_error_while_saving_order));
             }
         });
     }

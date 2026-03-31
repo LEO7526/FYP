@@ -286,7 +286,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="👆 Select Dine In or Takeaway"
+                    android:text="@string/select_order_type_hint"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/white"
@@ -295,7 +295,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="to start shopping"
+                    android:text="@string/to_start_shopping"
                     android:textSize="14sp"
                     android:textColor="@color/white"
                     android:layout_marginTop="8dp"

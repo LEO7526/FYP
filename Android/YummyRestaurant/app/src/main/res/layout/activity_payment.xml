@@ -10,7 +10,7 @@
         android:id="@+id/amountText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Total: HK$5.00"
+        android:text="@string/payment_total_placeholder"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
@@ -21,7 +21,7 @@
         android:id="@+id/paymentMethodLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Payment Method:"
+        android:text="@string/select_payment_method"
         android:textSize="14sp"
         android:textStyle="bold"
         android:layout_marginBottom="12dp" />
@@ -37,7 +37,7 @@
             android:id="@+id/rbCard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="💳 Credit/Debit Card"
+            android:text="@string/payment_method_card"
             android:textSize="14sp"
             android:layout_marginBottom="8dp"
             android:checked="true" />
@@ -46,7 +46,7 @@
             android:id="@+id/rbAlipayHK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔐 Alipay HK"
+            android:text="@string/payment_method_alipay_hk"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
@@ -54,7 +54,7 @@
             android:id="@+id/rbCash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="💰 Pay by Cash at Front Desk"
+            android:text="@string/payment_method_cash_frontdesk"
             android:textSize="14sp" />
 
     </RadioGroup>
@@ -64,7 +64,7 @@
         android:id="@+id/payButton"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:text="Pay Now"
+        android:text="@string/pay_now"
         android:layout_marginBottom="16dp"
         android:backgroundTint="#FF6F00"
         android:textColor="@android:color/white" />

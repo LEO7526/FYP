@@ -86,7 +86,7 @@ public class EditProfileActivity extends ThemeBaseActivity {
         saveButton = findViewById(R.id.saveButton);
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Uploading image...");
+        progressDialog.setMessage(getString(R.string.uploading_image));
         progressDialog.setCancelable(false);
 
         apiService = RetrofitClient.getClient(this).create(LoginCustomerApi.class);
@@ -180,13 +180,13 @@ public class EditProfileActivity extends ThemeBaseActivity {
             Log.d(TAG, "Save button clicked. New name: " + newName + ", New email: " + newEmail);
 
             if (newName.isEmpty() || newEmail.isEmpty()) {
-                Toast.makeText(this, "Name and email cannot be empty", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.name_email_cannot_be_empty), Toast.LENGTH_SHORT).show();
                 Log.w(TAG, "Validation failed: empty fields");
                 return;
             }
 
             if (!Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
-                Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.please_enter_valid_email), Toast.LENGTH_SHORT).show();
                 Log.w(TAG, "Validation failed: invalid email");
                 return;
             }
@@ -219,7 +219,7 @@ public class EditProfileActivity extends ThemeBaseActivity {
                         StaffUploadApi uploadApi = RetrofitClient.getClient(this).create(StaffUploadApi.class);
                         uploadCall = uploadApi.uploadImage(body, emailBody); // API expects "semail"
                     } else {
-                        Toast.makeText(this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.unknown_user_role), Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "Upload aborted: unknown role");
                         return;
                     }
@@ -261,17 +261,17 @@ public class EditProfileActivity extends ThemeBaseActivity {
                                             .error(R.drawable.error_image)
                                             .into(profilePreview);
 
-                                    Toast.makeText(EditProfileActivity.this, "✅ Image uploaded!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(EditProfileActivity.this, getString(R.string.image_uploaded), Toast.LENGTH_SHORT).show();
 
                                     Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
                                     intent.putExtra("updatedImageUrl", githubImageUrl);
                                     startActivity(intent);
                                     finish();
                                 } else {
-                                    Toast.makeText(EditProfileActivity.this, "❌ Upload failed: " + uploadResponse.getMessage(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(EditProfileActivity.this, getString(R.string.upload_failed_with_reason, uploadResponse.getMessage()), Toast.LENGTH_LONG).show();
                                 }
                             } else {
-                                Toast.makeText(EditProfileActivity.this, "❌ Server error: " + response.code(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(EditProfileActivity.this, getString(R.string.server_error_code, response.code()), Toast.LENGTH_LONG).show();
 
                                 try {
                                     if (response.errorBody() != null) {
@@ -288,24 +288,24 @@ public class EditProfileActivity extends ThemeBaseActivity {
                         public void onFailure(Call<UploadResponse> call, Throwable t) {
                             progressDialog.dismiss();
                             Log.e(TAG, "Upload error", t);
-                            Toast.makeText(EditProfileActivity.this, "⚠️ Upload error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(EditProfileActivity.this, getString(R.string.upload_error_with_reason, t.getMessage()), Toast.LENGTH_LONG).show();
 
                             new AlertDialog.Builder(EditProfileActivity.this)
-                                    .setTitle("Upload Failed")
-                                    .setMessage("Would you like to retry?")
-                                    .setPositiveButton("Retry", (dialog, which) -> saveButton.performClick())
-                                    .setNegativeButton("Cancel", null)
+                                    .setTitle(getString(R.string.upload_failed_title))
+                                    .setMessage(getString(R.string.upload_retry_message))
+                                    .setPositiveButton(getString(R.string.retry), (dialog, which) -> saveButton.performClick())
+                                    .setNegativeButton(getString(R.string.cancel), null)
                                     .show();
                         }
                     });
 
                 } catch (IOException e) {
                     Log.e(TAG, "File access error", e);
-                    Toast.makeText(this, "⚠️ Unable to access image file", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.unable_access_image_file), Toast.LENGTH_LONG).show();
                 }
             } else {
                 Log.d(TAG, "No image selected. Proceeding with profile update...");
-                Toast.makeText(this, "Profile updated!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.profile_updated), Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, ProfileActivity.class));
                 finish();
             }
@@ -332,9 +332,9 @@ public class EditProfileActivity extends ThemeBaseActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if ((requestCode == 100 || requestCode == 101) && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.permission_granted), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Permission denied. Cannot access image.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.permission_denied_cannot_access_image), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -392,7 +392,7 @@ public class EditProfileActivity extends ThemeBaseActivity {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         RoleManager.setUserBirthday(response.body().getCbirthday());
                         Log.d(TAG, "Birthday saved: " + response.body().getCbirthday());
-                        Toast.makeText(EditProfileActivity.this, "Birthday saved!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditProfileActivity.this, getString(R.string.birthday_saved), Toast.LENGTH_SHORT).show();
 
                         // Disable the field immediately after saving
                         birthdayInput.setEnabled(false);
@@ -401,7 +401,7 @@ public class EditProfileActivity extends ThemeBaseActivity {
 
                         // Show status label
                         if (birthdayStatusLabel != null) {
-                            birthdayStatusLabel.setText("Birthday saved");
+                            birthdayStatusLabel.setText(getString(R.string.birthday_saved));
                             birthdayStatusLabel.setVisibility(View.VISIBLE);
                         }
                     } else {
