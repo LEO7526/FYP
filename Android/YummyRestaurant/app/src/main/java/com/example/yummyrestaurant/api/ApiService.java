@@ -13,7 +13,8 @@ public interface ApiService {
     Call<List<Product>> getProducts();
 
     @GET("get_customization_options.php")
-    Call<CustomizationOptionsResponse> getCustomizationOptions(@Query("item_id") int itemId);
+    Call<CustomizationOptionsResponse> getCustomizationOptions(@Query("item_id") int itemId,
+                                                               @Query("lang") String language);
 
     @GET("get_customer_coupon_points.php")
     Call<CouponPointsResponse> getCouponPoints(@Query("cid") int cid);
