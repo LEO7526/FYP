@@ -6,12 +6,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.app.AlertDialog;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.CouponAdapter;
@@ -259,55 +262,66 @@ public class CouponActivity extends BaseCustomerActivity {
             options[i] = String.valueOf(i + 1);
         }
 
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle(getString(R.string.select_quantity_to_redeem))
-                .setItems(options, (dialog, which) -> {
-                    int quantity = which + 1;
-                    Log.d(TAG, "Redeeming " + quantity + " of couponId=" + coupon.getCouponId());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_quantity_selector, null);
+        ListView listView = dialogView.findViewById(R.id.quantityListView);
+        ArrayAdapter<String> adapterList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, options);
+        listView.setAdapter(adapterList);
 
-                    CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
-                    service.redeemCoupon(customerId, coupon.getCouponId(), quantity)
-                            .enqueue(new Callback<RedeemCouponResponse>() {
-                                @Override
-                                public void onResponse(Call<RedeemCouponResponse> call, Response<RedeemCouponResponse> response) {
-                                    if (response.isSuccessful() && response.body() != null) {
-                                        RedeemCouponResponse res = response.body();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.select_quantity_to_redeem))
+                .setView(dialogView)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
 
-                                        if (res.isSuccess()) {
-                                            Toast.makeText(CouponActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
-                                            showRedeemSuccessOverlay(res.getMessage());
-                                            if (res.getPointsAfter() != null) {
-                                                int remaining = res.getPointsAfter();
-                                                currentPoints = remaining;
-                                                tvCouponPoints.setText(getString(R.string.points_format, remaining));
-                                                adapter.setCurrentPoints(remaining);
-                                            }
-                                        } else {
-                                            if ("BIRTHDAY_ALREADY_REDEEMED".equals(res.getErrorCode())) {
-                                                Toast.makeText(CouponActivity.this,
-                                                        getString(R.string.birthday_coupon_redeemed_this_year),
-                                                        Toast.LENGTH_LONG).show();
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            dialog.dismiss();
+            int quantity = position + 1;
+            Log.d(TAG, "Redeeming " + quantity + " of couponId=" + coupon.getCouponId());
 
-                                                coupon.setRedeemable(false);   // mark coupon
-                                                adapter.notifyDataSetChanged(); // refresh list
-                                            } else {
-                                                Toast.makeText(CouponActivity.this,
-                                                        res.getError() != null ? res.getError() : getString(R.string.redeem_failed),
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
+            CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
+            service.redeemCoupon(customerId, coupon.getCouponId(), quantity)
+                    .enqueue(new Callback<RedeemCouponResponse>() {
+                        @Override
+                        public void onResponse(Call<RedeemCouponResponse> call, Response<RedeemCouponResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                RedeemCouponResponse res = response.body();
+
+                                if (res.isSuccess()) {
+                                    Toast.makeText(CouponActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
+                                    showRedeemSuccessOverlay(res.getMessage());
+                                    if (res.getPointsAfter() != null) {
+                                        int remaining = res.getPointsAfter();
+                                        currentPoints = remaining;
+                                        tvCouponPoints.setText(getString(R.string.points_format, remaining));
+                                        adapter.setCurrentPoints(remaining);
+                                    }
+                                } else {
+                                    if ("BIRTHDAY_ALREADY_REDEEMED".equals(res.getErrorCode())) {
+                                        Toast.makeText(CouponActivity.this,
+                                                getString(R.string.birthday_coupon_redeemed_this_year),
+                                                Toast.LENGTH_LONG).show();
+
+                                        coupon.setRedeemable(false);   // mark coupon
+                                        adapter.notifyDataSetChanged(); // refresh list
                                     } else {
-                                        Toast.makeText(CouponActivity.this, getString(R.string.redeem_failed), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(CouponActivity.this,
+                                                res.getError() != null ? res.getError() : getString(R.string.redeem_failed),
+                                                Toast.LENGTH_SHORT).show();
                                     }
                                 }
+                            } else {
+                                Toast.makeText(CouponActivity.this, getString(R.string.redeem_failed), Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
-                                @Override
-                                public void onFailure(Call<RedeemCouponResponse> call, Throwable t) {
-                                    Toast.makeText(CouponActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                })
-                .show();
+                        @Override
+                        public void onFailure(Call<RedeemCouponResponse> call, Throwable t) {
+                            Toast.makeText(CouponActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
+
+        dialog.show();
     }
 
     private void showRedeemSuccessOverlay(String message) {

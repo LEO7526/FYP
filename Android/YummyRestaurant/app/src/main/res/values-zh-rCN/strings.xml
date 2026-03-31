@@ -324,6 +324,7 @@
     <string name="profile_email_hint">邮箱</string>
     <string name="profile_birthday_hint">生日（月-日）</string>
     <string name="save_changes">保存更改</string>
+    <string name="customize">自定义</string>
     <string name="customize_your_dish">自定义菜品</string>
     <string name="special_instructions_optional">特别要求（可选）</string>
     <string name="add_to_cart">加入购物车</string>
