@@ -364,6 +364,7 @@
     <string name="profile_email_hint">Email</string>
     <string name="profile_birthday_hint">Birthday (MM-DD)</string>
     <string name="save_changes">Save Changes</string>
+    <string name="customize">Customize</string>
     <string name="customize_your_dish">Customize Your Dish</string>
     <string name="special_instructions_optional">Special instructions (optional)</string>
     <string name="add_to_cart">Add To Cart</string>
