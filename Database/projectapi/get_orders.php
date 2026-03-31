@@ -94,7 +94,7 @@ function parse_note_customizations($note): array {
     return $customizations;
 }
 
-function build_customization_map(mysqli $conn, int $oid): array {
+function build_customization_map(mysqli $conn, int $oid, string $language = 'en'): array {
     $map = [];
 
     $customSql = "
@@ -102,12 +102,14 @@ function build_customization_map(mysqli $conn, int $oid): array {
             oic.item_id,
             oic.option_id,
             oic.group_id,
-            cog.group_name,
+            COALESCE(cogt.group_name, cog.group_name) AS group_name,
             oic.selected_value_ids,
             oic.selected_values,
             oic.text_value
         FROM order_item_customizations oic
         LEFT JOIN customization_option_group cog ON oic.group_id = cog.group_id
+        LEFT JOIN customization_option_group_translation cogt
+            ON cog.group_id = cogt.group_id AND cogt.language_code = ?
         WHERE oic.oid = ?
     ";
 
@@ -117,7 +119,7 @@ function build_customization_map(mysqli $conn, int $oid): array {
         return $map;
     }
 
-    $customStmt->bind_param("i", $oid);
+    $customStmt->bind_param("si", $language, $oid);
     $customStmt->execute();
     $customResult = $customStmt->get_result();
 
@@ -130,6 +132,62 @@ function build_customization_map(mysqli $conn, int $oid): array {
     }
 
     $customStmt->close();
+
+    // Translate value names in a single batch query when a non-English language is requested
+    if ($language !== 'en') {
+        // Collect all unique value IDs across the whole map
+        $allValueIds = [];
+        foreach ($map as $entries) {
+            foreach ($entries as $entry) {
+                foreach ($entry['selected_value_ids'] as $vid) {
+                    $allValueIds[$vid] = true;
+                }
+            }
+        }
+
+        if (!empty($allValueIds)) {
+            $idList = implode(',', array_map('intval', array_keys($allValueIds)));
+            $batchSql = "
+                SELECT cov.value_id,
+                       COALESCE(covt.value_name, cov.value_name) AS value_name
+                FROM customization_option_value cov
+                LEFT JOIN customization_option_value_translation covt
+                    ON cov.value_id = covt.value_id AND covt.language_code = ?
+                WHERE cov.value_id IN ($idList)
+            ";
+            $batchStmt = $conn->prepare($batchSql);
+            if ($batchStmt) {
+                $batchStmt->bind_param("s", $language);
+                $batchStmt->execute();
+                $batchResult = $batchStmt->get_result();
+                $valueTranslations = [];
+                while ($batchRow = $batchResult->fetch_assoc()) {
+                    $valueTranslations[(int)$batchRow['value_id']] = $batchRow['value_name'];
+                }
+                $batchStmt->close();
+
+                // Apply translations back to each entry
+                foreach ($map as $itemId => &$entries) {
+                    foreach ($entries as &$entry) {
+                        if (!empty($entry['selected_value_ids'])) {
+                            $translated = [];
+                            foreach ($entry['selected_value_ids'] as $vid) {
+                                if (isset($valueTranslations[$vid])) {
+                                    $translated[] = $valueTranslations[$vid];
+                                }
+                            }
+                            if (!empty($translated)) {
+                                $entry['selected_values'] = $translated;
+                            }
+                        }
+                    }
+                    unset($entry);
+                }
+                unset($entries);
+            }
+        }
+    }
+
     return $map;
 }
 
@@ -161,7 +219,7 @@ while ($row = $result->fetch_assoc()) {
     $order = $row;
     $oid = (int)$order['oid'];
 
-    $customizationMap = build_customization_map($conn, $oid);
+    $customizationMap = build_customization_map($conn, $oid, $language);
 
     $packages = [];
     $reservedQtyByItem = [];

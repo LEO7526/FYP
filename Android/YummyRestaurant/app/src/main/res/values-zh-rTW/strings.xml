@@ -128,6 +128,66 @@
 
     <string name="no_spice">不辣</string>
 
+    <!-- Spice level labels -->
+    <string name="spice_level_mild">微辣</string>
+    <string name="spice_level_medium">中辣</string>
+    <string name="spice_level_hot">辣</string>
+    <string name="spice_level_numbing">麻辣</string>
+
+    <!-- Tag labels (matching database tag names) -->
+    <string name="tag_vegetarian">素食</string>
+    <string name="tag_spicy">辣</string>
+    <string name="tag_numbing">麻</string>
+    <string name="tag_sour">酸</string>
+    <string name="tag_sweet">甜</string>
+    <string name="tag_salty">鹹</string>
+    <string name="tag_chicken">雞肉</string>
+    <string name="tag_beef">牛肉</string>
+    <string name="tag_pork">豬肉</string>
+    <string name="tag_seafood">海鮮</string>
+    <string name="tag_fish">魚肉</string>
+    <string name="tag_tofu">豆腐</string>
+    <string name="tag_milk">奶</string>
+    <string name="tag_tea">茶</string>
+    <string name="tag_cold">凍飲</string>
+    <string name="tag_hot">熱</string>
+    <string name="tag_refreshing">清爽</string>
+    <string name="tag_classic">經典</string>
+    <string name="tag_traditional">傳統</string>
+    <string name="tag_glutinous">糯</string>
+    <string name="tag_lemon">檸檬</string>
+    <string name="tag_soda">氣泡水</string>
+    <string name="tag_grape">葡萄</string>
+    <string name="tag_noodles">麵條</string>
+    <string name="tag_streetfood">街頭小吃</string>
+    <string name="tag_stirfry">炒</string>
+
+    <!-- Customization option group labels -->
+    <string name="option_group_spice_level">辣度</string>
+    <string name="option_group_sugar_level">甜度</string>
+    <string name="option_group_ice_level">冰量</string>
+    <string name="option_group_milk_level">奶量</string>
+    <string name="option_group_toppings">配料</string>
+
+    <!-- Customization option value labels -->
+    <string name="option_value_mild">微辣</string>
+    <string name="option_value_medium">中辣</string>
+    <string name="option_value_hot">辣</string>
+    <string name="option_value_numbing">麻辣</string>
+    <string name="option_value_more_sweet">多糖</string>
+    <string name="option_value_less_sweet">少糖</string>
+    <string name="option_value_no_sweet">無糖</string>
+    <string name="option_value_more_ice">多冰</string>
+    <string name="option_value_less_ice">少冰</string>
+    <string name="option_value_no_ice">無冰</string>
+    <string name="option_value_more_milk">多奶</string>
+    <string name="option_value_less_milk">少奶</string>
+    <string name="option_value_no_milk">無奶</string>
+    <string name="option_value_extra_sesame">加芝麻</string>
+    <string name="option_value_peanuts">花生</string>
+    <string name="option_value_honey_drizzle">蜂蜜淋醬</string>
+    <string name="option_value_chocolate_chips">朱古力粒</string>
+
     <string name="please_login_customer_before_booking">請先以顧客身分登入再預訂座位。</string>
     <string name="please_login_customer_first">請先以顧客身分登入。</string>
     <string name="select_time_slot">選擇時段</string>
@@ -337,4 +397,32 @@
     <string name="failed_retrieve_client_secret">無法從後端取得付款憑證</string>
     <string name="failed_save_order_try_again">儲存訂單失敗，請稍後再試。</string>
     <string name="network_error_while_saving_order">儲存訂單時出現網路錯誤。</string>
+
+    <!-- UI labels and descriptions -->
+    <string name="select_spice_level">選擇辣度</string>
+    <string name="select_tag">選擇標籤</string>
+    <string name="select_category">選擇分類</string>
+    <string name="spice_level_icon">辣度圖示</string>
+    <string name="search_hint">搜尋菜式...</string>
+    <string name="loading">載入中...</string>
+    <string name="title_inventory">庫存管理</string>
+    <string name="menu_item_image_desc">菜式圖片</string>
+    <string name="add_button">新增項目</string>
+    <string name="navigation_drawer_open">開啟導覽選單</string>
+    <string name="navigation_drawer_close">關閉導覽選單</string>
+    <string name="desc_search_icon">搜尋圖示</string>
+    <string name="desc_profile_icon">個人資料圖示</string>
+    <string name="merchant_name">Yummy Restaurant</string>
+    <string name="category_all">全部</string>
+    <string name="category_combos">套餐</string>
+    <string name="category_sliders">小食</string>
+    <string name="dish_name_placeholder">菜式名稱</string>
+    <string name="dish_description_placeholder">菜式簡介</string>
+    <string name="dish_price_placeholder">$00.00</string>
+    <string name="error_network">網路連接失敗，請稍後再試。</string>
+    <string-array name="roles_array">
+        <item>顧客</item>
+        <item>員工</item>
+        <item>管理員</item>
+    </string-array>
 </resources>

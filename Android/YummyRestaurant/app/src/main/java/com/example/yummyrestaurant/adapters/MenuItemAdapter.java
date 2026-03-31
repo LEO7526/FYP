@@ -54,7 +54,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
             }
         }
         sortByCategory();
-        filter("All Dishes"); // default to show all
+        showAllItems(); // default to show all items
     }
 
     // Sort items by category to group them together
@@ -90,19 +90,43 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
     // Get the position of the first item in a specific category
     public int getPositionForCategory(String category) {
-        String searchCategory = category.trim().toLowerCase();
-        
+        String searchNormalized = toEnglishCategory(category);
+
         for (int i = 0; i < filteredList.size(); i++) {
             MenuItem item = filteredList.get(i);
-            String itemCategory = item.getCategory() != null 
-                    ? item.getCategory().trim().toLowerCase() 
+            String itemCategory = item.getCategory() != null
+                    ? item.getCategory().trim()
                     : "";
-            
-            if (itemCategory.equals(searchCategory)) {
+            String itemNormalized = toEnglishCategory(itemCategory);
+
+            if (searchNormalized != null && searchNormalized.equalsIgnoreCase(
+                    itemNormalized != null ? itemNormalized : itemCategory)) {
                 return i;
             }
         }
         return 0; // Return first position if category not found
+    }
+
+    /**
+     * Normalises a category string (localised or raw DB value) to a canonical
+     * lowercase English form so that comparisons work regardless of language.
+     */
+    private String toEnglishCategory(String category) {
+        if (category == null) return null;
+        String c = category.trim().toLowerCase();
+        // English DB values
+        if (c.equals("appetizer") || c.equals("appetizers")) return "appetizers";
+        if (c.equals("soup") || c.equals("soups")) return "soup";
+        if (c.equals("main course") || c.equals("main courses")) return "main courses";
+        if (c.equals("dessert") || c.equals("desserts")) return "dessert";
+        if (c.equals("drink") || c.equals("drinks") || c.equals("beverage") || c.equals("beverages")) return "drink";
+        // Localised button label values (compare using string resources for correctness)
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_appetizers))) return "appetizers";
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_soup))) return "soup";
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_main_courses))) return "main courses";
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_dessert))) return "dessert";
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_drink))) return "drink";
+        return c;
     }
 
     @Nullable
@@ -126,7 +150,10 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         filteredList.clear();
 
         String selectedCategory = category != null ? category.trim().toLowerCase() : "all";
-        if (selectedCategory.equals("all dishes")) {
+        // Normalize any "all" variant (English or localized) to a single sentinel
+        String filterAllStr = context.getString(R.string.filter_all).trim().toLowerCase();
+        if (selectedCategory.equals("all dishes") || selectedCategory.equals("all")
+                || selectedCategory.equals(filterAllStr)) {
             selectedCategory = "all";
         }
 

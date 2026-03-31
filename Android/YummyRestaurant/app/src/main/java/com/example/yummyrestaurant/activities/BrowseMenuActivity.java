@@ -641,7 +641,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     }
 
     private void applyFilters() {
-        adapter.filter(selectedCategory);
+        adapter.showAllItems();
     }
 
 

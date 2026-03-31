@@ -84,7 +84,7 @@ public class DishDetailActivity extends BaseCustomerActivity {
                     if (tag.isEmpty()) continue;
 
                     TextView tagView = new TextView(this);
-                    tagView.setText("#" + tag);
+                    tagView.setText("#" + getTranslatedTagName(tag));
                     tagView.setTextSize(12);
                     tagView.setTextColor(Color.parseColor("#333333"));
                     tagView.setPadding(12, 6, 12, 6);
@@ -261,7 +261,10 @@ public class DishDetailActivity extends BaseCustomerActivity {
         tagColors.put("pork", "#F8BBD0");       // 粉紅色淺色
         tagColors.put("seafood", "#B3E5FC");    // 淺藍色
         tagColors.put("vegetarian", "#C5E1A5"); // 淺綠色
-        
+        tagColors.put("fish", "#B3E5FC");       // 淺藍色
+        tagColors.put("tofu", "#E0F2F1");       // 青綠色淺色
+        tagColors.put("noodles", "#FFF8E1");    // 淺黃色
+
         // 飲品標籤
         tagColors.put("milk", "#FFE0B2");       // 橙色淺色
         tagColors.put("tea", "#BBDEFB");        // 藍色淺色
@@ -276,8 +279,48 @@ public class DishDetailActivity extends BaseCustomerActivity {
         tagColors.put("lemon", "#FFF9C4");      // 淺黃色
         tagColors.put("soda", "#CFD8DC");       // 藍灰色淺色
         tagColors.put("grape", "#CE93D8");      // 紫色
+        tagColors.put("streetfood", "#FFCCBC"); // 深橙色淺色
+        tagColors.put("stirfry", "#C8E6C9");    // 綠色淺色
         
         // 返回 tag 對應的顏色，如果不存在則返回默認顏色
         return tagColors.getOrDefault(tagName.toLowerCase(), "#E8EAED");
+    }
+
+    /**
+     * Translates a raw English tag name from the database into the current
+     * locale using string resources. Falls back to the original name if no
+     * translation key exists for it.
+     */
+    private String getTranslatedTagName(String tag) {
+        if (tag == null) return "";
+        switch (tag.trim().toLowerCase()) {
+            case "vegetarian":  return getString(R.string.tag_vegetarian);
+            case "spicy":       return getString(R.string.tag_spicy);
+            case "numbing":     return getString(R.string.tag_numbing);
+            case "sour":        return getString(R.string.tag_sour);
+            case "sweet":       return getString(R.string.tag_sweet);
+            case "salty":       return getString(R.string.tag_salty);
+            case "chicken":     return getString(R.string.tag_chicken);
+            case "beef":        return getString(R.string.tag_beef);
+            case "pork":        return getString(R.string.tag_pork);
+            case "seafood":     return getString(R.string.tag_seafood);
+            case "fish":        return getString(R.string.tag_fish);
+            case "tofu":        return getString(R.string.tag_tofu);
+            case "milk":        return getString(R.string.tag_milk);
+            case "tea":         return getString(R.string.tag_tea);
+            case "cold":        return getString(R.string.tag_cold);
+            case "hot":         return getString(R.string.tag_hot);
+            case "refreshing":  return getString(R.string.tag_refreshing);
+            case "classic":     return getString(R.string.tag_classic);
+            case "traditional": return getString(R.string.tag_traditional);
+            case "glutinous":   return getString(R.string.tag_glutinous);
+            case "lemon":       return getString(R.string.tag_lemon);
+            case "soda":        return getString(R.string.tag_soda);
+            case "grape":       return getString(R.string.tag_grape);
+            case "noodles":     return getString(R.string.tag_noodles);
+            case "streetfood":  return getString(R.string.tag_streetfood);
+            case "stirfry":     return getString(R.string.tag_stirfry);
+            default:            return tag;
+        }
     }
 }
