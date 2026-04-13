@@ -233,6 +233,15 @@ public class LabelManager {
     // ============ Private helper methods ============
     
 
+    private List<Map<String, Object>> parseJsonArray(JsonArray jsonArray) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            Map<String, Object> item = gson.fromJson(jsonArray.get(i), Map.class);
+            result.add(item);
+        }
+        return result;
+    }
+
     private void parseCustomizationGroups(JsonArray jsonArray) {
         customizationGroups = new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
