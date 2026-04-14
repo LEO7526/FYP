@@ -20,6 +20,7 @@ import com.example.yummyrestaurant.models.Customization;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.MaterialAvailabilityChecker;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
 
 import org.json.JSONArray;
 
@@ -108,7 +109,7 @@ public class DishDetailActivity extends BaseCustomerActivity {
             String imageUrl = item.getImage_url();
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(this)
-                        .load(imageUrl)
+                    .load(ImageUrlResolver.resolve(imageUrl))
                         .placeholder(R.drawable.placeholder)
                         .error(R.drawable.error_image)
                         .into(image);

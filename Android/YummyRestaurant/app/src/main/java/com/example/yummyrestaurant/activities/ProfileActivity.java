@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 public class ProfileActivity extends BaseCustomerActivity {
@@ -115,7 +116,7 @@ public class ProfileActivity extends BaseCustomerActivity {
 
     private void loadProfileImage(String imagePath) {
         if (imagePath != null && !imagePath.isEmpty()) {
-            String fullImageUrl = imagePath; // ✅ Use GitHub URL directly
+            String fullImageUrl = ImageUrlResolver.resolve(imagePath);
             Log.d(TAG, "loadProfileImage: Loading image from URL = " + fullImageUrl);
 
             Glide.with(this)

@@ -4,10 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -29,6 +31,8 @@ import com.example.yummyrestaurant.models.OrderPackage;
 import com.example.yummyrestaurant.models.OrderPackageDish;
 import com.example.yummyrestaurant.utils.AnimationUtils;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.MaterialAvailabilityChecker;
+import com.example.yummyrestaurant.utils.PackageNameTranslator;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,6 +44,7 @@ import java.util.Locale;
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
 
     private static final int SPECIAL_OPTION_ID = 999; // Special requests/notes option ID
+    private static final int MAX_PACKAGE_REORDER_QUANTITY = 99;
     private List<Order> orders;
 
     public OrderAdapter(List<Order> orders) {
@@ -317,6 +322,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 // ===== 套餐訂單：導航到 BuildSetMenuActivity 進行重新選擇 =====
                 Log.d("OrderAdapter", "This is a PACKAGE order with " + order.getPackages().size() + " package(s)");
                 OrderPackage pkg = order.getPackages().get(0);
+                if (pkg == null || pkg.getPackageId() <= 0) {
+                    Toast.makeText(context, context.getString(R.string.reorder_package_unavailable), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (!CartManager.isOrderTypeSelected()) {
+                    Toast.makeText(context, context.getString(R.string.error_select_order_type_first), Toast.LENGTH_SHORT).show();
+                    Intent browseIntent = new Intent(context, com.example.yummyrestaurant.activities.BrowseMenuActivity.class);
+                    browseIntent.putExtra("open_package_tab_after_order_type_selection", true);
+                    browseIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    context.startActivity(browseIntent);
+                    return;
+                }
+
                 Log.d("OrderAdapter", "Package: id=" + pkg.getPackageId() + 
                            ", name=" + pkg.getPackageName() + 
                            ", dishes=" + (pkg.getDishes() != null ? pkg.getDishes().size() : 0));
@@ -336,15 +355,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 
                 Log.d("OrderAdapter", "Storing " + prefilledItems.size() + " items in CartManager for prefill");
                 CartManager.setPrefillPackageData(pkg.getPackageId(), prefilledItems);
-                
-                // 導航到 BuildSetMenuActivity
-                Intent intent = new Intent(context, com.example.yummyrestaurant.activities.BuildSetMenuActivity.class);
-                intent.putExtra("package_id", pkg.getPackageId());
-                intent.putExtra("is_reorder", true);
-                Log.d("OrderAdapter", "Navigating to BuildSetMenuActivity with package_id=" + pkg.getPackageId());
-                context.startActivity(intent);
-                
-                Toast.makeText(context, context.getString(R.string.please_customize_package), Toast.LENGTH_SHORT).show();
+
+                MenuItem packageItem = new MenuItem();
+                packageItem.setId(pkg.getPackageId());
+                packageItem.setName(pkg.getPackageName());
+                packageItem.setPrice(pkg.getPackagePrice() > 0 ? pkg.getPackagePrice() : pkg.getPackageCost());
+
+                resolveMaxPackageReorderQuantity(context, packageItem, maxQuantity -> {
+                    if (maxQuantity <= 0) {
+                        Toast.makeText(context, context.getString(R.string.reorder_package_unavailable), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    showPackageQuantityDialog(context, pkg, maxQuantity);
+                }, error -> Toast.makeText(context, context.getString(R.string.reorder_material_check_failed, error), Toast.LENGTH_SHORT).show());
             } else if (order.getItems() != null && order.getItems().size() > 0) {
                 // ===== 常規訂單：直接恢復到購物車 =====
                 Log.d("OrderAdapter", "This is a REGULAR order with " + order.getItems().size() + " item(s)");
@@ -353,6 +377,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 
                 int addedCount = 0;
                 for (OrderItem item : order.getItems()) {
+                    if (item == null || item.getItemId() <= 0 || item.getQuantity() <= 0) {
+                        Log.w("OrderAdapter", "Skipping invalid reorder item");
+                        continue;
+                    }
+
                     MenuItem menuItem = new MenuItem();
                     menuItem.setId(item.getItemId());
                     menuItem.setName(item.getName());
@@ -412,17 +441,37 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     // 創建 CartItem 並添加到購物車
                     CartItem cartItem = new CartItem(menuItem, customization);
                     CartManager.addItem(cartItem, item.getQuantity());
+                    addedCount++;
                     Log.d("OrderAdapter", "  ✅ CartItem added: " + item.getName() + " x" + item.getQuantity());
                 }
+
+                if (addedCount == 0) {
+                    Toast.makeText(context, context.getString(R.string.no_items_to_reorder), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                MaterialAvailabilityChecker.checkCartMaterialAvailability(context, new MaterialAvailabilityChecker.MaterialCheckCallback() {
+                    @Override
+                    public void onCheckComplete(boolean allAvailable, String message, org.json.JSONArray materialDetails) {
+                        if (allAvailable) {
+                            Toast.makeText(context, context.getString(R.string.order_restored_to_cart), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(context, context.getString(R.string.reorder_insufficient_ingredients), Toast.LENGTH_SHORT).show();
+                        }
+
+                        Intent intent = new Intent(context, com.example.yummyrestaurant.activities.CartActivity.class);
+                        context.startActivity(intent);
+                    }
+
+                    @Override
+                    public void onCheckError(String error) {
+                        Toast.makeText(context, context.getString(R.string.reorder_material_check_failed, error), Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(context, com.example.yummyrestaurant.activities.CartActivity.class);
+                        context.startActivity(intent);
+                    }
+                });
+                return;
                 
-                Toast.makeText(context, context.getString(R.string.order_restored_to_cart), Toast.LENGTH_SHORT).show();
-                Log.d("OrderAdapter", "✅ ALL ITEMS RESTORED TO CART - Ready for reorder");
-                
-                // 導航到購物車
-                Log.d("OrderAdapter", "🔄 Navigating to CartActivity...");
-                Intent intent = new Intent(context, com.example.yummyrestaurant.activities.CartActivity.class);
-                context.startActivity(intent);
-                Log.d("OrderAdapter", "✅ CartActivity started");
             } else {
                 Log.d("OrderAdapter", "❌ No items found in order");
                 Toast.makeText(context, context.getString(R.string.no_items_to_reorder), Toast.LENGTH_SHORT).show();
@@ -432,6 +481,134 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             Log.e("OrderAdapter", "Stack trace:", e);
             Toast.makeText(context, context.getString(R.string.error_with_reason, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private interface QuantityResultCallback {
+        void onResult(int quantity);
+    }
+
+    private interface QuantityErrorCallback {
+        void onError(String error);
+    }
+
+    private void resolveMaxPackageReorderQuantity(Context context, MenuItem packageItem, QuantityResultCallback resultCallback, QuantityErrorCallback errorCallback) {
+        probePackageQuantity(context, packageItem, 1, 0, resultCallback, errorCallback);
+    }
+
+    private void probePackageQuantity(Context context, MenuItem packageItem, int testQuantity, int bestQuantity, QuantityResultCallback resultCallback, QuantityErrorCallback errorCallback) {
+        if (testQuantity <= 0) {
+            resultCallback.onResult(bestQuantity);
+            return;
+        }
+
+        if (testQuantity > MAX_PACKAGE_REORDER_QUANTITY) {
+            resultCallback.onResult(bestQuantity);
+            return;
+        }
+
+        MaterialAvailabilityChecker.checkItemMaterialAvailability(context, packageItem, testQuantity, true, new MaterialAvailabilityChecker.MaterialCheckCallback() {
+            @Override
+            public void onCheckComplete(boolean allAvailable, String message, org.json.JSONArray materialDetails) {
+                if (allAvailable) {
+                    int nextQuantity = testQuantity >= MAX_PACKAGE_REORDER_QUANTITY ? testQuantity : Math.min(testQuantity * 2, MAX_PACKAGE_REORDER_QUANTITY);
+                    if (nextQuantity == testQuantity) {
+                        resultCallback.onResult(testQuantity);
+                    } else {
+                        probePackageQuantity(context, packageItem, nextQuantity, testQuantity, resultCallback, errorCallback);
+                    }
+                    return;
+                }
+
+                if (testQuantity == 1) {
+                    resultCallback.onResult(0);
+                } else {
+                    binarySearchPackageQuantity(context, packageItem, bestQuantity, testQuantity - 1, bestQuantity, resultCallback, errorCallback);
+                }
+            }
+
+            @Override
+            public void onCheckError(String error) {
+                errorCallback.onError(error);
+            }
+        });
+    }
+
+    private void binarySearchPackageQuantity(Context context, MenuItem packageItem, int low, int high, int bestQuantity, QuantityResultCallback resultCallback, QuantityErrorCallback errorCallback) {
+        if (low > high) {
+            resultCallback.onResult(bestQuantity);
+            return;
+        }
+
+        if (low == high) {
+            MaterialAvailabilityChecker.checkItemMaterialAvailability(context, packageItem, low, true, new MaterialAvailabilityChecker.MaterialCheckCallback() {
+                @Override
+                public void onCheckComplete(boolean allAvailable, String message, org.json.JSONArray materialDetails) {
+                    resultCallback.onResult(allAvailable ? low : bestQuantity);
+                }
+
+                @Override
+                public void onCheckError(String error) {
+                    errorCallback.onError(error);
+                }
+            });
+            return;
+        }
+
+        int mid = (low + high + 1) / 2;
+        MaterialAvailabilityChecker.checkItemMaterialAvailability(context, packageItem, mid, true, new MaterialAvailabilityChecker.MaterialCheckCallback() {
+            @Override
+            public void onCheckComplete(boolean allAvailable, String message, org.json.JSONArray materialDetails) {
+                if (allAvailable) {
+                    binarySearchPackageQuantity(context, packageItem, mid + 1, high, mid, resultCallback, errorCallback);
+                } else {
+                    binarySearchPackageQuantity(context, packageItem, low, mid - 1, bestQuantity, resultCallback, errorCallback);
+                }
+            }
+
+            @Override
+            public void onCheckError(String error) {
+                errorCallback.onError(error);
+            }
+        });
+    }
+
+    private void showPackageQuantityDialog(Context context, OrderPackage pkg, int maxQuantity) {
+        EditText input = new EditText(context);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setHint(context.getString(R.string.package_reorder_quantity_hint));
+        input.setText(String.valueOf(Math.max(1, Math.min(maxQuantity, pkg.getQuantity() > 0 ? pkg.getQuantity() : 1))));
+
+        new AlertDialog.Builder(context)
+                .setTitle(context.getString(R.string.package_reorder_quantity_title))
+                .setMessage(context.getString(R.string.package_reorder_quantity_message, maxQuantity))
+                .setView(input)
+                .setPositiveButton(context.getString(R.string.confirm), (dialog, which) -> {
+                    int quantity = 1;
+                    try {
+                        quantity = Integer.parseInt(input.getText().toString().trim());
+                    } catch (Exception ignored) {
+                    }
+
+                    if (quantity < 1 || quantity > maxQuantity) {
+                        Toast.makeText(context, context.getString(R.string.package_reorder_quantity_invalid, maxQuantity), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    openPackageBuilder(context, pkg, quantity);
+                })
+                .setNegativeButton(context.getString(R.string.cancel), (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void openPackageBuilder(Context context, OrderPackage pkg, int quantity) {
+        Intent intent = new Intent(context, com.example.yummyrestaurant.activities.BuildSetMenuActivity.class);
+        intent.putExtra("package_id", pkg.getPackageId());
+        intent.putExtra("is_reorder", true);
+        intent.putExtra("reorder_quantity", quantity);
+        Log.d("OrderAdapter", "Navigating to BuildSetMenuActivity with package_id=" + pkg.getPackageId() + ", reorder_quantity=" + quantity);
+        context.startActivity(intent);
+
+        Toast.makeText(context, context.getString(R.string.please_customize_package), Toast.LENGTH_SHORT).show();
     }
 
     private void showOrderDetails(Context context, Order order) {
@@ -721,7 +898,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         
         // Package name and quantity
         TextView packageInfo = new TextView(context);
-        packageInfo.setText("📦 " + packageItem.getName() + " × " + packageItem.getQuantity());
+        packageInfo.setText("📦 " + PackageNameTranslator.translate(context, packageItem.getName()) + " × " + packageItem.getQuantity());
         packageInfo.setTextSize(12);
         packageInfo.setTypeface(null, android.graphics.Typeface.BOLD);
         packageInfo.setTextColor(Color.parseColor("#212121"));

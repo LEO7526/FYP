@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.models.OrderItemCustomization;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         String imageUrl = item.getImage_url();
         if (imageUrl != null && !imageUrl.isEmpty()) {
             Glide.with(holder.itemView.getContext())
-                    .load(imageUrl)
+                    .load(ImageUrlResolver.resolve(imageUrl))
                     .placeholder(R.drawable.placeholder)
                     .error(R.drawable.error_image)
                     .into(holder.image);

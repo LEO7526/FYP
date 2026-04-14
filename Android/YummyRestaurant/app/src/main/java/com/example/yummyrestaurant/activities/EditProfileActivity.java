@@ -35,6 +35,7 @@ import com.example.yummyrestaurant.api.LoginCustomerApi;
 import com.example.yummyrestaurant.api.StaffUploadApi;
 import com.example.yummyrestaurant.models.BirthdayResponse;
 import com.example.yummyrestaurant.models.UploadResponse;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
 import com.example.yummyrestaurant.utils.RoleManager;
 
 import java.io.ByteArrayOutputStream;
@@ -147,7 +148,7 @@ public class EditProfileActivity extends ThemeBaseActivity {
         }
 
         if (imagePath != null && !imagePath.isEmpty()) {
-            String fullImageUrl = imagePath; // Now imagePath is the full GitHub URL
+            String fullImageUrl = ImageUrlResolver.resolve(imagePath);
             Log.d(TAG, "Loading profile image from: " + fullImageUrl);
 
             Glide.with(this)
@@ -254,9 +255,10 @@ public class EditProfileActivity extends ThemeBaseActivity {
                                     }
 
                                     RoleManager.setUserImageUrl(githubImageUrl);
+                                    String resolvedImageUrl = ImageUrlResolver.resolve(githubImageUrl);
 
                                     Glide.with(EditProfileActivity.this)
-                                            .load(githubImageUrl)
+                                            .load(resolvedImageUrl)
                                             .placeholder(R.drawable.default_avatar)
                                             .error(R.drawable.error_image)
                                             .into(profilePreview);
@@ -264,7 +266,7 @@ public class EditProfileActivity extends ThemeBaseActivity {
                                     Toast.makeText(EditProfileActivity.this, getString(R.string.image_uploaded), Toast.LENGTH_SHORT).show();
 
                                     Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
-                                    intent.putExtra("updatedImageUrl", githubImageUrl);
+                                    intent.putExtra("updatedImageUrl", resolvedImageUrl);
                                     startActivity(intent);
                                     finish();
                                 } else {

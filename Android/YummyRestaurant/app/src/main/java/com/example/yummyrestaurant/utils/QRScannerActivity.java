@@ -73,6 +73,9 @@ public class QRScannerActivity extends AppCompatActivity {
      * Verify table ID with backend and proceed if valid
      */
     private void verifyTableAndProceed(int tableId) {
+        Intent sourceIntent = getIntent();
+        boolean openPackageTabAfterOrderTypeSelection = sourceIntent.getBooleanExtra("open_package_tab_after_order_type_selection", false);
+
         TableManager.verifyTable(QRScannerActivity.this, tableId, new TableManager.TableVerificationCallback() {
             @Override
             public void onVerificationSuccess(TableManager.TableVerificationResponse response) {
@@ -95,6 +98,7 @@ public class QRScannerActivity extends AppCompatActivity {
                     Intent intent = new Intent(QRScannerActivity.this, BrowseMenuActivity.class);
                     intent.putExtra("table_number", response.table_id);
                     intent.putExtra("table_capacity", response.capacity);
+                    intent.putExtra("open_package_tab_after_order_type_selection", openPackageTabAfterOrderTypeSelection);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                     finish();

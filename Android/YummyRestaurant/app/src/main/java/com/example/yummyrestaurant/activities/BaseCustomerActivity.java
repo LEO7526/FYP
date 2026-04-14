@@ -106,8 +106,6 @@ public abstract class BaseCustomerActivity extends ThemeBaseActivity {
             return navigateProtected(R.id.orderBellIcon, BrowseMenuActivity.class, null, 0, null, null);
         } else if (id == R.id.couponIcon) {
             return navigateProtected(R.id.couponIcon, CouponActivity.class, null, 0, null, null);
-        } else if (id == R.id.membershipIcon) {
-            return navigateProtected(R.id.membershipIcon, MembershipActivity.class, null, 0, null, null);
         } else if (id == R.id.orderRecordIcon) {
             return navigateProtected(R.id.orderRecordIcon, OrderHistoryActivity.class, null, 0, null, null);
         } else if (id == R.id.profileIcon) {

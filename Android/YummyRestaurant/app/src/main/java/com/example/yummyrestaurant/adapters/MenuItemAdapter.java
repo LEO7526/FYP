@@ -29,6 +29,7 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.activities.DishDetailActivity;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -323,7 +324,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
         // Load dish image with Glide
         Glide.with(context)
-                .load(item.getImage_url())
+            .load(ImageUrlResolver.resolve(item.getImage_url()))
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error_image)
                 .listener(new com.bumptech.glide.request.RequestListener<Drawable>() {

@@ -52,6 +52,7 @@
     <string name="please_set_birthday_to_redeem">請先設定生日再兌換此優惠券</string>
     <string name="birthday_coupon_month_only">生日優惠券僅可於生日月份兌換</string>
     <string name="invalid_birthday_format">回傳的生日格式無效：%1$s</string>
+    <string name="birthday_not_set">未設定生日</string>
     <string name="error_parsing_birthday">解析生日時發生錯誤：%1$s</string>
     <string name="failed_check_birthday">檢查生日失敗</string>
     <string name="error_checking_birthday">檢查生日時發生錯誤：%1$s</string>
@@ -84,6 +85,10 @@
     <string name="choose_items_format">請選擇 %1$d 個%2$s</string>
     <string name="customization_saved">自訂已儲存</string>
     <string name="complete_selection">請完成您的選擇</string>
+    <string name="package_reorder_quantity_title">選擇重點數量</string>
+    <string name="package_reorder_quantity_message">最多可重點 %1$d 套。</string>
+    <string name="package_reorder_quantity_hint">數量</string>
+    <string name="package_reorder_quantity_invalid">請輸入 1 至 %1$d 之間的數量</string>
     <string name="unnamed_dish">未命名菜式</string>
     <string name="original_total_format">原價總計：$%1$s</string>
     <string name="discounted_total_format">折後總計：$%1$s</string>
@@ -225,7 +230,6 @@
     <string name="nav_my_bookings">我的預訂</string>
     <string name="nav_browse">瀏覽</string>
     <string name="nav_coupons">優惠券</string>
-    <string name="nav_member">會員</string>
     <string name="nav_orders">訂單</string>
     <string name="nav_profile">個人資料</string>
 
@@ -309,6 +313,9 @@
     <string name="please_customize_package">請先自訂套餐內容</string>
     <string name="order_restored_to_cart">已將訂單商品加入購物車</string>
     <string name="no_items_to_reorder">沒有可重新點選的商品</string>
+    <string name="reorder_package_unavailable">此套餐目前無法重新點選。</string>
+    <string name="reorder_insufficient_ingredients">部分食材暫時不足，請到購物車調整項目。</string>
+    <string name="reorder_material_check_failed">暫時無法檢查食材：%1$s</string>
     <string name="order_details_title_format">訂單詳情 - #%1$d</string>
     <string name="order_detail_order_id">訂單編號：</string>
     <string name="order_detail_date">日期：</string>

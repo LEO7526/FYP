@@ -26,6 +26,7 @@ import com.bumptech.glide.request.target.Target;
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.api.ApiConfig;
 import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
 import com.example.yummyrestaurant.utils.QRScannerActivity;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.android.material.navigation.NavigationView;
@@ -80,11 +81,12 @@ public class DashboardActivity extends ThemeBaseActivity implements NavigationVi
         } else {
             String imagePath = RoleManager.getUserImageUrl();
             if (imagePath != null && !imagePath.trim().isEmpty()) {
-                String fullUrl = ApiConfig.getBaseUrl(this) + imagePath;
-                Log.d("DashboardActivity", "Loading profile image from: " + fullUrl);
+                String fullUrl = imagePath.startsWith("http") ? imagePath : ApiConfig.getBaseUrl(this) + imagePath;
+                String resolvedUrl = ImageUrlResolver.resolve(fullUrl);
+                Log.d("DashboardActivity", "Loading profile image from: " + resolvedUrl);
 
                 Glide.with(this)
-                        .load(fullUrl)
+                    .load(resolvedUrl)
                         .placeholder(R.drawable.default_avatar)
                         .error(R.drawable.default_avatar)
                         .listener(new RequestListener<Drawable>() {

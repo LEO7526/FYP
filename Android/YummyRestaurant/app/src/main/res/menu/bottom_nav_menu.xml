@@ -9,10 +9,6 @@
         android:icon="@drawable/ic_coupon"
         android:title="@string/nav_coupons" />
     <item
-        android:id="@+id/membershipIcon"
-        android:icon="@drawable/ic_qr"
-        android:title="@string/nav_member" />
-    <item
         android:id="@+id/orderRecordIcon"
         android:icon="@drawable/ic_order_record"
         android:title="@string/nav_orders" />

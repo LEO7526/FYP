@@ -18,6 +18,7 @@ import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.AnimationUtils;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
 import com.example.yummyrestaurant.utils.MaterialAvailabilityChecker;
 
 import org.json.JSONArray;
@@ -252,7 +253,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
         });
 
         Glide.with(context)
-                .load(item != null ? item.getImage_url() : null)
+            .load(ImageUrlResolver.resolve(item != null ? item.getImage_url() : null))
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error_image)
                 .into(holder.image);

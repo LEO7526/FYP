@@ -77,6 +77,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     private Button btnMenuTab, btnPackageTab;
     private View tabUnderline;
     private String currentTab = "menu"; // "menu" or "package"
+    private boolean openPackageTabAfterOrderTypeSelection = false;
 
     // Category management
     private LinearLayout menuCategoryList, packageCategoryList;
@@ -114,6 +115,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         setupTabButtons();
         setupNavigationDrawer();
         setupOrderTypeButtons();
+
+        openPackageTabAfterOrderTypeSelection = getIntent().getBooleanExtra("open_package_tab_after_order_type_selection", false);
 
         updateCartBadge();
 
@@ -650,6 +653,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent); // update the stored Intent so onResume() sees the latest extras
+        openPackageTabAfterOrderTypeSelection = intent.getBooleanExtra("open_package_tab_after_order_type_selection", false);
     }
 
 
@@ -657,6 +661,11 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     protected void onResume() {
         super.onResume();
         updateCartBadge(); // refresh badge every time this screen becomes visible
+
+        if (openPackageTabAfterOrderTypeSelection && CartManager.isOrderTypeSelected() && packageContentContainer != null) {
+            openPackageTabAfterOrderTypeSelection = false;
+            packageContentContainer.post(() -> switchTab("package"));
+        }
     }
 
     // New: update cart badge from CartManager
@@ -696,6 +705,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             Toast.makeText(BrowseMenuActivity.this, getString(R.string.scanning_qr_code), Toast.LENGTH_SHORT).show();
             Intent qrScanIntent = new Intent(BrowseMenuActivity.this, 
                     com.example.yummyrestaurant.utils.QRScannerActivity.class);
+            qrScanIntent.putExtra("open_package_tab_after_order_type_selection", openPackageTabAfterOrderTypeSelection);
             startActivity(qrScanIntent);
             // Note: The QRScannerActivity will set order type and table number, 
             // then return to this activity
@@ -707,6 +717,11 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             // Menu already loaded, just update UI state
             adapter.notifyDataSetChanged();
             updateOverlayVisibility();
+
+            if (openPackageTabAfterOrderTypeSelection) {
+                openPackageTabAfterOrderTypeSelection = false;
+                switchTab("package");
+            }
         });
 
         // Update UI if already selected
@@ -714,6 +729,11 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         if (selectedType != null) {
             updateOrderTypeButtons(selectedType);
             menuRecyclerView.setVisibility(View.VISIBLE);
+
+            if (openPackageTabAfterOrderTypeSelection) {
+                openPackageTabAfterOrderTypeSelection = false;
+                btnPackageTab.post(() -> switchTab("package"));
+            }
         }
         
         // Show overlay if no order type selected yet

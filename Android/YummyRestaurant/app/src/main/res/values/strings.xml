@@ -124,6 +124,10 @@
     <string name="choose_items_format">Choose %1$d %2$s</string>
     <string name="customization_saved">Customization saved</string>
     <string name="complete_selection">Please complete your selection</string>
+    <string name="package_reorder_quantity_title">Choose Reorder Quantity</string>
+    <string name="package_reorder_quantity_message">You can reorder up to %1$d set(s).</string>
+    <string name="package_reorder_quantity_hint">Quantity</string>
+    <string name="package_reorder_quantity_invalid">Please enter a quantity between 1 and %1$d</string>
     <string name="unnamed_dish">Unnamed Dish</string>
     <string name="original_total_format">Original Total: $%1$s</string>
     <string name="discounted_total_format">Discounted Total: $%1$s</string>
@@ -265,7 +269,6 @@
     <string name="nav_my_bookings">My Bookings</string>
     <string name="nav_browse">Browse</string>
     <string name="nav_coupons">Coupons</string>
-    <string name="nav_member">Member</string>
     <string name="nav_orders">Orders</string>
     <string name="nav_profile">Profile</string>
 
@@ -350,6 +353,9 @@
     <string name="please_customize_package">Please customize your package</string>
     <string name="order_restored_to_cart">Order restored to cart!</string>
     <string name="no_items_to_reorder">No items to reorder</string>
+    <string name="reorder_package_unavailable">This package is no longer available for reorder.</string>
+    <string name="reorder_insufficient_ingredients">Some ingredients are currently unavailable. Please review your cart.</string>
+    <string name="reorder_material_check_failed">Unable to verify ingredients: %1$s</string>
     <string name="order_details_title_format">Order Details - #%1$d</string>
     <string name="order_detail_order_id">Order ID:</string>
     <string name="order_detail_date">Date:</string>

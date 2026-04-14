@@ -21,6 +21,7 @@ import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.Coupon;
 import com.example.yummyrestaurant.models.MenuItem;
 import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.example.yummyrestaurant.utils.CouponValidator;
 import com.example.yummyrestaurant.utils.MaterialAvailabilityChecker;
@@ -270,7 +271,7 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
         chopsticksImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
         
         // Load chopsticks image using Glide
-        String chopsticksImageUrl = "https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/22.jpg";
+        String chopsticksImageUrl = ImageUrlResolver.resolve("https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/22.jpg");
         Glide.with(this)
                 .load(chopsticksImageUrl)
                 .override(300, 300)
@@ -305,7 +306,7 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
                 chopsticks.setName(getString(R.string.wooden_chopsticks_name));
                     chopsticks.setPrice(1.00);
                     chopsticks.setCategory("Supplies");
-                    chopsticks.setImage_url("https://raw.githubusercontent.com/LEO7526/FYP/main/Image/dish/22.jpg");
+                    chopsticks.setImage_url(chopsticksImageUrl);
                     
                     // Create CartItem with chopsticks MenuItem and null customization
                     CartItem chopstickItem = new CartItem(chopsticks, null);

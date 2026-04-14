@@ -27,6 +27,7 @@ import com.example.yummyrestaurant.models.SetMenu;
 import com.example.yummyrestaurant.models.SetMenuResponse;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.LanguageManager;
+import com.example.yummyrestaurant.utils.PackageNameTranslator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
     private SetMenu currentSetMenu;
     private boolean isReorder = false;
     private int prefillPackageId = -1;
+    private int reorderQuantity = 1;
     private static final int CUSTOMIZE_REQUEST_CODE = 1001;
 
     @Override
@@ -55,6 +57,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
 
         int packageId = getIntent().getIntExtra("package_id", 1); // default to 1 if not passed
         isReorder = getIntent().getBooleanExtra("is_reorder", false);
+        reorderQuantity = Math.max(1, getIntent().getIntExtra("reorder_quantity", 1));
         prefillPackageId = packageId;
 
         MenuApi menuApi = RetrofitClient.getClient(this).create(MenuApi.class);
@@ -253,7 +256,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
 
         // Show confirmation dialog
         new AlertDialog.Builder(this)
-            .setTitle(getString(R.string.confirm_your_package, currentSetMenu.getName()))
+            .setTitle(getString(R.string.confirm_your_package, PackageNameTranslator.translate(this, currentSetMenu.getName())))
                 .setMessage(summary.toString())
             .setPositiveButton(getString(R.string.confirm), (dialog, which) -> {
                     // ✅ Add package item to cart (as a special marker item)
@@ -265,9 +268,9 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
                     packageMarker.setCategory("PACKAGE");
                     packageMarker.setImage_url(currentSetMenu.getImageUrl());  // ← 添加此行
 
-// Add marker item to cart (qty=1 represents the whole package)
+                    // Add marker item to cart with the selected reorder quantity
                     CartItem packageItem = new CartItem(packageMarker, null);
-                    CartManager.addItem(packageItem, 1);
+                    CartManager.addItem(packageItem, reorderQuantity);
                     
                     // Store the package details in CartManager for later use
                     CartManager.setPackageDetails(currentSetMenu.getId(), allChosen, discountedPrice);
@@ -277,7 +280,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
 
                     Toast.makeText(
                             BuildSetMenuActivity.this,
-                            getString(R.string.package_added_you_saved, currentSetMenu.getName(), String.format("%.2f", finalTotal - discountedPrice)),
+                            getString(R.string.package_added_you_saved, PackageNameTranslator.translate(BuildSetMenuActivity.this, currentSetMenu.getName()), String.format("%.2f", finalTotal - discountedPrice)),
                             Toast.LENGTH_LONG
                     ).show();
 
