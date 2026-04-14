@@ -45,6 +45,8 @@
     <string name="not_enough_points_to_redeem_coupon">积分不足，无法兑换此优惠券</string>
     <string name="not_enough_points_to_redeem">积分不足，无法兑换</string>
     <string name="select_quantity_to_redeem">选择兑换数量</string>
+    <string name="redeem_dialog_max_redeemable_format">最多可兑换：%1$d</string>
+    <string name="redeem_dialog_points_cost_format">本次扣除积分：%1$d</string>
     <string name="birthday_coupon_redeemed_this_year">您今年已经兑换过生日优惠券。</string>
     <string name="birthday_coupon_already_used">生日优惠券今年已使用。</string>
     <string name="redeem_failed">兑换失败</string>
@@ -239,6 +241,7 @@
     <string name="order_type_takeaway">外带</string>
     <string name="tab_menu">菜单</string>
     <string name="tab_package">套餐</string>
+    <string name="package_card_hint">点击自定义套餐内容</string>
 
     <string name="profile_user_name_placeholder">用户名称</string>
     <string name="profile_user_email_placeholder">user@example.com</string>

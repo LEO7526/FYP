@@ -1,14 +1,16 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.NumberPicker;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,11 +34,8 @@ import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.airbnb.lottie.LottieAnimationView;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -256,26 +255,43 @@ public class CouponActivity extends BaseCustomerActivity {
             return;
         }
 
-        // Build options array: "1", "2", "3", ...
-        String[] options = new String[maxRedeemable];
-        for (int i = 0; i < maxRedeemable; i++) {
-            options[i] = String.valueOf(i + 1);
-        }
+        showRedeemQuantityDialog(coupon, maxRedeemable, requiredPoints);
+    }
 
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_quantity_selector, null);
-        ListView listView = dialogView.findViewById(R.id.quantityListView);
-        ArrayAdapter<String> adapterList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, options);
-        listView.setAdapter(adapterList);
+    private void showRedeemQuantityDialog(Coupon coupon, int maxRedeemable, int requiredPoints) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_redeem_quantity, null);
+        TextView titleView = dialogView.findViewById(R.id.tvRedeemDialogTitle);
+        TextView hintView = dialogView.findViewById(R.id.tvRedeemDialogHint);
+        NumberPicker quantityPicker = dialogView.findViewById(R.id.npRedeemQuantity);
+        Button cancelButton = dialogView.findViewById(R.id.btnRedeemQtyCancel);
+        Button confirmButton = dialogView.findViewById(R.id.btnRedeemQtyConfirm);
+
+        titleView.setText(getString(R.string.select_quantity_to_redeem));
+        quantityPicker.setMinValue(1);
+        quantityPicker.setMaxValue(maxRedeemable);
+        quantityPicker.setWrapSelectorWheel(false);
+
+        Runnable refreshHint = () -> {
+            int qty = quantityPicker.getValue();
+            String hint = getString(R.string.redeem_dialog_max_redeemable_format, maxRedeemable);
+            if (requiredPoints > 0) {
+                hint = hint + "\n" + getString(R.string.redeem_dialog_points_cost_format, requiredPoints * qty);
+            }
+            hintView.setText(hint);
+        };
+        refreshHint.run();
+
+        quantityPicker.setOnValueChangedListener((picker, oldVal, newVal) -> refreshHint.run());
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.select_quantity_to_redeem))
                 .setView(dialogView)
-                .setNegativeButton(android.R.string.cancel, null)
+                .setCancelable(true)
                 .create();
 
-        listView.setOnItemClickListener((parent, view, position, id) -> {
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        confirmButton.setOnClickListener(v -> {
             dialog.dismiss();
-            int quantity = position + 1;
+            int quantity = quantityPicker.getValue();
             Log.d(TAG, "Redeeming " + quantity + " of couponId=" + coupon.getCouponId());
 
             CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
@@ -301,8 +317,8 @@ public class CouponActivity extends BaseCustomerActivity {
                                                 getString(R.string.birthday_coupon_redeemed_this_year),
                                                 Toast.LENGTH_LONG).show();
 
-                                        coupon.setRedeemable(false);   // mark coupon
-                                        adapter.notifyDataSetChanged(); // refresh list
+                                        coupon.setRedeemable(false);
+                                        adapter.notifyDataSetChanged();
                                     } else {
                                         Toast.makeText(CouponActivity.this,
                                                 res.getError() != null ? res.getError() : getString(R.string.redeem_failed),
@@ -322,6 +338,17 @@ public class CouponActivity extends BaseCustomerActivity {
         });
 
         dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            int screenWidth = getResources().getDisplayMetrics().widthPixels;
+            int targetWidth = (int) (screenWidth * 0.9f);
+            int maxWidth = dpToPx(420);
+            dialog.getWindow().setLayout(Math.min(targetWidth, maxWidth), ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 
     private void showRedeemSuccessOverlay(String message) {

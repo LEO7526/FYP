@@ -45,6 +45,8 @@
     <string name="not_enough_points_to_redeem_coupon">積分不足，無法兌換此優惠券</string>
     <string name="not_enough_points_to_redeem">積分不足，無法兌換</string>
     <string name="select_quantity_to_redeem">選擇兌換數量</string>
+    <string name="redeem_dialog_max_redeemable_format">最多可兌換：%1$d</string>
+    <string name="redeem_dialog_points_cost_format">本次扣除積分：%1$d</string>
     <string name="birthday_coupon_redeemed_this_year">您今年已經兌換過生日優惠券。</string>
     <string name="birthday_coupon_already_used">生日優惠券今年已使用。</string>
     <string name="redeem_failed">兌換失敗</string>
@@ -239,6 +241,7 @@
     <string name="order_type_takeaway">外賣</string>
     <string name="tab_menu">菜單</string>
     <string name="tab_package">套餐</string>
+    <string name="package_card_hint">按一下自訂套餐內容</string>
 
     <string name="profile_user_name_placeholder">用戶名稱</string>
     <string name="profile_user_email_placeholder">user@example.com</string>

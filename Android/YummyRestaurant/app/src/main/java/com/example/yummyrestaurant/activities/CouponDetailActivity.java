@@ -1,8 +1,13 @@
 package com.example.yummyrestaurant.activities;
 
 import android.os.Bundle;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -143,18 +148,52 @@ public class CouponDetailActivity extends BaseCustomerActivity {
             return;
         }
 
-        String[] options = new String[maxRedeemable];
-        for (int i = 0; i < maxRedeemable; i++) {
-            options[i] = String.valueOf(i + 1);
-        }
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_redeem_quantity, null);
+        TextView titleView = dialogView.findViewById(R.id.tvRedeemDialogTitle);
+        TextView hintView = dialogView.findViewById(R.id.tvRedeemDialogHint);
+        NumberPicker quantityPicker = dialogView.findViewById(R.id.npRedeemQuantity);
+        Button cancelButton = dialogView.findViewById(R.id.btnRedeemQtyCancel);
+        Button confirmButton = dialogView.findViewById(R.id.btnRedeemQtyConfirm);
 
-        new AlertDialog.Builder(this)
-            .setTitle(getString(R.string.select_quantity_to_redeem))
-                .setItems(options, (dialog, which) -> {
-                    int quantity = which + 1;
-                    redeemCoupon(couponId, customerId, quantity);
-                })
-                .show();
+        titleView.setText(getString(R.string.select_quantity_to_redeem));
+        quantityPicker.setMinValue(1);
+        quantityPicker.setMaxValue(maxRedeemable);
+        quantityPicker.setWrapSelectorWheel(false);
+
+        Runnable refreshHint = () -> {
+            int qty = quantityPicker.getValue();
+            String hint = getString(R.string.redeem_dialog_max_redeemable_format, maxRedeemable);
+            if (requiredPoints > 0) {
+                hint = hint + "\n" + getString(R.string.redeem_dialog_points_cost_format, requiredPoints * qty);
+            }
+            hintView.setText(hint);
+        };
+        refreshHint.run();
+        quantityPicker.setOnValueChangedListener((picker, oldVal, newVal) -> refreshHint.run());
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        confirmButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            redeemCoupon(couponId, customerId, quantityPicker.getValue());
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            int screenWidth = getResources().getDisplayMetrics().widthPixels;
+            int targetWidth = (int) (screenWidth * 0.9f);
+            int maxWidth = dpToPx(420);
+            dialog.getWindow().setLayout(Math.min(targetWidth, maxWidth), ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 
     private void redeemCoupon(int couponId, int customerId, int quantity) {

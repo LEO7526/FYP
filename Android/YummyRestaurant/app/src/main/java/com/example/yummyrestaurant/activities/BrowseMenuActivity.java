@@ -38,6 +38,7 @@ import com.example.yummyrestaurant.models.SetMenu;
 import com.example.yummyrestaurant.utils.BadgeManager;
 import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.LanguageManager;
+import com.example.yummyrestaurant.utils.PackageNameTranslator;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.android.material.navigation.NavigationView;
 import com.airbnb.lottie.LottieAnimationView;
@@ -45,6 +46,7 @@ import com.airbnb.lottie.LottieAnimationView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,6 +80,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
     private View tabUnderline;
     private String currentTab = "menu"; // "menu" or "package"
     private boolean openPackageTabAfterOrderTypeSelection = false;
+    private int pendingReorderPackageId = -1;
+    private int pendingReorderQuantity = 1;
 
     // Category management
     private LinearLayout menuCategoryList, packageCategoryList;
@@ -117,6 +121,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         setupOrderTypeButtons();
 
         openPackageTabAfterOrderTypeSelection = getIntent().getBooleanExtra("open_package_tab_after_order_type_selection", false);
+        pendingReorderPackageId = getIntent().getIntExtra("pending_reorder_package_id", -1);
+        pendingReorderQuantity = Math.max(1, getIntent().getIntExtra("pending_reorder_quantity", 1));
 
         updateCartBadge();
 
@@ -197,7 +203,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         if ("menu".equals(tab)) {
             btnMenuTab.setTextColor(getResources().getColor(R.color.colorPrimary));
             btnMenuTab.setTypeface(null, android.graphics.Typeface.BOLD);
-            btnPackageTab.setTextColor(getResources().getColor(R.color.gray_text));
+            btnPackageTab.setTextColor(getResources().getColor(R.color.black));
             btnPackageTab.setTypeface(null, android.graphics.Typeface.NORMAL);
 
             // Animate underline to menu tab
@@ -208,7 +214,7 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         } else {
             btnPackageTab.setTextColor(getResources().getColor(R.color.colorPrimary));
             btnPackageTab.setTypeface(null, android.graphics.Typeface.BOLD);
-            btnMenuTab.setTextColor(getResources().getColor(R.color.gray_text));
+            btnMenuTab.setTextColor(getResources().getColor(R.color.black));
             btnMenuTab.setTypeface(null, android.graphics.Typeface.NORMAL);
 
             // Animate underline to package tab
@@ -287,16 +293,18 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             Button btn = new Button(this);
             btn.setText(category);
             btn.setTextSize(12);
-            btn.setBackgroundColor(getResources().getColor(R.color.white));
-            btn.setTextColor(getResources().getColor(R.color.purple_700));
+            btn.setAllCaps(false);
+            btn.setBackgroundResource(R.drawable.sidebar_category_unselected_bg);
+            btn.setTextColor(getResources().getColor(R.color.black));
+            btn.setElevation(0f);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
-            params.setMargins(0, 4, 0, 4);
+            params.setMargins(0, 6, 0, 6);
             btn.setLayoutParams(params);
-            btn.setPadding(8, 8, 8, 8);
+            btn.setPadding(12, 14, 12, 14);
 
             final String categoryName = category;
             btn.setOnClickListener(v -> {
@@ -330,27 +338,30 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         packageCategoryList.removeAllViews();
 
         // Get unique package types from packages
-        Set<String> types = new HashSet<>();
+        Set<String> types = new LinkedHashSet<>();
         for (SetMenu pkg : packages) {
-            types.add(pkg.getName());
+            types.add(PackageNameTranslator.canonicalize(pkg.getName()));
         }
 
         for (String type : types) {
             Button btn = new Button(this);
-            btn.setText(type);
+            btn.setText(PackageNameTranslator.translate(this, type));
             btn.setTextSize(12);
-            btn.setBackgroundColor(getResources().getColor(R.color.white));
-            btn.setTextColor(getResources().getColor(R.color.purple_700));
+            btn.setAllCaps(false);
+            btn.setBackgroundResource(R.drawable.sidebar_category_unselected_bg);
+            btn.setTextColor(getResources().getColor(R.color.black));
+            btn.setElevation(0f);
+            btn.setTag(PackageNameTranslator.canonicalize(type));
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
-            params.setMargins(0, 4, 0, 4);
+            params.setMargins(0, 6, 0, 6);
             btn.setLayoutParams(params);
-            btn.setPadding(8, 8, 8, 8);
+            btn.setPadding(12, 14, 12, 14);
 
-            final String packageName = type;
+            final String packageName = PackageNameTranslator.canonicalize(type);
             btn.setOnClickListener(v -> {
                 // Scroll to package of this type
                 updatePackageCategoryHighlight(packageName);
@@ -369,11 +380,11 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             if (child instanceof Button) {
                 Button btn = (Button) child;
                 if (btn.getText().toString().equals(selectedCategory)) {
-                    btn.setBackgroundColor(getResources().getColor(R.color.purple_200));
-                    btn.setTextColor(getResources().getColor(R.color.purple_700));
+                    btn.setBackgroundResource(R.drawable.sidebar_category_selected_bg);
+                    btn.setTextColor(getResources().getColor(R.color.white));
                 } else {
-                    btn.setBackgroundColor(getResources().getColor(R.color.white));
-                    btn.setTextColor(getResources().getColor(R.color.gray_text));
+                    btn.setBackgroundResource(R.drawable.sidebar_category_unselected_bg);
+                    btn.setTextColor(getResources().getColor(R.color.black));
                 }
             }
         }
@@ -460,12 +471,13 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             View child = packageCategoryList.getChildAt(i);
             if (child instanceof Button) {
                 Button btn = (Button) child;
-                if (btn.getText().toString().equals(selectedType)) {
-                    btn.setBackgroundColor(getResources().getColor(R.color.purple_200));
-                    btn.setTextColor(getResources().getColor(R.color.purple_700));
+                String buttonType = btn.getTag() != null ? String.valueOf(btn.getTag()) : PackageNameTranslator.canonicalize(btn.getText().toString());
+                if (buttonType.equalsIgnoreCase(PackageNameTranslator.canonicalize(selectedType))) {
+                    btn.setBackgroundResource(R.drawable.sidebar_category_selected_bg);
+                    btn.setTextColor(getResources().getColor(R.color.white));
                 } else {
-                    btn.setBackgroundColor(getResources().getColor(R.color.white));
-                    btn.setTextColor(getResources().getColor(R.color.gray_text));
+                    btn.setBackgroundResource(R.drawable.sidebar_category_unselected_bg);
+                    btn.setTextColor(getResources().getColor(R.color.black));
                 }
             }
         }
@@ -654,6 +666,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         super.onNewIntent(intent);
         setIntent(intent); // update the stored Intent so onResume() sees the latest extras
         openPackageTabAfterOrderTypeSelection = intent.getBooleanExtra("open_package_tab_after_order_type_selection", false);
+        pendingReorderPackageId = intent.getIntExtra("pending_reorder_package_id", -1);
+        pendingReorderQuantity = Math.max(1, intent.getIntExtra("pending_reorder_quantity", 1));
     }
 
 
@@ -662,10 +676,33 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         super.onResume();
         updateCartBadge(); // refresh badge every time this screen becomes visible
 
+        if (navigateToPendingPackageReorderIfReady()) {
+            return;
+        }
+
         if (openPackageTabAfterOrderTypeSelection && CartManager.isOrderTypeSelected() && packageContentContainer != null) {
             openPackageTabAfterOrderTypeSelection = false;
             packageContentContainer.post(() -> switchTab("package"));
         }
+    }
+
+    private boolean navigateToPendingPackageReorderIfReady() {
+        if (pendingReorderPackageId <= 0 || !CartManager.isOrderTypeSelected()) {
+            return false;
+        }
+
+        int packageId = pendingReorderPackageId;
+        int quantity = pendingReorderQuantity;
+        pendingReorderPackageId = -1;
+        pendingReorderQuantity = 1;
+        openPackageTabAfterOrderTypeSelection = false;
+
+        Intent intent = new Intent(this, BuildSetMenuActivity.class);
+        intent.putExtra("package_id", packageId);
+        intent.putExtra("is_reorder", true);
+        intent.putExtra("reorder_quantity", quantity);
+        startActivity(intent);
+        return true;
     }
 
     // New: update cart badge from CartManager
@@ -706,6 +743,8 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             Intent qrScanIntent = new Intent(BrowseMenuActivity.this, 
                     com.example.yummyrestaurant.utils.QRScannerActivity.class);
             qrScanIntent.putExtra("open_package_tab_after_order_type_selection", openPackageTabAfterOrderTypeSelection);
+            qrScanIntent.putExtra("pending_reorder_package_id", pendingReorderPackageId);
+            qrScanIntent.putExtra("pending_reorder_quantity", pendingReorderQuantity);
             startActivity(qrScanIntent);
             // Note: The QRScannerActivity will set order type and table number, 
             // then return to this activity
@@ -718,6 +757,10 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
             adapter.notifyDataSetChanged();
             updateOverlayVisibility();
 
+            if (navigateToPendingPackageReorderIfReady()) {
+                return;
+            }
+
             if (openPackageTabAfterOrderTypeSelection) {
                 openPackageTabAfterOrderTypeSelection = false;
                 switchTab("package");
@@ -729,6 +772,10 @@ public class BrowseMenuActivity extends BaseCustomerActivity implements Packages
         if (selectedType != null) {
             updateOrderTypeButtons(selectedType);
             menuRecyclerView.setVisibility(View.VISIBLE);
+
+            if (navigateToPendingPackageReorderIfReady()) {
+                return;
+            }
 
             if (openPackageTabAfterOrderTypeSelection) {
                 openPackageTabAfterOrderTypeSelection = false;

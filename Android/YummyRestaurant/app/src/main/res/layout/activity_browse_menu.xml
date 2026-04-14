@@ -151,7 +151,7 @@
                     android:layout_weight="1"
                     android:text="@string/tab_package"
                     android:textSize="14sp"
-                    android:textColor="@color/gray_text"
+                    android:textColor="@color/black"
                     android:background="@color/transparent"
                     style="?attr/buttonBarButtonStyle" />
             </LinearLayout>
@@ -193,7 +193,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.3"
-                android:background="@color/light_gray"
+                android:background="@drawable/sidebar_panel_background"
                 android:scrollbars="none">
 
                 <LinearLayout
@@ -233,7 +233,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.3"
-                android:background="@color/light_gray"
+                android:background="@drawable/sidebar_panel_background"
                 android:scrollbars="none">
 
                 <LinearLayout
@@ -250,7 +250,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.7"
-                android:padding="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:background="@drawable/package_content_background"
                 android:clipToPadding="false" />
         </LinearLayout>
 

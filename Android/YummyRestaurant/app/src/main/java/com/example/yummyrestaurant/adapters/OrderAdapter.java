@@ -327,15 +327,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     return;
                 }
 
-                if (!CartManager.isOrderTypeSelected()) {
-                    Toast.makeText(context, context.getString(R.string.error_select_order_type_first), Toast.LENGTH_SHORT).show();
-                    Intent browseIntent = new Intent(context, com.example.yummyrestaurant.activities.BrowseMenuActivity.class);
-                    browseIntent.putExtra("open_package_tab_after_order_type_selection", true);
-                    browseIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    context.startActivity(browseIntent);
-                    return;
-                }
-
                 Log.d("OrderAdapter", "Package: id=" + pkg.getPackageId() + 
                            ", name=" + pkg.getPackageName() + 
                            ", dishes=" + (pkg.getDishes() != null ? pkg.getDishes().size() : 0));
@@ -355,6 +346,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 
                 Log.d("OrderAdapter", "Storing " + prefilledItems.size() + " items in CartManager for prefill");
                 CartManager.setPrefillPackageData(pkg.getPackageId(), prefilledItems);
+
+                if (!CartManager.isOrderTypeSelected()) {
+                    int fallbackQuantity = pkg.getQuantity() > 0 ? pkg.getQuantity() : 1;
+                    Toast.makeText(context, context.getString(R.string.error_select_order_type_first), Toast.LENGTH_SHORT).show();
+                    Intent browseIntent = new Intent(context, com.example.yummyrestaurant.activities.BrowseMenuActivity.class);
+                    browseIntent.putExtra("open_package_tab_after_order_type_selection", true);
+                    browseIntent.putExtra("pending_reorder_package_id", pkg.getPackageId());
+                    browseIntent.putExtra("pending_reorder_quantity", fallbackQuantity);
+                    browseIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    context.startActivity(browseIntent);
+                    return;
+                }
 
                 MenuItem packageItem = new MenuItem();
                 packageItem.setId(pkg.getPackageId());

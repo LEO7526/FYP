@@ -75,6 +75,8 @@ public class QRScannerActivity extends AppCompatActivity {
     private void verifyTableAndProceed(int tableId) {
         Intent sourceIntent = getIntent();
         boolean openPackageTabAfterOrderTypeSelection = sourceIntent.getBooleanExtra("open_package_tab_after_order_type_selection", false);
+        int pendingReorderPackageId = sourceIntent.getIntExtra("pending_reorder_package_id", -1);
+        int pendingReorderQuantity = Math.max(1, sourceIntent.getIntExtra("pending_reorder_quantity", 1));
 
         TableManager.verifyTable(QRScannerActivity.this, tableId, new TableManager.TableVerificationCallback() {
             @Override
@@ -99,6 +101,8 @@ public class QRScannerActivity extends AppCompatActivity {
                     intent.putExtra("table_number", response.table_id);
                     intent.putExtra("table_capacity", response.capacity);
                     intent.putExtra("open_package_tab_after_order_type_selection", openPackageTabAfterOrderTypeSelection);
+                    intent.putExtra("pending_reorder_package_id", pendingReorderPackageId);
+                    intent.putExtra("pending_reorder_quantity", pendingReorderQuantity);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                     finish();
