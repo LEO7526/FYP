@@ -67,6 +67,9 @@
             android:name=".activities.CustomerHomeActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.BrowseMenuActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.BaseCustomerActivity"
             android:exported="false" />
         <activity
