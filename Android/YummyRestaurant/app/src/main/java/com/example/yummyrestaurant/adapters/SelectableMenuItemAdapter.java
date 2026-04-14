@@ -1,6 +1,5 @@
 package com.example.yummyrestaurant.adapters;
 
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,10 +71,10 @@ public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMe
         // Highlight if selected
         boolean isSelected = selectedItems.contains(item);
         if (isSelected) {
-            holder.root.setBackgroundResource(R.drawable.item_selected_background);
+            holder.root.setBackgroundResource(R.drawable.set_menu_item_selected_bg);
             holder.customizeBtn.setVisibility(View.VISIBLE);
         } else {
-            holder.root.setBackgroundColor(Color.TRANSPARENT);
+            holder.root.setBackgroundResource(R.drawable.set_menu_item_unselected_bg);
             holder.customizeBtn.setVisibility(View.GONE);
         }
 

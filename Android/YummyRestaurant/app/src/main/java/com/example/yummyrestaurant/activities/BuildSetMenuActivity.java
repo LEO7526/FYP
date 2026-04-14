@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
 
 import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.SelectableMenuItemAdapter;
@@ -118,9 +119,18 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
             // 1. Create label
             TextView label = new TextView(this);
             label.setText(getString(R.string.choose_items_format, type.getOptionalQuantity(), type.getName()));
-            label.setTextSize(16f);
+                label.setTextSize(15f);
             label.setTypeface(null, Typeface.BOLD);
-            label.setPadding(0, 24, 0, 8);
+                label.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+                label.setBackgroundResource(R.drawable.set_menu_section_title_bg);
+                label.setPadding(20, 14, 20, 14);
+                LinearLayout.LayoutParams labelLp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+                labelLp.topMargin = 16;
+                labelLp.bottomMargin = 10;
+                label.setLayoutParams(labelLp);
             packageContainer.addView(label);
 
             // 2. Create RecyclerView
@@ -130,6 +140,8 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
                     (int) getResources().getDimension(R.dimen.recycler_height)
             ));
             rv.setNestedScrollingEnabled(false);
+                rv.setClipToPadding(false);
+                rv.setPadding(4, 0, 4, 0);
 
             // 3. Setup adapter
             SelectableMenuItemAdapter adapter = new SelectableMenuItemAdapter(
@@ -148,6 +160,10 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
             
             rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
             rv.setAdapter(adapter);
+
+            LinearLayout.LayoutParams rvLp = (LinearLayout.LayoutParams) rv.getLayoutParams();
+            rvLp.bottomMargin = 8;
+            rv.setLayoutParams(rvLp);
 
             // 4. 應用預填數據（如果是 Reorder）
             if (isReorder && prefillPackageId > 0) {

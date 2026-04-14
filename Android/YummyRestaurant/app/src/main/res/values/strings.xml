@@ -124,6 +124,9 @@
     <string name="no_menu_data">No menu data</string>
     <string name="failed_load_set_menu">Failed to load set menu</string>
     <string name="choose_items_format">Choose %1$d %2$s</string>
+    <string name="build_set_menu_title">Build Your Set Menu</string>
+    <string name="build_set_menu_subtitle">Pick the required items in each section to complete your package.</string>
+    <string name="add_set_menu_to_cart">Add Set Menu to Cart</string>
     <string name="customization_saved">Customization saved</string>
     <string name="complete_selection">Please complete your selection</string>
     <string name="package_reorder_quantity_title">Choose Reorder Quantity</string>
@@ -348,7 +351,9 @@
     <string name="time_hours_ago">%1$d hour(s) ago</string>
     <string name="time_days_ago">%1$d day(s) ago</string>
     <string name="status_awaiting_cash_payment">Awaiting Cash Payment</string>
+    <string name="status_unpaid">Unpaid</string>
     <string name="status_pending">Pending</string>
+    <string name="status_done">Done</string>
     <string name="status_preparing">Preparing</string>
     <string name="status_delivered">Delivered</string>
     <string name="status_paid">Paid</string>

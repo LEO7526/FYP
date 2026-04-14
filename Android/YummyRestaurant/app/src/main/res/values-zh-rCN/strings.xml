@@ -85,6 +85,9 @@
     <string name="no_menu_data">没有菜单数据</string>
     <string name="failed_load_set_menu">加载套餐失败</string>
     <string name="choose_items_format">请选择 %1$d 个%2$s</string>
+    <string name="build_set_menu_title">自定义套餐</string>
+    <string name="build_set_menu_subtitle">请按每个分类选齐指定份数，即可加入购物车。</string>
+    <string name="add_set_menu_to_cart">加入套餐到购物车</string>
     <string name="customization_saved">自定义已保存</string>
     <string name="complete_selection">请完成您的选择</string>
     <string name="package_reorder_quantity_title">选择重订数量</string>
@@ -308,7 +311,9 @@
     <string name="time_hours_ago">%1$d 小时前</string>
     <string name="time_days_ago">%1$d 天前</string>
     <string name="status_awaiting_cash_payment">等待现金确认</string>
+    <string name="status_unpaid">未付款</string>
     <string name="status_pending">待处理</string>
+    <string name="status_done">已完成</string>
     <string name="status_preparing">准备中</string>
     <string name="status_delivered">已送达</string>
     <string name="status_paid">已付款</string>

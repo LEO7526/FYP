@@ -1,13 +1,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/itemRoot"
     android:orientation="vertical"
-    android:layout_width="wrap_content"
+    android:layout_width="132dp"
     android:layout_height="wrap_content"
-    android:padding="8dp"
+    android:layout_marginEnd="10dp"
+    android:padding="10dp"
     android:gravity="center"
     android:clickable="true"
     android:focusable="true"
-    android:background="?attr/selectableItemBackground">
+    android:background="@drawable/set_menu_item_unselected_bg">
 
     <ImageView
         android:id="@+id/itemImage"
@@ -20,12 +21,12 @@
 
     <TextView
         android:id="@+id/itemName"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/dish_name_placeholder"
         android:textStyle="bold"
         android:textSize="14sp"
-        android:textColor="#333333"
+        android:textColor="@android:color/black"
         android:gravity="center"
         android:layout_marginTop="4dp" />
 
@@ -38,7 +39,8 @@
         android:padding="4dp"
         android:layout_marginTop="4dp"
         android:visibility="gone"
-        android:backgroundTint="#FF9800"
+        android:background="@drawable/set_menu_confirm_button"
+        android:textColor="@android:color/white"
         android:textAllCaps="false"
         android:textStyle="bold" />
 

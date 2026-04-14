@@ -259,24 +259,24 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         
         switch (status) {
             case 0:
-                statusText = holder.itemView.getContext().getString(R.string.status_awaiting_cash_payment);
-                backgroundColor = Color.parseColor("#FF5722"); // 橘紅色 - 需要注意
+                statusText = holder.itemView.getContext().getString(R.string.status_unpaid);
+                backgroundColor = Color.parseColor("#FF9800"); // 橙色 - 前台未付款
                 break;
             case 1:
                 statusText = holder.itemView.getContext().getString(R.string.status_pending);
                 backgroundColor = Color.parseColor("#FFC107"); // 黃色
                 break;
             case 2:
-                statusText = holder.itemView.getContext().getString(R.string.status_preparing);
-                backgroundColor = Color.parseColor("#2196F3"); // 藍色
+                statusText = holder.itemView.getContext().getString(R.string.status_done);
+                backgroundColor = Color.parseColor("#4CAF50"); // 綠色 - 已完成
                 break;
             case 3:
-                statusText = holder.itemView.getContext().getString(R.string.status_delivered);
-                backgroundColor = Color.parseColor("#4CAF50"); // 綠色
+                statusText = holder.itemView.getContext().getString(R.string.cancelled);
+                backgroundColor = Color.parseColor("#F44336"); // 紅色
                 break;
             case 4:
                 statusText = holder.itemView.getContext().getString(R.string.cancelled);
-                backgroundColor = Color.parseColor("#F44336"); // 紅色
+                backgroundColor = Color.parseColor("#F44336"); // 相容舊資料
                 break;
             case 5:
                 statusText = holder.itemView.getContext().getString(R.string.status_paid);
@@ -294,18 +294,21 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     private void setStatusColorBar(OrderViewHolder holder, int status) {
         int color;
         switch (status) {
+            case 0:
+                color = Color.parseColor("#FF9800"); // 未付款
+                break;
             case 1:
                 color = Color.parseColor("#FFC107"); // 黃色
                 break;
             case 2:
-                color = Color.parseColor("#2196F3"); // 藍色
+                color = Color.parseColor("#4CAF50"); // 已完成
                 break;
             case 3:
+            case 4:
+                color = Color.parseColor("#F44336"); // 已取消
+                break;
             case 5:
                 color = Color.parseColor("#4CAF50"); // 綠色
-                break;
-            case 4:
-                color = Color.parseColor("#F44336"); // 紅色
                 break;
             default:
                 color = Color.parseColor("#9E9E9E"); // 灰色
@@ -860,11 +863,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     private String getStatusText(Context context, int status) {
         switch (status) {
-            case 0: return context.getString(R.string.status_awaiting_cash_payment);
+            case 0: return context.getString(R.string.status_unpaid);
             case 1: return context.getString(R.string.status_pending);
-            case 2: return context.getString(R.string.status_preparing);
-            case 3: return context.getString(R.string.status_delivered);
-            case 4: return context.getString(R.string.cancelled);
+            case 2: return context.getString(R.string.status_done);
+            case 3: return context.getString(R.string.cancelled);
+            case 4: return context.getString(R.string.cancelled); // 相容舊資料
             case 5: return context.getString(R.string.status_paid);
             default: return context.getString(R.string.status_unknown);
         }
