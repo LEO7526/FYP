@@ -75,6 +75,7 @@
     <string name="proceed_without_coupon">不使用優惠券繼續</string>
     <string name="no_coupons_found">找不到優惠券</string>
     <string name="no_coupons_available_to_use">沒有可使用的優惠券</string>
+    <string name="no_coupons_in_my_coupon_page">目前沒有可使用的優惠券。</string>
     <string name="select_quantity_to_use">選擇使用數量</string>
     <string name="coupon_not_valid_for_cart">此優惠券不適用於目前購物車</string>
     <string name="can_only_use_more_coupon">此優惠券您最多還可使用 %1$d 張</string>
@@ -220,6 +221,11 @@
     <string name="booking_id_format">預訂 #%1$d</string>
     <string name="table_people_format">餐桌 %1$d • %2$d 人</string>
     <string name="purpose_format">用途：%1$s</string>
+    <string name="purpose_value_family_dinner">家庭聚餐</string>
+    <string name="purpose_value_date_night">約會晚餐</string>
+    <string name="purpose_value_business_meeting">商務會面</string>
+    <string name="purpose_value_lunch_meeting">午餐會議</string>
+    <string name="purpose_value_birthday_celebration">生日慶祝</string>
     <string name="remark_format">備註：%1$s</string>
     <string name="status_cancelled">狀態：已取消</string>
     <string name="cancelled">已取消</string>
@@ -258,6 +264,16 @@
     <string name="booking_number_of_people">用餐人數：</string>
     <string name="booking_people_hint_example">例如：4</string>
     <string name="booking_find_available_tables">查找可用餐桌</string>
+    <string name="confirm_booking_select_table_title">選擇餐桌</string>
+    <string name="confirm_booking_legend_available">可用</string>
+    <string name="confirm_booking_legend_occupied">已佔用</string>
+    <string name="confirm_booking_legend_reserved">已預留</string>
+    <string name="confirm_booking_legend_selected">已選擇</string>
+    <string name="confirm_booking_confirm_action">確認預訂</string>
+    <string name="seating_label_wall">牆身</string>
+    <string name="seating_label_window">窗戶</string>
+    <string name="seating_label_door">門口</string>
+    <string name="seating_label_counter">前台</string>
 
     <string name="coupon_points_zero">積分：0</string>
     <string name="my_coupons">我的優惠券</string>

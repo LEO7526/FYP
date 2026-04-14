@@ -114,6 +114,7 @@
     <string name="proceed_without_coupon">Proceed without coupon</string>
     <string name="no_coupons_found">No coupons found</string>
     <string name="no_coupons_available_to_use">No coupons available to use</string>
+    <string name="no_coupons_in_my_coupon_page">No coupons currently on this page.</string>
     <string name="select_quantity_to_use">Select quantity to use</string>
     <string name="coupon_not_valid_for_cart">Coupon not valid for this cart</string>
     <string name="can_only_use_more_coupon">You can only use %1$d more of this coupon</string>
@@ -259,6 +260,11 @@
     <string name="booking_id_format">Booking #%1$d</string>
     <string name="table_people_format">Table %1$d • %2$d people</string>
     <string name="purpose_format">Purpose: %1$s</string>
+    <string name="purpose_value_family_dinner">Family Dinner</string>
+    <string name="purpose_value_date_night">Date Night</string>
+    <string name="purpose_value_business_meeting">Business Meeting</string>
+    <string name="purpose_value_lunch_meeting">Lunch Meeting</string>
+    <string name="purpose_value_birthday_celebration">Birthday Celebration</string>
     <string name="remark_format">Remark: %1$s</string>
     <string name="status_cancelled">Status: Cancelled</string>
     <string name="cancelled">Cancelled</string>
@@ -432,6 +438,16 @@
     <string name="no_table_data_available">No table data available</string>
     <string name="failed_parse_table_data">Failed to parse table data</string>
     <string name="no_tables_available_for_booking">No tables available for booking</string>
+    <string name="confirm_booking_select_table_title">Select a Table</string>
+    <string name="confirm_booking_legend_available">Available</string>
+    <string name="confirm_booking_legend_occupied">Occupied</string>
+    <string name="confirm_booking_legend_reserved">Reserved</string>
+    <string name="confirm_booking_legend_selected">Selected</string>
+    <string name="confirm_booking_confirm_action">Confirm Booking</string>
+    <string name="seating_label_wall">Wall</string>
+    <string name="seating_label_window">Window</string>
+    <string name="seating_label_door">Door</string>
+    <string name="seating_label_counter">Counter</string>
     <string name="table_selected_tap_confirm">Table %1$d selected. Tap Confirm.</string>
     <string name="table_occupied">Table %1$d is occupied</string>
     <string name="table_reserved">Table %1$d is reserved</string>

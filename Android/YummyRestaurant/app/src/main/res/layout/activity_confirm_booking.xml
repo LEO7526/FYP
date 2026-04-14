@@ -46,7 +46,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Select a Table"
+            android:text="@string/confirm_booking_select_table_title"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#1a5f7a"
@@ -75,7 +75,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Available"
+                    android:text="@string/confirm_booking_legend_available"
                     android:textSize="11sp" />
             </LinearLayout>
 
@@ -94,7 +94,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Occupied"
+                    android:text="@string/confirm_booking_legend_occupied"
                     android:textSize="11sp" />
             </LinearLayout>
 
@@ -113,7 +113,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reserved"
+                    android:text="@string/confirm_booking_legend_reserved"
                     android:textSize="11sp" />
             </LinearLayout>
 
@@ -131,7 +131,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Selected"
+                    android:text="@string/confirm_booking_legend_selected"
                     android:textSize="11sp" />
             </LinearLayout>
 
@@ -147,7 +147,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@drawable/ic_check"
-        android:contentDescription="Confirm Booking"
+        android:contentDescription="@string/confirm_booking_confirm_action"
         app:fabSize="normal"
         android:enabled="false"
         android:alpha="0.5" />

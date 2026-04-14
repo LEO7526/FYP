@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -36,6 +37,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
     private static final String TAG = "MyCouponsActivity";
 
     private RecyclerView rvMyCoupons;
+    private TextView tvMyCouponsEmpty;
     private MyCouponAdapter adapter;
     private List<Coupon> myCoupons = new ArrayList<>();
     private int customerId;
@@ -55,6 +57,7 @@ public class MyCouponsActivity extends BaseCustomerActivity {
         setupBottomFunctionBar();
 
         rvMyCoupons = findViewById(R.id.rvMyCoupons);
+        tvMyCouponsEmpty = findViewById(R.id.tvMyCouponsEmpty);
         rvMyCoupons.setLayoutManager(new LinearLayoutManager(this));
 
         btnDone = findViewById(R.id.btnDone);
@@ -90,6 +93,23 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             showQuantityPickerAndUse(coupon, position);
         }, fromCart);
         rvMyCoupons.setAdapter(adapter);
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                updateEmptyState();
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                updateEmptyState();
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                updateEmptyState();
+            }
+        });
+        updateEmptyState();
 
         fetchMyCoupons(customerId);
 
@@ -119,16 +139,23 @@ public class MyCouponsActivity extends BaseCustomerActivity {
                         myCoupons.clear();
                         myCoupons.addAll(response.body().getCoupons());
                         adapter.notifyDataSetChanged();
+                        updateEmptyState();
                         Log.i(TAG, "Coupons loaded successfully, count=" + myCoupons.size());
 
                         if (myCoupons.isEmpty()) {
                             btnDone.setText(getString(R.string.proceed_without_coupon));
                         }
                     } else {
+                        myCoupons.clear();
+                        adapter.notifyDataSetChanged();
+                        updateEmptyState();
                         Toast.makeText(MyCouponsActivity.this, getString(R.string.no_coupons_found), Toast.LENGTH_SHORT).show();
                         btnDone.setText(getString(R.string.proceed_without_coupon));
                     }
                 } else {
+                    myCoupons.clear();
+                    adapter.notifyDataSetChanged();
+                    updateEmptyState();
                     Toast.makeText(MyCouponsActivity.this, getString(R.string.failed_load_coupons), Toast.LENGTH_SHORT).show();
                     btnDone.setText(getString(R.string.proceed_without_coupon));
                 }
@@ -136,10 +163,20 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
             @Override
             public void onFailure(Call<MyCouponListResponse> call, Throwable t) {
+                myCoupons.clear();
+                adapter.notifyDataSetChanged();
+                updateEmptyState();
                 Toast.makeText(MyCouponsActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
                 btnDone.setText(getString(R.string.proceed_without_coupon));
             }
         });
+    }
+
+    private void updateEmptyState() {
+        if (tvMyCouponsEmpty == null || rvMyCoupons == null) return;
+        boolean empty = adapter == null || adapter.getItemCount() == 0;
+        tvMyCouponsEmpty.setVisibility(empty ? TextView.VISIBLE : TextView.GONE);
+        rvMyCoupons.setVisibility(empty ? RecyclerView.GONE : RecyclerView.VISIBLE);
     }
 
     private void showQuantityPickerAndUse(Coupon coupon, int position) {

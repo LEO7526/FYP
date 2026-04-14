@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.models.Table;
 
 import java.util.ArrayList;
@@ -442,14 +443,14 @@ public class SeatingChartView extends View {
         canvas.drawLine(leftWallX, chartArea.top, leftWallX, chartArea.bottom, guidePaint);
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("Wall", chartArea.left , chartArea.top-(36f  * displayDensity), guideTextPaint);
+        canvas.drawText(getContext().getString(R.string.seating_label_wall), chartArea.left , chartArea.top-(36f  * displayDensity), guideTextPaint);
         // Wall marker line (left side)
         canvas.drawLine(chartArea.left + (9f * displayDensity), chartArea.top , chartArea.left + (9f * displayDensity), chartArea.top - (32f * displayDensity), guidePaint);
 
 
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("Window", rightWallX - (18f * displayDensity), chartArea.top - (20f * displayDensity), guideTextPaint);
+        canvas.drawText(getContext().getString(R.string.seating_label_window), rightWallX - (18f * displayDensity), chartArea.top - (20f * displayDensity), guideTextPaint);
         // Window marker line (right upper wall)
         float windowMarkerY = chartArea.top + (18f * displayDensity);
         canvas.drawLine(rightWallX + (4f * displayDensity), windowMarkerY, rightWallX + (16f * displayDensity), windowMarkerY, guidePaint);
@@ -495,7 +496,7 @@ public class SeatingChartView extends View {
 
 
         guideTextPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("Door", rightWallX - (58f * displayDensity), doorGapTop + (18f * displayDensity), guideTextPaint);
+        canvas.drawText(getContext().getString(R.string.seating_label_door), rightWallX - (58f * displayDensity), doorGapTop + (18f * displayDensity), guideTextPaint);
 
         RectF counterRect = new RectF(
                 chartArea.right - (150f * displayDensity),
@@ -506,7 +507,7 @@ public class SeatingChartView extends View {
         canvas.drawRect(counterRect, guidePaint);
 
         guideTextPaint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("Counter", counterRect.centerX(), counterRect.centerY() + (4f * displayDensity), guideTextPaint);
+        canvas.drawText(getContext().getString(R.string.seating_label_counter), counterRect.centerX(), counterRect.centerY() + (4f * displayDensity), guideTextPaint);
 
         // Door opening symbol: longer diagonal stroke connected to lower wall
         canvas.drawLine(
@@ -523,7 +524,7 @@ public class SeatingChartView extends View {
      */
     private void drawEmptyState(Canvas canvas) {
         textPaint.setTextSize(48);
-        String emptyText = "No tables available";
+        String emptyText = getContext().getString(R.string.no_tables_available_for_booking);
         canvas.drawText(emptyText, getWidth() / 2f, getHeight() / 2f, textPaint);
     }
 

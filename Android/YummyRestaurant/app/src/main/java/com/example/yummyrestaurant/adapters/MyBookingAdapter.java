@@ -49,7 +49,8 @@ public class MyBookingAdapter extends RecyclerView.Adapter<MyBookingAdapter.Book
 
         if (booking.getPurpose() != null && !booking.getPurpose().trim().isEmpty()) {
             holder.textPurpose.setVisibility(View.VISIBLE);
-            holder.textPurpose.setText(context.getString(R.string.purpose_format, booking.getPurpose()));
+            String localizedPurpose = getLocalizedPurpose(context, booking.getPurpose());
+            holder.textPurpose.setText(context.getString(R.string.purpose_format, localizedPurpose));
         } else {
             holder.textPurpose.setVisibility(View.GONE);
         }
@@ -76,6 +77,28 @@ public class MyBookingAdapter extends RecyclerView.Adapter<MyBookingAdapter.Book
     @Override
     public int getItemCount() {
         return bookings.size();
+    }
+
+    private String getLocalizedPurpose(android.content.Context context, String rawPurpose) {
+        String normalized = rawPurpose == null ? "" : rawPurpose.trim();
+        if (normalized.isEmpty()) {
+            return rawPurpose;
+        }
+
+        switch (normalized.toLowerCase()) {
+            case "family dinner":
+                return context.getString(R.string.purpose_value_family_dinner);
+            case "date night":
+                return context.getString(R.string.purpose_value_date_night);
+            case "business meeting":
+                return context.getString(R.string.purpose_value_business_meeting);
+            case "lunch meeting":
+                return context.getString(R.string.purpose_value_lunch_meeting);
+            case "birthday celebration":
+                return context.getString(R.string.purpose_value_birthday_celebration);
+            default:
+                return rawPurpose;
+        }
     }
 
     static class BookingViewHolder extends RecyclerView.ViewHolder {
