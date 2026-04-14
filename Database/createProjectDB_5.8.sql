@@ -2336,4 +2336,12 @@ INSERT INTO spice_level_translation (spice_id, language_code, spice_name) VALUES
 (4, 'en', 'Hot'),
 (5, 'en', 'Numbing');
 
+-- =================================================================
+-- STATUS NORMALIZATION
+-- =================================================================
+-- Business rule: card-paid orders should be pending (1), not cancelled (3)
+UPDATE orders
+SET ostatus = 1
+WHERE payment_method = 'card' AND ostatus = 3;
+
 COMMIT;
