@@ -49,7 +49,7 @@ public class TakeawayCashPaymentActivity extends ThemeBaseActivity {
         setContentView(R.layout.activity_takeaway_cash_payment);
 
         Log.d(TAG, "onCreate: Initializing Takeaway Cash Payment Management");
-        Log.d(TAG, "API Base URL: " + ApiConstants.BASE_URL);
+        Log.d(TAG, "API Base URL: " + ApiConstants.baseUrl());
         
         initializeUI();
         fetchTakeawayCashOrders();
@@ -82,7 +82,7 @@ public class TakeawayCashPaymentActivity extends ThemeBaseActivity {
         Log.d(TAG, "fetchTakeawayCashOrders: Loading takeaway orders with pending cash payments");
         showLoading(true);
         
-        String url = ApiConstants.BASE_URL + "get_takeaway_cash_orders.php";
+        String url = ApiConstants.baseUrl() + "get_takeaway_cash_orders.php";
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
@@ -195,7 +195,7 @@ public class TakeawayCashPaymentActivity extends ThemeBaseActivity {
         Log.d(TAG, "processTakeawayCashPayment: Processing payment for order " + orderId);
         showLoading(true);
         
-        String url = ApiConstants.BASE_URL + "process_cash_payment.php";
+        String url = ApiConstants.baseUrl() + "process_cash_payment.php";
 
         JSONObject requestData = new JSONObject();
         try {

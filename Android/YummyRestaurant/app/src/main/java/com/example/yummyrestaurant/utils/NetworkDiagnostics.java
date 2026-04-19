@@ -4,6 +4,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+
+import com.example.yummyrestaurant.api.ApiConfig;
+
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.io.IOException;
@@ -95,9 +98,10 @@ public class NetworkDiagnostics {
 
         // Image loading examples
         report.append("\nImage Loading Test:\n");
-        boolean dishImageAccessible = testUrlConnectivity(
-            "http://10.0.2.2/newFolder/Image/dish/1.jpg");
+        String sampleImageUrl = buildSampleDishImageUrl();
+        boolean dishImageAccessible = testUrlConnectivity(sampleImageUrl);
         report.append("  - Local dish images: ").append(dishImageAccessible ? "✓" : "✗").append("\n");
+        report.append("  - Test URL: ").append(sampleImageUrl).append("\n");
 
         report.append("\nRecommendations:\n");
         if (!hasInternet) {
@@ -125,5 +129,20 @@ public class NetworkDiagnostics {
     public static void logDiagnostics(Context context) {
         String report = generateDiagnosticsReport(context);
         Log.i(TAG, report);
+    }
+
+    private static String buildSampleDishImageUrl() {
+        String baseUrl = ApiConfig.getBaseUrl();
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
+            return "http://10.0.2.2/newFolder/Image/dish/1.jpg";
+        }
+
+        String normalized = baseUrl.trim();
+        String imageBase = normalized.replace("/Database/projectapi/", "/Image/");
+        if (!imageBase.endsWith("/")) {
+            imageBase += "/";
+        }
+
+        return imageBase + "dish/1.jpg";
     }
 }

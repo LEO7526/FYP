@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.example.yummyrestaurant.api.ApiConfig;
 import com.example.yummyrestaurant.activities.CustomerHomeActivity;
 import com.example.yummyrestaurant.activities.DashboardActivity;
 import com.example.yummyrestaurant.activities.LoginActivity;
@@ -34,6 +35,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize RoleManager
         RoleManager.init(this);
+
+        ApiConfig.initializeBaseUrlOnStartup(this, this::continueStartupFlow);
+    }
+
+    private void continueStartupFlow() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
 
         // Check and request POST_NOTIFICATIONS permission (required for Android 13 and above)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

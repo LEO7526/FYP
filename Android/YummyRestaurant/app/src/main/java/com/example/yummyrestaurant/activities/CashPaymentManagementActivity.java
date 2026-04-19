@@ -81,7 +81,7 @@ public class CashPaymentManagementActivity extends ThemeBaseActivity {
         Log.d(TAG, "fetchCashPaymentTables: Loading tables with pending cash payments");
         showLoading(true);
         
-        String url = ApiConstants.BASE_URL + "get_cash_payment_tables.php";
+        String url = ApiConstants.baseUrl() + "get_cash_payment_tables.php";
         Log.d(TAG, "API URL: " + url);
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
@@ -195,7 +195,7 @@ public class CashPaymentManagementActivity extends ThemeBaseActivity {
         Log.d(TAG, "processCashPayment: Processing payment for order " + orderId);
         showLoading(true);
         
-        String url = ApiConstants.BASE_URL + "process_cash_payment.php";
+        String url = ApiConstants.baseUrl() + "process_cash_payment.php";
 
         JSONObject requestData = new JSONObject();
         try {

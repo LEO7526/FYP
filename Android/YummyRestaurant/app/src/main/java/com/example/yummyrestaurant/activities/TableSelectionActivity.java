@@ -57,7 +57,7 @@ public class TableSelectionActivity extends AppCompatActivity {
     }
 
     private void fetchTableStatus() {
-        String url = ApiConstants.BASE_URL + "get_table_status.php";
+        String url = ApiConstants.baseUrl() + "get_table_status.php";
         
         android.util.Log.d("TableSelection", "Fetching table status from: " + url);
 
@@ -132,7 +132,7 @@ public class TableSelectionActivity extends AppCompatActivity {
         dialog.show();
 
         // 3. API 請求詳情
-        String url = ApiConstants.BASE_URL + "get_table_detail.php?tid=" + tableId;
+        String url = ApiConstants.baseUrl() + "get_table_detail.php?tid=" + tableId;
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {

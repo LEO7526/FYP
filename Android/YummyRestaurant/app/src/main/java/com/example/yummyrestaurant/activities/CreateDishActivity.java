@@ -164,7 +164,7 @@ public class CreateDishActivity extends AppCompatActivity {
         dialog.show();
 
         // 呼叫 API
-        String url = ApiConstants.BASE_URL + "get_dish_detail.php?item_id=" + dishId;
+        String url = ApiConstants.baseUrl() + "get_dish_detail.php?item_id=" + dishId;
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
@@ -233,7 +233,7 @@ public class CreateDishActivity extends AppCompatActivity {
     }
 
     private void fetchDishList() {
-        String url = ApiConstants.BASE_URL + "get_dish_list.php";
+        String url = ApiConstants.baseUrl() + "get_dish_list.php";
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
@@ -281,7 +281,7 @@ public class CreateDishActivity extends AppCompatActivity {
             }
             json.put("recipe", recipeArr);
 
-            String url = ApiConstants.BASE_URL + "create_dish.php";
+            String url = ApiConstants.baseUrl() + "create_dish.php";
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, url, json,
                     response -> {
                         Toast.makeText(this, "Dish Created!", Toast.LENGTH_SHORT).show();
@@ -301,7 +301,7 @@ public class CreateDishActivity extends AppCompatActivity {
     }
 
     private void fetchMetadata() {
-        String url = ApiConstants.BASE_URL + "get_dish_metadata.php";
+        String url = ApiConstants.baseUrl() + "get_dish_metadata.php";
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {

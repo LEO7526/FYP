@@ -80,31 +80,76 @@ try {
     $capacity = intval($row['capacity']);
     $seating_status = intval($row['status']);
 
-    // Check table_orders status (optional)
+    // Check table_orders status (optional) with schema compatibility.
     $current_status = 'available';
     $is_available = true;
 
-    $sqlStatus = "SELECT status FROM table_orders WHERE table_number = ? ORDER BY created_at DESC LIMIT 1";
-    $stmtStatus = $conn->prepare($sqlStatus);
+    $hasStatusColumn = false;
+    $checkStatusColumnSql = "SHOW COLUMNS FROM table_orders LIKE 'status'";
+    $checkStatusResult = $conn->query($checkStatusColumnSql);
+    if ($checkStatusResult && $checkStatusResult->num_rows > 0) {
+        $hasStatusColumn = true;
+    }
 
-    if ($stmtStatus) {
-        $stmtStatus->bind_param("i", $table_id);
-        $stmtStatus->execute();
-        $resultStatus = $stmtStatus->get_result();
+    if ($hasStatusColumn) {
+        // Legacy schema: table_orders has a textual status column.
+        $sqlStatus = "SELECT status FROM table_orders WHERE table_number = ? ORDER BY created_at DESC, toid DESC LIMIT 1";
+        $stmtStatus = $conn->prepare($sqlStatus);
 
-        if ($resultStatus->num_rows > 0) {
-            $statusRow = $resultStatus->fetch_assoc();
-            $order_status = $statusRow['status'];
-            
-            if ($order_status === 'ordering' || $order_status === 'seated' || $order_status === 'ready_to_pay') {
-                $current_status = 'occupied';
-                $is_available = false;
-            } elseif ($order_status === 'reserved') {
-                $current_status = 'reserved';
-                $is_available = false;
+        if ($stmtStatus) {
+            $stmtStatus->bind_param("i", $table_id);
+            $stmtStatus->execute();
+            $resultStatus = $stmtStatus->get_result();
+
+            if ($resultStatus->num_rows > 0) {
+                $statusRow = $resultStatus->fetch_assoc();
+                $order_status = $statusRow['status'];
+
+                if ($order_status === 'ordering' || $order_status === 'seated' || $order_status === 'ready_to_pay') {
+                    $current_status = 'occupied';
+                    $is_available = false;
+                } elseif ($order_status === 'reserved') {
+                    $current_status = 'reserved';
+                    $is_available = false;
+                }
             }
+            $stmtStatus->close();
         }
-        $stmtStatus->close();
+    } else {
+        // Current schema: no table_orders.status, infer from latest linked order status.
+        $sqlOrderStatus = "
+            SELECT o.ostatus, o.order_type
+            FROM table_orders t
+            LEFT JOIN orders o ON o.oid = t.oid
+            WHERE t.table_number = ?
+            ORDER BY t.created_at DESC, t.toid DESC
+            LIMIT 1
+        ";
+        $stmtOrderStatus = $conn->prepare($sqlOrderStatus);
+
+        if ($stmtOrderStatus) {
+            $stmtOrderStatus->bind_param("i", $table_id);
+            $stmtOrderStatus->execute();
+            $resultOrderStatus = $stmtOrderStatus->get_result();
+
+            if ($resultOrderStatus->num_rows > 0) {
+                $orderRow = $resultOrderStatus->fetch_assoc();
+                $orderType = $orderRow['order_type'] ?? '';
+
+                // Takeaway orders should not occupy dine-in tables.
+                if ($orderType !== 'takeaway' && $orderRow['ostatus'] !== null) {
+                    $orderStatus = intval($orderRow['ostatus']);
+
+                    // 0=awaiting cash payment, 1=pending/preparing => table occupied.
+                    if ($orderStatus === 0 || $orderStatus === 1) {
+                        $current_status = 'occupied';
+                        $is_available = false;
+                    }
+                }
+            }
+
+            $stmtOrderStatus->close();
+        }
     }
 
     if ($seating_status == 1 && $current_status === 'available') {

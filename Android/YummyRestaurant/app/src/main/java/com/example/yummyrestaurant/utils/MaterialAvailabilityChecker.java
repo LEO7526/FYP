@@ -6,7 +6,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.yummyrestaurant.BuildConfig;
+import com.example.yummyrestaurant.api.ApiConfig;
 import com.example.yummyrestaurant.models.CartItem;
 import com.example.yummyrestaurant.models.MenuItem;
 
@@ -23,7 +23,6 @@ import java.util.Map;
 public class MaterialAvailabilityChecker {
     
     private static final String TAG = "MaterialChecker";
-    private static final String API_BASE_URL = BuildConfig.API_DEFAULT_BASE_URL;
     
     /**
      * Interface for material availability callback
@@ -145,7 +144,7 @@ public class MaterialAvailabilityChecker {
      * Core method to check material availability via API
      */
     private static void checkMaterialAvailability(Context context, JSONArray itemsArray, MaterialCheckCallback callback) {
-        String url = API_BASE_URL + "check_material_availability.php";
+        String url = ApiConfig.getBaseUrl(context) + "check_material_availability.php";
         
         try {
             JSONObject requestBody = new JSONObject();
@@ -199,6 +198,7 @@ public class MaterialAvailabilityChecker {
                     if (error.networkResponse != null) {
                         errorMessage += " (Code: " + error.networkResponse.statusCode + ")";
                     }
+                    errorMessage += " [" + url + "]";
                     callback.onCheckError(errorMessage);
                 }
             );

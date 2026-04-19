@@ -114,7 +114,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
         dialog.show();
 
         // 載入詳細資料 (API)
-        String url = ApiConstants.BASE_URL + "get_order_details_by_id.php?oid=" + order.getOid();
+        String url = ApiConstants.baseUrl() + "get_order_details_by_id.php?oid=" + order.getOid();
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
@@ -153,7 +153,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
     }
 
     private void updateOrderStatus(StaffOrder order, int nextStatus, int position) {
-        StringRequest request = new StringRequest(Request.Method.POST, ApiConstants.UPDATE_ORDER_STATUS,
+        StringRequest request = new StringRequest(Request.Method.POST, ApiConstants.updateOrderStatus(),
                 response -> {
                     Toast.makeText(context, "Order Updated!", Toast.LENGTH_SHORT).show();
 
