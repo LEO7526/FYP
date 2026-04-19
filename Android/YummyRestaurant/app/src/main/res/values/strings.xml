@@ -246,7 +246,7 @@
     <string name="registration_failed_try_again">Registration failed. Please try again.</string>
 
     <string name="alipay_unavailable_using_card">Alipay currently unavailable. Using Card instead.</string>
-    <string name="payment_available_time_only">Only available 11:00-22:59 (Asia/Hong_Kong).</string>
+    <string name="payment_available_time_only">Only available 11:00-21:29 (Asia/Hong_Kong).</string>
     <string name="payment_setup_failed_try_again">Payment setup failed. Please try again.</string>
     <string name="network_error">Network error</string>
     <string name="failed_initialize_payment_try_again">Failed to initialize payment. Please try again.</string>

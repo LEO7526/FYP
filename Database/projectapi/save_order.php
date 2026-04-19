@@ -4,7 +4,7 @@ date_default_timezone_set('Asia/Hong_Kong');
 
 const DEFAULT_ORDER_TIMEZONE = 'Asia/Hong_Kong';
 const ORDER_WINDOW_START_MINUTES = 11 * 60;
-const ORDER_WINDOW_END_MINUTES = 23 * 60;
+const ORDER_WINDOW_END_MINUTES = 21 * 60 + 30;
 
 // Read payload first so timezone can be provided by client.
 $input = json_decode(file_get_contents("php://input"), true);
@@ -53,7 +53,7 @@ function getOrderWindowContext(array $input): array {
         'timezone' => $tz->getName(),
         'server_time' => $now->format('Y-m-d H:i:s P'),
         'minutes' => $minutes,
-        'window' => '11:00-22:59'
+        'window' => '11:00-21:29'
     ];
 }
 
@@ -63,7 +63,7 @@ if (!$window['allowed']) {
     http_response_code(403);
     echo json_encode([
         'success' => false,
-        'message' => 'Only available during business hours (11:00-22:59).',
+        'message' => 'Only available during business hours (11:00-21:29).',
         'error' => 'Outside ordering hours',
         'timezone_used' => $window['timezone'],
         'server_time' => $window['server_time'],

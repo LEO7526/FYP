@@ -6,14 +6,14 @@ date_default_timezone_set('Asia/Hong_Kong');
 function isWithinOrderWindow(): bool {
     $now = new DateTime('now', new DateTimeZone('Asia/Hong_Kong'));
     $minutes = ((int)$now->format('H')) * 60 + (int)$now->format('i');
-    return $minutes >= 11 * 60 && $minutes < 23 * 60;
+    return $minutes >= 11 * 60 && $minutes < (21 * 60 + 30);
 }
 
 if (!isWithinOrderWindow()) {
     http_response_code(403);
     echo json_encode([
         'success' => false,
-        'message' => 'Only available 11:00–22:59 (Asia/Hong_Kong).',
+        'message' => 'Only available 11:00–21:29 (Asia/Hong_Kong).',
         'error' => 'Outside ordering hours'
     ]);
     exit;

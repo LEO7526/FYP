@@ -242,20 +242,20 @@ public class EditProfileActivity extends ThemeBaseActivity {
                                 Log.d(TAG, "UploadResponse message: " + uploadResponse.getMessage());
 
                                 if ("success".equals(uploadResponse.getStatus())) {
-                                    String fileName = extractFileNameFromPath(uploadResponse.getPath());
-                                    String role = RoleManager.getUserRole();
-
-                                    String githubBaseUrl = "https://raw.githubusercontent.com/LEO7526/FYP/main/Image/Profile_image/";
-                                    String githubImageUrl;
-
-                                    if ("staff".equals(role)) {
-                                        githubImageUrl = githubBaseUrl + "Staff/" + fileName;
-                                    } else {
-                                        githubImageUrl = githubBaseUrl + "Customer/" + fileName;
+                                    String serverImageUrl = uploadResponse.getImageUrl();
+                                    if (serverImageUrl == null || serverImageUrl.isEmpty()) {
+                                        String fileName = extractFileNameFromPath(uploadResponse.getPath());
+                                        String role = RoleManager.getUserRole();
+                                        String githubBaseUrl = "https://raw.githubusercontent.com/LEO7526/FYP/main/Image/Profile_image/";
+                                        if ("staff".equals(role)) {
+                                            serverImageUrl = githubBaseUrl + "Staff/" + fileName;
+                                        } else {
+                                            serverImageUrl = githubBaseUrl + "Customer/" + fileName;
+                                        }
                                     }
 
-                                    RoleManager.setUserImageUrl(githubImageUrl);
-                                    String resolvedImageUrl = ImageUrlResolver.resolve(githubImageUrl);
+                                    RoleManager.setUserImageUrl(serverImageUrl);
+                                    String resolvedImageUrl = ImageUrlResolver.resolve(serverImageUrl);
 
                                     Glide.with(EditProfileActivity.this)
                                             .load(resolvedImageUrl)
