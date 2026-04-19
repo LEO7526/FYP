@@ -782,8 +782,12 @@ public class PaymentActivity extends ThemeBaseActivity {
             confirmIntent.putExtra("totalAmount", amount);
             confirmIntent.putExtra("itemCount", items.size());
             confirmIntent.putExtra("dishJson", dishJson);
-            if (isCashPayment) {
-                confirmIntent.putExtra("paymentMethod", "cash");
+            confirmIntent.putExtra("paymentMethod", selectedPaymentMethod);
+            if (selectedCoupons != null && !selectedCoupons.isEmpty()) {
+                confirmIntent.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
+            }
+            if (couponQuantities != null && !couponQuantities.isEmpty()) {
+                confirmIntent.putExtra("couponQuantities", couponQuantities);
             }
             startActivity(confirmIntent);
             finish();

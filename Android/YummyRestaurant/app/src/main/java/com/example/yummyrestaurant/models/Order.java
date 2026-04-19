@@ -12,6 +12,15 @@ public class Order {
     private String staff_name;
     private int table_number;
 
+    @SerializedName("original_total_amount")
+    private Double originalTotalAmount;
+
+    @SerializedName("discount_amount")
+    private Double discountAmount;
+
+    @SerializedName("total_amount")
+    private Double totalAmount;
+
     @SerializedName("items")
     private List<OrderItem> items;
 
@@ -82,5 +91,29 @@ public class Order {
 
     public void setTable_number(int table_number) {
         this.table_number = table_number;
+    }
+
+    public Double getOriginalTotalAmount() {
+        return originalTotalAmount;
+    }
+
+    public void setOriginalTotalAmount(Double originalTotalAmount) {
+        this.originalTotalAmount = originalTotalAmount;
+    }
+
+    public Double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(Double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public Double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }

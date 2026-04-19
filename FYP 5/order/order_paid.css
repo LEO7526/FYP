@@ -1,0 +1,80 @@
+/* 整體頁面置中與背景 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+}
+
+/* 容器 */
+.container {
+    width: 100%;
+    max-width: 600px;
+    background: #fff;
+    margin-top: 60px;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+/* 成功提示 */
+.paid {
+    color: #2e7d32;
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* 訂單標題 */
+h3, div {
+    margin-top: 20px;
+    font-size: 22px;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* 訂單明細列表 */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    text-align: left;
+}
+
+ul li {
+    background: #f9f9f9;
+    margin-bottom: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 金額加粗 */
+ul li strong {
+    color: #000;
+    font-weight: bold;
+}
+
+/* 響應式設計：手機上縮小 */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px;
+    }
+    h3, div {
+        font-size: 18px;
+    }
+    ul li {
+        font-size: 14px;
+        padding: 10px;
+    }
+}

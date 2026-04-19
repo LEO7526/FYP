@@ -218,6 +218,7 @@ $orders = [];
 while ($row = $result->fetch_assoc()) {
     $order = $row;
     $oid = (int)$order['oid'];
+    $originalTotal = 0.0;
 
     $customizationMap = build_customization_map($conn, $oid, $language);
 
@@ -370,9 +371,6 @@ while ($row = $result->fetch_assoc()) {
                             'customizations' => $customizations
                         ];
 
-                        if (!isset($reservedQtyByItem[$dishItemId])) {
-                            $reservedQtyByItem[$dishItemId] = 0;
-                        }
                         $reservedQtyByItem[$dishItemId] += $dishQty;
                     }
 
@@ -391,6 +389,8 @@ while ($row = $result->fetch_assoc()) {
                 'dishes' => $dishes,
                 'packageCost' => ((float)$packageRow['package_price']) * $packageQty
             ];
+
+            $originalTotal += ((float)$packageRow['package_price']) * $packageQty;
         }
 
         $packageStmt->close();
@@ -454,6 +454,30 @@ while ($row = $result->fetch_assoc()) {
     }
 
     $order['items'] = $items;
+
+    $discountTotal = 0.0;
+    $discountSql = "
+        SELECT COALESCE(SUM(discount_amount), 0) AS discount_total
+        FROM order_coupons
+        WHERE oid = ?
+    ";
+    $discountStmt = $conn->prepare($discountSql);
+    if ($discountStmt) {
+        $discountStmt->bind_param("i", $oid);
+        $discountStmt->execute();
+        $discountResult = $discountStmt->get_result();
+        if ($discountResult && ($discountRow = $discountResult->fetch_assoc())) {
+            $discountTotal = (float)$discountRow['discount_total'];
+        }
+        $discountStmt->close();
+    } else {
+        error_log("Prepare failed for order coupon totals: " . $conn->error);
+    }
+
+    $finalTotal = max(0, $originalTotal - $discountTotal);
+    $order['original_total_amount'] = $originalTotal;
+    $order['discount_amount'] = $discountTotal;
+    $order['total_amount'] = $finalTotal;
     $orders[] = $order;
 }
 

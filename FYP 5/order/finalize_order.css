@@ -1,0 +1,69 @@
+/* 整體背景與字體 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff8f0; /* 淺橙背景 */
+    color: #333;
+    padding: 40px;
+    text-align: center;
+}
+
+/* 標題 */
+h3 {
+    color: #e67e22; /* 橙色 */
+    margin-bottom: 20px;
+}
+
+/* 訂單明細列表 */
+ul {
+    list-style: none;
+    padding: 0;
+    max-width: 500px;
+    margin: 0 auto 20px auto;
+    text-align: left;
+}
+ul li {
+    background: #fff;
+    border: 1px solid #f39c12;
+    margin-bottom: 8px;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+/* 總價文字 */
+p {
+    font-size: 18px;
+    margin: 10px 0;
+    color: #d35400; /* 深橙色 */
+    font-weight: bold;
+}
+
+/* 表單區塊 */
+form {
+    margin-top: 20px;
+}
+form div {
+    margin-bottom: 15px;
+}
+label {
+    margin: 0 10px;
+    font-size: 16px;
+    color: #444;
+}
+input[type="radio"] {
+    margin-right: 6px;
+}
+
+/* 按鈕樣式 */
+button {
+    padding: 10px 20px;
+    background: #e67e22; /* 橙色主色 */
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+button:hover {
+    background: #d35400; /* 深橙色 hover 效果 */
+}

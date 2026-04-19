@@ -1,0 +1,301 @@
+/* popup 整體背景 */
+.popup {
+    display: none; /* 預設隱藏 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(44, 62, 80, 0.7); /* 半透明深灰背景 */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* 彈窗內容盒子 */
+.popup-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 320px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* 標題 */
+.popup-box h2 {
+    color: #f39c12; /* 橙色主題 */
+    margin-bottom: 20px;
+}
+
+/* label 與輸入框 */
+.popup-box label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.popup-box input[type="number"] {
+    width: 80px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* 按鈕 */
+.popup-box button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #f39c12;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.popup-box button:hover {
+    background-color: #e67e22; /* 深橙色 hover */
+}
+
+/* 關閉按鈕 */
+.close-btn {
+    float: right;
+    font-size: 20px;
+    cursor: pointer;
+    color: #e74c3c;
+}
+
+.close-btn:hover {
+    color: #c0392b;
+}
+
+.popup-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.popup-box button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+/* 確認按鈕：橙色 */
+.popup-box button[type="submit"] {
+    background-color: #f39c12;
+    color: #fff;
+}
+
+.popup-box button[type="submit"]:hover {
+    background-color: #e67e22;
+}
+
+/* 關閉按鈕：灰色 */
+.cancel-btn {
+    background-color: #bdc3c7;
+    color: #2c3e50;
+}
+
+.cancel-btn:hover {
+    background-color: #95a5a6;
+}
+
+/* 外層容器：置中 */
+.coupon-container {
+    display: flex;
+    justify-content: center; /* 水平置中 */
+    margin: 20px 0;
+}
+
+/* 按鈕樣式 */
+.coupon-btn {
+    padding: 10px 20px;
+    background-color: #f39c12; /* 橙色主題 */
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.coupon-btn:hover {
+    background-color: #e67e22; /* 深橙色 hover */
+}
+
+.owned-coupons {
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: left;
+}
+
+.coupon-owned {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #333;
+}
+
+.coupon-card {
+    width: 300px;
+    border: 2px dashed #e67e22; /* 虛線邊框像 coupon */
+    border-radius: 12px;
+    background: #fff8f0;
+    margin: 20px auto;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    font-family: "Arial", sans-serif;
+    transition: transform 0.2s;
+}
+
+.coupon-card:hover {
+    transform: scale(1.05);
+}
+
+.coupon-card h3 {
+    margin: 0;
+    color: #d35400;
+    font-size: 20px;
+}
+
+.coupon-card p {
+    margin: 8px 0;
+    color: #2c3e50;
+}
+
+.coupon-card .points {
+    font-weight: bold;
+    color: #27ae60;
+}
+
+.redeem-btn {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.redeem-btn:hover {
+    background-color: #219150;
+}
+
+/* 容器：顯示所有 coupon 卡片 */
+.coupon-container-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 每列 4 個 */
+    gap: 20px; /* 卡片間距 */
+    padding: 20px;
+    justify-items: center; /* 卡片置中 */
+}
+
+/* 單張 coupon 卡片 */
+.coupon-card {
+    width: 220px;
+    border: 2px dashed #e67e22; /* 虛線邊框像 coupon */
+    border-radius: 12px;
+    background: #fff8f0;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.coupon-card:hover {
+    transform: scale(1.05);
+}
+
+.coupon-card h3 {
+    margin: 0;
+    color: #d35400;
+    font-size: 18px;
+}
+
+.coupon-card p {
+    margin: 8px 0;
+    color: #2c3e50;
+}
+
+.coupon-card .points {
+    font-weight: bold;
+    color: #27ae60;
+}
+
+.redeem-btn {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.redeem-btn:hover {
+    background-color: #219150;
+}
+
+.coupon-card {
+    width: 220px;
+    border: 2px dashed #e67e22;
+    border-radius: 12px;
+    background: #fff8f0;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.coupon-card:hover {
+    transform: scale(1.05);
+}
+
+.coupon-card.disabled {
+    background: #f0f0f0;       /* 灰色背景 */
+    border: 2px dashed #aaa;   /* 灰色邊框 */
+    color: #888;               /* 文字變灰 */
+    box-shadow: none;          /* 移除陰影 */
+    transform: none;           /* 不放大 */
+}
+
+.coupon-card.disabled h3,
+.coupon-card.disabled p {
+    color: #888;
+}
+
+.redeem-btn {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.redeem-btn:hover {
+    background-color: #219150;
+}
+
+.coupon-card.disabled .redeem-btn {
+    background-color: #ccc; /* 灰色按鈕 */
+    cursor: not-allowed;
+}

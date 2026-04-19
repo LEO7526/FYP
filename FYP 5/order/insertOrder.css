@@ -1,0 +1,107 @@
+/* 讓整個頁面置中 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh; /* 佔滿整個視窗高度 */
+    display: flex;
+    justify-content: center; /* 水平置中 */
+    align-items: center;     /* 垂直置中 */
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+}
+
+/* 表單容器 */
+form {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+/* 標題 */
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 22px;
+}
+
+/* 標籤 */
+label {
+    display: block;
+    margin-top: 15px;
+    text-align: left;
+    font-weight: bold;
+    color: #444;
+}
+
+/* 輸入框 */
+input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Stripe Elements 的卡片輸入框 */
+#card-number, #card-expiry, #card-cvc {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fafafa;
+    margin-top: 6px;
+}
+
+/* 錯誤訊息 */
+#card-errors {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* 提交按鈕 */
+#submit {
+    margin-top: 20px;
+    padding: 12px;
+    width: 100%;
+    background: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+#submit:hover {
+    background: #005bb5;
+}
+
+/* 響應式設計：手機上縮小表單 */
+@media (max-width: 480px) {
+    form {
+        padding: 20px;
+    }
+    h2 {
+        font-size: 18px;
+    }
+    #submit {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
+
+/* Stripe Elements 容器 */
+#card-number, #card-expiry, #card-cvc {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px;
+    background: #fff; /* 改成白色，避免灰底遮住輸入 */
+    margin-top: 6px;
+    min-height: 40px; /* 確保 iframe 有足夠高度 */
+}
+

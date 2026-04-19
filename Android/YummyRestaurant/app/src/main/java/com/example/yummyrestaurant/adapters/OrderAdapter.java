@@ -69,6 +69,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         double total = 0;
         List<OrderItem> items = buildDisplayItems(order);
         List<OrderPackage> packages = order.getPackages();
+        Double backendTotal = order.getTotalAmount();
         
         Log.d("OrderAdapter", "=== BINDING ORDER #" + order.getOid() + " at position " + position + " ===");
         Log.d("OrderAdapter", "Packages: " + (packages != null ? packages.size() : "null"));
@@ -197,8 +198,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         Log.d("OrderAdapter", "Total item count: " + totalItemCount);
         
         // 設置總金額
-        holder.totalAmount.setText(holder.itemView.getContext().getString(R.string.order_total_amount_format, total));
-        Log.d("OrderAdapter", "Total amount: HK$" + String.format("%.2f", total));
+        double displayTotal = backendTotal != null ? backendTotal : total;
+        holder.totalAmount.setText(holder.itemView.getContext().getString(R.string.order_total_amount_format, displayTotal));
+        Log.d("OrderAdapter", "Total amount: HK$" + String.format("%.2f", displayTotal)
+            + (backendTotal != null ? " (backend total)" : " (legacy computed total)"));
 
         // 設置時間戳
         String timeAgoText = formatTimeAgo(holder.itemView.getContext(), order.getOdate());
