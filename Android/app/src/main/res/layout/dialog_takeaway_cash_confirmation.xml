@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/white">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/confirm_takeaway_cash_title"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="#333"
+        android:gravity="center"
+        android:background="#E3F2FD"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Order Reference -->
+    <TextView
+        android:id="@+id/textOrderRef"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Order: order_20260204_001"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#333"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Customer Name -->
+    <TextView
+        android:id="@+id/textCustomerName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Customer: John Doe"
+        android:textSize="14sp"
+        android:textColor="#666"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Total Amount -->
+    <TextView
+        android:id="@+id/textTotalAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Amount: HK$88.00"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#4CAF50"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Items Summary -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/items_colon"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:textColor="#333"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/textItemsSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chicken Rice x2, Beef Noodles x1"
+        android:textSize="14sp"
+        android:textColor="#333"
+        android:background="#F5F5F5"
+        android:padding="8dp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/textPointsReminder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Points reminder: customer will earn 88 points after confirmation."
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="#6A1B9A"
+        android:background="#F3E5F5"
+        android:padding="10dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Confirmation Message -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/confirm_takeaway_cash_msg"
+        android:textSize="14sp"
+        android:textColor="#666"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/cancel"
+            android:textColor="#666"
+            android:background="@drawable/button_outline"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnConfirmPayment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/confirm_cash_received_btn"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_primary"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

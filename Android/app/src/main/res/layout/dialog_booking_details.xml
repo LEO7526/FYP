@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Table Number -->
+    <TextView
+        android:id="@+id/textViewTableNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Table #5 (Capacity: 4)"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#333"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Customer Info Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/customer_name_colon"
+                android:textSize="13sp"
+                android:textColor="#666"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewCustomerName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Alex Wong"
+                android:textSize="13sp"
+                android:textColor="#333" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/phone_colon"
+                android:textSize="13sp"
+                android:textColor="#666"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewCustomerPhone"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="2123-2123"
+                android:textSize="13sp"
+                android:textColor="#333" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/num_people_colon"
+                android:textSize="13sp"
+                android:textColor="#666"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewNumPeople"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="4 person(s)"
+                android:textSize="13sp"
+                android:textColor="#333" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Booking Details Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/booking_time_colon"
+                android:textSize="13sp"
+                android:textColor="#666"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewBookingTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="18:30:00"
+                android:textSize="13sp"
+                android:textColor="#333" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/purpose_colon"
+                android:textSize="13sp"
+                android:textColor="#666"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewPurpose"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Family Dinner"
+                android:textSize="13sp"
+                android:textColor="#333" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/remark_colon"
+                android:textSize="13sp"
+                android:textColor="#666"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewRemark"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="We have a baby with us"
+                android:textSize="13sp"
+                android:textColor="#333" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/status_colon"
+                android:textSize="13sp"
+                android:textColor="#666"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Pending"
+                android:textSize="13sp"
+                android:textColor="#1E88E5"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

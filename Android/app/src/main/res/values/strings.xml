@@ -1,0 +1,543 @@
+<resources>
+    <string name="app_name">Yummy Restaurant</string>
+    <string name="merchant_name">Yummy Restaurant</string>
+    
+    <!-- Staff App Strings -->
+    <string name="title_inventory">Inventory Manager</string>
+    <string name="loading">Loading...</string>
+    <string name="error_network">Network Error</string>
+    
+    <string-array name="roles_array">
+        <item>Staff</item>
+        <item>Customer</item>
+    </string-array>
+
+    <string name="title_settings">Settings</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="enable_dark_mode">Enable Dark Mode</string>
+
+    <string-array name="language_options">
+        <item>English</item>
+        <item>Simplified Chinese</item>
+        <item>Traditional Chinese</item>
+    </string-array>
+
+    <string name="select_language">Select Language</string>
+    <string name="switch_language">Switch Language</string>
+    <string name="language_english">English</string>
+    <string name="language_simplified_chinese">Simplified Chinese</string>
+    <string name="language_traditional_chinese">Traditional Chinese</string>
+    <string name="select_category">Select Category</string>
+    <string name="select_spice_level">Select Spice Level</string>
+    <string name="select_tag">Select Tag</string>
+
+    <string name="menu_item_image_desc">Image of the menu item</string>
+
+    <string name="spice_level_icon">Spice level icon</string>
+
+    <string name="dish_name_placeholder">Dish Name</string>
+    <string name="dish_description_placeholder">Short description of the dish.</string>
+    <string name="dish_price_placeholder">$00.00</string>
+
+
+    <!-- New content descriptions -->
+    <string name="desc_search_icon">Search icon</string>
+    <string name="desc_profile_icon">User profile icon</string>
+
+    <!-- Category labels -->
+    <string name="category_all">All</string>
+    <string name="category_combos">Combos</string>
+    <string name="category_sliders">Sliders</string>
+
+    <string name="add_button">Add new item</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="search_hint">Search menu...</string>
+
+    <!-- Filter Buttons -->
+    <string name="filter_all">All Dishes</string>
+    <string name="filter_appetizers">Appetizers</string>
+    <string name="filter_main_courses">Main Courses</string>
+    <string name="filter_soup">Soup</string>
+    <string name="filter_dessert">Dessert</string>
+
+    <!-- Staff language system: messages and labels -->
+    <string name="api_environment_label">API Environment</string>
+    <string name="notifications_enabled">Notifications enabled</string>
+    <string name="notifications_disabled">Notifications disabled</string>
+    <string name="dark_mode_on">Dark mode on</string>
+    <string name="dark_mode_off">Dark mode off</string>
+    <string name="api_switched_working">API switched to %1$s and is working</string>
+    <string name="api_switched_test_failed">API switched to %1$s but test failed</string>
+    <string name="error_prefix">Error: %1$s</string>
+    <string name="network_error_prefix">Network Error: %1$s</string>
+    <string name="failed_load_ingredients">Failed to load ingredients</string>
+    <string name="please_fill_all_fields">Please fill all fields</string>
+    <string name="please_enter_valid_numbers">Please enter valid numbers</string>
+    <string name="values_cannot_be_negative">Values cannot be negative</string>
+    <string name="ingredient_added_successfully">Ingredient added successfully</string>
+    <string name="failed_create_ingredient">Failed to create ingredient</string>
+    <string name="failed_load_coupon_list">Failed to load coupon list</string>
+    <string name="coupon_created">Coupon Created!</string>
+    <string name="failed_create_coupon">Failed to create coupon</string>
+    <string name="refreshing_current_tab">Refreshing current tab...</string>
+    <string name="consumption_history_title">Consumption History</string>
+    <string name="failed_load_history">Failed to load history.</string>
+    <string name="no_ingredients_listed">No ingredients listed.</string>
+    <string name="error_loading_details">Error loading details</string>
+    <string name="failed_load_package_details">Failed to load package details</string>
+    <string name="package_default_name">Package</string>
+    <string name="type_dish_package">Type: Dish Package</string>
+    <string name="sections_count">Sections: %1$d</string>
+    <string name="section_default_name">Section</string>
+    <string name="choose_count">Choose %1$d</string>
+    <string name="dish_default_name">Dish</string>
+    <string name="no_package_sections">No package sections.</string>
+    <string name="package_grouped_selectable_dishes">Package menu with grouped selectable dishes.</string>
+    <string name="failed_parse_package_details">Failed to parse package details</string>
+    <string name="error_loading_package_details">Error loading package details</string>
+    <string name="dish_package_label">Dish Package</string>
+    <string name="dish_created">Dish Created!</string>
+    <string name="select_dish">Select Dish</string>
+    <string name="dish_list_not_ready">Dish list not ready yet, please wait</string>
+    <string name="package_name_price_required">Package name and price are required</string>
+    <string name="add_at_least_one_package_section">Add at least one package section</string>
+    <string name="package_section_needs_english_name">Every package section needs an English name</string>
+    <string name="package_section_needs_one_dish_option">Each package section needs at least one dish option</string>
+    <string name="dish_package_created">Dish package created!</string>
+    <string name="failed_create_package">Failed to create package</string>
+    <string name="package_form_invalid">Package form is invalid</string>
+    <string name="metadata_format_invalid">Metadata format invalid</string>
+    <string name="select_ingredient">Select Ingredient</string>
+    <string name="metadata_parse_failed">Metadata parse failed</string>
+    <string name="failed_load_categories_ingredients">Failed to load categories/ingredients</string>
+    <string name="ingredients_not_ready">Ingredients not ready yet, please wait</string>
+    <string name="logged_in_as">Logged in as: %1$s</string>
+    <string name="opening_drawer">Opening drawer...</string>
+    <string name="kitchen_staff_role">Kitchen Staff</string>
+    <string name="load_failed">Load failed</string>
+    <string name="unable_load_orders_tap_refresh">Unable to load orders. Tap refresh.</string>
+    <string name="data_error_prefix">Data Error: %1$s</string>
+    <string name="unable_parse_orders_tap_refresh">Unable to parse orders. Tap refresh.</string>
+    <string name="unknown_network_error">Unknown network error</string>
+    <string name="network_issue_tap_refresh">Network issue. Tap refresh.</string>
+
+    <string name="hello_user">Hello, %1$s!</string>
+    <string name="welcome_user">Welcome, %1$s</string>
+    <string name="no_new_notifications">No new notifications</string>
+    <string name="unread_notifications_count">You have %1$d unread notifications</string>
+    <string name="confirm_logout_title">Confirm Logout</string>
+    <string name="confirm_logout_message">Are you sure you want to log out?</string>
+    <string name="logout">Logout</string>
+    <string name="logging_out">Logging out...</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="close">Close</string>
+    <string name="ok">OK</string>
+    <string name="success">Success</string>
+
+    <string name="nfc_not_supported">NFC is not supported on this device.</string>
+    <string name="please_enable_nfc">Please enable NFC in settings.</string>
+    <string name="checked_in_out_tag_id">Checked in/out with tag ID: %1$s</string>
+
+    <string name="table_available_no_action">Table is available. No action needed.</string>
+    <string name="table_reserved_waiting">Table is reserved. Waiting for guests.</string>
+    <string name="guests_seated_ready_order">Guests are seated. Ready to take order.</string>
+    <string name="failed_load_tables">Failed to load tables</string>
+    <string name="table_order_number">Table Order #%1$d</string>
+    <string name="invalid_order_id">Invalid order ID</string>
+    <string name="failed_load_order_items">Failed to load order items</string>
+    <string name="total_hkd">Total: HK$%1$s</string>
+
+    <string name="network_error_loading_pending_orders">Network error loading pending orders</string>
+    <string name="pending_orders_count">Pending: %1$d order(s)</string>
+    <string name="order_label">Order: %1$s</string>
+    <string name="customer_label">Customer: %1$s</string>
+    <string name="amount_hkd">Amount: HK$%1$s</string>
+    <string name="points_reminder_earn_after_confirmation">Points reminder: customer will earn about %1$d member point(s) after confirmation.</string>
+    <string name="takeaway_cash_payment_confirmed_points">Takeaway cash payment confirmed! +%1$d member point(s).</string>
+    <string name="takeaway_cash_payment_confirmed">Takeaway cash payment confirmed!</string>
+    <string name="failed_prefix">Failed: %1$s</string>
+
+    <string name="failed_load_bookings">Failed to load bookings</string>
+    <string name="table_with_capacity">Table #%1$d (Capacity: %2$d)</string>
+    <string name="person_count">%1$d person(s)</string>
+    <string name="no_purpose_specified">No purpose specified</string>
+    <string name="no_remarks">No remarks</string>
+    <string name="check_in">Check-in</string>
+    <string name="process_payment">Process Payment</string>
+    <string name="customer_checked_in_successfully">Customer checked in successfully!</string>
+    <string name="check_in_failed">Check-in failed</string>
+
+    <string name="todays_bookings">Today\'s Bookings</string>
+    <string name="cash_payments">Cash Payments</string>
+    <string name="no_pending_cash_payments_yet">No pending cash payments for this table yet. Create a dine-in cash order first.</string>
+    <string name="cash_payment_management">Cash Payment Management</string>
+    <string name="switch_to_cash_payments">Switch to Cash Payments</string>
+    <string name="network_error">Network error</string>
+    <string name="opened_cash_payment_for_table">Opened cash payment for Table #%1$d</string>
+    <string name="table_no_pending_cash_payment">Table #%1$d has no pending cash payment yet.</string>
+    <string name="loading_order_details_for_table">Loading order details for Table #%1$d</string>
+    <string name="failed_load_detail_showing_summary">Failed to load detail, showing summary only</string>
+    <string name="table_label">Table: %1$d</string>
+    <string name="cash_payment_confirmed_points">Cash payment confirmed! +%1$d member point(s).</string>
+    <string name="cash_payment_confirmed">Cash payment confirmed!</string>
+    <string name="payment_confirmation_failed">Payment confirmation failed</string>
+    <string name="confirmation_failed_prefix">Confirmation failed: %1$s</string>
+    <string name="response_parsing_error">Response parsing error</string>
+    <string name="pending_completed_summary">Pending: %1$d | Completed: %2$d</string>
+
+    <string name="inventory_management">Inventory Management</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="recipes">Recipes</string>
+    <string name="analysis">Analysis</string>
+    <string name="consumption">Consumption</string>
+    <string name="restock">Restock</string>
+    <string name="current_reorder_text">Current: %1$.2f %2$s (Reorder at: %3$.2f %4$s)</string>
+    <string name="low_stock">Low Stock</string>
+    <string name="healthy">Healthy</string>
+    <string name="current_stock_info">Current stock: %1$.2f %2$s</string>
+    <string name="adjust_stock_for">Adjust Stock for: %1$s</string>
+    <string name="enter_quantity_add_subtract">Enter the quantity to add or subtract.</string>
+    <string name="add_stock">Add (In)</string>
+    <string name="decrease_stock">Decrease (Out)</string>
+    <string name="please_enter_quantity">Please enter a quantity.</string>
+    <string name="please_enter_positive_quantity">Please enter a positive quantity.</string>
+    <string name="invalid_number_format">Invalid number format.</string>
+    <string name="adjustment_successful">Adjustment successful!</string>
+    <string name="update_failed">Update failed.</string>
+
+    <string name="failed_load_recipes">Failed to load recipes.</string>
+    <string name="dish_no_recipe_configured">This dish has no recipe configured yet.</string>
+    <string name="not_enough_stock_produce">Not enough stock to produce this item.</string>
+    <string name="e_g_1">e.g., 1</string>
+    <string name="produce_item">produce: %1$s</string>
+    <string name="enter_quantity_to_produce_max">Enter quantity to produce (max %1$d):</string>
+    <string name="please_enter_valid_quantity">Please enter a valid quantity.</string>
+    <string name="max_producible_now">Max producible now is %1$d</string>
+    <string name="stock_deducted_successfully">Stock deducted successfully!</string>
+    <string name="stock_updated_check_ingredients">Stock has been updated. You can check the new stock levels in the Ingredients tab.</string>
+    <string name="operation_failed">Operation failed.</string>
+
+    <string name="failed_load_production_data">Failed to load production data.</string>
+    <string name="no_real_suggestions_loading_demo">No real suggestions now. Loading demo data...</string>
+    <string name="pending_predict_days">Pending: %1$d item(s) | Predict: %2$d days</string>
+    <string name="generated_suggestions_count">Generated %1$d suggestion(s)</string>
+    <string name="failed_load_restock_suggestions">Failed to load restock suggestions</string>
+    <string name="approve_restock">Approve Restock</string>
+    <string name="reject_restock">Reject Restock</string>
+    <string name="decision_submitted">Decision submitted</string>
+    <string name="failed_submit_decision">Failed to submit decision</string>
+
+    <string name="failed_load_weekly_consumption">Failed to load weekly consumption</string>
+    <string name="shortage_impact_summary_format">Period: %1$s ~ %2$s\nTracked ingredients: %3$d\nWeekly consumed: %4$.2f\nActivity records: %5$d (Deduction %6$d / Reorder %7$d / Forecast %8$d)\nTop ingredient: %9$s</string>
+    <string name="no_data">No data</string>
+    <string name="failed_parse_weekly_consumption">Failed to parse weekly consumption</string>
+    <string name="shortage_impact_detail_header">Used this week: %1$.2f %2$s\nAvg/day: %3$.2f %4$s\nCurrent stock: %5$.2f %6$s\nWarning line: %7$.2f %8$s\n\n</string>
+    <string name="no_manual_activity_log_7_days">No manual activity log in the past 7 days.</string>
+    <string name="recent_records">Recent records:</string>
+    <string name="ingredient_records_title">%1$s Records</string>
+
+    <string name="ingredient_analysis_restock_review">Ingredient Analysis and Restock Review</string>
+    <string name="no_ingredients_to_restock">No ingredients to restock</string>
+    <string name="api_error_prefix">API Error: %1$s</string>
+    <string name="json_parse_error_prefix">JSON Parse Error: %1$s</string>
+    <string name="material_analysis_summary">Period: %1$s\nTotal Ingredients: %2$d\nNeeding Restock: %3$d\nTotal Restock Needed: %4$.2f units</string>
+    <string name="auto_restock_now">AUTO RESTOCK NOW</string>
+    <string name="all_stocked">All Stocked</string>
+    <string name="no_analysis_data_available">No analysis data available</string>
+    <string name="auto_restock_completed">Auto-restock completed!</string>
+    <string name="restock_failed_prefix">Restock failed: %1$s</string>
+    <string name="json_error_prefix">JSON Error: %1$s</string>
+    <string name="error_preparing_request_prefix">Error preparing request: %1$s</string>
+    <string name="item_restocked_successfully">%1$s restocked successfully!</string>
+    <string name="add_ingredient">Add Ingredient</string>
+    <string name="view_ingredients">View Ingredients</string>
+    <string name="requires_points">Requires: %1$d pts</string>
+    <string name="valid_until">Valid until: %1$s</string>
+    <string name="no_expiry">No expiry</string>
+    <string name="view_details">View Details</string>
+    <string name="new_count">New (%1$d)</string>
+    <string name="making_count">Making (%1$d)</string>
+    <string name="delivered_count">Delivered (%1$d)</string>
+    <string name="no_orders_in_this_tab">No orders in this tab</string>
+    <string name="no_name">No Name</string>
+    <string name="price_label">$%1$s</string>
+    <string name="category_label">Category: %1$s</string>
+    <string name="spice_level_label">Spice Level: %1$s</string>
+    <string name="recipe_not_configured_yet">Recipe not configured yet</string>
+    <string name="no_recipe">No Recipe</string>
+    <string name="out_of_stock">Out of Stock</string>
+    <string name="produce">Produce</string>
+    <string name="producible_min_target">Producible: %1$d / Min Target: %2$d</string>
+    <string name="out_of_stock_producible_zero">OUT OF STOCK! (Producible: 0)</string>
+    <string name="current_qty_text">Current: %1$.2f %2$s</string>
+    <string name="avg_weekly_usage_last7d">Avg Weekly Usage (Last 7d): %1$.2f %2$s</string>
+    <string name="warning_line_120">Warning Line (120%%): %1$.2f %2$s</string>
+    <string name="restock_plus_text">RESTOCK +%1$.2f %2$s</string>
+    <string name="ok_upper">OK</string>
+    <string name="material_analysis_summary_fragment">Period: %1$s\nTotal Ingredients: %2$d\nBelow Warning Line: %3$d\nSuggested Top-up Qty: %4$.2f</string>
+
+    <!-- Staff drawer, orders, and table selection -->
+    <string name="menu">Menu</string>
+    <string name="refresh">Refresh</string>
+    <string name="tab_new">New</string>
+    <string name="tab_making">Making</string>
+    <string name="tab_delivered">Delivered</string>
+    <string name="staff_orders_header">Kitchen / Orders</string>
+    <string name="order_tabs_navigation">Order status tabs</string>
+
+    <string name="drawer_kitchen_orders">🍳 Kitchen Orders</string>
+    <string name="drawer_table_management">🪑 Table Management</string>
+    <string name="drawer_cash_payment_management">💰 Cash Payment Management</string>
+    <string name="drawer_takeaway_cash_orders">📦 Takeaway Cash Orders</string>
+    <string name="drawer_content_management">📝 Content Management</string>
+    <string name="drawer_create_dish">🍜 Create Dish</string>
+    <string name="drawer_create_ingredient">🥬 Create Ingredient</string>
+    <string name="drawer_create_coupon">🎫 Create Coupon</string>
+    <string name="drawer_inventory_system">📦 Inventory System</string>
+    <string name="drawer_inventory_management">📦 Inventory Management</string>
+    <string name="drawer_inventory_history">📊 Inventory History</string>
+    <string name="drawer_system">🔧 System</string>
+    <string name="drawer_switch_language">🌐 Switch Language</string>
+    <string name="drawer_logout">🚪 Logout</string>
+
+    <string name="table_sample">Table 05</string>
+    <string name="time_sample">12:30</string>
+    <string name="loading_items">Loading items...</string>
+    <string name="takeaway_label">🥡 TAKEAWAY</string>
+    <string name="order_status_new">New</string>
+    <string name="order_status_cooking">Cooking</string>
+    <string name="order_status_delivered">Delivered</string>
+    <string name="start_cooking">Start Cooking</string>
+    <string name="serve_done">Serve / Done</string>
+    <string name="order_number_title">Order #%1$d</string>
+    <string name="loading_details">Loading details...</string>
+    <string name="none">None</string>
+    <string name="guest">Guest</string>
+    <string name="customer_line">Customer: %1$s</string>
+    <string name="time_line">Time: %1$s</string>
+    <string name="items_header">=== ITEMS ===</string>
+    <string name="note_header">=== NOTE ===</string>
+    <string name="failed_load_details">Failed to load details.</string>
+    <string name="order_updated">Order Updated!</string>
+    <string name="invalid_server_response">Invalid server response</string>
+    <string name="error_updating">Error updating</string>
+
+    <string name="all_day">All Day</string>
+    <string name="select_time">Select Time</string>
+    <string name="select_a_table">Select a Table</string>
+    <string name="table_status">Table Status</string>
+    <string name="available">Available</string>
+    <string name="reserved">Reserved</string>
+    <string name="occupied">Occupied</string>
+    <string name="view_slot">View Slot</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="slot_placeholder">Slot: -</string>
+    <string name="apply_slot">Apply Slot</string>
+    <string name="slot_all_day_format">Slot: %1$s (All Day)</string>
+    <string name="slot_time_format">Slot: %1$s %2$s</string>
+    <string name="data_parsing_error_prefix">Data parsing error: %1$s</string>
+    <string name="checking_data">Checking data...</string>
+    <string name="table_title">Table %1$d</string>
+    <string name="no_data_available_dot">No data available.</string>
+    <string name="order_at_time">Order at %1$s</string>
+    <string name="days_ago">%1$d days ago</string>
+    <string name="mins_ago">%1$d mins</string>
+    <string name="no_items_ordered_yet">No items ordered yet.</string>
+    <string name="booking_today_count">%1$d booking(s) today</string>
+    <string name="unknown">Unknown</string>
+    <string name="booking_line_format">• %1$s  %2$s (%3$d pax, %4$s)\n</string>
+    <string name="no_booking_details">No booking details.</string>
+    <string name="booking_schedule">Booking Schedule</string>
+    <string name="table_currently_available">Table is currently available.</string>
+    <string name="error_parsing_data">Error parsing data.</string>
+    <string name="net_error_prefix">Net Error: %1$s</string>
+    <string name="staff_avatar">Staff Avatar</string>
+    <string name="staff_name">Staff Name</string>
+    <string name="kitchen_staff_role_with_emoji">🍳 Kitchen Staff</string>
+
+    <!-- Takeaway cash orders screen -->
+    <string name="takeaway_cash_payments_header">Today\'s Takeaway Cash Payments</string>
+    <string name="pending_zero_orders">Pending: 0 order(s)</string>
+    <string name="no_pending_takeaway_orders">No pending takeaway cash orders</string>
+    <string name="takeaway_cash_instruction">Pull down to refresh</string>
+    <string name="awaiting_payment">⏳ Awaiting Payment</string>
+    <string name="paid_today">✅ Paid Today</string>
+
+    <!-- Cash payment management screen -->
+    <string name="pending_zero_tables">Pending: 0 table(s)</string>
+    <string name="no_data_available">No data available</string>
+    <string name="pull_down_refresh">Pull down to refresh</string>
+    <string name="pending_confirmations">Pending Confirmations</string>
+    <string name="completed_today">Completed Today</string>
+
+    <!-- Table overview screen -->
+    <string name="seated">Seated</string>
+    <string name="tap_table_instruction">Tap a table to view details</string>
+    <string name="back">Back</string>
+
+    <!-- Table status badges (ALL CAPS for chip/badge display) -->
+    <string name="status_occupied">OCCUPIED</string>
+    <string name="status_reserved">RESERVED</string>
+    <string name="status_available">AVAILABLE</string>
+    <string name="pax_format">%d Pax</string>
+
+    <!-- Table details dialog -->
+    <string name="table_details_title">Table Details</string>
+    <string name="customer_colon">Customer:</string>
+    <string name="time_pax_colon">Time / Pax:</string>
+    <string name="order_items_note_label">Order items (subject to update):</string>
+
+    <!-- Restock decision dialog -->
+    <string name="staff_id_hint">Staff ID / Name</string>
+    <string name="decision_note_hint">Note (optional)</string>
+    <string name="apply_stock_immediately">Apply stock deduction immediately</string>
+
+    <!-- Materials / Ingredients dashboard -->
+    <string name="ingredients_dashboard">Ingredients Dashboard</string>
+    <string name="ingredients_dashboard_subtitle">Track current stock and quickly spot low ingredients.</string>
+    <string name="ingredient_name">Ingredient Name</string>
+    <string name="ingredient_details">Ingredient Details</string>
+    <string name="view_records">View Records</string>
+    <string name="restock_now">Restock Now</string>
+    <string name="current_units_placeholder">0.00 units</string>
+    <string name="avg_weekly_placeholder">Avg 0/wk</string>
+    <string name="restock_point_placeholder">Reorder: 0</string>
+    <string name="current_reorder_avg">Current | Reorder | ÷ Avg/wk</string>
+
+    <!-- Restock suggestions fragment -->
+    <string name="restock_suggestions">Restock Suggestions</string>
+    <string name="restock_suggestions_subtitle">Review AI predictions and approve or reject restock plans.</string>
+    <string name="predict">Predict</string>
+    <string name="days">days</string>
+    <string name="generate">Generate</string>
+    <string name="analyze">Analyze</string>
+    <string name="pending_recommendations_zero">Pending: 0 recommendation(s)</string>
+    <string name="no_pending_suggestions">No pending suggestions</string>
+    <string name="status_pending">PENDING</string>
+    <string name="projected_zero">Projected: 0 days</string>
+    <string name="predict_seven_days">Predict: 7 days</string>
+    <string name="suggested_restock">Suggested restock: 0.0 units</string>
+
+    <!-- 7-day consumption fragment -->
+    <string name="seven_day_consumption">7-Day Ingredient Consumption</string>
+    <string name="no_consumption_record">No consumption record in the past 7 days.</string>
+
+    <!-- Production / Recipe fragments -->
+    <string name="all_items_stocked">✅ All items are sufficiently stocked</string>
+    <string name="recipe_capacity">Recipe Capacity</string>
+    <string name="recipe_capacity_subtitle">See what can be produced now based on current ingredient stock.</string>
+    <string name="max_producible_zero">Max producible now: 0</string>
+
+    <!-- Dish management (item_dish_row) -->
+    <string name="dish_type_badge">DISH</string>
+
+    <!-- Takeaway cash order item -->
+    <string name="cash_payment_required">💰 CASH PAYMENT REQUIRED</string>
+
+    <!-- 7-day material analysis screen -->
+    <string name="seven_day_analysis_summary">7-Day Analysis Summary</string>
+
+    <!-- Table order detail screen -->
+    <string name="table_order_title">Table Order</string>
+
+    <!-- Cash payment confirmation dialog -->
+    <string name="order_details_label">Order Details:</string>
+    <string name="confirm_cash_payment_msg">Confirm that cash payment has been received at the front desk?\n\nAfter confirmation, the order will proceed to kitchen preparation stage.</string>
+    <string name="confirm_payment_received">Confirm Payment Received</string>
+
+    <!-- Takeaway cash confirmation dialog -->
+    <string name="confirm_takeaway_cash_title">💰 Confirm Takeaway Cash Payment</string>
+    <string name="items_colon">Items:</string>
+    <string name="confirm_takeaway_cash_msg">Confirm that cash payment has been received for this takeaway order?\n\nAfter confirmation, the order will proceed to kitchen preparation stage.</string>
+    <string name="confirm_cash_received_btn">💰 Confirm Cash Received</string>
+
+    <!-- Booking details dialog -->
+    <string name="customer_name_colon">Customer Name:</string>
+    <string name="phone_colon">Phone:</string>
+    <string name="num_people_colon">Number of People:</string>
+    <string name="booking_time_colon">Booking Time:</string>
+    <string name="purpose_colon">Purpose:</string>
+    <string name="remark_colon">Remark:</string>
+    <string name="status_colon">Status:</string>
+
+    <!-- Coupon detail dialog -->
+    <string name="required_points_label">Required Points:</string>
+    <string name="expiry_date_label">Expiry Date:</string>
+    <string name="rules_constraints_label">Rules &amp; Constraints:</string>
+    <string name="applicable_to_label">Applicable To:</string>
+
+    <!-- Dish detail dialog -->
+    <string name="recipe_ingredients_label">Recipe / Ingredients:</string>
+
+    <!-- Create dish activity -->
+    <string name="dish_management">Dish Management</string>
+    <string name="create_dish_subtitle">Create dish, translations, and recipe in one place</string>
+    <string name="create_new">Create New</string>
+    <string name="view_list">View List</string>
+    <string name="dish_package">Dish Package</string>
+    <string name="tap_to_select_photo">Tap to select photo</string>
+    <string name="browse_gallery">Browse Gallery</string>
+    <string name="basic_info">Basic Info</string>
+    <string name="price_hint">Price ($)</string>
+    <string name="dish_details_multi_lang">Dish Details (Multi-Language)</string>
+    <string name="recipe_ingredients_section">Recipe Ingredients</string>
+    <string name="create_dish_btn">Create Dish</string>
+    <string name="create_dish_package">Create Dish Package</string>
+    <string name="create_package_subtitle">Build set meals by grouping dishes into selectable sections.</string>
+    <string name="tap_to_select_package_photo">Tap to select package photo</string>
+    <string name="package_info">Package Info</string>
+    <string name="package_name_hint">Package Name</string>
+    <string name="package_price_hint">Package Price ($)</string>
+    <string name="package_sections">Package Sections</string>
+    <string name="add_package_section">+ Add Package Section</string>
+
+    <!-- Create coupon activity -->
+    <string name="coupon_management">Coupon Management</string>
+    <string name="coupon_management_subtitle">Configure rules, discount scope, and translations</string>
+    <string name="points_required_hint">Points Required (e.g. 100)</string>
+    <string name="select_expiry_date">Select Expiry Date</string>
+    <string name="discount_type">Discount Type</string>
+    <string name="percent">Percent</string>
+    <string name="cash_option">Cash</string>
+    <string name="free_item">Free Item</string>
+    <string name="discount_value_hint">Value (e.g. 10)</string>
+    <string name="applicable_to">Applicable To</string>
+    <string name="whole_order">Whole Order</string>
+    <string name="specific_category">Specific Category</string>
+    <string name="specific_item">Specific Item</string>
+    <string name="specific_package">Specific Package</string>
+    <string name="select_items_btn">Select Items</string>
+    <string name="none_selected">None selected</string>
+    <string name="rules">Rules</string>
+    <string name="minimum_spend">Minimum Spend</string>
+    <string name="amount_hint">Amount</string>
+    <string name="max_discount">Max Discount</string>
+    <string name="usage_limit">Usage Limit Per Customer</string>
+    <string name="limit_hint">Limit</string>
+    <string name="dine_in">Dine-in</string>
+    <string name="takeaway">Takeaway</string>
+    <string name="delivery">Delivery</string>
+    <string name="combinable_with_others">Combinable with others</string>
+    <string name="birthday_only">Birthday Only</string>
+    <string name="coupon_details_multi_lang">Coupon Details (Multi-Language)</string>
+    <string name="create_coupon">Create Coupon</string>
+
+    <!-- Create ingredient / material activity -->
+    <string name="ingredient_management">Ingredient Management</string>
+    <string name="ingredient_management_subtitle">Create and monitor ingredient stock in one place</string>
+    <string name="create_new_ingredient">Create New Ingredient</string>
+    <string name="create_ingredient_subtitle">Add ingredient stock and threshold in one place</string>
+    <string name="ingredient_example_hint">e.g. Chicken Breast</string>
+    <string name="current_quantity_label">Current Quantity</string>
+    <string name="reorder_level_label">Reorder Level</string>
+    <string name="reorder_hint">Alert me below this quantity</string>
+    <string name="save_ingredient">Save Ingredient</string>
+    <string name="existing_ingredients">Existing Ingredients</string>
+    <string name="no_ingredients_found">No ingredients found</string>
+
+</resources>

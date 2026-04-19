@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Ticket shape -->
+    <path
+        android:fillColor="@color/black"
+        android:pathData="M3,6c0,-1.1 0.9,-2 2,-2h14c1.1,0 2,0.9 2,2v2c-1.1,0 -2,0.9 -2,2s0.9,2 2,2v2c-1.1,0 -2,0.9 -2,2s0.9,2 2,2v2c0,1.1 -0.9,2 -2,2H5c-1.1,0 -2,-0.9 -2,-2v-2c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2v-2c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2V6z" />
+
+    <!-- Top dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M7.5,9.5a1.5,1.5 0 1,0 0,-3a1.5,1.5 0 0,0 0,3z" />
+
+    <!-- Bottom dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16.5,17.5a1.5,1.5 0 1,0 0,-3a1.5,1.5 0 0,0 0,3z" />
+
+    <!-- Slash line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeColor="#FFFFFF"
+        android:pathData="M8,16 L16,8" />
+</vector>

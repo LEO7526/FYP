@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="8dp"
+    android:padding="4dp"
+    android:background="@drawable/edit_text_background"> <!-- 如果沒有這個bg，可以刪除這行 -->
+
+    <!-- 原料下拉選單 -->
+    <Spinner
+        android:id="@+id/spMaterial"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="1.5"
+        android:layout_marginEnd="8dp"/>
+
+    <!-- 數量輸入框 -->
+    <EditText
+        android:id="@+id/etQty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="Qty"
+        android:inputType="numberDecimal"
+        android:textSize="14sp"
+        android:padding="10dp"/>
+
+    <!-- 單位顯示 -->
+    <TextView
+        android:id="@+id/tvUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="unit"
+        android:textSize="12sp"
+        android:textColor="#666666"
+        android:layout_marginStart="4dp"/>
+
+    <!-- 刪除按鈕 (X) -->
+    <Button
+        android:id="@+id/btnRemove"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:text="✕"
+        android:textSize="12sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#FEFF5252"
+        android:layout_marginStart="8dp"
+        android:padding="0dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"/>
+
+</LinearLayout>
