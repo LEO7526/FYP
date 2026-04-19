@@ -380,7 +380,15 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
             <!-- New Tag Form -->
             <div id="newTagForm" class="new-tag-form">
                 <div class="new-tag-row">
-                    <input type="text" id="newTagName" placeholder="Tag Name">
+                    <input type="text" id="newTagNameEn" placeholder="Tag Name (English)" required>
+                </div>
+                <div class="new-tag-row">
+                    <input type="text" id="newTagNameZhCn" placeholder="Tag Name (Simplified Chinese)" required>
+                </div>
+                <div class="new-tag-row">
+                    <input type="text" id="newTagNameZhTw" placeholder="Tag Name (Traditional Chinese)" required>
+                </div>
+                <div class="new-tag-row">
                     <select id="newTagCategory">
                         <option value="">Select Category</option>
                         <?php foreach ($tagCategories as $category): ?>
@@ -429,8 +437,16 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
                 <small style="color:#666;">Enter a type for the new group (e.g., spice, sugar, ice, etc.)</small>
             </div>
             <div class="form-group">
-                <label>Group Name</label>
-                <input type="text" id="newGroupName" placeholder="e.g., Sweetness Level">
+                <label>Group Name (English)</label>
+                <input type="text" id="newGroupNameEn" placeholder="e.g., Spice Level">
+            </div>
+            <div class="form-group">
+                <label>Group Name (Simplified Chinese)</label>
+                <input type="text" id="newGroupNameZhCn" placeholder="例如：辣度">
+            </div>
+            <div class="form-group">
+                <label>Group Name (Traditional Chinese)</label>
+                <input type="text" id="newGroupNameZhTw" placeholder="例如：辣度">
             </div>
             <div class="form-group">
                 <label>Values (one per line)</label>
@@ -818,97 +834,73 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
 
     // Add new tag
     async function addNewTag() {
-        const name = document.getElementById('newTagName').value.trim();
+        const nameEn = document.getElementById('newTagNameEn').value.trim();
+        const nameZhCn = document.getElementById('newTagNameZhCn').value.trim();
+        const nameZhTw = document.getElementById('newTagNameZhTw').value.trim();
         const category = document.getElementById('newTagCategory').value;
         const color = document.getElementById('newTagColor').value;
         const errorElement = document.getElementById('newTagError');
 
-        // Validate input
-        if (!name || !category) {
-            errorElement.textContent = 'Please fill in tag name and select category';
+        // 验证三种语言都不能为空
+        if (!nameEn || !nameZhCn || !nameZhTw) {
+            errorElement.textContent = 'Please fill in tag names in all three languages (English, Simplified Chinese, Traditional Chinese)';
+            return;
+        }
+        if (!category) {
+            errorElement.textContent = 'Please select a tag category';
             return;
         }
 
         try {
-            // Step 1: Check if tag name already exists in database
             const checkResponse = await fetch('check_tag_duplicate.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ tag_name: name })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tag_name: nameEn })
             });
-
             const checkData = await checkResponse.json();
-
             if (!checkData.success) {
                 errorElement.textContent = 'Error checking tag: ' + checkData.message;
                 return;
             }
-
             if (checkData.exists) {
-                errorElement.textContent = 'Tag name already exists in database';
+                errorElement.textContent = 'Tag name (English) already exists in database';
                 return;
             }
 
-            // Step 2: Add new tag to database
             const addResponse = await fetch('add_tag.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    tag_name: name,
+                    tag_name_en: nameEn,
+                    tag_name_zh_cn: nameZhCn,
+                    tag_name_zh_tw: nameZhTw,
                     tag_category: category,
                     tag_color: color
                 })
             });
 
             const addData = await addResponse.json();
-
             if (!addData.success) {
                 errorElement.textContent = 'Failed to add tag: ' + addData.message;
                 return;
             }
 
-            // Add to tags list
             const newTag = addData.tag;
             allTags.push(newTag);
 
-            // If tag category is new, add to categories list
             if (!tagCategories.includes(category)) {
                 tagCategories.push(category);
-
-                // Add new category button
-                const tagCategoryButtons = document.getElementById('tagCategoryButtons');
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'tag-category-btn';
-                button.textContent = category;
-                button.dataset.category = category;
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.tag-category-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    showTagsByCategory(category);
-                });
-                tagCategoryButtons.appendChild(button);
             }
 
-            // Reset form
-            document.getElementById('newTagName').value = '';
+            document.getElementById('newTagNameEn').value = '';
+            document.getElementById('newTagNameZhCn').value = '';
+            document.getElementById('newTagNameZhTw').value = '';
             document.getElementById('newTagCategory').selectedIndex = 0;
             document.getElementById('newTagColor').value = '#4fc3f7';
             document.getElementById('colorPreview').style.backgroundColor = '#4fc3f7';
-
-            // Hide form
-            toggleNewTagForm();
-
-            // Clear error message
+            document.getElementById('newTagForm').style.display = 'none';
             errorElement.textContent = '';
 
-            // Automatically select the new tag
             addTagToSelection(newTag);
 
         } catch (error) {
@@ -1614,9 +1606,14 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
 
     // --- MODAL LOGIC ---
     function openCustomizationModal() {
-        console.log('Opening customization modal');
         document.getElementById('customModal').style.display = 'block';
-        switchTab('create'); // Default tab
+        switchTab('create');
+        document.getElementById('newGroupType').value = '';
+        document.getElementById('newGroupNameEn').value = '';
+        document.getElementById('newGroupNameZhCn').value = '';
+        document.getElementById('newGroupNameZhTw').value = '';
+        document.getElementById('newValueContainer').innerHTML = '';
+        addNewValueRow();
     }
 
     function closeCustomizationModal() {
@@ -1665,43 +1662,57 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
         const div = document.createElement('div');
         div.className = 'value-input-group';
         div.innerHTML = `
-            <input type="text" class="new-value-input" placeholder="Value Name">
-            <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
-        `;
+        <input type="text" class="new-value-en" placeholder="Value (English)" style="width:30%">
+        <input type="text" class="new-value-zh-cn" placeholder="Value (简体中文)" style="width:30%">
+        <input type="text" class="new-value-zh-tw" placeholder="Value (繁體中文)" style="width:30%">
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+    `;
         container.appendChild(div);
     }
 
     function submitNewGroup() {
+        const groupNameEn = document.getElementById('newGroupNameEn').value.trim();
+        const groupNameZhCn = document.getElementById('newGroupNameZhCn').value.trim();
+        const groupNameZhTw = document.getElementById('newGroupNameZhTw').value.trim();
         const type = document.getElementById('newGroupType').value.trim();
-        const name = document.getElementById('newGroupName').value.trim();
-        const valueInputs = document.querySelectorAll('.new-value-input');
+
+        const valueRows = document.querySelectorAll('#newValueContainer .value-input-group');
         const values = [];
-
-        valueInputs.forEach(input => {
-            if(input.value.trim()) {
-                values.push(input.value.trim());
+        for (let row of valueRows) {
+            const en = row.querySelector('.new-value-en').value.trim();
+            const zhCn = row.querySelector('.new-value-zh-cn').value.trim();
+            const zhTw = row.querySelector('.new-value-zh-tw').value.trim();
+            if (en || zhCn || zhTw) {
+                if (!en || !zhCn || !zhTw) {
+                    alert('Each value must have all three language names');
+                    return;
+                }
+                values.push({ en, zh_cn: zhCn, zh_tw: zhTw });
             }
-        });
-
-        if (!name || values.length === 0) {
-            alert("Please provide a Group Name and at least one Value.");
-            return;
         }
 
+        if (!groupNameEn || !groupNameZhCn || !groupNameZhTw) {
+            alert("Please provide Group Name in all three languages.");
+            return;
+        }
         if (!type) {
             alert("Please provide a Group Type.");
+            return;
+        }
+        if (values.length === 0) {
+            alert("Please provide at least one Value.");
             return;
         }
 
         fetch('manage_customization.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'create_group',
+                group_name_en: groupNameEn,
+                group_name_zh_cn: groupNameZhCn,
+                group_name_zh_tw: groupNameZhTw,
                 type: type,
-                name: name,
                 values: values
             })
         })
@@ -1709,16 +1720,14 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
             .then(data => {
                 if (data.success) {
                     alert('Group Created!');
-                    // Clear form
                     document.getElementById('newGroupType').value = '';
-                    document.getElementById('newGroupName').value = '';
+                    document.getElementById('newGroupNameEn').value = '';
+                    document.getElementById('newGroupNameZhCn').value = '';
+                    document.getElementById('newGroupNameZhTw').value = '';
                     document.getElementById('newValueContainer').innerHTML = '';
                     addNewValueRow();
                     closeCustomizationModal();
-
-                    // Reload groups to update the main form
                     loadCustomizationGroups().then(() => {
-                        console.log('Groups reloaded after creation');
                         updateAllGroupDropdowns();
                     });
                 } else {
@@ -1747,7 +1756,6 @@ while ($row = mysqli_fetch_assoc($menuCategoriesResult)) {
                 data.data.forEach(g => {
                     const item = document.createElement('div');
                     item.className = 'unused-group-item';
-                    // 修改顯示：只顯示 group_type
                     item.innerHTML = `
                         <span>${g.group_type}</span>
                         <input type="checkbox" class="delete-group-check" value="${g.group_id}">

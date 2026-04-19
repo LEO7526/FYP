@@ -390,18 +390,49 @@ public class CartActivity extends ThemeBaseActivity implements CartItemAdapter.C
                 return;
             }
 
-            int finalAmount = applyCoupons(selectedCoupons != null ? selectedCoupons : new ArrayList<>());
+            ArrayList<Coupon> normalizedCoupons = normalizeSelectedCoupons(selectedCoupons, couponQuantities);
+            int finalAmount = applyCoupons(normalizedCoupons);
             Log.d(TAG, "Final amount after applying "
-                    + (selectedCoupons != null ? selectedCoupons.size() : 0)
+                    + normalizedCoupons.size()
                     + " coupons: " + finalAmount);
 
             Intent payIntent = new Intent(this, PaymentActivity.class);
             payIntent.putExtra("subtotalAmount", CartManager.getTotalAmountInCents());
             payIntent.putExtra("totalAmount", finalAmount);
             payIntent.putExtra("couponQuantities", couponQuantities);
-            payIntent.putParcelableArrayListExtra("selectedCoupons", selectedCoupons);
+            payIntent.putParcelableArrayListExtra("selectedCoupons", normalizedCoupons);
             startActivity(payIntent);
         }
+    }
+
+    private ArrayList<Coupon> normalizeSelectedCoupons(ArrayList<Coupon> selectedCoupons,
+                                                       HashMap<Integer, Integer> couponQuantities) {
+        ArrayList<Coupon> normalizedCoupons = new ArrayList<>();
+        if (selectedCoupons == null || selectedCoupons.isEmpty()) {
+            return normalizedCoupons;
+        }
+
+        Map<Integer, Coupon> couponById = new HashMap<>();
+        for (Coupon coupon : selectedCoupons) {
+            if (coupon != null) {
+                couponById.put(coupon.getCouponId(), coupon);
+            }
+        }
+
+        if (couponQuantities != null && !couponQuantities.isEmpty()) {
+            for (Map.Entry<Integer, Integer> entry : couponQuantities.entrySet()) {
+                Coupon coupon = couponById.get(entry.getKey());
+                if (coupon == null) {
+                    continue;
+                }
+                coupon.setQuantity(Math.max(1, entry.getValue() != null ? entry.getValue() : 1));
+                normalizedCoupons.add(coupon);
+            }
+            return normalizedCoupons;
+        }
+
+        normalizedCoupons.addAll(couponById.values());
+        return normalizedCoupons;
     }
 
     /**

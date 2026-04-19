@@ -21,6 +21,9 @@ import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.gson.Gson;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import com.example.yummyrestaurant.api.CouponApiService;
+import com.example.yummyrestaurant.models.Coupon;
+import com.example.yummyrestaurant.models.GenericResponse;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.Stripe;
 import com.stripe.android.paymentsheet.PaymentSheet;
@@ -65,6 +68,10 @@ public class PaymentActivity extends ThemeBaseActivity {
     private String paymentIntentId;
     private PaymentSheet paymentSheet;
     private String selectedPaymentMethod = "card"; // Default payment method
+    private int subtotalAmount = 0;
+    private int finalAmount = 0;
+    private ArrayList<Coupon> selectedCoupons;
+    private HashMap<Integer, Integer> couponQuantities;
 
     private interface SaveOrderCallback {
         void onSuccess();
@@ -91,6 +98,19 @@ public class PaymentActivity extends ThemeBaseActivity {
         rbCard = findViewById(R.id.rbCard);
         rbAlipayHK = findViewById(R.id.rbAlipayHK);
         rbCash = findViewById(R.id.rbCash);
+
+        subtotalAmount = getIntent().getIntExtra("subtotalAmount", CartManager.getTotalAmountInCents());
+        finalAmount = Math.max(0, getIntent().getIntExtra("totalAmount", subtotalAmount));
+        selectedCoupons = getIntent().getParcelableArrayListExtra("selectedCoupons");
+        try {
+            // noinspection unchecked
+            couponQuantities = (HashMap<Integer, Integer>) getIntent().getSerializableExtra("couponQuantities");
+        } catch (ClassCastException e) {
+            couponQuantities = new HashMap<>();
+        }
+
+        Log.d(TAG, "onCreate: subtotalAmount=" + subtotalAmount + ", finalAmount=" + finalAmount);
+        Log.d(TAG, "onCreate: selectedCoupons size=" + (selectedCoupons != null ? selectedCoupons.size() : 0));
         
         // Hide alternative payment method - PaymentSheet only supports card payments
         rbAlipayHK.setVisibility(View.GONE);
@@ -100,9 +120,7 @@ public class PaymentActivity extends ThemeBaseActivity {
             paymentMethodLabel.setVisibility(View.VISIBLE);
         }
 
-        int totalAmount = CartManager.getTotalAmountInCents();
-        Log.d(TAG, "onCreate: totalAmount=" + totalAmount);
-        amountText.setText(getString(R.string.payment_total_format, totalAmount / 100.0));
+        amountText.setText(getString(R.string.payment_total_format, finalAmount / 100.0));
 
         // ✅ Apply theme colors based on user role
         applyThemeColors();
@@ -128,6 +146,16 @@ public class PaymentActivity extends ThemeBaseActivity {
         payButton.setOnClickListener(v -> {
             Log.d(TAG, "Pay button clicked with method: " + selectedPaymentMethod);
             Log.i(TAG, ">>> PAY BUTTON CLICKED | Method: " + selectedPaymentMethod);
+
+            if (finalAmount <= 0) {
+                Log.i(TAG, ">>> ZERO-AMOUNT ORDER DETECTED: skipping payment gateway and finalizing directly");
+                payButton.setEnabled(false);
+                loadingSpinner.setVisibility(View.VISIBLE);
+                selectedPaymentMethod = "coupon";
+                paymentIntentId = "coupon_" + System.currentTimeMillis();
+                onPaymentSuccess();
+                return;
+            }
             
             if ("cash".equals(selectedPaymentMethod)) {
                 // Direct cash payment - no Stripe involved
@@ -187,7 +215,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         Log.i(TAG, ">>> CASH PAYMENT SELECTED");
         
         String userId = RoleManager.getUserId();
-        int amount = CartManager.getTotalAmountInCents();
+        int amount = finalAmount;
         
         Log.i(TAG, "Cash payment. userId=" + userId + ", amount=" + amount);
         Log.d(TAG, "onCashPaymentSelected: Saving order to backend");
@@ -205,7 +233,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         saveOrderToBackend(userId, amount, paymentIntentId, new SaveOrderCallback() {
             @Override
             public void onSuccess() {
-                completeCheckoutAndNavigate(userId, amount, true);
+                markCouponsAsUsedAfterPayment(amount, () -> completeCheckoutAndNavigate(userId, amount, true));
             }
 
             @Override
@@ -223,7 +251,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         Log.d(TAG, "createPaymentIntent: preparing request");
         Log.d(TAG, "createPaymentIntent: selectedPaymentMethod = " + selectedPaymentMethod);
 
-        int totalAmount = CartManager.getTotalAmountInCents();
+        int totalAmount = finalAmount;
         String userId = RoleManager.getUserId();
 
         if (userId == null || userId.trim().isEmpty()) {
@@ -501,7 +529,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         Log.i(TAG, ">>> Payment intent ID: " + paymentIntentId);
 
         String userId = RoleManager.getUserId();
-        int amount = CartManager.getTotalAmountInCents();
+        int amount = finalAmount;
 
         if (userId == null || userId.trim().isEmpty()) {
             showError(getString(R.string.invalid_customer_account_login_again));
@@ -514,7 +542,7 @@ public class PaymentActivity extends ThemeBaseActivity {
         saveOrderToBackend(userId, amount, paymentIntentId, new SaveOrderCallback() {
             @Override
             public void onSuccess() {
-                completeCheckoutAndNavigate(userId, amount, false);
+                markCouponsAsUsedAfterPayment(amount, () -> completeCheckoutAndNavigate(userId, amount, false));
             }
 
             @Override
@@ -763,6 +791,67 @@ public class PaymentActivity extends ThemeBaseActivity {
 
         CartManager.clearCart();
         CartManager.clearPackageDetails();
+    }
+
+    private void markCouponsAsUsedAfterPayment(int paidAmount, Runnable onFinished) {
+        if (couponQuantities == null || couponQuantities.isEmpty()) {
+            onFinished.run();
+            return;
+        }
+
+        Map<String, Integer> couponQuantitiesMap = new HashMap<>();
+        for (Map.Entry<Integer, Integer> entry : couponQuantities.entrySet()) {
+            Integer couponId = entry.getKey();
+            Integer quantity = entry.getValue();
+            if (couponId == null || quantity == null || quantity <= 0) {
+                continue;
+            }
+            couponQuantitiesMap.put("coupon_quantities[" + couponId + "]", quantity);
+        }
+
+        if (couponQuantitiesMap.isEmpty()) {
+            onFinished.run();
+            return;
+        }
+
+        ArrayList<Integer> menuItemIds = new ArrayList<>();
+        for (CartItem item : CartManager.getCartItems().keySet()) {
+            Integer id = item.getMenuItemId();
+            if (id != null) {
+                menuItemIds.add(id);
+            }
+        }
+
+        int orderTotalForValidation = subtotalAmount > 0 ? subtotalAmount : paidAmount;
+        String orderType = CartManager.getOrderType();
+        int customerId;
+        try {
+            customerId = Integer.parseInt(RoleManager.getUserId());
+        } catch (Exception e) {
+            Log.w(TAG, "markCouponsAsUsedAfterPayment: invalid customer id", e);
+            onFinished.run();
+            return;
+        }
+
+        CouponApiService service = RetrofitClient.getClient(this).create(CouponApiService.class);
+        service.useCoupons(customerId, orderTotalForValidation, orderType, couponQuantitiesMap, menuItemIds)
+                .enqueue(new Callback<GenericResponse>() {
+                    @Override
+                    public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            Log.i(TAG, "Coupons marked as used after payment: " + new Gson().toJson(couponQuantitiesMap));
+                        } else {
+                            Log.w(TAG, "Failed to mark coupons after payment, response code=" + response.code());
+                        }
+                        onFinished.run();
+                    }
+
+                    @Override
+                    public void onFailure(Call<GenericResponse> call, Throwable t) {
+                        Log.e(TAG, "Coupon use API error after payment: " + t.getMessage(), t);
+                        onFinished.run();
+                    }
+                });
     }
 
     private void showError(String message) {

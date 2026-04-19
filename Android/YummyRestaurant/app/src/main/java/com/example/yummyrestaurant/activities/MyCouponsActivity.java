@@ -1,6 +1,7 @@
 package com.example.yummyrestaurant.activities;
 
 import android.content.Intent;
+import android.os.Parcel;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -16,18 +17,14 @@ import com.example.yummyrestaurant.adapters.MyCouponAdapter;
 import com.example.yummyrestaurant.api.CouponApiService;
 import com.example.yummyrestaurant.api.RetrofitClient;
 import com.example.yummyrestaurant.models.Coupon;
-import com.example.yummyrestaurant.models.GenericResponse;
 import com.example.yummyrestaurant.models.MyCouponListResponse;
-import com.example.yummyrestaurant.utils.CartManager;
 import com.example.yummyrestaurant.utils.LanguageManager;
 import com.example.yummyrestaurant.utils.RoleManager;
 import com.example.yummyrestaurant.utils.CouponValidator;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -181,7 +178,10 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
     private void showQuantityPickerAndUse(Coupon coupon, int position) {
         int ownedQty = coupon.getQuantity();
-        int maxUsable = ownedQty;
+        int maxUsable = CouponValidator.getMaxUsableQuantityForCart(coupon);
+        if (maxUsable > ownedQty) {
+            maxUsable = ownedQty;
+        }
 
         if (maxUsable <= 0) {
             Toast.makeText(this, getString(R.string.no_coupons_available_to_use), Toast.LENGTH_SHORT).show();
@@ -216,12 +216,6 @@ public class MyCouponsActivity extends BaseCustomerActivity {
 
 
     private void useCoupon(Coupon coupon, int position, int quantity) {
-        int orderTotal = getIntent().getIntExtra("order_total", 0);
-        ArrayList<Integer> menuItemIds = getIntent().getIntegerArrayListExtra("menu_item_ids");
-        if (menuItemIds == null) {
-            menuItemIds = new ArrayList<>();
-        }
-
         // 防止重複使用檢查 - 檢查是否已經在此次結帳中使用過該優惠券
         if (couponQuantities.containsKey(coupon.getCouponId())) {
             int alreadyUsedQty = couponQuantities.get(coupon.getCouponId());
@@ -235,43 +229,29 @@ public class MyCouponsActivity extends BaseCustomerActivity {
             }
         }
 
-        Map<String, Integer> apiCouponQuantities = new HashMap<>();
-        apiCouponQuantities.put("coupon_quantities[" + coupon.getCouponId() + "]", quantity);
+        int previousQty = couponQuantities.getOrDefault(coupon.getCouponId(), 0);
+        couponQuantities.put(coupon.getCouponId(), previousQty + quantity);
 
-        String orderType = CartManager.getOrderType();
+        selectedCoupons.add(copyCouponWithQuantity(coupon, quantity));
 
-        CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
-        api.useCoupons(customerId, orderTotal, orderType, apiCouponQuantities, menuItemIds)
-                .enqueue(new Callback<GenericResponse>() {
-                    @Override
-                    public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
-                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            // 更新已使用的數量
-                            int previousQty = couponQuantities.getOrDefault(coupon.getCouponId(), 0);
-                            couponQuantities.put(coupon.getCouponId(), previousQty + quantity);
-                            
-                            // 添加到已選擇列表（用於返回結果）
-                            selectedCoupons.add(coupon);
-                            
-                            // 從列表中移除或更新數量
-                            adapter.decrementCouponQuantity(position, quantity);
-                            
-                            Toast.makeText(MyCouponsActivity.this,
-                                    getString(R.string.coupon_applied_press_done, quantity),
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            String errorMsg = response.body() != null ? 
-                                response.body().getMessage() : getString(R.string.failed_apply_coupon);
-                            Toast.makeText(MyCouponsActivity.this,
-                                    errorMsg, Toast.LENGTH_SHORT).show();
-                        }
-                    }
+        // 只做本地選擇，實際標記使用會等付款成功後才送去後端
+        adapter.decrementCouponQuantity(position, quantity);
 
-                    @Override
-                    public void onFailure(Call<GenericResponse> call, Throwable t) {
-                        Toast.makeText(MyCouponsActivity.this,
-                                getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
-                    }
-                });
+        Toast.makeText(MyCouponsActivity.this,
+                getString(R.string.coupon_applied_press_done, quantity),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private Coupon copyCouponWithQuantity(Coupon source, int quantity) {
+        Parcel parcel = Parcel.obtain();
+        try {
+            source.writeToParcel(parcel, 0);
+            parcel.setDataPosition(0);
+            Coupon copy = Coupon.CREATOR.createFromParcel(parcel);
+            copy.setQuantity(quantity);
+            return copy;
+        } finally {
+            parcel.recycle();
+        }
     }
 }

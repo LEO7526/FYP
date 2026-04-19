@@ -141,7 +141,7 @@ public class BuildSetMenuActivity extends ThemeBaseActivity {
             ));
             rv.setNestedScrollingEnabled(false);
                 rv.setClipToPadding(false);
-                rv.setPadding(4, 0, 4, 0);
+                rv.setPadding(4, 6, 4, 10);
 
             // 3. Setup adapter
             SelectableMenuItemAdapter adapter = new SelectableMenuItemAdapter(

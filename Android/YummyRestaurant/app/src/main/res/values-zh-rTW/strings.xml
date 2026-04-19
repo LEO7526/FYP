@@ -207,7 +207,7 @@
     <string name="registration_failed_try_again">註冊失敗，請稍後再試。</string>
 
     <string name="alipay_unavailable_using_card">Alipay 目前不可用，已切換為信用卡支付。</string>
-    <string name="payment_available_time_only">僅可於 11:00-21:29 使用（Asia/Hong_Kong）。</string>
+    <string name="payment_available_time_only">僅可於 11:00-22:59 使用（Asia/Hong_Kong）。</string>
     <string name="payment_setup_failed_try_again">支付設定失敗，請稍後再試。</string>
     <string name="network_error">網路錯誤</string>
     <string name="failed_initialize_payment_try_again">初始化支付失敗，請稍後再試。</string>

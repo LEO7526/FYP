@@ -43,6 +43,14 @@ public class CouponValidator {
             return new ValidationResult(false, "This coupon has expired");
         }
 
+        int maxUsableQty = getMaxUsableQuantityForCart(coupon);
+        if (requestedQty > maxUsableQty) {
+            Log.w(TAG, "Invalid: requested quantity exceeds cart eligibility, requested="
+                + requestedQty + ", maxUsable=" + maxUsableQty);
+            return new ValidationResult(false,
+                String.format("You can only use %d of this coupon for your current cart", maxUsableQty));
+        }
+
         int cartTotalCents = CartManager.getTotalAmountInCents();
         int scopedSubtotalCents = 0;
 
@@ -162,6 +170,77 @@ public class CouponValidator {
     public static boolean isCouponValidForCart(Coupon coupon, int requestedQty) {
         ValidationResult result = validateCouponWithReason(coupon, requestedQty);
         return result.isValid;
+    }
+
+    /**
+     * Return the maximum coupon quantity that can be used with the current cart.
+     * This caps free-item and item/category-scoped coupons by the matching cart quantity.
+     */
+    public static int getMaxUsableQuantityForCart(Coupon coupon) {
+        if (coupon == null) {
+            return 0;
+        }
+
+        int ownedQuantity = Math.max(1, coupon.getQuantity());
+        int eligibleQuantity = getEligibleCartQuantity(coupon);
+
+        if (eligibleQuantity > 0) {
+            return Math.min(ownedQuantity, eligibleQuantity);
+        }
+
+        return ownedQuantity;
+    }
+
+    private static int getEligibleCartQuantity(Coupon coupon) {
+        boolean hasItemRestrictions =
+                coupon.getApplicableItems() != null && !coupon.getApplicableItems().isEmpty();
+        boolean hasCategoryRestrictions =
+                coupon.getApplicableCategories() != null && !coupon.getApplicableCategories().isEmpty();
+
+        int eligibleQuantity = 0;
+
+        for (Map.Entry<CartItem, Integer> entry : CartManager.getCartItems().entrySet()) {
+            CartItem cartItem = entry.getKey();
+            Integer qty = entry.getValue();
+            int quantity = qty != null ? qty : 1;
+
+            Integer categoryId = cartItem.getCategoryId();
+            MenuItem menuItem = cartItem.getMenuItem();
+            Integer itemId = menuItem != null ? menuItem.getId() : null;
+
+            boolean matchesCategory = hasCategoryRestrictions
+                    && categoryId != null
+                    && coupon.getApplicableCategories().contains(categoryId);
+            boolean matchesItem = hasItemRestrictions
+                    && itemId != null
+                    && coupon.getApplicableItems().contains(itemId);
+
+            if (matchesCategory || matchesItem) {
+                eligibleQuantity += quantity;
+            }
+        }
+
+        if (eligibleQuantity > 0) {
+            return eligibleQuantity;
+        }
+
+        if (hasItemRestrictions || hasCategoryRestrictions) {
+            String couponItemCategory = coupon.getItemCategory();
+            if (couponItemCategory != null && !couponItemCategory.isEmpty()) {
+                for (Map.Entry<CartItem, Integer> entry : CartManager.getCartItems().entrySet()) {
+                    CartItem cartItem = entry.getKey();
+                    String cartCategoryName = cartItem.getCategory();
+                    if (cartCategoryName != null
+                            && couponItemCategory.equalsIgnoreCase(cartCategoryName.trim())) {
+                        Integer qty = entry.getValue();
+                        int quantity = qty != null ? qty : 1;
+                        eligibleQuantity += quantity;
+                    }
+                }
+            }
+        }
+
+        return eligibleQuantity;
     }
 
     /**

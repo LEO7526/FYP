@@ -69,6 +69,7 @@ if ($category_result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yummy Restaurant - Add New Inventory</title>
     <link rel="stylesheet" href="../CSS/header.css">
+    <link rel="stylesheet" href="../CSS/common.css">
     <link rel="stylesheet" href="../CSS/addInventory.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
