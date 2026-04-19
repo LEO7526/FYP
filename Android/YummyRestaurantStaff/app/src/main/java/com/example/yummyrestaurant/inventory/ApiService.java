@@ -5,8 +5,11 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 public interface ApiService {
+        @POST("add_material.php")
+        Call<ApiResponse<Void>> addMaterial(@Body Material material);
     @GET("get_materials.php")
     Call<ApiResponse<List<Material>>> getMaterials();
 
@@ -24,4 +27,14 @@ public interface ApiService {
 
     @GET("get_food_stock.php")
     Call<ApiResponse<List<FoodStock>>> getFoodStock();
+
+    @GET("get_restock_recommendations.php")
+    Call<ApiResponse<List<RestockRecommendation>>> getRestockRecommendations(
+            @Query("days") int days,
+            @Query("refresh") int refresh,
+            @Query("force_demo") int forceDemo
+    );
+
+    @POST("decide_restock_recommendation.php")
+    Call<ApiResponse<Object>> decideRestockRecommendation(@Body RestockDecisionRequest request);
 }

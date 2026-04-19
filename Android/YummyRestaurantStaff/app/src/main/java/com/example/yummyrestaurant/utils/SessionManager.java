@@ -26,18 +26,34 @@ public class SessionManager {
         editor.putString(KEY_NAME, name);
         editor.putString(KEY_ROLE, role);
         editor.apply();
+
+        // Also update RoleManager for compatibility with main app
+        RoleManager.setUserId(String.valueOf(sid));
+        RoleManager.setUserName(name);
+        RoleManager.setUserRole("staff");
     }
 
     public boolean isLoggedIn() {
-        return pref.getBoolean(KEY_IS_LOGGED_IN, false);
+        // Check both SessionManager and RoleManager
+        boolean sessionLogin = pref.getBoolean(KEY_IS_LOGGED_IN, false);
+        boolean roleManagerLogin = "staff".equalsIgnoreCase(RoleManager.getUserRole());
+        return sessionLogin || roleManagerLogin;
     }
 
     public void logout() {
         editor.clear();
         editor.apply();
+        
+        // Also clear RoleManager
+        RoleManager.clearUserData();
     }
 
     public String getStaffName() {
-        return pref.getString(KEY_NAME, "Staff");
+        String sessionName = pref.getString(KEY_NAME, null);
+        if (sessionName != null) {
+            return sessionName;
+        }
+        // Fallback to RoleManager
+        return RoleManager.getUserName() != null ? RoleManager.getUserName() : "Staff";
     }
 }

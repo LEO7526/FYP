@@ -1,0 +1,240 @@
+package com.example.yummyrestaurant.activities;
+
+import android.os.Bundle;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+
+import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.api.CouponApiService;
+import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.Coupon;
+import com.example.yummyrestaurant.models.CouponDetailResponse;
+import com.example.yummyrestaurant.models.RedeemCouponResponse;
+import com.example.yummyrestaurant.utils.LanguageManager;
+import com.example.yummyrestaurant.utils.RoleManager;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class CouponDetailActivity extends BaseCustomerActivity {
+
+    private static final String TAG = "CouponDetailActivity";
+
+    private TextView tvTitle, tvTerms, tvRequiredPoints, tvRemainingPoints;
+    private Button btnRedeem;
+
+    private int couponId;
+    private int customerId;
+    private int requiredPoints = 0;   // from API
+    private int currentPoints = 0;    // passed from intent or fetched separately
+    private String currentLanguage;
+
+    private Coupon currentCoupon;     // hold the full coupon object
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_coupon_detail);
+
+        setupBottomFunctionBar();
+
+        tvTitle = findViewById(R.id.tvTitle);
+        tvTerms = findViewById(R.id.tvTerms);
+        tvRequiredPoints = findViewById(R.id.tvRequiredPoints);
+        tvRemainingPoints = findViewById(R.id.tvRemainingPoints);
+        btnRedeem = findViewById(R.id.btnRedeem);
+
+        couponId = getIntent().getIntExtra("coupon_id", 0);
+        currentPoints = getIntent().getIntExtra("current_points", 0);
+        currentLanguage = LanguageManager.getCurrentLanguage(this);
+
+        if (couponId == 0) {
+            Toast.makeText(this, getString(R.string.invalid_coupon_selected), Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        try {
+            customerId = Integer.parseInt(RoleManager.getUserId());
+        } catch (Exception e) {
+            Log.w(TAG, "Invalid userId, defaulting to guest", e);
+            customerId = 0;
+        }
+
+        fetchCouponDetails(couponId);
+
+        btnRedeem.setOnClickListener(v -> {
+            if (customerId == 0) {
+                Toast.makeText(this, getString(R.string.please_login_to_redeem), Toast.LENGTH_SHORT).show();
+            } else if (btnRedeem.isEnabled()) {
+                showQuantityPickerAndRedeem();
+            }
+        });
+
+    }
+
+    private void fetchCouponDetails(int couponId) {
+        CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
+        api.getCouponDetail(couponId, currentLanguage).enqueue(new Callback<CouponDetailResponse>() {
+            @Override
+            public void onResponse(Call<CouponDetailResponse> call, Response<CouponDetailResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    currentCoupon = response.body().getCoupon();
+                    updateCouponUI(currentCoupon);
+                } else {
+                    Log.w(TAG, "fetchCouponDetails failed: " + response.code());
+                    tvTerms.setText(getString(R.string.failed_load_terms));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CouponDetailResponse> call, Throwable t) {
+                Log.e(TAG, "fetchCouponDetails onFailure", t);
+                tvTerms.setText(getString(R.string.error_loading_terms));
+            }
+        });
+    }
+
+    private void updateCouponUI(Coupon coupon) {
+        if (coupon != null) {
+            tvTitle.setText(coupon.getTitle());
+            requiredPoints = coupon.getPointsRequired();
+            tvRequiredPoints.setText(getString(R.string.points_required_format, requiredPoints));
+
+            // Show current points passed from intent
+            tvRemainingPoints.setText(getString(R.string.remaining_points_format, currentPoints));
+
+            // 🚨 Disable redeem button if not enough points
+            if (requiredPoints > 0 && currentPoints < requiredPoints) {
+                btnRedeem.setEnabled(false);
+                btnRedeem.setAlpha(0.5f); // optional visual cue
+                Toast.makeText(this, getString(R.string.not_enough_points_to_redeem_coupon), Toast.LENGTH_SHORT).show();
+            } else {
+                btnRedeem.setEnabled(true);
+                btnRedeem.setAlpha(1f);
+            }
+
+            if (coupon.getTerms() != null && !coupon.getTerms().isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (String term : coupon.getTerms()) {
+                    sb.append("• ").append(term).append("\n");
+                }
+                tvTerms.setText(sb.toString());
+            } else {
+                tvTerms.setText(getString(R.string.no_terms_available));
+            }
+        }
+    }
+
+
+
+    private void showQuantityPickerAndRedeem() {
+        int maxRedeemable = (requiredPoints > 0)
+                ? (currentPoints / requiredPoints)
+                : 5; // fallback if free coupon
+
+        if (maxRedeemable <= 0) {
+            Toast.makeText(this, getString(R.string.not_enough_points_to_redeem), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_redeem_quantity, null);
+        TextView titleView = dialogView.findViewById(R.id.tvRedeemDialogTitle);
+        TextView hintView = dialogView.findViewById(R.id.tvRedeemDialogHint);
+        NumberPicker quantityPicker = dialogView.findViewById(R.id.npRedeemQuantity);
+        Button cancelButton = dialogView.findViewById(R.id.btnRedeemQtyCancel);
+        Button confirmButton = dialogView.findViewById(R.id.btnRedeemQtyConfirm);
+
+        titleView.setText(getString(R.string.select_quantity_to_redeem));
+        quantityPicker.setMinValue(1);
+        quantityPicker.setMaxValue(maxRedeemable);
+        quantityPicker.setWrapSelectorWheel(false);
+
+        Runnable refreshHint = () -> {
+            int qty = quantityPicker.getValue();
+            String hint = getString(R.string.redeem_dialog_max_redeemable_format, maxRedeemable);
+            if (requiredPoints > 0) {
+                hint = hint + "\n" + getString(R.string.redeem_dialog_points_cost_format, requiredPoints * qty);
+            }
+            hintView.setText(hint);
+        };
+        refreshHint.run();
+        quantityPicker.setOnValueChangedListener((picker, oldVal, newVal) -> refreshHint.run());
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        confirmButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            redeemCoupon(couponId, customerId, quantityPicker.getValue());
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            int screenWidth = getResources().getDisplayMetrics().widthPixels;
+            int targetWidth = (int) (screenWidth * 0.9f);
+            int maxWidth = dpToPx(420);
+            dialog.getWindow().setLayout(Math.min(targetWidth, maxWidth), ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
+    }
+
+    private void redeemCoupon(int couponId, int customerId, int quantity) {
+        CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
+        api.redeemCoupon(customerId, couponId, quantity).enqueue(new Callback<RedeemCouponResponse>() {
+            @Override
+            public void onResponse(Call<RedeemCouponResponse> call, Response<RedeemCouponResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    RedeemCouponResponse res = response.body();
+                    Log.d(TAG, "redeemCoupon response: " + res.getMessage());
+
+                    if (res.isSuccess()) {
+                        Toast.makeText(CouponDetailActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
+                        if (res.getPointsAfter() != null) {
+                            tvRemainingPoints.setText(getString(R.string.remaining_points_format, res.getPointsAfter()));
+                        }
+                    } else {
+                        if ("BIRTHDAY_ALREADY_REDEEMED".equals(res.getErrorCode())) {
+                            Toast.makeText(CouponDetailActivity.this,
+                                    getString(R.string.birthday_coupon_already_used),
+                                    Toast.LENGTH_LONG).show();
+                            // Optional: disable the redeem button so user doesn’t retry
+                            btnRedeem.setEnabled(false);
+                            btnRedeem.setAlpha(0.5f);
+                        } else {
+                            Toast.makeText(CouponDetailActivity.this,
+                                    res.getError() != null ? res.getError() : getString(R.string.redeem_failed),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "redeemCoupon failed: " + response.code());
+                    Toast.makeText(CouponDetailActivity.this, getString(R.string.redeem_failed), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RedeemCouponResponse> call, Throwable t) {
+                Log.e(TAG, "redeemCoupon onFailure", t);
+                Toast.makeText(CouponDetailActivity.this, getString(R.string.network_error_with_reason, t.getMessage()), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+}

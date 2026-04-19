@@ -2,17 +2,22 @@ package com.example.yummyrestaurant.inventory;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import com.example.yummyrestaurant.activities.StaffBaseActivity;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.example.yummyrestaurant.activities.CreateMaterialActivity;
 import com.example.yummyrestaurant.R; // 確保引用正確的 R
 
-public class InventoryActivity extends AppCompatActivity {
+public class InventoryActivity extends StaffBaseActivity {
+
+    private ViewPager2 viewPager;
+    private ViewPagerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,27 +30,33 @@ public class InventoryActivity extends AppCompatActivity {
 
         // 設定標題
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Inventory Management");
+            getSupportActionBar().setTitle(R.string.inventory_management);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true); // 顯示返回箭頭
         }
 
         TabLayout tabLayout = findViewById(R.id.tab_layout);
-        ViewPager2 viewPager = findViewById(R.id.view_pager);
+        viewPager = findViewById(R.id.view_pager);
 
-        ViewPagerAdapter adapter = new ViewPagerAdapter(this);
+        adapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(adapter);
 
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> {
                     switch (position) {
                         case 0:
-                            tab.setText("Materials");
+                            tab.setText(R.string.ingredients);
                             break;
                         case 1:
-                            tab.setText("Recipes");
+                            tab.setText(R.string.recipes);
                             break;
                         case 2:
-                            tab.setText("Production");
+                            tab.setText(R.string.analysis);
+                            break;
+                        case 3:
+                            tab.setText(R.string.consumption);
+                            break;
+                        case 4:
+                            tab.setText(R.string.restock);
                             break;
                     }
                 }
@@ -66,6 +77,24 @@ public class InventoryActivity extends AppCompatActivity {
             startActivity(intent);
             return true;
         }
+
+        if (item.getItemId() == R.id.action_add_material) {
+            startActivity(new Intent(this, CreateMaterialActivity.class));
+            return true;
+        }
+
+        if (item.getItemId() == R.id.action_refresh) {
+            int currentTab = viewPager.getCurrentItem();
+            if (adapter != null) {
+                androidx.fragment.app.Fragment fragment = adapter.getFragmentAt(currentTab);
+                if (fragment instanceof RefreshableTab) {
+                    ((RefreshableTab) fragment).refreshData();
+                    Toast.makeText(this, R.string.refreshing_current_tab, Toast.LENGTH_SHORT).show();
+                }
+            }
+            return true;
+        }
+
         // 處理返回箭頭點擊
         if (item.getItemId() == android.R.id.home) {
             finish();

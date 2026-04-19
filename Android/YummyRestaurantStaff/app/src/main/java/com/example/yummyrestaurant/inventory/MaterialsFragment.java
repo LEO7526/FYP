@@ -20,7 +20,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import com.example.yummyrestaurant.R;
 
-public class MaterialsFragment extends Fragment implements MaterialAdapter.OnMaterialClickListener {
+public class MaterialsFragment extends Fragment implements MaterialAdapter.OnMaterialClickListener, RefreshableTab {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private MaterialAdapter materialAdapter;
@@ -54,17 +54,28 @@ public class MaterialsFragment extends Fragment implements MaterialAdapter.OnMat
                 if (isAdded() && response.isSuccessful() && apiResponse != null && apiResponse.success) {
                     materialAdapter.setMaterials(apiResponse.data);
                 } else if (isAdded()) {
-                    Toast.makeText(getContext(), "Failed to load materials.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.failed_load_ingredients, Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<Material>>> call, @NonNull Throwable t) {
                 if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
                 if (isAdded()) {
-                    Toast.makeText(getContext(), "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.network_error_prefix, t.getMessage()), Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchMaterials();
+    }
+
+    @Override
+    public void refreshData() {
+        fetchMaterials();
     }
 
     @Override
@@ -75,33 +86,33 @@ public class MaterialsFragment extends Fragment implements MaterialAdapter.OnMat
     private void showQuantityInputDialog(Material material) {
         final EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        String currentStockInfo = String.format(Locale.getDefault(), "Current stock: %.2f %s", material.mqty, material.unit);
+        String currentStockInfo = getString(R.string.current_stock_info, material.mqty, material.unit);
         input.setHint(currentStockInfo);
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Adjust Stock for: " + material.mname)
-                .setMessage("Enter the quantity to add or subtract.")
+            .setTitle(getString(R.string.adjust_stock_for, material.mname))
+            .setMessage(R.string.enter_quantity_add_subtract)
                 .setView(input)
-                .setPositiveButton("Add (入庫)", (dialog, which) -> handleDialogInput(input.getText().toString(), material, "in"))
+            .setPositiveButton(R.string.add_stock, (dialog, which) -> handleDialogInput(input.getText().toString(), material, "in"))
                 // *** 這裡就是修改的地方 ***
-                .setNegativeButton("Decrease (出庫)", (dialog, which) -> handleDialogInput(input.getText().toString(), material, "out"))
-                .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss())
+            .setNegativeButton(R.string.decrease_stock, (dialog, which) -> handleDialogInput(input.getText().toString(), material, "out"))
+            .setNeutralButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
     private void handleDialogInput(String quantityStr, Material material, String action) {
         if (quantityStr.isEmpty()) {
-            Toast.makeText(getContext(), "Please enter a quantity.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.please_enter_quantity, Toast.LENGTH_SHORT).show();
             return;
         }
         try {
             double quantity = Double.parseDouble(quantityStr);
             if (quantity <= 0) {
-                Toast.makeText(getContext(), "Please enter a positive quantity.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.please_enter_positive_quantity, Toast.LENGTH_SHORT).show();
                 return;
             }
             performStockAdjustment(material.mid, quantity, action);
         } catch (NumberFormatException e) {
-            Toast.makeText(getContext(), "Invalid number format.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.invalid_number_format, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -114,9 +125,9 @@ public class MaterialsFragment extends Fragment implements MaterialAdapter.OnMat
                 if (isAdded()) {
                     ApiResponse<Void> apiResponse = response.body();
                     if (response.isSuccessful() && apiResponse != null && apiResponse.success) {
-                        Toast.makeText(getContext(), "Adjustment successful!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), R.string.adjustment_successful, Toast.LENGTH_SHORT).show();
                     } else {
-                        String message = (apiResponse != null) ? apiResponse.message : "Update failed.";
+                        String message = (apiResponse != null) ? apiResponse.message : getString(R.string.update_failed);
                         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
                     }
                     fetchMaterials();
@@ -126,7 +137,7 @@ public class MaterialsFragment extends Fragment implements MaterialAdapter.OnMat
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 if (isAdded()) {
                     if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
-                    Toast.makeText(getContext(), "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.network_error_prefix, t.getMessage()), Toast.LENGTH_SHORT).show();
                 }
             }
         });

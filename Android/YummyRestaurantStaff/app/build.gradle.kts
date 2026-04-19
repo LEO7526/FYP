@@ -1,16 +1,17 @@
 plugins {
-    id("com.android.application")
+    id("com.android.application") version "8.10.1"
+    id("org.jetbrains.kotlin.android") version "1.9.22"
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
-    // 這是你的專案包名，千萬別改
     namespace = "com.example.yummyrestaurant"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.yummyrestaurant"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 28
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -18,63 +19,107 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("debug") {
+            // Keep current local development behavior for emulator/phone over HTTP.
+            manifestPlaceholders["usesCleartextTraffic"] = true
+            buildConfigField("String", "API_DEFAULT_BASE_URL", "\"http://10.0.2.2/newFolder/Database/projectapi/\"")
+            buildConfigField("String", "API_SIMULATOR_BASE_URL", "\"http://10.0.2.2/newFolder/Database/projectapi/\"")
+            buildConfigField("String", "API_PHONE_BASE_URL", "\"http://192.168.0.121/newFolder/Database/projectapi/\"")
+            buildConfigField("String", "INVENTORY_BASE_URL", "\"http://10.0.2.2/androidstaff_api/inventory/\"")
+        }
+
+        getByName("release") {
             isMinifyEnabled = false
+            manifestPlaceholders["usesCleartextTraffic"] = false
+            buildConfigField("String", "API_DEFAULT_BASE_URL", "\"https://api.yummyrestaurant.com/projectapi/\"")
+            buildConfigField("String", "API_SIMULATOR_BASE_URL", "\"https://api.yummyrestaurant.com/projectapi/\"")
+            buildConfigField("String", "API_PHONE_BASE_URL", "\"https://api.yummyrestaurant.com/projectapi/\"")
+            buildConfigField("String", "INVENTORY_BASE_URL", "\"https://api.yummyrestaurant.com/inventory/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+
 }
 
 dependencies {
-    // ============================================
-    // 1. Android 基礎元件 (直接寫死版本號，保證不報錯)
-    // ============================================
+//    for payment
+    implementation("com.stripe:stripe-android:20.11.0")
+
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.activity:activity:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.activity:activity:1.8.0")
 
-    // ============================================
-    // 2. 員工 App 原本用的 (Volley)
-    // ============================================
-    implementation("com.android.volley:volley:1.2.1")
+
+//for map
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
+    implementation("org.osmdroid:osmdroid-mapsforge:6.1.16")
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    implementation("com.google.android.material:material:1.11.0")
+
+    implementation("androidx.recyclerview:recyclerview:1.3.1")
+
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+
+    implementation("androidx.annotation:annotation:1.7.0")
+
+    implementation("androidx.cardview:cardview:1.0.0")
+
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // Animation
+    implementation("com.airbnb.android:lottie:6.4.1")
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 
     // ============================================
-    // 3. 庫存系統 (Inventory) 的強大功能
+    // Staff App Dependencies
     // ============================================
-
-    // 列表與下拉刷新
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    
+    // Volley for staff API calls
+    implementation("com.android.volley:volley:1.2.1")
+    
+    // SwipeRefreshLayout for pull-to-refresh functionality
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
-    // CameraX (掃描 QR Code 用)
+    // CameraX for QR Code scanning in inventory system
     implementation("androidx.camera:camera-core:1.3.1")
     implementation("androidx.camera:camera-camera2:1.3.1")
     implementation("androidx.camera:camera-lifecycle:1.3.1")
     implementation("androidx.camera:camera-view:1.3.1")
 
-    // ML Kit (條碼辨識)
+    // ML Kit for barcode scanning
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
 
-    // Retrofit & Gson (庫存系統用的網路連線)
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // ViewPager2 for inventory tabs
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
 
-    // 背景任務
+    // Background tasks for inventory system
     implementation("androidx.work:work-runtime:2.9.0")
 
-    // ============================================
-    // 4. 測試相關
-    // ============================================
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

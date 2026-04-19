@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,27 +54,32 @@ public class MaterialAdapter extends RecyclerView.Adapter<MaterialAdapter.Materi
     static class MaterialViewHolder extends RecyclerView.ViewHolder {
         private final TextView nameTextView;
         private final TextView quantityTextView;
+        private final TextView statusTextView;
 
         public MaterialViewHolder(@NonNull View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.text_material_name);
             quantityTextView = itemView.findViewById(R.id.text_material_quantity);
+            statusTextView = itemView.findViewById(R.id.text_material_status);
         }
 
         // bind 方法需要接收監聽器
         public void bind(final Material material, final OnMaterialClickListener listener) {
             nameTextView.setText(material.mname);
             // 修改這裡：使用 .unit 和 .reorderLevel
-            String quantityText = String.format(Locale.getDefault(),
-                    "Current: %.2f %s (Reorder at: %.2f %s)",
-                    material.mqty, material.unit, material.reorderLevel, material.unit);
+            String quantityText = itemView.getContext().getString(R.string.current_reorder_text,
+                material.mqty, material.unit, material.reorderLevel, material.unit);
             quantityTextView.setText(quantityText);
 
             // 判斷是否低於安全水位
             if (material.mqty <= material.reorderLevel) {
                 quantityTextView.setTextColor(Color.RED);
+                statusTextView.setText(R.string.low_stock);
+                statusTextView.getBackground().setTint(ContextCompat.getColor(itemView.getContext(), R.color.red_dark));
             } else {
                 quantityTextView.setTextColor(Color.GRAY);
+                statusTextView.setText(R.string.healthy);
+                statusTextView.getBackground().setTint(ContextCompat.getColor(itemView.getContext(), R.color.green_dark));
             }
 
             itemView.setOnClickListener(v -> listener.onMaterialClick(material));

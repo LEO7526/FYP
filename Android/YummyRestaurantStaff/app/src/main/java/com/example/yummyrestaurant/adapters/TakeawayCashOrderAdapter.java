@@ -14,38 +14,54 @@ import com.example.yummyrestaurant.models.TakeawayCashOrder;
 
 import java.util.List;
 
-public class TakeawayCashOrderAdapter extends RecyclerView.Adapter<TakeawayCashOrderAdapter.ViewHolder> {
+public class TakeawayCashOrderAdapter extends RecyclerView.Adapter<TakeawayCashOrderAdapter.OrderViewHolder> {
+
     private Context context;
     private List<TakeawayCashOrder> orderList;
-    private OnOrderClickListener listener;
+    private OnOrderClickListener clickListener;
 
     public interface OnOrderClickListener {
         void onOrderClick(TakeawayCashOrder order);
     }
 
-    public TakeawayCashOrderAdapter(Context context, List<TakeawayCashOrder> orderList, OnOrderClickListener listener) {
+    public TakeawayCashOrderAdapter(Context context, List<TakeawayCashOrder> orderList, OnOrderClickListener clickListener) {
         this.context = context;
         this.orderList = orderList;
-        this.listener = listener;
+        this.clickListener = clickListener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_2, parent, false);
-        return new ViewHolder(view);
+    public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.item_takeaway_cash_order, parent, false);
+        return new OrderViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         TakeawayCashOrder order = orderList.get(position);
-        
-        holder.text1.setText(order.getOrderRef() + " - " + order.getCustomerName());
-        holder.text2.setText("HK$" + String.format("%.2f", order.getTotalAmount()));
-        
+
+        holder.orderRef.setText(order.getOrderRef());
+        holder.customerName.setText(order.getCustomerName());
+        holder.orderTime.setText(order.getOrderTime());
+        holder.totalAmount.setText(String.format("HK$%.2f", order.getTotalAmount()));
+        holder.itemsSummary.setText(order.getItemsSummary());
+
+        if (order.isCompleted()) {
+            holder.statusBadge.setText("✅ PAID TODAY");
+            holder.statusBadge.setTextColor(0xFF1B5E20);
+            holder.statusBadge.setBackgroundColor(0xFFC8E6C9);
+            holder.itemView.setAlpha(0.75f);
+        } else {
+            holder.statusBadge.setText("💰 Awaiting Payment");
+            holder.statusBadge.setTextColor(0xFFFF5722);
+            holder.statusBadge.setBackgroundColor(0xFFFFE5DB);
+            holder.itemView.setAlpha(1.0f);
+        }
+
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onOrderClick(order);
+            if (clickListener != null) {
+                clickListener.onOrderClick(order);
             }
         });
     }
@@ -55,13 +71,17 @@ public class TakeawayCashOrderAdapter extends RecyclerView.Adapter<TakeawayCashO
         return orderList.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView text1, text2;
+    static class OrderViewHolder extends RecyclerView.ViewHolder {
+        TextView orderRef, customerName, orderTime, totalAmount, itemsSummary, statusBadge;
 
-        public ViewHolder(@NonNull View itemView) {
+        public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
-            text1 = itemView.findViewById(android.R.id.text1);
-            text2 = itemView.findViewById(android.R.id.text2);
+            orderRef = itemView.findViewById(R.id.textOrderRef);
+            customerName = itemView.findViewById(R.id.textCustomerName);
+            orderTime = itemView.findViewById(R.id.textOrderTime);
+            totalAmount = itemView.findViewById(R.id.textTotalAmount);
+            itemsSummary = itemView.findViewById(R.id.textItemsSummary);
+            statusBadge = itemView.findViewById(R.id.textStatusBadge);
         }
     }
 }

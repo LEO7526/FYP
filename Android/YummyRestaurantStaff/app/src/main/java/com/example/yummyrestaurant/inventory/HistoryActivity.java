@@ -3,8 +3,8 @@ package com.example.yummyrestaurant.inventory;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.yummyrestaurant.activities.StaffBaseActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import java.util.List;
 import retrofit2.Call;
@@ -12,7 +12,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import com.example.yummyrestaurant.R;
 
-public class HistoryActivity extends AppCompatActivity {
+public class HistoryActivity extends StaffBaseActivity {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private HistoryAdapter historyAdapter;
@@ -24,7 +24,7 @@ public class HistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_history);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Consumption History");
+            getSupportActionBar().setTitle(R.string.consumption_history_title);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
@@ -63,14 +63,16 @@ public class HistoryActivity extends AppCompatActivity {
                 if (response.isSuccessful() && apiResponse != null && apiResponse.success) {
                     historyAdapter.setHistoryLogs(apiResponse.data);
                 } else {
-                    Toast.makeText(HistoryActivity.this, "Failed to load history.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(HistoryActivity.this, R.string.failed_load_history, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<ConsumptionLog>>> call, @NonNull Throwable t) {
                 swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(HistoryActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(HistoryActivity.this,
+                        getString(R.string.network_error_prefix, t.getMessage()),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }

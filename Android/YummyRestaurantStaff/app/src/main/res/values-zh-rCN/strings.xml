@@ -1,0 +1,400 @@
+<resources>
+    <string name="app_name">Yummy Restaurant</string>
+
+    <string name="title_settings">设置</string>
+    <string name="enable_notifications">启用通知</string>
+    <string name="notifications_enabled">通知已启用</string>
+    <string name="notifications_disabled">通知已禁用</string>
+    <string name="language_updated">语言已更新</string>
+    <string name="select_language">选择语言</string>
+
+    <string-array name="language_options">
+        <item>English</item>
+        <item>简体中文</item>
+        <item>繁體中文</item>
+    </string-array>
+
+    <string name="login_to_earn_points">登录后可赚取和兑换积分</string>
+    <string name="points_format">积分：%1$d</string>
+    <string name="error_load_packages">加载套餐失败</string>
+    <string name="error_load_menu_items">加载菜单项目失败</string>
+    <string name="error_select_order_type_first">请先选择堂食或外带</string>
+    <string name="error_with_reason">错误：%1$s</string>
+
+    <string name="filter_all">全部菜品</string>
+    <string name="filter_appetizers">前菜</string>
+    <string name="filter_main_courses">主菜</string>
+    <string name="filter_soup">汤</string>
+    <string name="filter_dessert">甜品</string>
+    <string name="filter_drink">饮料</string>
+
+    <string name="notification_permission_denied">通知权限被拒绝</string>
+    <string name="please_login_access_feature">请先登录以使用此功能。</string>
+    <string name="not_logged_in">您尚未登录。</string>
+    <string name="confirm_logout_title">确认登出</string>
+    <string name="confirm_logout_message">确定要登出吗？</string>
+    <string name="logout">登出</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="scanning_qr_code">正在扫描二维码...</string>
+
+    <string name="failed_load_points">加载积分失败</string>
+    <string name="error_loading_points">加载积分时出错</string>
+    <string name="failed_load_coupons">加载优惠券失败</string>
+    <string name="please_login_to_redeem">请先登录再兑换</string>
+    <string name="not_enough_points_to_redeem_coupon">积分不足，无法兑换此优惠券</string>
+    <string name="not_enough_points_to_redeem">积分不足，无法兑换</string>
+    <string name="select_quantity_to_redeem">选择兑换数量</string>
+    <string name="redeem_dialog_max_redeemable_format">最多可兑换：%1$d</string>
+    <string name="redeem_dialog_points_cost_format">本次扣除积分：%1$d</string>
+    <string name="birthday_coupon_redeemed_this_year">您今年已经兑换过生日优惠券。</string>
+    <string name="birthday_coupon_already_used">生日优惠券今年已使用。</string>
+    <string name="redeem_failed">兑换失败</string>
+    <string name="redeemed_successfully">兑换成功</string>
+    <string name="please_set_birthday_to_redeem">请先设置生日再兑换此优惠券</string>
+    <string name="birthday_coupon_month_only">生日优惠券仅可在生日月份兑换</string>
+    <string name="invalid_birthday_format">返回的生日格式无效：%1$s</string>
+    <string name="birthday_not_set">未设置生日</string>
+    <string name="error_parsing_birthday">解析生日时出错：%1$s</string>
+    <string name="failed_check_birthday">检查生日失败</string>
+    <string name="error_checking_birthday">检查生日时出错：%1$s</string>
+
+    <string name="invalid_coupon_selected">选择的优惠券无效</string>
+    <string name="failed_load_terms">加载条款失败</string>
+    <string name="error_loading_terms">加载条款时出错</string>
+    <string name="points_required_format">所需积分：%1$d</string>
+    <string name="remaining_points_format">剩余积分：%1$d</string>
+    <string name="no_terms_available">暂无条款</string>
+
+    <string name="please_login_view_history">请先登录查看历史记录</string>
+    <string name="no_history_found_for_customer">该用户暂无历史记录</string>
+    <string name="unexpected_empty_response">返回为空</string>
+    <string name="failed_load_history_http">加载历史失败（HTTP %1$d）</string>
+
+    <string name="coupons_checkout_only">优惠券仅可在结账时使用</string>
+    <string name="proceed_without_coupon">不使用优惠券继续</string>
+    <string name="no_coupons_found">未找到优惠券</string>
+    <string name="no_coupons_available_to_use">没有可用优惠券</string>
+    <string name="no_coupons_in_my_coupon_page">目前没有可使用的优惠券。</string>
+    <string name="select_quantity_to_use">选择使用数量</string>
+    <string name="coupon_not_valid_for_cart">该优惠券不适用于当前购物车</string>
+    <string name="can_only_use_more_coupon">该优惠券您最多还能使用 %1$d 张</string>
+    <string name="coupon_applied_press_done">优惠券已应用（%1$d）。选择完成后请点击完成。</string>
+    <string name="failed_apply_coupon">应用优惠券失败</string>
+
+    <string name="network_error_with_reason">网络错误：%1$s</string>
+    <string name="no_menu_data">没有菜单数据</string>
+    <string name="failed_load_set_menu">加载套餐失败</string>
+    <string name="choose_items_format">请选择 %1$d 个%2$s</string>
+    <string name="build_set_menu_title">自定义套餐</string>
+    <string name="build_set_menu_subtitle">请按每个分类选齐指定份数，即可加入购物车。</string>
+    <string name="add_set_menu_to_cart">加入套餐到购物车</string>
+    <string name="customization_saved">自定义已保存</string>
+    <string name="complete_selection">请完成您的选择</string>
+    <string name="package_reorder_quantity_title">选择重订数量</string>
+    <string name="package_reorder_quantity_message">最多可重订 %1$d 套。</string>
+    <string name="package_reorder_quantity_hint">数量</string>
+    <string name="package_reorder_quantity_invalid">请输入 1 到 %1$d 之间的数量</string>
+    <string name="unnamed_dish">未命名菜品</string>
+    <string name="original_total_format">原价合计：$%1$s</string>
+    <string name="discounted_total_format">折后合计：$%1$s</string>
+    <string name="confirm_your_package">确认您的 %1$s</string>
+    <string name="package_added_you_saved">已添加 %1$s！您节省了 HK$%2$s</string>
+
+    <string name="coupon_requires_points_format">兑换需要：%1$d 积分</string>
+    <string name="coupon_valid_until_format">有效期至：%1$s</string>
+    <string name="coupon_no_expiry">无到期日</string>
+    <string name="login_to_redeem">登录后兑换</string>
+    <string name="birthday_not_eligible">不符合生日优惠资格</string>
+    <string name="already_redeemed">已兑换</string>
+    <string name="not_enough_points">积分不足</string>
+    <string name="redeem">兑换</string>
+
+    <string name="coupon_title_quantity_format">%1$s x%2$d</string>
+    <string name="reward_free_item_format">奖励：免费 %1$s</string>
+    <string name="discount_percent_off_format">折扣：%1$d%% OFF</string>
+    <string name="discount_cash_off_format">折扣：HK$%1$s</string>
+    <string name="not_applicable">不适用</string>
+    <string name="use_coupon">使用优惠券</string>
+    <string name="applying">套用中...</string>
+    <string name="info_reason_prefix">说明：%1$s</string>
+    <string name="balance_format">余额：%1$d</string>
+
+    <string name="please_enter_valid_email">请输入有效的邮箱地址。</string>
+    <string name="login_failed_check_credentials">登录失败，请检查账号或密码。</string>
+    <string name="please_enter_email_and_password">请输入邮箱和密码。</string>
+    <string name="login_successful">登录成功</string>
+    <string name="item_added_to_cart_with_qty">%1$d × %2$s</string>
+    <string name="added_to_cart_suffix"> 已加入购物车</string>
+
+    <string name="registration_successful">注册成功</string>
+    <string name="server_error_try_again">服务器错误，请稍后重试。</string>
+    <string name="please_fill_name">请填写姓名</string>
+    <string name="please_fill_email">请填写邮箱地址</string>
+    <string name="invalid_email_format">邮箱格式无效</string>
+    <string name="please_fill_password">请填写密码</string>
+    <string name="please_fill_confirm_password">请填写确认密码</string>
+    <string name="passwords_do_not_match">两次输入的密码不一致</string>
+    <string name="password_min_6_chars">密码长度至少为 6 位</string>
+
+    <string name="no_spice">不辣</string>
+
+    <!-- Spice level labels -->
+    <string name="spice_level_mild">微辣</string>
+    <string name="spice_level_medium">中辣</string>
+    <string name="spice_level_hot">辣</string>
+    <string name="spice_level_numbing">麻辣</string>
+
+    <!-- Tag labels (matching database tag names) -->
+    <string name="tag_vegetarian">素食</string>
+    <string name="tag_spicy">辣</string>
+    <string name="tag_numbing">麻</string>
+    <string name="tag_sour">酸</string>
+    <string name="tag_sweet">甜</string>
+    <string name="tag_salty">咸</string>
+    <string name="tag_chicken">鸡肉</string>
+    <string name="tag_beef">牛肉</string>
+    <string name="tag_pork">猪肉</string>
+    <string name="tag_seafood">海鲜</string>
+    <string name="tag_fish">鱼肉</string>
+    <string name="tag_tofu">豆腐</string>
+    <string name="tag_milk">奶</string>
+    <string name="tag_tea">茶</string>
+    <string name="tag_cold">冷饮</string>
+    <string name="tag_hot">热</string>
+    <string name="tag_refreshing">清爽</string>
+    <string name="tag_classic">经典</string>
+    <string name="tag_traditional">传统</string>
+    <string name="tag_glutinous">糯</string>
+    <string name="tag_lemon">柠檬</string>
+    <string name="tag_soda">气泡水</string>
+    <string name="tag_grape">葡萄</string>
+    <string name="tag_noodles">面条</string>
+    <string name="tag_streetfood">街头小吃</string>
+    <string name="tag_stirfry">炒</string>
+
+    <!-- Customization option group labels -->
+    <string name="option_group_spice_level">辣度</string>
+    <string name="option_group_sugar_level">甜度</string>
+    <string name="option_group_ice_level">冰量</string>
+    <string name="option_group_milk_level">奶量</string>
+    <string name="option_group_toppings">配料</string>
+
+    <!-- Customization option value labels -->
+    <string name="option_value_mild">微辣</string>
+    <string name="option_value_medium">中辣</string>
+    <string name="option_value_hot">辣</string>
+    <string name="option_value_numbing">麻辣</string>
+    <string name="option_value_more_sweet">多糖</string>
+    <string name="option_value_less_sweet">少糖</string>
+    <string name="option_value_no_sweet">无糖</string>
+    <string name="option_value_more_ice">多冰</string>
+    <string name="option_value_less_ice">少冰</string>
+    <string name="option_value_no_ice">无冰</string>
+    <string name="option_value_more_milk">多奶</string>
+    <string name="option_value_less_milk">少奶</string>
+    <string name="option_value_no_milk">无奶</string>
+    <string name="option_value_extra_sesame">加芝麻</string>
+    <string name="option_value_peanuts">花生</string>
+    <string name="option_value_honey_drizzle">蜂蜜淋酱</string>
+    <string name="option_value_chocolate_chips">巧克力粒</string>
+
+    <string name="please_login_customer_before_booking">请先以顾客身份登录再预订座位。</string>
+    <string name="please_login_customer_first">请先以顾客身份登录。</string>
+    <string name="select_time_slot">选择时段</string>
+        <!-- Removed: Spice levels, Tags, Customization groups/values are now fetched from database -->
+    <string name="server_error_with_reason">服务器错误：%1$s</string>
+    <string name="registration_failed_try_again">注册失败，请稍后重试。</string>
+
+    <string name="alipay_unavailable_using_card">Alipay 当前不可用，已切换为银行卡支付。</string>
+    <string name="payment_available_time_only">仅可在 11:00-21:29 使用（Asia/Hong_Kong）。</string>
+    <string name="payment_setup_failed_try_again">支付初始化失败，请稍后重试。</string>
+    <string name="network_error">网络错误</string>
+    <string name="failed_initialize_payment_try_again">初始化支付失败，请稍后重试。</string>
+    <string name="switched_to_card_only_option">已切换为银行卡支付（当前唯一可用方式）</string>
+    <string name="payment_service_temporarily_unavailable">支付服务暂时不可用，请稍后再试或联系客服。</string>
+    <string name="switched_to_card_payment">已切换为银行卡支付</string>
+    <string name="payment_method_unavailable_try_card">该支付方式不可用，请尝试银行卡支付。</string>
+    <string name="payment_cancelled">支付已取消</string>
+    <string name="payment_failed">支付失败</string>
+
+    <string name="booking_id_format">预订 #%1$d</string>
+    <string name="table_people_format">餐桌 %1$d • %2$d 人</string>
+    <string name="purpose_format">用途：%1$s</string>
+    <string name="purpose_value_family_dinner">家庭聚餐</string>
+    <string name="purpose_value_date_night">约会晚餐</string>
+    <string name="purpose_value_business_meeting">商务会面</string>
+    <string name="purpose_value_lunch_meeting">午餐会议</string>
+    <string name="purpose_value_birthday_celebration">生日庆祝</string>
+    <string name="remark_format">备注：%1$s</string>
+    <string name="status_cancelled">状态：已取消</string>
+    <string name="cancelled">已取消</string>
+    <string name="status_active">状态：有效</string>
+    <string name="cancel_booking">取消预订</string>
+
+    <string name="item_removed_from_cart">商品已从购物车移除</string>
+    <string name="cannot_increase_quantity_with_reason">无法增加数量：\n%1$s</string>
+    <string name="quantity_increased_unable_verify_ingredients">数量已增加（无法验证食材：%1$s）</string>
+
+    <string name="nav_home">首页</string>
+    <string name="nav_make_reservation">预约订座</string>
+    <string name="nav_my_bookings">我的预订</string>
+    <string name="nav_browse">浏览</string>
+    <string name="nav_coupons">优惠券</string>
+    <string name="nav_orders">订单</string>
+    <string name="nav_profile">个人资料</string>
+
+    <string name="desc_open_menu">打开菜单</string>
+    <string name="desc_open_cart">打开购物车</string>
+    <string name="order_type_dine_in">堂食</string>
+    <string name="order_type_takeaway">外带</string>
+    <string name="tab_menu">菜单</string>
+    <string name="tab_package">套餐</string>
+    <string name="package_card_hint">点击自定义套餐内容</string>
+
+    <string name="profile_user_name_placeholder">用户名称</string>
+    <string name="profile_user_email_placeholder">user@example.com</string>
+    <string name="edit_profile">编辑资料</string>
+
+    <string name="booking_title_make_reservation">预约订座</string>
+    <string name="booking_select_date">选择日期：</string>
+    <string name="booking_choose_date">选择日期</string>
+    <string name="booking_select_time">选择时间：</string>
+    <string name="booking_choose_time">选择时间</string>
+    <string name="booking_number_of_people">用餐人数：</string>
+    <string name="booking_people_hint_example">例如：4</string>
+    <string name="booking_find_available_tables">查找可用餐桌</string>
+    <string name="confirm_booking_select_table_title">选择餐桌</string>
+    <string name="confirm_booking_legend_available">可用</string>
+    <string name="confirm_booking_legend_occupied">已占用</string>
+    <string name="confirm_booking_legend_reserved">已预留</string>
+    <string name="confirm_booking_legend_selected">已选择</string>
+    <string name="confirm_booking_confirm_action">确认预订</string>
+    <string name="seating_label_wall">墙身</string>
+    <string name="seating_label_window">窗户</string>
+    <string name="seating_label_door">门口</string>
+    <string name="seating_label_counter">前台</string>
+
+    <string name="coupon_points_zero">积分：0</string>
+    <string name="my_coupons">我的优惠券</string>
+    <string name="history">历史记录</string>
+    <string name="done">完成</string>
+
+    <string name="cart_title">购物车</string>
+    <string name="cart_total_placeholder">总计：HK$0.00</string>
+    <string name="cart_total_format">总计：HK$%1$.2f</string>
+    <string name="proceed_to_payment">前往付款</string>
+    <string name="order_history_title">您的订单记录</string>
+    <string name="select_profile_image">选择头像</string>
+    <string name="profile_name_hint">姓名</string>
+    <string name="profile_email_hint">邮箱</string>
+    <string name="profile_birthday_hint">生日（月-日）</string>
+    <string name="save_changes">保存更改</string>
+    <string name="customize">自定义</string>
+    <string name="customize_your_dish">自定义菜品</string>
+    <string name="special_instructions_optional">特别要求（可选）</string>
+    <string name="add_to_cart">加入购物车</string>
+    <string name="select_order_type_hint">请先选择堂食或外带</string>
+    <string name="to_start_shopping">再开始点餐</string>
+    <string name="insufficient_ingredients_title">食材不足</string>
+    <string name="insufficient_ingredients_message">抱歉，目前食材不足，无法完成您的订单：\n\n%1$s\n\n请先移除部分商品，或联系店员协助。</string>
+    <string name="uploading_image">正在上传图片...</string>
+    <string name="name_email_cannot_be_empty">姓名和邮箱不能为空</string>
+    <string name="unknown_user_role">未知用户角色</string>
+    <string name="image_uploaded">图片上传成功</string>
+    <string name="upload_failed_with_reason">上传失败：%1$s</string>
+    <string name="server_error_code">服务器错误：%1$d</string>
+    <string name="upload_error_with_reason">上传错误：%1$s</string>
+    <string name="upload_failed_title">上传失败</string>
+    <string name="upload_retry_message">要重试吗？</string>
+    <string name="retry">重试</string>
+    <string name="unable_access_image_file">无法读取图片文件</string>
+    <string name="profile_updated">个人资料已更新</string>
+    <string name="permission_granted">已授予权限</string>
+    <string name="permission_denied_cannot_access_image">权限被拒，无法读取图片。</string>
+    <string name="birthday_saved">生日已保存</string>
+    <string name="customize_no_dish_data">没有菜品数据</string>
+    <string name="maximum_selection_allowed">最多只能选择 %1$d 项</string>
+    <string name="special_instructions_label">特别要求</string>
+    <string name="required_option_format">必须选择：%1$s</string>
+    <string name="special_instructions_too_long">特别要求过长（最多 500 字）</string>
+    <string name="added_to_cart_message">%1$d × %2$s 已加入购物车</string>
+    <string name="order_more_items_format">... 还有 %1$d 项</string>
+    <string name="order_item_count_format">%1$d 项</string>
+    <string name="order_total_amount_format">HK$%1$.2f</string>
+    <string name="time_just_now">刚刚</string>
+    <string name="time_minutes_ago">%1$d 分钟前</string>
+    <string name="time_hours_ago">%1$d 小时前</string>
+    <string name="time_days_ago">%1$d 天前</string>
+    <string name="status_awaiting_cash_payment">等待现金确认</string>
+    <string name="status_unpaid">未付款</string>
+    <string name="status_pending">待处理</string>
+    <string name="status_done">已完成</string>
+    <string name="status_preparing">准备中</string>
+    <string name="status_delivered">已送达</string>
+    <string name="status_paid">已付款</string>
+    <string name="status_unknown">未知</string>
+    <string name="please_customize_package">请先自定义套餐内容</string>
+    <string name="order_restored_to_cart">已将订单商品加入购物车</string>
+    <string name="no_items_to_reorder">没有可重新点选的商品</string>
+    <string name="reorder_package_unavailable">该套餐目前无法重新点选。</string>
+    <string name="reorder_insufficient_ingredients">部分食材暂时不足，请到购物车调整项目。</string>
+    <string name="reorder_material_check_failed">暂时无法检查食材：%1$s</string>
+    <string name="order_details_title_format">订单详情 - #%1$d</string>
+    <string name="order_detail_order_id">订单编号：</string>
+    <string name="order_detail_date">日期：</string>
+    <string name="order_detail_status">状态：</string>
+    <string name="order_detail_customer">顾客：</string>
+    <string name="order_detail_table">餐桌：</string>
+    <string name="order_detail_items">项目：</string>
+    <string name="order_detail_total_format">总计：HK$%1$.2f</string>
+    <string name="not_available_short">不适用</string>
+    <string name="show_less">收起</string>
+    <string name="close">关闭</string>
+    <string name="reorder">再点一次</string>
+    <string name="details">详情</string>
+    <string name="order_special_label">特别要求</string>
+    <string name="time_ago_placeholder">刚刚</string>
+    <string name="order_item_count_placeholder">0 项</string>
+    <string name="order_item_unit_price">单价：HK$%1$s</string>
+    <string name="order_item_qty">数量：%1$d</string>
+    <string name="order_item_subtotal">小计：HK$%1$s</string>
+    <string name="payment_total_placeholder">总计：HK$0.00</string>
+    <string name="payment_total_format">总计：HK$%1$.2f</string>
+    <string name="select_payment_method">选择支付方式：</string>
+    <string name="payment_method_card">信用卡/借记卡</string>
+    <string name="payment_method_alipay_hk">支付宝香港</string>
+    <string name="payment_method_cash_frontdesk">到前台现金付款</string>
+    <string name="pay_now">立即付款</string>
+    <string name="failed_retrieve_client_secret">无法从后端获取支付凭证</string>
+    <string name="failed_save_order_try_again">保存订单失败，请稍后重试。</string>
+    <string name="network_error_while_saving_order">保存订单时出现网络错误。</string>
+
+    <!-- UI labels and descriptions -->
+    <string name="select_spice_level">选择辣度</string>
+    <string name="select_tag">选择标签</string>
+    <string name="select_category">选择分类</string>
+    <string name="spice_level_icon">辣度图标</string>
+    <string name="search_hint">搜索菜式...</string>
+    <string name="loading">加载中...</string>
+    <string name="title_inventory">库存管理</string>
+    <string name="menu_item_image_desc">菜式图片</string>
+    <string name="add_button">新增项目</string>
+    <string name="navigation_drawer_open">打开导航菜单</string>
+    <string name="navigation_drawer_close">关闭导航菜单</string>
+    <string name="desc_search_icon">搜索图标</string>
+    <string name="desc_profile_icon">个人资料图标</string>
+    <string name="merchant_name">Yummy Restaurant</string>
+    <string name="category_all">全部</string>
+    <string name="category_combos">套餐</string>
+    <string name="category_sliders">小食</string>
+    <string name="dish_name_placeholder">菜式名称</string>
+    <string name="dish_description_placeholder">菜式简介</string>
+    <string name="dish_price_placeholder">$00.00</string>
+    <string name="error_network">网络连接失败，请稍后再试。</string>
+    <string-array name="roles_array">
+        <item>顾客</item>
+        <item>员工</item>
+        <item>管理员</item>
+    </string-array>
+</resources>

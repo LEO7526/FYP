@@ -1,0 +1,185 @@
+package com.example.yummyrestaurant.adapters;
+
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.models.OrderItemCustomization;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class SelectableMenuItemAdapter extends RecyclerView.Adapter<SelectableMenuItemAdapter.ViewHolder> {
+
+    private final List<MenuItem> items;
+    private final List<MenuItem> selectedItems = new ArrayList<>();
+    private final int maxSelection; // how many items can be selected in this category
+    private OnCustomizeClickListener customizeClickListener;
+
+    public interface OnCustomizeClickListener {
+        void onCustomizeClick(MenuItem item);
+    }
+
+    public SelectableMenuItemAdapter(List<MenuItem> items, int maxSelection) {
+        this.items = items != null ? items : new ArrayList<>();
+        this.maxSelection = maxSelection;
+    }
+
+    public void setOnCustomizeClickListener(OnCustomizeClickListener listener) {
+        this.customizeClickListener = listener;
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_selectable_menu, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        MenuItem item = items.get(position);
+
+        Log.d("SelectableAdapter", "Binding item: id=" + item.getId() + ", name=" + item.getName());
+
+        holder.name.setText(item.getName() != null ? item.getName() : "Unnamed Dish");
+
+        // Load image with Glide
+        String imageUrl = item.getImage_url();
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(ImageUrlResolver.resolve(imageUrl))
+                    .placeholder(R.drawable.placeholder)
+                    .error(R.drawable.error_image)
+                    .into(holder.image);
+        } else {
+            holder.image.setImageResource(R.drawable.placeholder);
+        }
+
+        // Highlight if selected
+        boolean isSelected = selectedItems.contains(item);
+        if (isSelected) {
+            holder.root.setBackgroundResource(R.drawable.set_menu_item_selected_bg);
+            holder.customizeBtn.setVisibility(View.VISIBLE);
+        } else {
+            holder.root.setBackgroundResource(R.drawable.set_menu_item_unselected_bg);
+            holder.customizeBtn.setVisibility(View.GONE);
+        }
+
+        // Handle item click (selection)
+        holder.itemView.setOnClickListener(v -> {
+            if (selectedItems.contains(item)) {
+                selectedItems.remove(item);
+                notifyItemChanged(position);
+            } else {
+                if (selectedItems.size() < maxSelection) {
+                    selectedItems.add(item);
+                    notifyItemChanged(position);
+                }
+            }
+        });
+
+        // Handle customize button click
+        holder.customizeBtn.setOnClickListener(v -> {
+            if (customizeClickListener != null) {
+                customizeClickListener.onCustomizeClick(item);
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+    /** Returns the currently selected items (shallow copy for safety) */
+    public List<MenuItem> getSelectedItems() {
+        return new ArrayList<>(selectedItems);
+    }
+
+    /** 
+     * Returns the currently selected items directly (not a copy)
+     * Use this when you need to preserve object references with customizations
+     */
+    public List<MenuItem> getSelectedItemsDirect() {
+        return selectedItems;
+    }
+
+    /** Returns how many items must/can be selected (used in validation) */
+    public int getRequiredCount() {
+        return maxSelection;
+    }
+
+    /** Preselect items for reorder (matches by name and price) */
+    public void preselectItems(List<MenuItem> itemsToPreselect) {
+        if (itemsToPreselect == null || itemsToPreselect.isEmpty()) {
+            return;
+        }
+
+        selectedItems.clear();
+        
+        for (MenuItem prefillItem : itemsToPreselect) {
+            for (MenuItem availableItem : items) {
+                // Match by ID, or by name and price as fallback
+                if ((prefillItem.getId() > 0 && prefillItem.getId() == availableItem.getId()) ||
+                    (prefillItem.getName() != null && prefillItem.getName().equals(availableItem.getName()) &&
+                     Math.abs(prefillItem.getPrice() - availableItem.getPrice()) < 0.01)) {
+                    
+                    if (!selectedItems.contains(availableItem) && selectedItems.size() < maxSelection) {
+                        selectedItems.add(availableItem);
+                        Log.d("SelectableAdapter", "Preselected item: " + availableItem.getName());
+                    }
+                    break;
+                }
+            }
+        }
+        
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Update customizations for a selected item by ID
+     * @param itemId The ID of the item to update
+     * @param customizations The new customizations to set
+     * @return true if the item was found and updated, false otherwise
+     */
+    public boolean updateItemCustomizations(int itemId, List<OrderItemCustomization> customizations) {
+        for (MenuItem item : selectedItems) {
+            if (item.getId() == itemId) {
+                item.setCustomizations(customizations);
+                int count = (customizations != null ? customizations.size() : 0);
+                Log.d("SelectableAdapter", String.format("Updated customizations for item: %s, count: %d", 
+                      item.getName(), count));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView name;
+        ImageView image;
+        View root;
+        Button customizeBtn;
+
+        ViewHolder(View itemView) {
+            super(itemView);
+            root = itemView.findViewById(R.id.itemRoot);
+            name = itemView.findViewById(R.id.itemName);
+            image = itemView.findViewById(R.id.itemImage);
+            customizeBtn = itemView.findViewById(R.id.btnCustomize);
+        }
+    }
+}

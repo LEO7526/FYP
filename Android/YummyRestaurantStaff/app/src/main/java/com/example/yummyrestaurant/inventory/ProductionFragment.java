@@ -18,7 +18,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import com.example.yummyrestaurant.R;
 
-public class ProductionFragment extends Fragment {
+public class ProductionFragment extends Fragment implements RefreshableTab {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private FoodStockAdapter foodStockAdapter;
@@ -34,7 +34,7 @@ public class ProductionFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(super.onCreateView(null, null, null), null); // 此行僅為示意，請保留原本生成的程式碼
+        super.onViewCreated(view, savedInstanceState);
 
         // 初始化組件
         apiService = ApiClient.getClient().create(ApiService.class);
@@ -75,7 +75,7 @@ public class ProductionFragment extends Fragment {
                         textEmptyWarning.setVisibility(View.GONE);
                     }
                 } else if (isAdded()) {
-                    Toast.makeText(getContext(), "Failed to load production data.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.failed_load_production_data, Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -85,9 +85,20 @@ public class ProductionFragment extends Fragment {
                     swipeRefreshLayout.setRefreshing(false);
                 }
                 if (isAdded()) {
-                    Toast.makeText(getContext(), "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.network_error_prefix, t.getMessage()), Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchFoodStock();
+    }
+
+    @Override
+    public void refreshData() {
+        fetchFoodStock();
     }
 }

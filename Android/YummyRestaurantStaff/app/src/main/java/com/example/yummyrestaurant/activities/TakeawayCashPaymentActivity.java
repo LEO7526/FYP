@@ -5,14 +5,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -22,6 +24,7 @@ import com.example.yummyrestaurant.R;
 import com.example.yummyrestaurant.adapters.TakeawayCashOrderAdapter;
 import com.example.yummyrestaurant.api.ApiConstants;
 import com.example.yummyrestaurant.models.TakeawayCashOrder;
+import com.example.yummyrestaurant.utils.SessionManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,17 +34,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Activity for staff to manage cash payments for takeaway orders
- * Shows takeaway orders with pending cash payments (ostatus=0) and allows staff to confirm payment
+ * Activity for staff to manage cash payments for takeaway orders.
+ * Shows pending orders (ostatus=0) and today completed cash orders.
  */
-public class TakeawayCashPaymentActivity extends androidx.appcompat.app.AppCompatActivity {
+public class TakeawayCashPaymentActivity extends ThemeBaseActivity {
     private static final String TAG = "TakeawayCashPayment";
-    
+
     private RecyclerView recyclerView;
+    private RecyclerView recyclerViewCompleted;
     private TakeawayCashOrderAdapter adapter;
+    private TakeawayCashOrderAdapter completedAdapter;
     private List<TakeawayCashOrder> orderList;
+    private List<TakeawayCashOrder> completedOrderList;
     private ProgressBar progressBar;
     private TextView emptyView;
+    private TextView pendingCountView;
+    private LinearLayout emptyLayout;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private NestedScrollView takeawayScrollView;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,208 +60,189 @@ public class TakeawayCashPaymentActivity extends androidx.appcompat.app.AppCompa
         setContentView(R.layout.activity_takeaway_cash_payment);
 
         Log.d(TAG, "onCreate: Initializing Takeaway Cash Payment Management");
-        
+        sessionManager = new SessionManager(this);
         initializeUI();
-        fetchTakeawayCashOrders();
+        refreshAll();
     }
 
     private void initializeUI() {
-        // Back button
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        // Views
         progressBar = findViewById(R.id.progressBar);
         emptyView = findViewById(R.id.textViewEmpty);
+        pendingCountView = findViewById(R.id.textViewPendingCount);
+        emptyLayout = findViewById(R.id.layoutEmpty);
+        swipeRefreshLayout = findViewById(R.id.swipeRefresh);
+        takeawayScrollView = findViewById(R.id.takeawayScrollView);
 
-        // Setup RecyclerView
+        findViewById(R.id.btnRetry).setOnClickListener(v -> refreshAll());
+        swipeRefreshLayout.setOnRefreshListener(this::refreshAll);
+
+        // Pending RecyclerView
         orderList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerViewTakeawayOrders);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        // Create adapter
         adapter = new TakeawayCashOrderAdapter(this, orderList, this::onOrderClicked);
         recyclerView.setAdapter(adapter);
-        
-        Log.d(TAG, "initializeUI: UI components initialized");
+
+        // Completed RecyclerView
+        completedOrderList = new ArrayList<>();
+        recyclerViewCompleted = findViewById(R.id.recyclerViewTakeawayCompleted);
+        recyclerViewCompleted.setLayoutManager(new LinearLayoutManager(this));
+        completedAdapter = new TakeawayCashOrderAdapter(this, completedOrderList, order -> { });
+        recyclerViewCompleted.setAdapter(completedAdapter);
     }
 
-    /**
-     * Fetch takeaway orders with pending cash payments (ostatus=0)
-     */
-    private void fetchTakeawayCashOrders() {
-        Log.d(TAG, "fetchTakeawayCashOrders: Loading takeaway orders with pending cash payments");
-        showLoading(true);
-        
-        String url = ApiConstants.BASE_URL + "get_takeaway_cash_orders.php";
+    private void refreshAll() {
+        fetchTakeawayCashOrders();
+        fetchCompletedOrders();
+    }
 
-        StringRequest request = new StringRequest(Request.Method.GET, url,
+    private void fetchTakeawayCashOrders() {
+        showLoading(true);
+        String url = ApiConstants.BASE_URL + "get_takeaway_cash_orders.php?type=pending";
+        Volley.newRequestQueue(this).add(new StringRequest(Request.Method.GET, url,
                 response -> {
-                    Log.d(TAG, "API Response: " + response);
-                    parseOrdersResponse(response);
+                    parseOrdersResponse(response, false);
                     showLoading(false);
                 },
                 error -> {
                     Log.e(TAG, "Network error: " + error.getMessage());
-                    Toast.makeText(this, "Network error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.network_error_loading_pending_orders, Toast.LENGTH_SHORT).show();
                     showLoading(false);
                     showEmptyState(true);
-                }
-        );
-
-        Volley.newRequestQueue(this).add(request);
+                }));
     }
 
-    private void parseOrdersResponse(String response) {
+    private void fetchCompletedOrders() {
+        String url = ApiConstants.BASE_URL + "get_takeaway_cash_orders.php?type=completed";
+        Volley.newRequestQueue(this).add(new StringRequest(Request.Method.GET, url,
+                response -> parseOrdersResponse(response, true),
+                error -> Log.e(TAG, "Error loading completed orders: " + error.getMessage())));
+    }
+
+    private void parseOrdersResponse(String response, boolean isCompleted) {
         try {
             JSONObject jsonObject = new JSONObject(response);
-            
-            if (jsonObject.getString("status").equals("success")) {
-                JSONArray dataArray = jsonObject.getJSONArray("data");
-                orderList.clear();
-                
-                for (int i = 0; i < dataArray.length(); i++) {
-                    JSONObject orderObj = dataArray.getJSONObject(i);
-                    
-                    TakeawayCashOrder order = new TakeawayCashOrder(
-                        orderObj.getInt("oid"),
-                        orderObj.getString("orderRef"),
-                        orderObj.getString("customer_name"),
-                        orderObj.getString("order_time"),
-                        orderObj.getDouble("total_amount"),
-                        orderObj.getString("items_summary")
-                    );
-                    
-                    orderList.add(order);
-                    Log.d(TAG, "Added order: " + order.getOrderRef() + " with amount: " + order.getTotalAmount());
-                }
-                
-                if (adapter != null) {
-                    adapter.notifyDataSetChanged();
-                }
-                
-                if (orderList.isEmpty()) {
-                    showEmptyState(true);
-                } else {
-                    showEmptyState(false);
-                }
-                
-                Log.d(TAG, "fetchTakeawayCashOrders: Loaded " + orderList.size() + " orders");
+            if (!jsonObject.getString("status").equals("success")) return;
+
+            JSONArray dataArray = jsonObject.getJSONArray("data");
+            List<TakeawayCashOrder> target = isCompleted ? completedOrderList : orderList;
+            target.clear();
+
+            for (int i = 0; i < dataArray.length(); i++) {
+                JSONObject o = dataArray.getJSONObject(i);
+                target.add(new TakeawayCashOrder(
+                    o.getInt("oid"),
+                    o.getString("orderRef"),
+                    o.getString("customer_name"),
+                    o.getString("order_time"),
+                    o.getDouble("total_amount"),
+                    o.getString("items_summary"),
+                    isCompleted
+                ));
+            }
+
+            if (isCompleted) {
+                completedAdapter.notifyDataSetChanged();
             } else {
-                String message = jsonObject.optString("message", "Unknown error");
-                Log.w(TAG, "API Error: " + message);
-                Toast.makeText(this, "Error: " + message, Toast.LENGTH_SHORT).show();
-                showEmptyState(true);
+                adapter.notifyDataSetChanged();
+                pendingCountView.setText(getString(R.string.pending_orders_count, orderList.size()));
+                showEmptyState(orderList.isEmpty() && completedOrderList.isEmpty());
             }
         } catch (JSONException e) {
             Log.e(TAG, "JSON parsing error", e);
-            Toast.makeText(this, "Data parsing error", Toast.LENGTH_SHORT).show();
-            showEmptyState(true);
         }
     }
 
-    /**
-     * Handle order click - show payment confirmation dialog
-     */
     public void onOrderClicked(TakeawayCashOrder order) {
-        Log.d(TAG, "onOrderClicked: Order " + order.getOrderRef() + " clicked");
+        if (order.isCompleted()) return;
         showPaymentConfirmationDialog(order);
     }
 
-    /**
-     * Show payment confirmation dialog for pending takeaway cash payments
-     */
     private void showPaymentConfirmationDialog(TakeawayCashOrder order) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        
-        builder.setTitle("Confirm Cash Payment");
-        builder.setMessage("Order: " + order.getOrderRef() + "\n" +
-                          "Customer: " + order.getCustomerName() + "\n" +
-                          "Amount: HK$" + String.format("%.2f", order.getTotalAmount()) + "\n\n" +
-                          order.getItemsSummary());
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_takeaway_cash_confirmation, null);
+        builder.setView(view);
 
-        builder.setPositiveButton("Confirm Payment", (dialog, which) -> {
-            Log.d(TAG, "Confirming takeaway cash payment for order " + order.getOrderRef());
+        int estimatedPoints = (int) Math.floor(order.getTotalAmount());
+
+        ((TextView) view.findViewById(R.id.textOrderRef)).setText(getString(R.string.order_label, order.getOrderRef()));
+        ((TextView) view.findViewById(R.id.textCustomerName)).setText(getString(R.string.customer_label, order.getCustomerName()));
+        ((TextView) view.findViewById(R.id.textTotalAmount)).setText(getString(R.string.amount_hkd, String.format("%.2f", order.getTotalAmount())));
+        ((TextView) view.findViewById(R.id.textItemsSummary)).setText(order.getItemsSummary());
+        ((TextView) view.findViewById(R.id.textPointsReminder)).setText(
+            getString(R.string.points_reminder_earn_after_confirmation, estimatedPoints)
+        );
+
+        AlertDialog dialog = builder.create();
+        view.findViewById(R.id.btnConfirmPayment).setOnClickListener(v -> {
             processTakeawayCashPayment(order.getOrderId());
+            dialog.dismiss();
         });
-
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+        view.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
     }
 
-    /**
-     * Process takeaway cash payment - update order status to confirmed
-     */
     private void processTakeawayCashPayment(int orderId) {
-        Log.d(TAG, "processTakeawayCashPayment: Processing payment for order " + orderId);
         showLoading(true);
-        
         String url = ApiConstants.BASE_URL + "process_cash_payment.php";
-
         JSONObject requestData = new JSONObject();
         try {
             requestData.put("order_id", orderId);
-            requestData.put("staff_id", 1); // TODO: Get from current staff session
+            requestData.put("staff_id", sessionManager.getStaffId());
         } catch (JSONException e) {
-            Log.e(TAG, "JSON creation error", e);
             showLoading(false);
             return;
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, requestData,
+        Volley.newRequestQueue(this).add(new JsonObjectRequest(Request.Method.POST, url, requestData,
                 response -> {
-                    Log.d(TAG, "Payment processing response: " + response.toString());
                     handlePaymentResponse(response);
                     showLoading(false);
                 },
                 error -> {
-                    Log.e(TAG, "Payment processing error: " + error.getMessage());
-                    Toast.makeText(this, "Network error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Payment error: " + error.getMessage());
+                    Toast.makeText(this, getString(R.string.network_error_prefix, error.getMessage()), Toast.LENGTH_SHORT).show();
                     showLoading(false);
-                }
-        );
-
-        Volley.newRequestQueue(this).add(request);
+                }));
     }
 
     private void handlePaymentResponse(JSONObject response) {
         try {
             if (response.getBoolean("success")) {
-                Toast.makeText(this, "Takeaway cash payment confirmed! Order ready for preparation.", Toast.LENGTH_LONG).show();
-                // Refresh the order list
-                fetchTakeawayCashOrders();
+                int pointsAdded = response.optInt("couponPointsAdded", 0);
+                String toastMessage = pointsAdded > 0
+                        ? getString(R.string.takeaway_cash_payment_confirmed_points, pointsAdded)
+                        : getString(R.string.takeaway_cash_payment_confirmed);
+                Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
+                refreshAll();
             } else {
-                String message = response.optString("message", "Payment confirmation failed, please try again");
-                Toast.makeText(this, "Confirmation failed: " + message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,
+                        getString(R.string.failed_prefix, response.optString("message")),
+                        Toast.LENGTH_SHORT).show();
             }
         } catch (JSONException e) {
-            Log.e(TAG, "JSON parsing error", e);
-            Toast.makeText(this, "Response parsing error", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Response parse error", e);
         }
     }
 
     private void showLoading(boolean show) {
-        if (progressBar != null) {
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-        if (recyclerView != null) {
-            recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (show) return;
+        takeawayScrollView.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void showEmptyState(boolean show) {
-        if (emptyView != null) {
-            emptyView.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-        if (recyclerView != null) {
-            recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        emptyLayout.setVisibility(show ? View.VISIBLE : View.GONE);
+        takeawayScrollView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data when activity resumes
-        fetchTakeawayCashOrders();
+        refreshAll();
     }
 }

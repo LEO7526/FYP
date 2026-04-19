@@ -1,0 +1,423 @@
+package com.example.yummyrestaurant.adapters;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.app.Activity;
+import android.app.ActivityOptions;
+import android.os.Build;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.target.Target;
+import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.activities.DishDetailActivity;
+import com.example.yummyrestaurant.models.MenuItem;
+import com.example.yummyrestaurant.utils.CartManager;
+import com.example.yummyrestaurant.utils.ImageUrlResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHolder> {
+    private Context context;
+    private List<MenuItem> fullList;
+    private List<MenuItem> filteredList;
+    private String selectedCategory = "All Dishes"; // Track selected category
+
+    public MenuItemAdapter(Context context, List<MenuItem> menuItems) {
+        this.context = context;
+        this.fullList = new ArrayList<>(menuItems);
+        this.filteredList = new ArrayList<>(menuItems);
+    }
+
+    public void setMenuItems(List<MenuItem> menuItems) {
+        fullList.clear();
+        // Filter out hidden browse items (e.g., supplies and staple foods) from fullList
+        for (MenuItem item : menuItems) {
+            if (shouldIncludeInBrowse(item)) {
+                fullList.add(item);
+            }
+        }
+        sortByCategory();
+        showAllItems(); // default to show all items
+    }
+
+    // Sort items by category to group them together
+    private void sortByCategory() {
+        String[] categoryOrder = {"Appetizers", "Soup", "Main Courses", "Dessert", "Drink", "Staple Foods"};
+        fullList.sort((item1, item2) -> {
+            String cat1 = item1.getCategory() != null ? item1.getCategory().trim() : "";
+            String cat2 = item2.getCategory() != null ? item2.getCategory().trim() : "";
+            
+            int index1 = -1, index2 = -1;
+            for (int i = 0; i < categoryOrder.length; i++) {
+                if (cat1.equalsIgnoreCase(categoryOrder[i])) index1 = i;
+                if (cat2.equalsIgnoreCase(categoryOrder[i])) index2 = i;
+            }
+            
+            if (index1 == -1) index1 = categoryOrder.length;
+            if (index2 == -1) index2 = categoryOrder.length;
+            
+            return Integer.compare(index1, index2);
+        });
+    }
+
+    // Show all items without filtering (for category navigation)
+    public void showAllItems() {
+        filteredList.clear();
+        for (MenuItem item : fullList) {
+            if (shouldIncludeInBrowse(item)) {
+                filteredList.add(item);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    // Get the position of the first item in a specific category
+    public int getPositionForCategory(String category) {
+        String searchNormalized = toEnglishCategory(category);
+
+        for (int i = 0; i < filteredList.size(); i++) {
+            MenuItem item = filteredList.get(i);
+            String itemCategory = item.getCategory() != null
+                    ? item.getCategory().trim()
+                    : "";
+            String itemNormalized = toEnglishCategory(itemCategory);
+
+            if (searchNormalized != null && searchNormalized.equalsIgnoreCase(
+                    itemNormalized != null ? itemNormalized : itemCategory)) {
+                return i;
+            }
+        }
+        return 0; // Return first position if category not found
+    }
+
+    /**
+     * Normalises a category string (localised or raw DB value) to a canonical
+     * lowercase English form so that comparisons work regardless of language.
+     */
+    private String toEnglishCategory(String category) {
+        if (category == null) return null;
+        String c = category.trim().toLowerCase();
+        // English DB values
+        if (c.equals("appetizer") || c.equals("appetizers")) return "appetizers";
+        if (c.equals("soup") || c.equals("soups")) return "soup";
+        if (c.equals("main course") || c.equals("main courses")) return "main courses";
+        if (c.equals("dessert") || c.equals("desserts")) return "dessert";
+        if (c.equals("drink") || c.equals("drinks") || c.equals("beverage") || c.equals("beverages")) return "drink";
+        // Localised button label values (compare using string resources for correctness)
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_appetizers))) return "appetizers";
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_soup))) return "soup";
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_main_courses))) return "main courses";
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_dessert))) return "dessert";
+        if (c.equalsIgnoreCase(context.getString(R.string.filter_drink))) return "drink";
+        return c;
+    }
+
+    @Nullable
+    public String getCategoryAtPosition(int position) {
+        if (position < 0 || position >= filteredList.size()) {
+            return null;
+        }
+        MenuItem item = filteredList.get(position);
+        return item != null ? item.getCategory() : null;
+    }
+
+    // Set the currently selected category for UI highlighting
+    public void setSelectedCategory(String category) {
+        this.selectedCategory = category;
+        notifyDataSetChanged();
+    }
+
+    // simplified filter: only by category
+    public void filter(String category) {
+        Log.d("FilterStart", "Full list size: " + fullList.size());
+        filteredList.clear();
+
+        String selectedCategory = category != null ? category.trim().toLowerCase() : "all";
+        // Normalize any "all" variant (English or localized) to a single sentinel
+        String filterAllStr = context.getString(R.string.filter_all).trim().toLowerCase();
+        if (selectedCategory.equals("all dishes") || selectedCategory.equals("all")
+                || selectedCategory.equals(filterAllStr)) {
+            selectedCategory = "all";
+        }
+
+        for (MenuItem item : fullList) {
+            if (!shouldIncludeInBrowse(item)) {
+                continue;
+            }
+            
+            String itemCategory = item.getCategory() != null
+                    ? item.getCategory().trim().toLowerCase()
+                    : "";
+
+            boolean matchCategory = selectedCategory.equals("all")
+                    || itemCategory.equals(selectedCategory);
+
+            if (matchCategory) {
+                filteredList.add(item);
+            }
+        }
+
+        Log.d("FilterResult", "Filtered list size: " + filteredList.size());
+        notifyDataSetChanged();
+    }
+
+    public void search(String query) {
+        filteredList.clear();
+
+        if (query == null || query.trim().isEmpty()) {
+            // Keep consistent browse visibility rules when query is empty.
+            for (MenuItem item : fullList) {
+                if (shouldIncludeInBrowse(item)) {
+                    filteredList.add(item);
+                }
+            }
+        } else {
+            String lowerQuery = query.toLowerCase();
+            for (MenuItem item : fullList) {
+                if (!shouldIncludeInBrowse(item)) {
+                    continue;
+                }
+                String name = item.getName() != null ? item.getName().toLowerCase() : "";
+                if (name.contains(lowerQuery)) {
+                    filteredList.add(item);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+    public void searchByDishName(String query) {
+        filteredList.clear();
+
+        if (query == null || query.trim().isEmpty()) {
+            // Keep consistent browse visibility rules when query is empty.
+            for (MenuItem item : fullList) {
+                if (shouldIncludeInBrowse(item)) {
+                    filteredList.add(item);
+                }
+            }
+        } else {
+            String lowerQuery = query.toLowerCase();
+            for (MenuItem item : fullList) {
+                if (!shouldIncludeInBrowse(item)) {
+                    continue;
+                }
+                if (item.getName() != null && item.getName().toLowerCase().contains(lowerQuery)) {
+                    filteredList.add(item);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.menu_item_card, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        MenuItem item = filteredList.get(position);
+
+        // Ensure recycled views are always visible (prevents invisible-but-clickable cards).
+        holder.itemView.animate().cancel();
+        holder.itemView.setAlpha(1f);
+        holder.itemView.setTranslationY(0f);
+
+        // Set text values
+        holder.dishName.setText(item.getName() != null ? item.getName() : "");
+        holder.dishDescription.setText(item.getDescription() != null ? item.getDescription() : "");
+        holder.dishPrice.setText(String.format("$ %.2f", item.getPrice()));
+
+        // Set background color for image container based on selected category
+        String itemCategory = item.getCategory() != null ? item.getCategory().trim() : "";
+        String normalizedSelected = selectedCategory.equals("All Dishes") ? "All Dishes" : selectedCategory;
+        boolean isSelectedCategory = selectedCategory.equals("All Dishes") || itemCategory.equalsIgnoreCase(selectedCategory);
+        
+        int bgColor = isSelectedCategory ? context.getResources().getColor(R.color.light_purple) : context.getResources().getColor(R.color.light_gray);
+        if (holder.dishImageContainer != null) {
+            holder.dishImageContainer.setBackgroundColor(bgColor);
+        }
+
+        // Set card border based on selected category
+        if (holder.cardView != null) {
+            if (isSelectedCategory) {
+                holder.cardView.setForeground(ContextCompat.getDrawable(context, R.drawable.card_border_selected));
+            } else {
+                holder.cardView.setForeground(ContextCompat.getDrawable(context, R.drawable.card_border_normal));
+            }
+        }
+
+        // Spice level with chili icons
+        holder.spiceIconContainer.removeAllViews();
+
+        int spiceCount = 0;
+        try {
+            spiceCount = Math.max(0, Math.min(4, item.getSpice_level()));
+        } catch (Exception e) {
+            spiceCount = 0;
+        }
+
+        if (spiceCount > 0) {
+            for (int i = 0; i < spiceCount; i++) {
+                ImageView chili = new ImageView(context);
+                chili.setImageResource(R.drawable.ic_chili);
+
+                // Tint color depending on spice index
+                switch (spiceCount) {
+                    case 1:
+                        chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_mild));
+                        break;
+                    case 2:
+                        chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_medium));
+                        break;
+                    case 3:
+                        chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_hot));
+                        break;
+                    case 4:
+                        chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_numbing));
+                        break;
+                    default:
+                        chili.setColorFilter(ContextCompat.getColor(context, R.color.spice_medium));
+                        break;
+                }
+
+                int sizePx = dpToPx(16);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePx, sizePx);
+                if (i > 0) params.setMarginStart(dpToPx(4));
+                chili.setLayoutParams(params);
+                holder.spiceIconContainer.addView(chili);
+            }
+        } else {
+
+            if (!item.getCategory().equalsIgnoreCase("Drink")) {
+                TextView noSpice = new TextView(context);
+                noSpice.setText(context.getString(R.string.no_spice));
+                noSpice.setTextSize(10);
+                noSpice.setTextColor(Color.GRAY);
+                holder.spiceIconContainer.addView(noSpice);
+            }
+
+        }
+
+        // Load dish image with Glide
+        Glide.with(context)
+            .load(ImageUrlResolver.resolve(item.getImage_url()))
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.error_image)
+                .listener(new com.bumptech.glide.request.RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                                Target<Drawable> target, boolean isFirstResource) {
+                        Log.e("GlideError", "Failed to load image for: " + item.getName()
+                                + " | URL: " + item.getImage_url()
+                                + " | Error: " + (e != null ? e.getMessage() : "Unknown error"));
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model,
+                                                   Target<Drawable> target, DataSource dataSource,
+                                                   boolean isFirstResource) {
+                        Log.d("GlideSuccess", "Image loaded for: " + item.getName());
+                        return false;
+                    }
+                })
+                .into(holder.dishImage);
+
+        // Disabled entry animation for menu list because delayed/recycled animations
+        // can leave occasional transparent placeholders on fast scroll.
+
+        holder.itemView.setOnClickListener(v -> {
+            int adapterPosition = holder.getBindingAdapterPosition();
+            if (adapterPosition == RecyclerView.NO_POSITION || adapterPosition >= filteredList.size()) return;
+
+            MenuItem clickedItem = filteredList.get(adapterPosition);
+
+            // Check if order type is selected
+            if (!CartManager.isOrderTypeSelected()) {
+                Toast.makeText(context, context.getString(R.string.error_select_order_type_first), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent intent = new Intent(context, DishDetailActivity.class);
+            intent.putExtra("menuItem", clickedItem);
+            if (context instanceof Activity) {
+                Activity activity = (Activity) context;
+                holder.dishImage.setTransitionName("dish_image_" + clickedItem.getId());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                            activity,
+                            holder.dishImage,
+                            holder.dishImage.getTransitionName()
+                    );
+                    activity.startActivity(intent, options.toBundle());
+                } else {
+                    activity.startActivity(intent);
+                }
+            } else {
+                context.startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return filteredList.size();
+    }
+
+    private int dpToPx(int dp) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView dishImage;
+        View dishImageContainer;
+        LinearLayout spiceIconContainer;
+        TextView dishName, dishDescription, dishPrice;
+        androidx.cardview.widget.CardView cardView;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            cardView = (androidx.cardview.widget.CardView) itemView;
+            dishImage = itemView.findViewById(R.id.dishImage);
+            dishImageContainer = itemView.findViewById(R.id.dishImageContainer);
+            dishName = itemView.findViewById(R.id.dishName);
+            dishDescription = itemView.findViewById(R.id.dishDescription);
+            dishPrice = itemView.findViewById(R.id.dishPrice);
+            spiceIconContainer = itemView.findViewById(R.id.spiceIconContainer);
+        }
+    }
+
+    private boolean shouldIncludeInBrowse(MenuItem item) {
+        if (item == null) return false;
+        if (item.getId() == 22) return false; // Wooden Chopsticks in Supplies
+
+        String category = item.getCategory();
+        if (category == null) return true;
+        String normalized = category.trim().toLowerCase();
+        return !"staple foods".equals(normalized);
+    }
+}

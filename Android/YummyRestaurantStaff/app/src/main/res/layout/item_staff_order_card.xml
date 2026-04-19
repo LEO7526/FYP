@@ -1,88 +1,139 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/orderCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:layout_marginHorizontal="4dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="3dp"
-    app:cardBackgroundColor="@color/white">
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginBottom="20dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="10dp"
+    app:cardUseCompatPadding="true">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:background="@drawable/bg_order_card_surface">
 
-        <!-- 頭部：桌號 + 時間 -->
+        <View
+            android:id="@+id/statusAccent"
+            android:layout_width="8dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@color/colorPrimary" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingTop="18dp"
+            android:paddingEnd="18dp"
+            android:paddingBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/tableNumber"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/table_sample"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="34sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/orderTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/bg_order_time_chip"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="6dp"
+                    android:text="@string/time_sample"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/orderStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="7dp"
+                    android:text="@string/order_status_new"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/tableNumber"
-                android:layout_width="wrap_content"
+                android:id="@+id/orderSummary"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Table 05"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"/>
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_order_summary_panel"
+                android:lineSpacingExtra="5dp"
+                android:padding="14dp"
+                android:text="@string/loading_items"
+                android:textColor="@color/on_surface"
+                android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/orderTime"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/actionRow"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="12:30 PM"
-                android:textColor="#757575"
-                android:textSize="14sp"
-                android:layout_marginStart="12dp"/>
+                android:orientation="horizontal">
 
-            <!-- 狀態標籤 (只顯示文字顏色，不做按鈕) -->
-            <TextView
-                android:id="@+id/orderStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="New"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:background="@drawable/badge_circle_red_scalable"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:textStyle="bold"/>
+                <Button
+                    android:id="@+id/btnPrimaryAction"
+                    android:layout_width="0dp"
+                    android:layout_height="58dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_order_primary_button"
+                    android:backgroundTint="@null"
+                    app:backgroundTint="@null"
+                    android:minHeight="58dp"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:includeFontPadding="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/start_cooking"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnViewDetails"
+                    android:layout_width="0dp"
+                    android:layout_height="58dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_order_outline_button"
+                    android:backgroundTint="@null"
+                    app:backgroundTint="@null"
+                    android:minHeight="58dp"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:includeFontPadding="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/view_details"
+                    android:textAllCaps="false"
+                    android:textColor="#1565C0"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E0E0E0"
-            android:layout_marginBottom="12dp"/>
-
-        <!-- 訂單摘要 -->
-        <TextView
-            android:id="@+id/orderSummary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Loading items..."
-            android:textSize="16sp"
-            android:textColor="#424242"
-            android:lineSpacingExtra="4dp"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- 底部按鈕：只保留查看詳情 -->
-        <Button
-            android:id="@+id/btnViewDetails"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="View Full Details"
-            android:textColor="@color/black"
-            app:strokeColor="#757575"/>
-
-    </LinearLayout>
+    </FrameLayout>
 </androidx.cardview.widget.CardView>

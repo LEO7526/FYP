@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp"
+    app:strokeColor="#FFE2BF"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Package Section"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnRemovePackageType"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:backgroundTint="@color/red_dark"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                android:text="✕"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/etTypeNameEn"
+            style="@style/InputStyle"
+            android:hint="Section Name (EN)"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etTypeNameTw"
+            style="@style/InputStyle"
+            android:hint="Section Name (繁中)"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etTypeNameCn"
+            style="@style/InputStyle"
+            android:hint="Section Name (简中)"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etOptionalQuantity"
+            style="@style/InputStyle"
+            android:hint="How many dishes can customer choose from this section?"
+            android:inputType="number"
+            android:text="1"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Allowed Dishes"
+            android:textColor="@color/primary_text"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/llPackageDishContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
+
+        <Button
+            android:id="@+id/btnAddPackageDish"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ Add Dish Option" />
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

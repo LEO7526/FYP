@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tempPaymentRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="?android:attr/windowBackground">
+
+    <!-- Amount text -->
+    <TextView
+        android:id="@+id/amountText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total: HK$0.00"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Success icon (hidden initially) -->
+    <ImageView
+        android:id="@+id/successIcon"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@android:drawable/ic_menu_compass"
+        android:visibility="gone"
+        android:contentDescription="success icon"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Loading spinner -->
+    <ProgressBar
+        android:id="@+id/loadingSpinner"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Confirm / Save order button -->
+    <Button
+        android:id="@+id/confirmButton1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Order (Temp)"
+        android:padding="12dp" />
+
+    <!-- Small helper text -->
+    <TextView
+        android:id="@+id/helperText1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This bypasses external payment and saves the order directly."
+        android:textSize="12sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginTop="12dp" />
+
+</LinearLayout>

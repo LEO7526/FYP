@@ -54,15 +54,13 @@ public class FoodStockAdapter extends RecyclerView.Adapter<FoodStockAdapter.Food
         public void bind(final FoodStock foodStock) {
             foodNameTextView.setText(foodStock.itemName);
 
-            String quantityText = String.format(Locale.getDefault(),
-                    "Producible: %d / Min Target: %d",
-                    foodStock.producibleQty,
-                    foodStock.minProducibleQty);
+            String quantityText = itemView.getContext().getString(R.string.producible_min_target,
+                foodStock.producibleQty, foodStock.minProducibleQty);
             quantityTextView.setText(quantityText);
 
             // 因為這個列表現在只顯示「不足」的項，所以統一把顏色設為紅色/橘色警告色
             if (foodStock.producibleQty <= 0) {
-                quantityTextView.setText("OUT OF STOCK! (Producible: 0)");
+                quantityTextView.setText(R.string.out_of_stock_producible_zero);
                 quantityTextView.setTextColor(Color.parseColor("#B71C1C")); // 深紅
             } else {
                 quantityTextView.setTextColor(Color.parseColor("#E65100")); // 橘色警告

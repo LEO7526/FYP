@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import com.example.yummyrestaurant.R;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder> {
@@ -49,16 +50,34 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
 
     static class RecipeViewHolder extends RecyclerView.ViewHolder {
         private final TextView nameTextView;
+        private final TextView capacityTextView;
         private final Button cookButton;
 
         public RecipeViewHolder(@NonNull View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.text_recipe_name);
+            capacityTextView = itemView.findViewById(R.id.text_recipe_capacity);
             cookButton = itemView.findViewById(R.id.btn_cook);
         }
 
         public void bind(final Recipe recipe, final OnCookClickListener listener) {
             nameTextView.setText(recipe.itemName);
+            if (recipe.ingredientCount <= 0 || !recipe.hasRecipe) {
+                capacityTextView.setText(R.string.recipe_not_configured_yet);
+                cookButton.setText(R.string.no_recipe);
+                cookButton.setEnabled(false);
+                cookButton.setAlpha(0.6f);
+            } else if (recipe.maxProducible <= 0) {
+                capacityTextView.setText(itemView.getContext().getString(R.string.max_producible_now, 0));
+                cookButton.setText(R.string.out_of_stock);
+                cookButton.setEnabled(false);
+                cookButton.setAlpha(0.6f);
+            } else {
+                capacityTextView.setText(itemView.getContext().getString(R.string.max_producible_now, recipe.maxProducible));
+                cookButton.setText(R.string.produce);
+                cookButton.setEnabled(true);
+                cookButton.setAlpha(1f);
+            }
             cookButton.setOnClickListener(v -> listener.onCookClick(recipe));
         }
     }

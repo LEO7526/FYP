@@ -1,0 +1,47 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemRoot"
+    android:orientation="vertical"
+    android:layout_width="132dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="10dp"
+    android:padding="10dp"
+    android:gravity="center"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@drawable/set_menu_item_unselected_bg">
+
+    <ImageView
+        android:id="@+id/itemImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/image_rounded_bg"
+        android:contentDescription="@string/menu_item_image_desc" />
+
+    <TextView
+        android:id="@+id/itemName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dish_name_placeholder"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_marginTop="4dp" />
+
+    <Button
+        android:id="@+id/btnCustomize"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:text="@string/customize"
+        android:textSize="12sp"
+        android:padding="4dp"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        android:background="@drawable/set_menu_confirm_button"
+        android:textColor="@android:color/white"
+        android:textAllCaps="false"
+        android:textStyle="bold" />
+
+</LinearLayout>

@@ -19,7 +19,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import com.example.yummyrestaurant.R;
 
-public class RecipesFragment extends Fragment implements RecipeAdapter.OnCookClickListener {
+public class RecipesFragment extends Fragment implements RecipeAdapter.OnCookClickListener, RefreshableTab {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecipeAdapter recipeAdapter;
@@ -53,14 +53,14 @@ public class RecipesFragment extends Fragment implements RecipeAdapter.OnCookCli
                 if (isAdded() && response.isSuccessful() && apiResponse != null && apiResponse.success) {
                     recipeAdapter.setRecipes(apiResponse.data);
                 } else if (isAdded()) {
-                    Toast.makeText(getContext(), "Failed to load recipes.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.failed_load_recipes, Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<Recipe>>> call, @NonNull Throwable t) {
                 if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
                 if (isAdded()) {
-                    Toast.makeText(getContext(), "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.network_error_prefix, t.getMessage()), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -68,27 +68,41 @@ public class RecipesFragment extends Fragment implements RecipeAdapter.OnCookCli
 
     @Override
     public void onCookClick(Recipe recipe) {
+        if (recipe.ingredientCount <= 0 || !recipe.hasRecipe) {
+            Toast.makeText(getContext(), R.string.dish_no_recipe_configured, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (recipe.maxProducible <= 0) {
+            Toast.makeText(getContext(), R.string.not_enough_stock_produce, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        input.setHint("e.g., 1");
+        input.setHint(R.string.e_g_1);
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("produce: " + recipe.itemName)
-                .setMessage("Enter the quantity to cook:")
+                .setTitle(getString(R.string.produce_item, recipe.itemName))
+                .setMessage(getString(R.string.enter_quantity_to_produce_max, recipe.maxProducible))
                 .setView(input)
-                .setPositiveButton("Confirm", (dialog, which) -> {
+                .setPositiveButton(R.string.confirm, (dialog, which) -> {
                     String quantityStr = input.getText().toString();
                     if (quantityStr.isEmpty() || quantityStr.equals("0")) {
-                        Toast.makeText(getContext(), "Please enter a valid quantity.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), R.string.please_enter_valid_quantity, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     try {
                         int quantity = Integer.parseInt(quantityStr);
+                        if (quantity > recipe.maxProducible) {
+                            Toast.makeText(getContext(), getString(R.string.max_producible_now, recipe.maxProducible), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         performCook(recipe.itemId, quantity);
                     } catch (NumberFormatException e) {
-                        Toast.makeText(getContext(), "Invalid number format.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), R.string.invalid_number_format, Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
@@ -102,14 +116,15 @@ public class RecipesFragment extends Fragment implements RecipeAdapter.OnCookCli
                 if (isAdded()) {
                     ApiResponse<Void> apiResponse = response.body();
                     if (response.isSuccessful() && apiResponse != null && apiResponse.success) {
-                        Toast.makeText(getContext(), "Stock deducted successfully!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), R.string.stock_deducted_successfully, Toast.LENGTH_SHORT).show();
+                        fetchRecipes();
                         new MaterialAlertDialogBuilder(requireContext())
-                                .setTitle("Success")
-                                .setMessage("Stock has been updated. You can check the new stock levels in the 'Materials' tab.")
-                                .setPositiveButton("OK", null)
+                                .setTitle(R.string.success)
+                            .setMessage(R.string.stock_updated_check_ingredients)
+                                .setPositiveButton(R.string.ok, null)
                                 .show();
                     } else {
-                        String message = (apiResponse != null) ? apiResponse.message : "Operation failed.";
+                        String message = (apiResponse != null) ? apiResponse.message : getString(R.string.operation_failed);
                         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                     }
                 }
@@ -118,9 +133,20 @@ public class RecipesFragment extends Fragment implements RecipeAdapter.OnCookCli
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 if (isAdded()) {
                     if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
-                    Toast.makeText(getContext(), "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.network_error_prefix, t.getMessage()), Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchRecipes();
+    }
+
+    @Override
+    public void refreshData() {
+        fetchRecipes();
     }
 }

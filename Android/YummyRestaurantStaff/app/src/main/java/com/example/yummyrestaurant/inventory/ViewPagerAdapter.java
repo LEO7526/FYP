@@ -7,6 +7,12 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
 
+    private final MaterialsFragment materialsFragment = new MaterialsFragment();
+    private final RecipesFragment recipesFragment = new RecipesFragment();
+    private final MaterialAnalysisFragment materialAnalysisFragment = new MaterialAnalysisFragment();
+    private final ShortageImpactFragment shortageImpactFragment = new ShortageImpactFragment();
+    private final RestockFragment restockFragment = new RestockFragment();
+
     public ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
     }
@@ -16,18 +22,39 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return new MaterialsFragment();
+                return materialsFragment;
             case 1:
-                return new RecipesFragment();
+                return recipesFragment;
             case 2:
-                return new ProductionFragment();
+                return materialAnalysisFragment;
+            case 3:
+                return shortageImpactFragment;
+            case 4:
+                return restockFragment;
             default:
-                return new MaterialsFragment();
+                return materialsFragment;
         }
     }
 
     @Override
     public int getItemCount() {
-        return 3;
+        return 5;
+    }
+
+    public Fragment getFragmentAt(int position) {
+        switch (position) {
+            case 0:
+                return materialsFragment;
+            case 1:
+                return recipesFragment;
+            case 2:
+                return materialAnalysisFragment;
+            case 3:
+                return shortageImpactFragment;
+            case 4:
+                return restockFragment;
+            default:
+                return materialsFragment;
+        }
     }
 }

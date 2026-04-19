@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Main Content -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <!-- Top Bar -->
+        <RelativeLayout
+            android:id="@+id/topBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:background="@color/white">
+
+            <!-- Left menu icon -->
+            <ImageView
+                android:id="@+id/menuIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_menu"
+                android:contentDescription="@string/desc_open_menu"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true" />
+
+            <!-- FrameLayout container around cart icon -->
+            <FrameLayout
+                android:id="@+id/cartIconContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true">
+
+                <ImageView
+                    android:id="@+id/cartIcon"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_cart"
+                    android:contentDescription="@string/desc_open_cart" />
+
+                <TextView
+                    android:id="@+id/cartBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|top"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:minWidth="18dp"
+                    android:minHeight="18dp"
+                    android:background="@drawable/badge_circle_red_scalable"
+                    android:text="0"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </FrameLayout>
+
+            <!-- Title in the center -->
+            <TextView
+                android:id="@+id/appTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/merchant_name"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_centerInParent="true" />
+        </RelativeLayout>
+
+        <!-- Order Type Selection Container -->
+        <LinearLayout
+            android:id="@+id/orderTypeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/topBar"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="16dp"
+            android:background="@color/white">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDineIn"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="@string/order_type_dine_in"
+                android:textSize="14sp"
+                android:textColor="@color/colorPrimary"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"
+                app:strokeWidth="2dp"
+                app:rippleColor="@color/orange_light" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTakeaway"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/order_type_takeaway"
+                android:textSize="14sp"
+                android:textColor="@color/colorPrimary"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary"
+                app:strokeWidth="2dp"
+                app:rippleColor="@color/orange_light" />
+
+        </LinearLayout>
+
+        <!-- Menu/Package Tabs -->
+        <FrameLayout
+            android:id="@+id/tabContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/orderTypeContainer"
+            android:background="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnMenuTab"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/tab_menu"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorPrimary"
+                    android:background="@color/transparent"
+                    style="?attr/buttonBarButtonStyle"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnPackageTab"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/tab_package"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:background="@color/transparent"
+                    style="?attr/buttonBarButtonStyle" />
+            </LinearLayout>
+
+            <!-- Underline indicator positioned at bottom -->
+            <View
+                android:id="@+id/tabUnderline"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_gravity="bottom"
+                android:background="@color/colorPrimary" />
+        </FrameLayout>
+
+        <!-- Search Bar (Menu only) -->
+        <EditText
+            android:id="@+id/searchBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/search_hint"
+            android:layout_below="@id/tabContainer"
+            android:layout_margin="16dp"
+            android:background="@drawable/search_bar_bg"
+            android:padding="12dp"
+            android:visibility="visible" />
+
+        <!-- Menu Container (Two-panel layout) -->
+        <LinearLayout
+            android:id="@+id/menuContentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/searchBar"
+            android:layout_above="@id/bottomFunctionBar"
+            android:orientation="horizontal"
+            android:visibility="visible">
+
+            <!-- Left Panel: Menu Categories -->
+            <ScrollView
+                android:id="@+id/menuCategoryScroll"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:background="@drawable/sidebar_panel_background"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/menuCategoryList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp" />
+            </ScrollView>
+
+            <!-- Right Panel: Menu Items -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/menuRecyclerView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.7"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+        <!-- Package Container (Two-panel layout) -->
+        <LinearLayout
+            android:id="@+id/packageContentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/tabContainer"
+            android:layout_above="@id/bottomFunctionBar"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <!-- Left Panel: Package Categories -->
+            <ScrollView
+                android:id="@+id/packageCategoryScroll"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.3"
+                android:background="@drawable/sidebar_panel_background"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/packageCategoryList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp" />
+            </ScrollView>
+
+            <!-- Right Panel: Package Items -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/packageRecyclerView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.7"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:background="@drawable/package_content_background"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+        <!-- Loading Spinner -->
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/loadingSpinner"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/loading_wave" />
+
+        <!-- Order Type Selection Overlay Hint -->
+        <FrameLayout
+            android:id="@+id/orderTypeHintOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/tabContainer"
+            android:layout_above="@id/bottomFunctionBar"
+            android:background="@color/overlay_semi_transparent"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_order_type_hint"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/to_start_shopping"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Bottom Function Bar -->
+        <include
+            android:id="@+id/bottomFunctionBar"
+            layout="@layout/bottom_function_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" />
+
+    </RelativeLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/white"
+        app:menu="@menu/drawer_menu" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

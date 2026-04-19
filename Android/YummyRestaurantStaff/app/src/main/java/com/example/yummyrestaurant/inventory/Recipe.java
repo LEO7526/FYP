@@ -8,4 +8,13 @@ public class Recipe {
 
     @SerializedName("item_name")
     public String itemName;
+
+    @SerializedName("ingredient_count")
+    public int ingredientCount;
+
+    @SerializedName("has_recipe")
+    public boolean hasRecipe;
+
+    @SerializedName("max_producible")
+    public int maxProducible;
 }

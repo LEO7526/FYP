@@ -3,7 +3,9 @@ package com.example.yummyrestaurant.activities;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -32,7 +34,7 @@ import java.util.List;
  * Activity for staff to manage cash payments at front desk
  * Shows tables with pending cash payments and allows staff to confirm payment
  */
-public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCompatActivity {
+public class CashPaymentManagementActivity extends ThemeBaseActivity {
     private static final String TAG = "CashPaymentMgmt";
     
     private RecyclerView recyclerView;
@@ -55,9 +57,7 @@ public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCom
     private void initializeUI() {
         // Back button
         ImageView btnBack = findViewById(R.id.btnBack);
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
-        }
+        btnBack.setOnClickListener(v -> finish());
 
         // Views
         progressBar = findViewById(R.id.progressBar);
@@ -66,13 +66,10 @@ public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCom
         // Setup RecyclerView
         tableList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerViewCashPaymentTables);
-        if (recyclerView != null) {
-            recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
-            // Create adapter
-            adapter = new CashPaymentTableAdapter(this, tableList, this::onTableClicked);
-            recyclerView.setAdapter(adapter);
-        }
+        adapter = new CashPaymentTableAdapter(this, tableList, this::onTableClicked);
+        recyclerView.setAdapter(adapter);
         
         Log.d(TAG, "initializeUI: UI components initialized");
     }
@@ -84,7 +81,8 @@ public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCom
         Log.d(TAG, "fetchCashPaymentTables: Loading tables with pending cash payments");
         showLoading(true);
         
-        String url = ApiConstants.BASE_URL + "get_cash_payment_tables.php";
+        String url = ApiConstants.baseUrl() + "get_cash_payment_tables.php";
+        Log.d(TAG, "API URL: " + url);
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
@@ -127,9 +125,7 @@ public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCom
                     Log.d(TAG, "Added table: " + table.getTableNumber() + " with amount: " + table.getTotalAmount());
                 }
                 
-                if (adapter != null) {
-                    adapter.notifyDataSetChanged();
-                }
+                adapter.notifyDataSetChanged();
                 
                 if (tableList.isEmpty()) {
                     showEmptyState(true);
@@ -164,20 +160,32 @@ public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCom
      */
     private void showPaymentConfirmationDialog(CashPaymentTable table) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_cash_payment_confirmation, null);
+        builder.setView(view);
         
-        builder.setTitle("Confirm Cash Payment");
-        builder.setMessage("Table: " + table.getTableNumber() + "\n" +
-                          "Customer: " + table.getCustomerName() + "\n" +
-                          "Amount: HK$" + String.format("%.2f", table.getTotalAmount()) + "\n\n" +
-                          table.getItemsSummary());
+        TextView tvTableNumber = view.findViewById(R.id.textTableNumber);
+        TextView tvCustomerName = view.findViewById(R.id.textCustomerName);
+        TextView tvTotalAmount = view.findViewById(R.id.textTotalAmount);
+        TextView tvItemsSummary = view.findViewById(R.id.textItemsSummary);
+        Button btnConfirmPayment = view.findViewById(R.id.btnConfirmPayment);
+        Button btnCancel = view.findViewById(R.id.btnCancel);
 
-        builder.setPositiveButton("Confirm Payment", (dialog, which) -> {
+        tvTableNumber.setText("Table: " + table.getTableNumber());
+        tvCustomerName.setText("Customer: " + table.getCustomerName());
+        tvTotalAmount.setText(String.format("Amount: HK$%.2f", table.getTotalAmount()));
+        tvItemsSummary.setText(table.getItemsSummary());
+
+        AlertDialog dialog = builder.create();
+
+        btnConfirmPayment.setOnClickListener(v -> {
             Log.d(TAG, "Confirming front desk cash payment for table " + table.getTableNumber());
             processCashPayment(table.getOrderId());
+            dialog.dismiss();
         });
 
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     /**
@@ -187,7 +195,7 @@ public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCom
         Log.d(TAG, "processCashPayment: Processing payment for order " + orderId);
         showLoading(true);
         
-        String url = ApiConstants.BASE_URL + "process_cash_payment.php";
+        String url = ApiConstants.baseUrl() + "process_cash_payment.php";
 
         JSONObject requestData = new JSONObject();
         try {
@@ -232,21 +240,13 @@ public class CashPaymentManagementActivity extends androidx.appcompat.app.AppCom
     }
 
     private void showLoading(boolean show) {
-        if (progressBar != null) {
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-        if (recyclerView != null) {
-            recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
     private void showEmptyState(boolean show) {
-        if (emptyView != null) {
-            emptyView.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-        if (recyclerView != null) {
-            recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        emptyView.setVisibility(show ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
     @Override

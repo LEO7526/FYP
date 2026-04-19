@@ -1,10 +1,12 @@
 package com.example.yummyrestaurant.activities;
 
 import android.app.DatePickerDialog;
-import android.app.AlertDialog; // 記得是這個
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater; // 記得加
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -12,18 +14,23 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.yummyrestaurant.R;
-import com.example.yummyrestaurant.adapters.CouponListAdapter;
-import com.example.yummyrestaurant.api.ApiConstants;
+import com.example.yummyrestaurant.api.ApiConfig;
+import com.example.yummyrestaurant.api.ApiService;
+import com.example.yummyrestaurant.api.CouponApiService;
+import com.example.yummyrestaurant.api.RetrofitClient;
+import com.example.yummyrestaurant.models.Coupon;
+import com.example.yummyrestaurant.models.CouponListResponse;
+import com.example.yummyrestaurant.models.CouponPointsResponse;
+import com.example.yummyrestaurant.utils.RoleManager;
 import com.google.android.material.tabs.TabLayout;
+import com.example.yummyrestaurant.utils.LanguageManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,70 +40,45 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CreateCouponActivity extends AppCompatActivity {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-    // Tabs & List
+public class CreateCouponActivity extends StaffBaseActivity {
+
+    private static final String TAG = "CreateCouponActivity";
+
+    private EditText etPoints, etDiscountValue, etMinSpend, etMaxDiscount, etLimit;
+    private TextView tvExpiryDate;
+    private RadioGroup rgDiscountType, rgAppliesTo;
+    private CheckBox cbMinSpend, cbMaxDiscount, cbLimit, cbDineIn, cbTakeaway, cbDelivery, cbCombine, cbBirthday;
+    private Button btnSubmit;
+
     private TabLayout tabMain;
     private View viewCreate;
     private RecyclerView rvCouponList;
-    private CouponListAdapter listAdapter;
-    private List<JSONObject> couponList = new ArrayList<>();
 
-    // UI Components
-    private EditText etPoints, etDiscountValue, etMinSpend, etMaxDiscount, etLimit;
-    private TextView tvExpiryDate, tvSelectedScope;
-    private RadioGroup rgDiscountType, rgAppliesTo;
-    private CheckBox cbMinSpend, cbMaxDiscount, cbLimit, cbDineIn, cbTakeaway, cbDelivery, cbCombine, cbBirthday;
-    private Button btnSelectScope;
-
-    // Language Fields
     private EditText etTitleEn, etDescEn, etTermEn;
     private EditText etTitleTw, etDescTw, etTermTw;
     private EditText etTitleCn, etDescCn, etTermCn;
 
-    // Data
+    private final List<Coupon> couponList = new ArrayList<>();
+    private CouponListAdapter couponListAdapter;
+    private int currentPoints = 0;
+    private int customerId = 0;
+
     private String selectedDate = "";
-    private List<String> selectedScopeIds = new ArrayList<>();
-    private List<ScopeItem> allCategories = new ArrayList<>();
-    private List<ScopeItem> allItems = new ArrayList<>();
-    private List<ScopeItem> allPackages = new ArrayList<>();
-
-    private String[] dialogNames;
-    private String[] dialogIds;
-    private boolean[] dialogChecked;
-
-    class ScopeItem {
-        String id; String name;
-        ScopeItem(String id, String name) { this.id = id; this.name = name; }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_coupon);
 
-        initViews();
-        setupTabs();
-        fetchMetadata();
-    }
-
-    private void initViews() {
-        tabMain = findViewById(R.id.tabMain);
-        viewCreate = findViewById(R.id.viewCreate);
-        rvCouponList = findViewById(R.id.rvCouponList);
-
-        rvCouponList.setLayoutManager(new LinearLayoutManager(this));
-        // 修改 Adapter 建構，傳入點擊事件
-        listAdapter = new CouponListAdapter(this, couponList, this::showCouponDetails);
-        rvCouponList.setAdapter(listAdapter);
-
         etPoints = findViewById(R.id.etPoints);
         etDiscountValue = findViewById(R.id.etDiscountValue);
         tvExpiryDate = findViewById(R.id.tvExpiryDate);
         rgDiscountType = findViewById(R.id.rgDiscountType);
         rgAppliesTo = findViewById(R.id.rgAppliesTo);
-        btnSelectScope = findViewById(R.id.btnSelectScope);
-        tvSelectedScope = findViewById(R.id.tvSelectedScope);
         cbMinSpend = findViewById(R.id.cbMinSpend);
         etMinSpend = findViewById(R.id.etMinSpend);
         cbMaxDiscount = findViewById(R.id.cbMaxDiscount);
@@ -108,155 +90,32 @@ public class CreateCouponActivity extends AppCompatActivity {
         cbDelivery = findViewById(R.id.cbDelivery);
         cbCombine = findViewById(R.id.cbCombine);
         cbBirthday = findViewById(R.id.cbBirthday);
+        btnSubmit = findViewById(R.id.btnSubmit);
 
-        etTitleEn = findViewById(R.id.etTitleEn); etDescEn = findViewById(R.id.etDescEn); etTermEn = findViewById(R.id.etTermEn);
-        etTitleTw = findViewById(R.id.etTitleTw); etDescTw = findViewById(R.id.etDescTw); etTermTw = findViewById(R.id.etTermTw);
-        etTitleCn = findViewById(R.id.etTitleCn); etDescCn = findViewById(R.id.etDescCn); etTermCn = findViewById(R.id.etTermCn);
+        tabMain = findViewById(R.id.tabMain);
+        viewCreate = findViewById(R.id.viewCreate);
+        rvCouponList = findViewById(R.id.rvCouponList);
 
-        findViewById(R.id.btnSubmit).setOnClickListener(v -> submitCoupon());
-
-        setupListeners();
-    }
-
-    // === 顯示詳細資料彈窗 (新增方法) ===
-    private void showCouponDetails(int couponId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_coupon_detail, null);
-        builder.setView(view);
-        AlertDialog dialog = builder.create();
-
-        TextView tvTitle = view.findViewById(R.id.tvDetailTitle);
-        TextView tvType = view.findViewById(R.id.tvDetailType);
-        TextView tvPoints = view.findViewById(R.id.tvDetailPoints);
-        TextView tvExpiry = view.findViewById(R.id.tvDetailExpiry);
-        TextView tvRules = view.findViewById(R.id.tvDetailRules);
-        TextView tvScope = view.findViewById(R.id.tvDetailScope);
-        TextView tvTrans = view.findViewById(R.id.tvDetailTransTW);
-        Button btnClose = view.findViewById(R.id.btnCloseDetail);
-
-        tvTitle.setText("Loading...");
-        btnClose.setOnClickListener(v -> dialog.dismiss());
-        dialog.show();
-
-        String url = ApiConstants.BASE_URL + "get_coupon_detail.php?coupon_id=" + couponId;
-        StringRequest req = new StringRequest(Request.Method.GET, url,
-                response -> {
-                    try {
-                        JSONObject json = new JSONObject(response);
-                        if (json.getString("status").equals("success")) {
-                            JSONObject data = json.getJSONObject("data");
-                            JSONObject info = data.getJSONObject("info");
-                            JSONObject trans = data.getJSONObject("translations");
-                            JSONArray scope = data.getJSONArray("scope_list");
-
-                            // 1. Title & Type
-                            String enTitle = trans.getJSONObject("en").getString("title");
-                            tvTitle.setText(enTitle);
-
-                            String typeStr = info.getString("type");
-                            String val = info.getString("discount_amount");
-                            if (typeStr.equals("percent")) tvType.setText(val + "% OFF");
-                            else if (typeStr.equals("cash")) tvType.setText("$" + val + " OFF");
-                            else tvType.setText("Free Item");
-
-                            // 2. Info
-                            tvPoints.setText(info.getString("points_required"));
-                            tvExpiry.setText(info.getString("expiry_date"));
-
-                            // 3. Rules
-                            StringBuilder sbRules = new StringBuilder();
-                            if (!info.isNull("min_spend")) sbRules.append("• Min Spend: $").append(info.getString("min_spend")).append("\n");
-                            if (!info.isNull("max_discount")) sbRules.append("• Max Discount: $").append(info.getString("max_discount")).append("\n");
-                            if (!info.isNull("per_customer_per_day")) sbRules.append("• Limit: ").append(info.getString("per_customer_per_day")).append("/day\n");
-                            if (info.getInt("birthday_only") == 1) sbRules.append("• Birthday Only\n");
-                            if (info.getInt("valid_dine_in") == 1) sbRules.append("• Dine-in  ");
-                            if (info.getInt("valid_takeaway") == 1) sbRules.append("• Takeaway  ");
-                            tvRules.setText(sbRules.length() > 0 ? sbRules.toString() : "No special rules");
-
-                            // 4. Scope
-                            String applies = info.getString("applies_to");
-                            if (applies.equals("whole_order")) {
-                                tvScope.setText("All Items (Whole Order)");
-                            } else {
-                                StringBuilder sbScope = new StringBuilder(applies + ": ");
-                                for(int i=0; i<scope.length(); i++) sbScope.append(scope.getString(i)).append(", ");
-                                tvScope.setText(sbScope.toString());
-                            }
-
-                            // 5. Translation Preview (TW)
-                            StringBuilder sbTrans = new StringBuilder();
-                            String[] langKeys = {"en", "zh-TW", "zh-CN"};
-                            String[] langLabels = {"🇬🇧 EN", "🇭🇰 TW", "🇨🇳 CN"};
-
-                            for (int i = 0; i < langKeys.length; i++) {
-                                if (trans.has(langKeys[i])) {
-                                    JSONObject t = trans.getJSONObject(langKeys[i]);
-
-                                    // 標題
-                                    sbTrans.append(langLabels[i]).append(": ")
-                                            .append(t.optString("title", "-")).append("\n");
-
-                                    // 描述
-                                    String desc = t.optString("desc", "");
-                                    if (!desc.isEmpty()) sbTrans.append(desc).append("\n");
-
-                                    // 條款 (Terms) - 這裡就是你原本缺少的
-                                    JSONArray terms = t.optJSONArray("terms");
-                                    if (terms != null && terms.length() > 0) {
-                                        for (int j = 0; j < terms.length(); j++) {
-                                            sbTrans.append("  • ").append(terms.getString(j)).append("\n");
-                                        }
-                                    }
-                                    sbTrans.append("\n"); // 語言之間空一行
-                                }
-                            }
-
-                            tvTrans.setText(sbTrans.toString());
-                        }
-                    } catch (Exception e) { e.printStackTrace(); }
-                },
-                error -> Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show()
-        );
-        Volley.newRequestQueue(this).add(req);
-    }
-
-    private void setupTabs() {
-        tabMain.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                if (tab.getPosition() == 0) {
-                    viewCreate.setVisibility(View.VISIBLE);
-                    rvCouponList.setVisibility(View.GONE);
-                } else {
-                    viewCreate.setVisibility(View.GONE);
-                    rvCouponList.setVisibility(View.VISIBLE);
-                    fetchCouponList();
-                }
-            }
-            @Override public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        rvCouponList.setLayoutManager(new LinearLayoutManager(this));
+        couponListAdapter = new CouponListAdapter(couponList, coupon -> {
+            Intent intent = new Intent(CreateCouponActivity.this, CouponDetailActivity.class);
+            intent.putExtra("coupon_id", coupon.getCouponId());
+            intent.putExtra("current_points", currentPoints);
+            intent.putExtra("from_staff", true);
+            startActivity(intent);
         });
-    }
+        rvCouponList.setAdapter(couponListAdapter);
 
-    private void fetchCouponList() {
-        String url = ApiConstants.BASE_URL + "get_coupon_list.php";
-        StringRequest req = new StringRequest(Request.Method.GET, url,
-                response -> {
-                    try {
-                        JSONObject json = new JSONObject(response);
-                        if (json.getString("status").equals("success")) {
-                            JSONArray arr = json.getJSONArray("data");
-                            couponList.clear();
-                            for(int i=0; i<arr.length(); i++) couponList.add(arr.getJSONObject(i));
-                            listAdapter.notifyDataSetChanged();
-                        }
-                    } catch (Exception e) {}
-                }, error -> Toast.makeText(this, "Failed to load list", Toast.LENGTH_SHORT).show()
-        );
-        Volley.newRequestQueue(this).add(req);
-    }
+        etTitleEn = findViewById(R.id.etTitleEn);
+        etDescEn = findViewById(R.id.etDescEn);
+        etTermEn = findViewById(R.id.etTermEn);
+        etTitleTw = findViewById(R.id.etTitleTw);
+        etDescTw = findViewById(R.id.etDescTw);
+        etTermTw = findViewById(R.id.etTermTw);
+        etTitleCn = findViewById(R.id.etTitleCn);
+        etDescCn = findViewById(R.id.etDescCn);
+        etTermCn = findViewById(R.id.etTermCn);
 
-    private void setupListeners() {
         tvExpiryDate.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
             new DatePickerDialog(this, (view, year, month, day) -> {
@@ -265,91 +124,104 @@ public class CreateCouponActivity extends AppCompatActivity {
             }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
         });
 
-        rgAppliesTo.setOnCheckedChangeListener((group, checkedId) -> {
-            selectedScopeIds.clear();
-            tvSelectedScope.setText("None selected");
-
-            if (checkedId == R.id.rbWhole) {
-                btnSelectScope.setVisibility(View.GONE);
-                tvSelectedScope.setVisibility(View.GONE);
-            } else {
-                btnSelectScope.setVisibility(View.VISIBLE);
-                tvSelectedScope.setVisibility(View.VISIBLE);
-                prepareScopeData(checkedId);
-            }
-        });
-
-        btnSelectScope.setOnClickListener(v -> showMultiSelectDialog());
-
         cbMinSpend.setOnCheckedChangeListener((bv, isChecked) -> etMinSpend.setVisibility(isChecked ? View.VISIBLE : View.GONE));
         cbMaxDiscount.setOnCheckedChangeListener((bv, isChecked) -> etMaxDiscount.setVisibility(isChecked ? View.VISIBLE : View.GONE));
         cbLimit.setOnCheckedChangeListener((bv, isChecked) -> etLimit.setVisibility(isChecked ? View.VISIBLE : View.GONE));
+
+        setupTabSwitching();
+        resolveCustomerAndLoadPoints();
+        btnSubmit.setOnClickListener(v -> submitCoupon());
     }
 
-    private void prepareScopeData(int checkedRadioId) {
-        List<ScopeItem> targetList;
-        if (checkedRadioId == R.id.rbCategory) targetList = allCategories;
-        else if (checkedRadioId == R.id.rbItem) targetList = allItems;
-        else if (checkedRadioId == R.id.rbPackage) targetList = allPackages;
-        else return;
-
-        int size = targetList.size();
-        dialogNames = new String[size];
-        dialogIds = new String[size];
-        dialogChecked = new boolean[size];
-
-        for (int i=0; i<size; i++) {
-            dialogNames[i] = targetList.get(i).name;
-            dialogIds[i] = targetList.get(i).id;
-            dialogChecked[i] = false;
+    private void resolveCustomerAndLoadPoints() {
+        try {
+            customerId = Integer.parseInt(RoleManager.getUserId());
+        } catch (Exception e) {
+            customerId = 0;
         }
-    }
 
-    private void showMultiSelectDialog() {
-        if (dialogNames == null || dialogNames.length == 0) {
-            Toast.makeText(this, "No items available.", Toast.LENGTH_SHORT).show();
+        if (customerId <= 0) {
+            currentPoints = 0;
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select Items");
-        builder.setMultiChoiceItems(dialogNames, dialogChecked, (dialog, which, isChecked) -> dialogChecked[which] = isChecked);
-        builder.setPositiveButton("OK", (dialog, which) -> {
-            selectedScopeIds.clear();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < dialogChecked.length; i++) {
-                if (dialogChecked[i]) {
-                    selectedScopeIds.add(dialogIds[i]);
-                    sb.append(dialogNames[i]).append(", ");
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+        apiService.getCouponPoints(customerId).enqueue(new Callback<CouponPointsResponse>() {
+            @Override
+            public void onResponse(Call<CouponPointsResponse> call, Response<CouponPointsResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    currentPoints = response.body().getCouponPoints();
+                } else {
+                    currentPoints = 0;
                 }
             }
-            tvSelectedScope.setText(sb.length() > 0 ? sb.substring(0, sb.length() - 2) : "None selected");
+
+            @Override
+            public void onFailure(Call<CouponPointsResponse> call, Throwable t) {
+                currentPoints = 0;
+            }
         });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
     }
 
-    private void fetchMetadata() {
-        String url = ApiConstants.BASE_URL + "get_coupon_metadata.php";
-        StringRequest request = new StringRequest(Request.Method.GET, url,
-                response -> {
-                    try {
-                        JSONObject json = new JSONObject(response);
-                        if (json.getString("status").equals("success")) {
-                            JSONObject data = json.getJSONObject("data");
-                            JSONArray cats = data.getJSONArray("categories");
-                            for (int i=0; i<cats.length(); i++) allCategories.add(new ScopeItem(cats.getJSONObject(i).getString("category_id"), cats.getJSONObject(i).getString("category_name")));
+    private void setupTabSwitching() {
+        showCreateTab();
 
-                            JSONArray items = data.getJSONArray("items");
-                            for (int i=0; i<items.length(); i++) allItems.add(new ScopeItem(items.getJSONObject(i).getString("item_id"), items.getJSONObject(i).getString("item_name")));
+        tabMain.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) {
+                    showCreateTab();
+                } else {
+                    showListTab();
+                    fetchCouponList();
+                }
+            }
 
-                            JSONArray pkgs = data.getJSONArray("packages");
-                            for (int i=0; i<pkgs.length(); i++) allPackages.add(new ScopeItem(pkgs.getJSONObject(i).getString("package_id"), pkgs.getJSONObject(i).getString("package_name")));
-                        }
-                    } catch (Exception e) {}
-                }, error -> {}
-        );
-        Volley.newRequestQueue(this).add(request);
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 1) {
+                    fetchCouponList();
+                }
+            }
+        });
+    }
+
+    private void showCreateTab() {
+        viewCreate.setVisibility(View.VISIBLE);
+        rvCouponList.setVisibility(View.GONE);
+    }
+
+    private void showListTab() {
+        viewCreate.setVisibility(View.GONE);
+        rvCouponList.setVisibility(View.VISIBLE);
+    }
+
+    private void fetchCouponList() {
+        CouponApiService api = RetrofitClient.getClient(this).create(CouponApiService.class);
+        api.getCoupons(LanguageManager.getLangCode(this)).enqueue(new Callback<CouponListResponse>() {
+            @Override
+            public void onResponse(Call<CouponListResponse> call, Response<CouponListResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    couponList.clear();
+                    couponList.addAll(response.body().getCoupons());
+                    couponListAdapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(CreateCouponActivity.this, R.string.failed_load_coupon_list, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CouponListResponse> call, Throwable t) {
+                Log.e(TAG, "fetchCouponList failed", t);
+                Toast.makeText(CreateCouponActivity.this,
+                        getString(R.string.error_prefix, t.getMessage()),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void submitCoupon() {
@@ -365,18 +237,17 @@ public class CreateCouponActivity extends AppCompatActivity {
 
             int applyId = rgAppliesTo.getCheckedRadioButtonId();
             String applyStr = "whole_order";
-            if(applyId == R.id.rbCategory) applyStr = "category";
-            else if(applyId == R.id.rbItem) applyStr = "item";
-            else if(applyId == R.id.rbPackage) applyStr = "package";
+            if (applyId == R.id.rbCategory) applyStr = "category";
+            else if (applyId == R.id.rbItem) applyStr = "item";
+            else if (applyId == R.id.rbPackage) applyStr = "package";
             json.put("applies_to", applyStr);
 
             JSONArray ids = new JSONArray();
-            for(String id : selectedScopeIds) ids.put(Integer.parseInt(id));
             json.put("selected_ids", ids);
 
-            if(cbMinSpend.isChecked()) json.put("min_spend", etMinSpend.getText().toString());
-            if(cbMaxDiscount.isChecked()) json.put("max_discount", etMaxDiscount.getText().toString());
-            if(cbLimit.isChecked()) json.put("per_customer_limit", etLimit.getText().toString());
+            if (cbMinSpend.isChecked()) json.put("min_spend", etMinSpend.getText().toString());
+            if (cbMaxDiscount.isChecked()) json.put("max_discount", etMaxDiscount.getText().toString());
+            if (cbLimit.isChecked()) json.put("per_customer_limit", etLimit.getText().toString());
 
             json.put("valid_dine_in", cbDineIn.isChecked());
             json.put("valid_takeaway", cbTakeaway.isChecked());
@@ -390,17 +261,35 @@ public class CreateCouponActivity extends AppCompatActivity {
             transObj.put("zh-CN", buildTransJson(etTitleCn, etDescCn, etTermCn));
             json.put("translations", transObj);
 
-            String url = ApiConstants.BASE_URL + "create_coupon_api.php";
+            // Use the same environment-aware base URL as Retrofit APIs.
+            String url = ApiConfig.getBaseUrl(this) + "create_coupon_api.php";
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, url, json,
                     response -> {
-                        Toast.makeText(this, "Coupon Created!", Toast.LENGTH_SHORT).show();
-                        tabMain.getTabAt(1).select();
+                        String status = response.optString("status", "");
+                        if ("success".equalsIgnoreCase(status)) {
+                            Toast.makeText(this, R.string.coupon_created, Toast.LENGTH_SHORT).show();
+
+                            TabLayout.Tab listTab = tabMain.getTabAt(1);
+                            if (listTab != null) {
+                                listTab.select();
+                            } else {
+                                showListTab();
+                                fetchCouponList();
+                            }
+                        } else {
+                                String msg = response.optString("message", getString(R.string.failed_create_coupon));
+                            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                        }
                     },
-                    error -> Toast.makeText(this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show()
+                            error -> Toast.makeText(this,
+                                getString(R.string.error_prefix, error.getMessage()),
+                                Toast.LENGTH_SHORT).show()
             );
             Volley.newRequestQueue(this).add(req);
 
-        } catch (JSONException e) { e.printStackTrace(); }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private JSONObject buildTransJson(EditText title, EditText desc, EditText term) throws JSONException {
@@ -411,5 +300,67 @@ public class CreateCouponActivity extends AppCompatActivity {
         if (!term.getText().toString().isEmpty()) termArr.put(term.getText().toString());
         obj.put("terms", termArr);
         return obj;
+    }
+
+    private static class CouponListAdapter extends RecyclerView.Adapter<CouponListAdapter.ViewHolder> {
+        interface OnCouponItemClickListener {
+            void onCouponItemClick(Coupon coupon);
+        }
+
+        private final List<Coupon> items;
+        private final OnCouponItemClickListener clickListener;
+
+        CouponListAdapter(List<Coupon> items, OnCouponItemClickListener clickListener) {
+            this.items = items;
+            this.clickListener = clickListener;
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_coupon_card, parent, false);
+            return new ViewHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            Coupon c = items.get(position);
+            android.content.Context context = holder.itemView.getContext();
+            holder.tvTitle.setText(c.getTitle());
+            holder.tvDesc.setText(c.getDescription());
+            holder.tvPoints.setText(context.getString(R.string.requires_points, c.getPointsRequired()));
+            holder.tvExpiry.setText(c.getExpiryDate() != null && !c.getExpiryDate().isEmpty()
+                ? context.getString(R.string.valid_until, c.getExpiryDate())
+                : context.getString(R.string.no_expiry));
+            holder.btnRedeem.setText(R.string.view_details);
+            holder.btnRedeem.setEnabled(true);
+            holder.btnRedeem.setAlpha(1f);
+
+            View.OnClickListener openDetail = v -> {
+                if (clickListener != null) {
+                    clickListener.onCouponItemClick(c);
+                }
+            };
+            holder.itemView.setOnClickListener(openDetail);
+            holder.btnRedeem.setOnClickListener(openDetail);
+        }
+
+        @Override
+        public int getItemCount() {
+            return items == null ? 0 : items.size();
+        }
+
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            TextView tvTitle, tvDesc, tvPoints, tvExpiry;
+            Button btnRedeem;
+
+            ViewHolder(View itemView) {
+                super(itemView);
+                tvTitle = itemView.findViewById(R.id.tvCouponTitle);
+                tvDesc = itemView.findViewById(R.id.tvCouponDescription);
+                tvPoints = itemView.findViewById(R.id.tvCouponPointsRequired);
+                tvExpiry = itemView.findViewById(R.id.tvCouponExpiry);
+                btnRedeem = itemView.findViewById(R.id.btnRedeem);
+            }
+        }
     }
 }
