@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView; // 👈 關鍵！一定要有這一行
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -147,7 +147,7 @@ public class CreateDishActivity extends StaffBaseActivity {
         viewPackageCreate = findViewById(R.id.viewPackageCreate);
         rvDishList = findViewById(R.id.rvDishList);
 
-        // 初始化 Adapter，傳入點擊事件監聽器
+        // 鍒濆鍖?Adapter锛屽偝鍏ラ粸鎿婁簨浠剁洠鑱藉櫒
         rvDishList.setLayoutManager(new LinearLayoutManager(this));
         listAdapter = new DishListAdapter(this, dishList, this::handleListItemClick);
         rvDishList.setAdapter(listAdapter);
@@ -189,7 +189,7 @@ public class CreateDishActivity extends StaffBaseActivity {
         spSpice.setAdapter(adapter);
     }
 
-    // === 顯示詳細資料彈窗 (重點功能) ===
+    // === 椤ず瑭崇窗璩囨枡褰堢獥 (閲嶉粸鍔熻兘) ===
     private void handleListItemClick(JSONObject item) {
         String itemType = item.optString("item_type", "dish");
         int id = item.optInt("id", 0);
@@ -206,7 +206,7 @@ public class CreateDishActivity extends StaffBaseActivity {
         builder.setView(view);
         AlertDialog dialog = builder.create();
 
-        // 綁定 UI
+        // 缍佸畾 UI
         TextView tvName = view.findViewById(R.id.tvDetailName);
         TextView tvPrice = view.findViewById(R.id.tvDetailPrice);
         TextView tvCategory = view.findViewById(R.id.tvDetailCategory);
@@ -220,8 +220,8 @@ public class CreateDishActivity extends StaffBaseActivity {
         btnClose.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
 
-        // 呼叫 API
-        String url = ApiConstants.BASE_URL + "get_dish_detail.php?item_id=" + dishId;
+        // 鍛煎彨 API
+        String url = ApiConstants.baseUrl() + "get_dish_detail.php?item_id=" + dishId;
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
@@ -232,7 +232,7 @@ public class CreateDishActivity extends StaffBaseActivity {
                             JSONObject names = data.getJSONObject("names");
                             JSONArray recipe = data.getJSONArray("recipe");
 
-                            // 顯示基本資料 (優先顯示英文，沒有則顯示 Walking)
+                            // 椤ず鍩烘湰璩囨枡 (鍎厛椤ず鑻辨枃锛屾矑鏈夊墖椤ず Walking)
                             String enName = names.has("en") ? names.getJSONObject("en").getString("name") : getString(R.string.no_name);
                             String enDesc = names.has("en") ? names.getJSONObject("en").getString("desc") : "";
 
@@ -242,18 +242,18 @@ public class CreateDishActivity extends StaffBaseActivity {
                             tvCategory.setText(getString(R.string.category_label, info.getString("category_name")));
                             tvSpice.setText(getString(R.string.spice_level_label, info.getString("spice_level")));
 
-                            // 顯示食譜
+                            // 椤ず椋熻瓬
                             if (recipe.length() > 0) {
                                 StringBuilder sb = new StringBuilder();
                                 for (int i = 0; i < recipe.length(); i++) {
-                                    sb.append("• ").append(recipe.getString(i)).append("\n");
+                                    sb.append("- ").append(recipe.getString(i)).append("\n");
                                 }
                                 tvRecipe.setText(sb.toString());
                             } else {
                                 tvRecipe.setText(R.string.no_ingredients_listed);
                             }
 
-                            // 載入圖片 (使用簡單的 Thread 下載)
+                            // 杓夊叆鍦栫墖 (浣跨敤绨″柈鐨?Thread 涓嬭級)
                             String imgUrl = info.optString("image_url", "");
                             if (!imgUrl.isEmpty()) {
                                 if (imgUrl.startsWith("data:image")) {
@@ -270,7 +270,7 @@ public class CreateDishActivity extends StaffBaseActivity {
                                 } else {
                                     String finalUrl = imgUrl;
                                     if (!imgUrl.toLowerCase(Locale.ROOT).startsWith("http")) {
-                                        finalUrl = ApiConstants.BASE_URL + imgUrl;
+                                        finalUrl = ApiConstants.baseUrl() + imgUrl;
                                     }
                                     String imageUrl = finalUrl;
                                     new Thread(() -> {
@@ -310,7 +310,7 @@ public class CreateDishActivity extends StaffBaseActivity {
         btnClose.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
 
-        String url = ApiConstants.BASE_URL + "get_package.php?id=" + packageId + "&lang=" + LanguageManager.getLangCode(this);
+        String url = ApiConstants.baseUrl() + "get_package.php?id=" + packageId + "&lang=" + LanguageManager.getLangCode(this);
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
@@ -331,7 +331,7 @@ public class CreateDishActivity extends StaffBaseActivity {
                         if (types != null) {
                             for (int i = 0; i < types.length(); i++) {
                                 JSONObject type = types.getJSONObject(i);
-                                details.append("• ")
+                                details.append("- ")
                                     .append(type.optString("name", getString(R.string.section_default_name)))
                                     .append(" (")
                                     .append(getString(R.string.choose_count, type.optInt("optional_quantity", 1)))
@@ -356,7 +356,7 @@ public class CreateDishActivity extends StaffBaseActivity {
                         if (!imgUrl.isEmpty()) {
                             String finalUrl = imgUrl;
                             if (!imgUrl.toLowerCase(Locale.ROOT).startsWith("http") && !imgUrl.startsWith("data:image")) {
-                                finalUrl = ApiConstants.BASE_URL + imgUrl;
+                                finalUrl = ApiConstants.baseUrl() + imgUrl;
                             }
 
                             if (imgUrl.startsWith("data:image")) {
@@ -420,8 +420,8 @@ public class CreateDishActivity extends StaffBaseActivity {
     private void fetchDishList() {
         List<JSONObject> combinedList = new ArrayList<>();
         String currentLang = LanguageManager.getLangCode(this);
-        String dishUrl = ApiConstants.BASE_URL + "get_dish_list.php?lang=" + currentLang;
-        String packageUrl = ApiConstants.BASE_URL + "get_packages.php?lang=" + currentLang;
+        String dishUrl = ApiConstants.baseUrl() + "get_dish_list.php?lang=" + currentLang;
+        String packageUrl = ApiConstants.baseUrl() + "get_packages.php?lang=" + currentLang;
 
         StringRequest dishReq = new StringRequest(Request.Method.GET, dishUrl,
                 dishResponse -> {
@@ -502,7 +502,7 @@ public class CreateDishActivity extends StaffBaseActivity {
             }
             json.put("recipe", recipeArr);
 
-            String url = ApiConstants.BASE_URL + "create_dish.php";
+            String url = ApiConstants.baseUrl() + "create_dish.php";
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, url, json,
                     response -> {
                         Toast.makeText(this, R.string.dish_created, Toast.LENGTH_SHORT).show();
@@ -517,7 +517,7 @@ public class CreateDishActivity extends StaffBaseActivity {
     }
 
     private void fetchDishOptions() {
-        String url = ApiConstants.BASE_URL + "get_dish_list.php?lang=" + LanguageManager.getLangCode(this);
+        String url = ApiConstants.baseUrl() + "get_dish_list.php?lang=" + LanguageManager.getLangCode(this);
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
@@ -643,7 +643,7 @@ public class CreateDishActivity extends StaffBaseActivity {
 
             json.put("types", typesArray);
 
-            String url = ApiConstants.BASE_URL + "create_dish_package.php";
+            String url = ApiConstants.baseUrl() + "create_dish_package.php";
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, url, json,
                     response -> {
                         if (response.optBoolean("success", false)) {
@@ -685,7 +685,7 @@ public class CreateDishActivity extends StaffBaseActivity {
     }
 
     private void fetchMetadata() {
-        String url = ApiConstants.BASE_URL + "get_dish_metadata.php";
+        String url = ApiConstants.baseUrl() + "get_dish_metadata.php";
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
@@ -748,3 +748,4 @@ public class CreateDishActivity extends StaffBaseActivity {
         llRecipeContainer.addView(row);
     }
 }
+

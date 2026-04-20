@@ -84,6 +84,19 @@ public class ApiConfig {
         return isEmulator() ? BuildConfig.API_SIMULATOR_BASE_URL : BuildConfig.API_PHONE_BASE_URL;
     }
 
+    private static String buildAlternateProjectApiBase(String endpointUrl) {
+        if (endpointUrl == null || endpointUrl.isEmpty()) {
+            return null;
+        }
+        if (endpointUrl.contains("/newFolder/Database/projectapi/")) {
+            return normalizeBaseUrl(endpointUrl.replace("/newFolder/Database/projectapi/", "/projectapi/").replace(ADDRESS_ENDPOINT, ""));
+        }
+        if (endpointUrl.contains("/projectapi/")) {
+            return normalizeBaseUrl(endpointUrl.replace("/projectapi/", "/newFolder/Database/projectapi/").replace(ADDRESS_ENDPOINT, ""));
+        }
+        return null;
+    }
+
     private static List<String> buildAddressEndpointCandidates() {
         Set<String> endpoints = new LinkedHashSet<>();
 
@@ -133,6 +146,18 @@ public class ApiConfig {
             public void onResponse(Call call, Response response) {
                 if (!response.isSuccessful()) {
                     Log.w(TAG, "Dynamic API endpoint HTTP " + response.code() + ": " + endpointUrl);
+                    if (response.code() == 404) {
+                        String fallbackBase = buildAlternateProjectApiBase(endpointUrl);
+                        if (isValidHttpBaseUrl(fallbackBase)) {
+                            setRuntimeBaseUrl(fallbackBase, false);
+                            saveCachedBaseUrl(appContext, fallbackBase);
+                            RetrofitClient.reset();
+                            Log.d(TAG, "Fallback API base URL from 404: " + fallbackBase);
+                            response.close();
+                            postComplete(callback);
+                            return;
+                        }
+                    }
                     response.close();
                     tryEndpointSequentially(appContext, endpoints, index + 1, callback);
                     return;
@@ -211,12 +236,19 @@ public class ApiConfig {
     private static boolean isEmulator() {
         return Build.FINGERPRINT.startsWith("generic")
                 || Build.FINGERPRINT.startsWith("unknown")
+                || Build.FINGERPRINT.contains("emulator")
                 || Build.MODEL.contains("google_sdk")
                 || Build.MODEL.contains("Emulator")
                 || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MODEL.contains("sdk_gphone")
                 || Build.MANUFACTURER.contains("Genymotion")
                 || Build.BRAND.startsWith("generic")
                 || Build.DEVICE.startsWith("generic")
+                || Build.DEVICE.contains("emulator")
+                || Build.DEVICE.contains("emu")
+                || Build.HARDWARE.contains("goldfish")
+                || Build.HARDWARE.contains("ranchu")
+                || Build.PRODUCT.contains("sdk_gphone")
                 || "google_sdk".equals(Build.PRODUCT);
     }
 }

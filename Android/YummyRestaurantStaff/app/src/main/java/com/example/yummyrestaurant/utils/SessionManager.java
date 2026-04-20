@@ -56,4 +56,16 @@ public class SessionManager {
         // Fallback to RoleManager
         return RoleManager.getUserName() != null ? RoleManager.getUserName() : "Staff";
     }
+
+    public int getStaffId() {
+        int sessionId = pref.getInt(KEY_SID, -1);
+        if (sessionId > 0) {
+            return sessionId;
+        }
+        try {
+            return Integer.parseInt(RoleManager.getUserId());
+        } catch (Exception ignored) {
+            return -1;
+        }
+    }
 }

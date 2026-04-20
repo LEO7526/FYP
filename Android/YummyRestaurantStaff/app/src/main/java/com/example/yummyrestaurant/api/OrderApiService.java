@@ -28,6 +28,9 @@ public interface OrderApiService {
     @GET("get_orders.php")
     Call<List<Order>> getOrdersByCustomer(@Query("cid") int cid);
 
+    @GET("get_orders.php")
+    Call<List<Order>> getOrdersByCustomer(@Query("cid") int cid, @Query("lang") String lang);
+
     @POST("save_order.php")
     Call<ResponseBody> saveOrderDirect(@Body Map<String, Object> payload);
 

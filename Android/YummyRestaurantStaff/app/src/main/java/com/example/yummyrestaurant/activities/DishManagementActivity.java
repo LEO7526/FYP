@@ -12,6 +12,7 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.yummyrestaurant.R;
+import com.example.yummyrestaurant.api.ApiConstants;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class DishManagementActivity extends StaffBaseActivity {
 
     private void loadDishList() {
         progressBar.setVisibility(View.VISIBLE);
-        String url = "http://10.0.2.2/projectapi/get_dish_list.php?lang=" + LanguageManager.getLangCode(this);
+        String url = ApiConstants.baseUrl() + "get_dish_list.php?lang=" + LanguageManager.getLangCode(this);
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
                     progressBar.setVisibility(View.GONE);
@@ -73,3 +74,5 @@ public class DishManagementActivity extends StaffBaseActivity {
         Volley.newRequestQueue(this).add(request);
     }
 }
+
+

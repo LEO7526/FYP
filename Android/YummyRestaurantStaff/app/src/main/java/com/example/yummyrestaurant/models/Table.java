@@ -34,6 +34,10 @@ public class Table {
         return tid;
     }
 
+    public int getId() {
+        return tid;
+    }
+
     public int getCapacity() {
         return capacity;
     }
@@ -48,6 +52,13 @@ public class Table {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getStatusText() {
+        if (status == null) return "Available";
+        if ("occupied".equalsIgnoreCase(status)) return "Occupied";
+        if ("reserved".equalsIgnoreCase(status) || "booked".equalsIgnoreCase(status)) return "Reserved";
+        return "Available";
     }
 
     public boolean isAvailable() {

@@ -101,7 +101,7 @@ public class TakeawayCashPaymentActivity extends ThemeBaseActivity {
 
     private void fetchTakeawayCashOrders() {
         showLoading(true);
-        String url = ApiConstants.BASE_URL + "get_takeaway_cash_orders.php?type=pending";
+        String url = ApiConstants.baseUrl() + "get_takeaway_cash_orders.php?type=pending";
         Volley.newRequestQueue(this).add(new StringRequest(Request.Method.GET, url,
                 response -> {
                     parseOrdersResponse(response, false);
@@ -116,7 +116,7 @@ public class TakeawayCashPaymentActivity extends ThemeBaseActivity {
     }
 
     private void fetchCompletedOrders() {
-        String url = ApiConstants.BASE_URL + "get_takeaway_cash_orders.php?type=completed";
+        String url = ApiConstants.baseUrl() + "get_takeaway_cash_orders.php?type=completed";
         Volley.newRequestQueue(this).add(new StringRequest(Request.Method.GET, url,
                 response -> parseOrdersResponse(response, true),
                 error -> Log.e(TAG, "Error loading completed orders: " + error.getMessage())));
@@ -187,7 +187,7 @@ public class TakeawayCashPaymentActivity extends ThemeBaseActivity {
 
     private void processTakeawayCashPayment(int orderId) {
         showLoading(true);
-        String url = ApiConstants.BASE_URL + "process_cash_payment.php";
+        String url = ApiConstants.baseUrl() + "process_cash_payment.php";
         JSONObject requestData = new JSONObject();
         try {
             requestData.put("order_id", orderId);
@@ -246,3 +246,5 @@ public class TakeawayCashPaymentActivity extends ThemeBaseActivity {
         refreshAll();
     }
 }
+
+

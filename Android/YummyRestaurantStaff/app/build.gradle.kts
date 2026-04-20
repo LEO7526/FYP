@@ -22,9 +22,9 @@ android {
         getByName("debug") {
             // Keep current local development behavior for emulator/phone over HTTP.
             manifestPlaceholders["usesCleartextTraffic"] = true
-            buildConfigField("String", "API_DEFAULT_BASE_URL", "\"http://10.0.2.2/newFolder/Database/projectapi/\"")
-            buildConfigField("String", "API_SIMULATOR_BASE_URL", "\"http://10.0.2.2/newFolder/Database/projectapi/\"")
-            buildConfigField("String", "API_PHONE_BASE_URL", "\"http://192.168.0.121/newFolder/Database/projectapi/\"")
+            buildConfigField("String", "API_DEFAULT_BASE_URL", "\"http://10.0.2.2/projectapi/\"")
+            buildConfigField("String", "API_SIMULATOR_BASE_URL", "\"http://10.0.2.2/projectapi/\"")
+            buildConfigField("String", "API_PHONE_BASE_URL", "\"http://192.168.0.121/projectapi/\"")
             buildConfigField("String", "INVENTORY_BASE_URL", "\"http://10.0.2.2/androidstaff_api/inventory/\"")
         }
 

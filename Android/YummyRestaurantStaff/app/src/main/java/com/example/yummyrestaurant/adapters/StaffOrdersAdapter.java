@@ -55,7 +55,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
         StaffOrder order = orderList.get(position);
         android.util.Log.d("KitchenAdapter", "Binding order at position " + position + " - OID: " + order.getOid() + ", Status: " + order.getStatus());
 
-        // 如果是外帶，桌號顯示為 "Takeaway" (紅色)，否則顯示桌號
+        // If takeaway, show takeaway label instead of table number.
         if (order.getType().equals("takeaway")) {
             holder.tableNumber.setText(context.getString(R.string.takeaway_label));
             holder.tableNumber.setTextColor(Color.parseColor("#D32F2F"));
@@ -68,7 +68,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
         holder.orderTime.setText(formatOrderTime(order.getOrderTime()));
 
 
-        // 設定標籤顏色
+        // 瑷畾妯欑堡椤忚壊
         switch (order.getStatus()) {
             case 1: // New
                 holder.orderStatus.setText(R.string.order_status_new);
@@ -117,7 +117,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
             holder.btnViewDetails.setLayoutParams(detailParams);
         }
 
-        // 點擊查看詳情 (同時把目前的狀態傳進去)
+        // 榛炴搳鏌ョ湅瑭虫儏 (鍚屾檪鎶婄洰鍓嶇殑鐙€鎱嬪偝閫插幓)
         holder.btnViewDetails.setOnClickListener(v -> {
             showOrderDetailsDialog(order, position);
         });
@@ -129,31 +129,30 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
         builder.setMessage(context.getString(R.string.loading_details));
 
         // ==============================================
-        // 這裡就是「隱藏版」的操作邏輯
+        // 閫欒！灏辨槸銆岄毐钘忕増銆嶇殑鎿嶄綔閭忚集
         // ==============================================
         if (order.getStatus() == 1) {
-            // 如果是 New，右下角按鈕顯示 "Start Cooking"
+            // 濡傛灉鏄?New锛屽彸涓嬭鎸夐垥椤ず "Start Cooking"
             builder.setPositiveButton(R.string.start_cooking, (dialog, which) -> {
-                updateOrderStatus(order, 2, position); // 改成 Cooking (2)
+                updateOrderStatus(order, 2, position); // 鏀规垚 Cooking (2)
             });
         } else if (order.getStatus() == 2) {
-            // 如果是 Cooking，右下角按鈕顯示 "Serve Order"
+            // 濡傛灉鏄?Cooking锛屽彸涓嬭鎸夐垥椤ず "Serve Order"
             builder.setPositiveButton(R.string.serve_done, (dialog, which) -> {
-                updateOrderStatus(order, 3, position); // 改成 Delivered (3)
+                updateOrderStatus(order, 3, position); // 鏀规垚 Delivered (3)
             });
         } else {
-            // 已經完成，只顯示 Close
+            // 宸茬稉瀹屾垚锛屽彧椤ず Close
             builder.setPositiveButton(R.string.close, null);
         }
 
-        // 左邊的取消按鈕
         builder.setNegativeButton(R.string.cancel, null);
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // 載入詳細資料 (API)
-        String url = ApiConstants.BASE_URL + "get_order_details_by_id.php?oid=" + order.getOid();
+        // 杓夊叆瑭崇窗璩囨枡 (API)
+        String url = ApiConstants.baseUrl() + "get_order_details_by_id.php?oid=" + order.getOid();
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
@@ -172,7 +171,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
 
                             JSONArray items = data.getJSONArray("items");
                             for (int i=0; i<items.length(); i++) {
-                                msg.append("• ").append(items.getString(i)).append("\n");
+                                msg.append("- ").append(items.getString(i)).append("\n");
                             }
 
                             msg.append("\n").append(context.getString(R.string.note_header)).append("\n");
@@ -192,7 +191,7 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
     }
 
     private void updateOrderStatus(StaffOrder order, int nextStatus, int position) {
-        StringRequest request = new StringRequest(Request.Method.POST, ApiConstants.UPDATE_ORDER_STATUS,
+        StringRequest request = new StringRequest(Request.Method.POST, ApiConstants.updateOrderStatus(),
                 response -> {
                     try {
                         JSONObject json = new JSONObject(response);
@@ -261,3 +260,4 @@ public class StaffOrdersAdapter extends RecyclerView.Adapter<StaffOrdersAdapter.
         return String.format(Locale.getDefault(), "%s:%s", hm[0], hm[1]);
     }
 }
+

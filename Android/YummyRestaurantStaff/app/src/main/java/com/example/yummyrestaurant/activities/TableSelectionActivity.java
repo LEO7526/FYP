@@ -48,11 +48,11 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
         setContentView(R.layout.activity_staff_select_table);
         allDayMode = getString(R.string.all_day);
 
-        // 1. 綁定返回按鈕
+        // 1. 缍佸畾杩斿洖鎸夐垥
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        // 2. 初始化座位圖
+        // 2. 鍒濆鍖栧骇浣嶅湒
         tableList = new ArrayList<>();
         seatingChartView = findViewById(R.id.seatingChartView);
         seatingChartView.setOnTableSelectedListener(this);
@@ -76,8 +76,7 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
         btnFilterTime.setOnClickListener(v -> showTimeSlotPicker());
         btnApplySlot.setOnClickListener(v -> fetchTableStatus());
 
-        // 3. 載入桌位狀態
-        fetchTableStatus();
+        // 3. 杓夊叆妗屼綅鐙€鎱?        fetchTableStatus();
     }
 
     private String[] buildTimeSlots() {
@@ -161,16 +160,16 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
         String url;
         try {
             if (isAllDayMode()) {
-                url = ApiConstants.BASE_URL + "get_table_status.php?date="
+                url = ApiConstants.baseUrl() + "get_table_status.php?date="
                         + URLEncoder.encode(selectedDate, "UTF-8")
                         + "&view_mode=day";
             } else {
-                url = ApiConstants.BASE_URL + "get_table_status.php?date="
+                url = ApiConstants.baseUrl() + "get_table_status.php?date="
                         + URLEncoder.encode(selectedDate, "UTF-8")
                         + "&time=" + URLEncoder.encode(selectedTime, "UTF-8");
             }
         } catch (Exception e) {
-            url = ApiConstants.BASE_URL + "get_table_status.php";
+            url = ApiConstants.baseUrl() + "get_table_status.php";
         }
         
         android.util.Log.d("TableSelection", "Fetching table status from: " + url);
@@ -250,7 +249,7 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
         showTableDetails(tableId);
     }
 
-    // 顯示詳情 (已移除對 detailStatus 的依賴)
+    // 椤ず瑭虫儏 (宸茬Щ闄ゅ皪 detailStatus 鐨勪緷璩?
     private void showTableDetails(int tableId) {
         if (isFinishing() || isDestroyed()) {
             return;
@@ -268,14 +267,14 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
         tableDetailDialog = dialog;
         dialog.setOnDismissListener(d -> tableDetailDialog = null);
 
-        // 1. 綁定 UI (注意：這裡不抓取 detailStatus，因為 XML 已移除)
+        // 1. Bind dialog views.
         TextView title = view.findViewById(R.id.detailTableTitle);
         TextView customer = view.findViewById(R.id.detailCustomer);
         TextView time = view.findViewById(R.id.detailTime);
         TextView items = view.findViewById(R.id.detailItems);
         Button btnClose = view.findViewById(R.id.btnCloseDetail);
 
-        // 2. 初始化
+        // 2. Set initial placeholders.
         title.setText(getString(R.string.table_title, tableId));
         customer.setText(getString(R.string.loading));
         time.setText(getString(R.string.loading));
@@ -286,10 +285,10 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
             dialog.show();
         }
 
-        // 3. API 請求詳情
+        // 3. Request table details.
         String url;
         try {
-            url = ApiConstants.BASE_URL + "get_table_detail.php?tid=" + tableId
+            url = ApiConstants.baseUrl() + "get_table_detail.php?tid=" + tableId
                     + "&date=" + URLEncoder.encode(selectedDate, "UTF-8");
 
             if (isAllDayMode()) {
@@ -298,7 +297,7 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
                 url += "&time=" + URLEncoder.encode(selectedTime, "UTF-8");
             }
         } catch (Exception e) {
-            url = ApiConstants.BASE_URL + "get_table_detail.php?tid=" + tableId;
+            url = ApiConstants.baseUrl() + "get_table_detail.php?tid=" + tableId;
         }
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
@@ -320,9 +319,8 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
                         String name = data.optString("customer_name", getString(R.string.none));
                         customer.setText(name);
 
-                        // 判斷狀態類型並顯示
+                        // 鍒ゆ柗鐙€鎱嬮鍨嬩甫椤ず
                         if (type.equals("live")) {
-                            // 現場用餐中
                             int min = data.optInt("duration", 0);
                             boolean isFutureOrder = data.optBoolean("is_future_order", false);
                             String orderTime = data.optString("order_time", "-");
@@ -338,14 +336,13 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
                             if (itemArray != null && itemArray.length() > 0) {
                                 StringBuilder sb = new StringBuilder();
                                 for (int i = 0; i < itemArray.length(); i++) {
-                                    sb.append("• ").append(itemArray.optString(i)).append("\n");
+                                    sb.append("- ").append(itemArray.optString(i)).append("\n");
                                 }
                                 items.setText(sb.toString());
                             } else {
                                 items.setText(R.string.no_items_ordered_yet);
                             }
                         } else if (type.equals("booking") || type.equals("booking_schedule")) {
-                            // 同桌多時段預約列表
                             int totalBookings = data.optInt("total_bookings", 0);
                             time.setText(getString(R.string.booking_today_count, totalBookings));
 
@@ -370,7 +367,7 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
 
                             customer.setText(R.string.booking_schedule);
                         } else {
-                            // 空桌
+                            // 绌烘
                             time.setText("-");
                             items.setText(R.string.table_currently_available);
                         }
@@ -398,3 +395,4 @@ public class TableSelectionActivity extends StaffBaseActivity implements Seating
         }
     }
 }
+

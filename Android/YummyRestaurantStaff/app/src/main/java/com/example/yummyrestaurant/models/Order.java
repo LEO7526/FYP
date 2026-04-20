@@ -116,4 +116,22 @@ public class Order {
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
     }
+
+    // Legacy compatibility accessors.
+    public int getStatus() {
+        return ostatus;
+    }
+
+    public String getTableNumber() {
+        return table_number > 0 ? String.valueOf(table_number) : "-";
+    }
+
+    public String getType() {
+        return table_number > 0 ? "dine_in" : "takeaway";
+    }
+
+    public String getSummary() {
+        int itemCount = items == null ? 0 : items.size();
+        return itemCount + " item(s)";
+    }
 }

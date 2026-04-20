@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="8dp">
+
+    <!-- 桌子圖示 (外圓框) -->
+    <FrameLayout
+        android:id="@+id/tableContainer"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle_background"
+        android:backgroundTint="@color/light_gray"> <!-- Java code 控制這裡變色 -->
+
+        <TextView
+            android:id="@+id/tableNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="A1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_text"/>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tableStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Empty"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/hint_text"/>
+
+</LinearLayout>

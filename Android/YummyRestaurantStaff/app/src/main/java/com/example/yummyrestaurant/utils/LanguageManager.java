@@ -50,6 +50,19 @@ public final class LanguageManager {
         return context;
     }
 
+    // Legacy aliases kept for older activity code.
+    public static Context applyLocale(Context context) {
+        return wrapContext(context);
+    }
+
+    public static String getLangCode(Context context) {
+        return getCurrentLanguage(context);
+    }
+
+    public static void setLangCode(Context context, String languageCode) {
+        setCurrentLanguage(context, languageCode);
+    }
+
     public static Locale toLocale(String languageCode) {
         String normalized = normalizeLanguageCode(languageCode);
         switch (normalized) {

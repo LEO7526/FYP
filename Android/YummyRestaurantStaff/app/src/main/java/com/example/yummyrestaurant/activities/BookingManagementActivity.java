@@ -103,7 +103,7 @@ public class BookingManagementActivity extends ThemeBaseActivity {
         Log.d(TAG, "fetchTodayBookings: Loading today's bookings");
         showLoading(true);
         
-        String url = ApiConstants.BASE_URL + "get_today_bookings.php";
+        String url = ApiConstants.baseUrl() + "get_today_bookings.php";
         Log.d(TAG, "API URL: " + url);
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
@@ -237,7 +237,7 @@ public class BookingManagementActivity extends ThemeBaseActivity {
     private void performCheckin(Booking booking) {
         Log.d(TAG, "performCheckin: booking " + booking.getBid());
         
-        String url = ApiConstants.BASE_URL + "update_booking_checkin.php";
+        String url = ApiConstants.baseUrl() + "update_booking_checkin.php";
         
         JSONObject requestBody = new JSONObject();
         try {
@@ -289,3 +289,5 @@ public class BookingManagementActivity extends ThemeBaseActivity {
         fetchTodayBookings();
     }
 }
+
+

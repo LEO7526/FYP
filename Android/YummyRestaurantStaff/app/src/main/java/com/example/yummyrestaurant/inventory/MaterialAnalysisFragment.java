@@ -82,7 +82,7 @@ public class MaterialAnalysisFragment extends Fragment implements RefreshableTab
     private void fetchAnalysisData() {
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
 
-        String url = ApiConstants.BASE_URL + "analyze_material_consumption.php";
+        String url = ApiConstants.baseUrl() + "analyze_material_consumption.php";
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
@@ -177,7 +177,7 @@ public class MaterialAnalysisFragment extends Fragment implements RefreshableTab
             requestBody.put("source", "analysis_single");
             requestBody.put("mode", "single");
 
-            String url = ApiConstants.BASE_URL + "auto_restock_materials.php";
+            String url = ApiConstants.baseUrl() + "auto_restock_materials.php";
             final JSONObject finalRequestBody = requestBody;
 
             StringRequest request = new StringRequest(Request.Method.POST, url,
@@ -234,7 +234,7 @@ public class MaterialAnalysisFragment extends Fragment implements RefreshableTab
             requestBody.put("source", "analysis_bulk");
             requestBody.put("mode", "bulk");
 
-            String url = ApiConstants.BASE_URL + "auto_restock_materials.php";
+            String url = ApiConstants.baseUrl() + "auto_restock_materials.php";
             final JSONObject finalRequestBody = requestBody;
 
             StringRequest request = new StringRequest(Request.Method.POST, url,

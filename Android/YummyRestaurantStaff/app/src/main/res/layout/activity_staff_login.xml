@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_background"
+    android:fillViewport="true"
+    tools:context=".activities.StaffLoginActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
+
+        <!-- 這裡改用 Orange 顏色強調是員工端 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Staff Portal"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Employee Access Only"
+            android:textSize="14sp"
+            android:textColor="@color/hint_text"
+            android:layout_marginBottom="32dp" />
+
+        <!-- ID 輸入框 (員工通常用 ID 或 Email) -->
+        <EditText
+            android:id="@+id/staffId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Employee ID / Email"
+            android:inputType="textEmailAddress"
+            android:layout_marginBottom="16dp"
+            android:padding="12dp"
+            android:background="@drawable/edit_text_background"
+            android:elevation="2dp"
+            android:textColor="@color/primary_text"
+            android:textColorHint="@color/hint_text"
+            android:fontFamily="sans-serif-light" />
+
+        <EditText
+            android:id="@+id/staffPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:layout_marginBottom="24dp"
+            android:padding="12dp"
+            android:background="@drawable/edit_text_background"
+            android:elevation="2dp"
+            android:textColor="@color/primary_text"
+            android:textColorHint="@color/hint_text"
+            android:fontFamily="sans-serif-light" />
+
+        <!-- 實心按鈕，看起來比較正式 -->
+        <Button
+            android:id="@+id/staffLoginBtn"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Sign In"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/staffHelpLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forgot ID? Contact Manager"
+            android:textSize="14sp"
+            android:textColor="@color/hint_text"
+            android:layout_marginTop="24dp" />
+
+    </LinearLayout>
+</ScrollView>

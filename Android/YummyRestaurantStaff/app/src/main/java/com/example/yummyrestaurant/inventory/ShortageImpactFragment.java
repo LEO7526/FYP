@@ -67,7 +67,7 @@ public class ShortageImpactFragment extends Fragment implements RefreshableTab {
             progressBar.setVisibility(View.VISIBLE);
         }
 
-        String url = ApiConstants.BASE_URL + "get_weekly_material_consumption.php";
+        String url = ApiConstants.baseUrl() + "get_weekly_material_consumption.php";
         Volley.newRequestQueue(requireContext()).add(new StringRequest(Request.Method.GET, url,
                 response -> {
                     if (!isAdded()) return;

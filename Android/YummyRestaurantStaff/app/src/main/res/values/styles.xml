@@ -1,38 +1,50 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="CategoryButton">
-        <item name="android:layout_marginEnd">8dp</item>
-        <item name="android:backgroundTint">@color/light_gray</item>
-        <item name="android:textColor">@color/black</item>
-    </style>
-
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-
-
-    </style>
-
-    <!-- Staff App Styles - copied from YummyRestaurantStaff -->
-    <style name="SectionTitle">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/black</item>
-        <item name="android:layout_marginTop">24dp</item>
-        <item name="android:layout_marginBottom">12dp</item>
-    </style>
-
-    <!-- 輸入框通用樣式 -->
-    <style name="InputStyle">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/edit_text_background</item>
-        <item name="android:padding">12dp</item>
-        <item name="android:layout_marginBottom">16dp</item>
-    </style>
+  <style name="CategoryButton">
+    <item name="android:layout_marginEnd">8dp</item>
+    <item name="android:backgroundTint">@color/light_gray</item>
+    <item name="android:textColor">@color/black</item>
+  </style>
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <!-- Customize your theme here -->
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccent</item>
+  </style>
+  <!-- Staff App Styles - copied from YummyRestaurantStaff -->
+  <style name="SectionTitle">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:textSize">18sp</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/black</item>
+    <item name="android:layout_marginTop">24dp</item>
+    <item name="android:layout_marginBottom">12dp</item>
+  </style>
+  <!-- 杓稿叆妗嗛€氱敤妯ｅ紡 -->
+  <style name="InputStyle">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:background">@drawable/edit_text_background</item>
+    <item name="android:padding">12dp</item>
+    <item name="android:layout_marginBottom">16dp</item>
+  </style>
+  <style name="StaffToolbarTitle" parent="TextAppearance.MaterialComponents.Headline6">
+    <item name="android:textColor">@color/on_primary</item>
+    <item name="android:textStyle">bold</item>
+  </style>
+  <style name="StaffTabText" parent="TextAppearance.MaterialComponents.Body2">
+    <item name="android:textStyle">bold</item>
+  </style>
+  <style name="StaffDrawerItemText" parent="TextAppearance.MaterialComponents.Body1">
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/primary_text</item>
+  </style>
+  <style name="StaffHeaderNameText" parent="TextAppearance.MaterialComponents.Subtitle1">
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/white</item>
+  </style>
+  <style name="StaffHeaderRoleText" parent="TextAppearance.MaterialComponents.Body2">
+    <item name="android:textColor">@color/white</item>
+  </style>
 </resources>

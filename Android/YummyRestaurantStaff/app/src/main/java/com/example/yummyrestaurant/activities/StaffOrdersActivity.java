@@ -170,9 +170,10 @@ public class StaffOrdersActivity extends StaffBaseActivity {
 
     // 從 API 抓取訂單 (支援新的 Order Type)
     private void fetchOrders() {
-        android.util.Log.d("KitchenOrders", "Fetching orders from: " + ApiConstants.GET_ORDERS);
+        String ordersUrl = ApiConstants.getOrders();
+        android.util.Log.d("KitchenOrders", "Fetching orders from: " + ordersUrl);
         
-        StringRequest request = new StringRequest(Request.Method.GET, ApiConstants.GET_ORDERS,
+        StringRequest request = new StringRequest(Request.Method.GET, ordersUrl,
                 response -> {
                     android.util.Log.d("KitchenOrders", "API Response: " + response);
                     try {
