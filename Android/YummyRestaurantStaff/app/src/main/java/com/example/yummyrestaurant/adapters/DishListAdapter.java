@@ -49,25 +49,29 @@ public class DishListAdapter extends RecyclerView.Adapter<DishListAdapter.ViewHo
         String name = dish.optString("name", "Unknown");
         String price = dish.optString("price", "0");
         String category = dish.optString("category", "-");
-        String itemType = dish.optString("item_type", "dish");
+        String itemType = dish.optString("item_type", "dish").toLowerCase();
 
         holder.tvName.setText(name);
         holder.tvPrice.setText("$" + price);
         holder.tvCategory.setText(category);
-        holder.tvType.setText("package".equalsIgnoreCase(itemType) ? "PACKAGE" : "DISH");
+        
+        if (holder.tvType != null) {
+            boolean isPackage = "package".equals(itemType);
+            holder.tvType.setText(isPackage ? "🎁 PACKAGE" : "🍽️ DISH");
 
-        GradientDrawable bg = (GradientDrawable) holder.tvType.getBackground();
-        int color = "package".equalsIgnoreCase(itemType)
-                ? ContextCompat.getColor(context, R.color.blue_dark)
-                : ContextCompat.getColor(context, R.color.orange_dark);
-        bg.setColor(color);
+            // Apply appropriate background drawable based on type
+            int badgeBackgroundRes = isPackage
+                    ? R.drawable.bg_package_type_badge
+                    : R.drawable.bg_dish_type_badge;
+            holder.tvType.setBackground(ContextCompat.getDrawable(context, badgeBackgroundRes));
+            holder.tvType.setTextColor(ContextCompat.getColor(context, android.R.color.white));
+        }
 
         // 設定點擊事件
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(dish);
         });
 
-        // 加 log
         android.util.Log.d("DishListAdapter", "onBindViewHolder: name=" + name + ", price=" + price + ", category=" + category + ", type=" + itemType);
     }
 
